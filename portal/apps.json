@@ -1,0 +1,40 @@
+{
+  "apps": [
+    {
+      "id": "chinese-writing",
+      "title": "國字注音練習",
+      "desc": "依課本課次的生字＋注音＋詞語手寫練習，含形近字、多音字、成語與句型",
+      "url": "https://kids-chinese-writing.scsnake.xyz",
+      "icon": "✍️",
+      "subject": "語文",
+      "level": ["國小 1-6"]
+    },
+    {
+      "id": "math-practice",
+      "title": "數學計算練習",
+      "desc": "加減乘除、九九乘法，計時挑戰＋錯題回顧",
+      "url": "https://kids-math.scsnake.xyz",
+      "icon": "🔢",
+      "subject": "數學",
+      "level": ["國小 1-4"]
+    },
+    {
+      "id": "piano-sight",
+      "title": "鋼琴視奏",
+      "desc": "高低音譜、和弦、調號辨識，可用鍵盤或字母＋升降記號輸入",
+      "url": "https://kids-piano.scsnake.xyz",
+      "icon": "🎹",
+      "subject": "音樂",
+      "level": ["初階", "中階"]
+    },
+    {
+      "id": "one-stroke",
+      "title": "一筆畫遊戲",
+      "desc": "24 個幾何關卡的一筆畫解題，訓練空間邏輯",
+      "url": "https://kids-onestroke.scsnake.xyz",
+      "icon": "✏️",
+      "subject": "邏輯",
+      "level": ["國小 1-6"]
+    }
+  ]
+}

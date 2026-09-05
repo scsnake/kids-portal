@@ -1,0 +1,748 @@
+import React, { useState, useEffect, useRef } from 'react';
+
+// Musical mappings across 4 octaves
+const ALL_NOTES = [
+  'C2','D2','E2','F2','G2','A2','B2',
+  'C3','D3','E3','F3','G3','A3','B3',
+  'C4','D4','E4','F4','G4','A4','B4',
+  'C5','D5','E5','F5','G5','A5','B5',
+  'C6'
+];
+
+const frequencies = {
+  'C2': 65.41, 'C#2': 69.30, 'Db2': 69.30, 'D2': 73.42, 'D#2': 77.78, 'Eb2': 77.78, 'E2': 82.41, 'F2': 87.31, 'F#2': 92.50, 'Gb2': 92.50, 'G2': 98.00, 'G#2': 103.83, 'Ab2': 103.83, 'A2': 110.00, 'A#2': 116.54, 'Bb2': 116.54, 'B2': 123.47,
+  'C3': 130.81, 'C#3': 138.59, 'Db3': 138.59, 'D3': 146.83, 'D#3': 155.56, 'Eb3': 155.56, 'E3': 164.81, 'F3': 174.61, 'F#3': 185.00, 'Gb3': 185.00, 'G3': 196.00, 'G#3': 207.65, 'Ab3': 207.65, 'A3': 220.00, 'A#3': 233.08, 'Bb3': 233.08, 'B3': 246.94,
+  'C4': 261.63, 'C#4': 277.18, 'Db4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'Eb4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'Gb4': 369.99, 'G4': 392.00, 'G#4': 415.30, 'Ab4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'Bb4': 466.16, 'B4': 493.88,
+  'C5': 523.25, 'C#5': 554.37, 'Db5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'Eb5': 622.25, 'E5': 659.25, 'F5': 698.46, 'F#5': 739.99, 'Gb5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'Ab5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'Bb5': 932.33, 'B5': 987.77,
+  'C6': 1046.50
+};
+
+const enharmonics = {
+  'C#': 'Db', 'Db': 'C#', 'D#': 'Eb', 'Eb': 'D#', 'F#': 'Gb', 'Gb': 'F#', 'G#': 'Ab', 'Ab': 'G#', 'A#': 'Bb', 'Bb': 'A#'
+};
+
+const staffOffsets = {
+  'treble': {
+    'C4': 3, 'D4': 2.5, 'E4': 2, 'F4': 1.5, 'G4': 1, 'A4': 0.5, 'B4': 0,
+    'C5': -0.5, 'D5': -1, 'E5': -1.5, 'F5': -2, 'G5': -2.5, 'A5': -3, 'B5': -3.5, 'C6': -4
+  },
+  'bass': {
+    'C2': 4, 'D2': 3.5, 'E2': 3, 'F2': 2.5, 'G2': 2, 'A2': 1.5, 'B2': 1,
+    'C3': 0.5, 'D3': 0, 'E3': -0.5, 'F3': -1, 'G3': -1.5, 'A3': -2, 'B3': -2.5, 'C4': -3
+  }
+};
+
+const keySigStaffOffsets = {
+  'treble': {
+    'F#': -2, 'C#': -0.5, 'G#': -2.5, 'D#': -1, 'A#': 0.5, 'E#': -1.5, 'B#': 0,
+    'Bb': 0, 'Eb': -1.5, 'Ab': 0.5, 'Db': -1, 'Gb': 1, 'Cb': -0.5, 'Fb': 1.5
+  },
+  'bass': {
+    'F#': -1, 'C#': 0.5, 'G#': -1.5, 'D#': 0, 'A#': 1.5, 'E#': -0.5, 'B#': 1,
+    'Bb': 1, 'Eb': -0.5, 'Ab': 1.5, 'Db': 0, 'Gb': 2, 'Cb': 0.5, 'Fb': 2.5
+  }
+};
+
+const NOTE_LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+const semitoneMap = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
+
+function getInterval(rootStr, letterOffset, semiOffset) {
+  if (!rootStr) return null;
+  const letter = rootStr.charAt(0);
+  const acc = rootStr.length === 3 ? rootStr.charAt(1) : '';
+  const oct = parseInt(rootStr.slice(-1));
+
+  const letterIdx = NOTE_LETTERS.indexOf(letter);
+  if (letterIdx === -1 || isNaN(oct)) return null;
+
+  const baseSemis = semitoneMap[letter] + (acc === '#' ? 1 : acc === 'b' ? -1 : 0);
+
+  let targetLetterIdx = letterIdx + letterOffset;
+  let targetOct = oct;
+  while (targetLetterIdx >= 7) {
+    targetLetterIdx -= 7;
+    targetOct += 1;
+  }
+  const targetLetter = NOTE_LETTERS[targetLetterIdx];
+
+  let rootAbsoluteSemis = oct * 12 + baseSemis;
+  let targetAbsoluteSemis = rootAbsoluteSemis + semiOffset;
+  let targetNaturalAbsoluteSemis = targetOct * 12 + semitoneMap[targetLetter];
+
+  let accDiff = targetAbsoluteSemis - targetNaturalAbsoluteSemis;
+  if (accDiff > 1 || accDiff < -1) return null;
+  let targetAcc = accDiff === 1 ? '#' : accDiff === -1 ? 'b' : '';
+
+  return `${targetLetter}${targetAcc}${targetOct}`;
+}
+
+export default function App() {
+  const canvasRef = useRef(null);
+  const [clef, setClef] = useState('treble');
+  const clefRef = useRef(clef);
+
+  const [gameMode, setGameMode] = useState('standard');
+  const [advancedChordSize, setAdvancedChordSize] = useState(3);
+  const [selectedKeySig, setSelectedKeySig] = useState('C');
+
+  const [inputMode, setInputMode] = useState('piano');
+  const [activeModifier, setActiveModifier] = useState('');
+
+  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [guessedNotes, setGuessedNotes] = useState([]);
+  const [errorsThisQuestion, setErrorsThisQuestion] = useState(0);
+
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [feedback, setFeedback] = useState(null);
+  const [sessionTime, setSessionTime] = useState(0);
+  const [elapsedMs, setElapsedMs] = useState(0);
+
+  useEffect(() => { clefRef.current = clef; }, [clef]);
+
+  useEffect(() => {
+    const timer = setInterval(() => { setSessionTime(prev => prev + 1); }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    let timer;
+    if (currentQuestion && feedback !== 'correct') {
+      timer = setInterval(() => { setElapsedMs(prev => prev + 50); }, 50);
+    }
+    return () => clearInterval(timer);
+  }, [currentQuestion, feedback]);
+
+  const formatTime = (seconds) => {
+    return `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
+  };
+
+  const playPianoSound = (frequency) => {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext || !frequency) return;
+
+    const ctx = new AudioContext();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const t = ctx.currentTime;
+    const osc1 = ctx.createOscillator(); const osc2 = ctx.createOscillator();
+    osc1.type = 'sawtooth'; osc2.type = 'triangle';
+    osc1.frequency.value = frequency; osc2.frequency.value = frequency;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass'; filter.frequency.setValueAtTime(frequency * 4, t);
+    filter.frequency.exponentialRampToValueAtTime(frequency, t + 0.5);
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.setValueAtTime(0, t);
+    gainNode.gain.linearRampToValueAtTime(0.5, t + 0.02);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
+
+    osc1.connect(filter); osc2.connect(filter); filter.connect(gainNode); gainNode.connect(ctx.destination);
+    osc1.start(t); osc2.start(t); osc1.stop(t + 1.5); osc2.stop(t + 1.5);
+  };
+
+  const getKeySignatureAlterations = (key) => {
+    const keySigs = {
+      'C': [],
+      'G': ['F#'], 'D': ['F#', 'C#'], 'A': ['F#', 'C#', 'G#'], 'E': ['F#', 'C#', 'G#', 'D#'],
+      'B': ['F#', 'C#', 'G#', 'D#', 'A#'], 'F#': ['F#', 'C#', 'G#', 'D#', 'A#', 'E#'],
+      'F': ['Bb'], 'Bb': ['Bb', 'Eb'], 'Eb': ['Bb', 'Eb', 'Ab'], 'Ab': ['Bb', 'Eb', 'Ab', 'Db'],
+      'Db': ['Bb', 'Eb', 'Ab', 'Db', 'Gb'], 'Gb': ['Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb']
+    };
+    return keySigs[key] || [];
+  };
+
+  const generateQuestion = (activeClef, prevQ = null) => {
+    let pitches = [];
+    let isValid = false;
+    let attempts = 0;
+
+    const alterations = getKeySignatureAlterations(selectedKeySig);
+
+    while (!isValid && attempts < 100) {
+      attempts++;
+      if (gameMode === 'standard') {
+        const rand = Math.random();
+        let minIdx, maxIdx;
+
+        if (activeClef === 'treble') {
+          minIdx = ALL_NOTES.indexOf('C4');
+          maxIdx = rand < 0.34 ? ALL_NOTES.indexOf('C6') : ALL_NOTES.indexOf('F5');
+        } else {
+          minIdx = ALL_NOTES.indexOf('C2');
+          maxIdx = rand < 0.34 ? ALL_NOTES.indexOf('C4') : ALL_NOTES.indexOf('F3');
+        }
+
+        const baseNatIdx = Math.floor(Math.random() * (maxIdx - minIdx + 1)) + minIdx;
+        const baseNat = ALL_NOTES[baseNatIdx];
+        const letter = baseNat.charAt(0);
+
+        let acc = '';
+        const accRand = Math.random();
+        if (accRand < 0.25 && ['C', 'D', 'F', 'G', 'A'].includes(letter)) acc = '#';
+        else if (accRand > 0.25 && accRand < 0.50 && ['D', 'E', 'G', 'A', 'B'].includes(letter)) acc = 'b';
+
+        const root = letter + acc + baseNat.slice(-1);
+
+        if (rand < 0.34) {
+          pitches = [root];
+        } else if (rand < 0.67) {
+          const intervals = [ {l: 2, s: 4}, {l: 2, s: 3}, {l: 3, s: 5}, {l: 4, s: 7} ];
+          const int = intervals[Math.floor(Math.random() * intervals.length)];
+          const top = getInterval(root, int.l, int.s);
+          if (top && frequencies[root] && frequencies[top]) {
+            pitches = [root, top];
+          }
+        } else {
+          const isMajor = Math.random() > 0.5;
+          const third = getInterval(root, 2, isMajor ? 4 : 3);
+          const fifth = getInterval(root, 4, 7);
+          if (third && fifth && frequencies[root] && frequencies[third] && frequencies[fifth]) {
+            pitches = [root, third, fifth];
+          }
+        }
+      } else {
+        // Advanced Mode with realistic tertian structures
+        let minIdx = activeClef === 'treble' ? ALL_NOTES.indexOf('C4') : ALL_NOTES.indexOf('C3');
+        let maxIdx = activeClef === 'treble' ? ALL_NOTES.indexOf('E5') : ALL_NOTES.indexOf('E4');
+
+        const baseNatIdx = Math.floor(Math.random() * (maxIdx - minIdx + 1)) + minIdx;
+        const baseNat = ALL_NOTES[baseNatIdx];
+        const letter = baseNat.charAt(0);
+
+        let rootAcc = '';
+        const matchingAlt = alterations.find(alt => alt.charAt(0) === letter);
+        if (matchingAlt) {
+          rootAcc = matchingAlt.slice(1);
+        }
+
+        const root = letter + rootAcc + baseNat.slice(-1);
+        const tempPitches = [root];
+
+        const chordStructures = {
+          3: [
+            [{l:2, s:4}, {l:4, s:7}], // Major
+            [{l:2, s:3}, {l:4, s:7}], // Minor
+            [{l:2, s:3}, {l:4, s:6}], // Diminished
+            [{l:2, s:4}, {l:4, s:8}]  // Augmented
+          ],
+          4: [
+            [{l:2, s:4}, {l:4, s:7}, {l:6, s:10}], // Dominant 7
+            [{l:2, s:4}, {l:4, s:7}, {l:6, s:11}], // Major 7
+            [{l:2, s:3}, {l:4, s:7}, {l:6, s:10}], // Minor 7
+            [{l:2, s:3}, {l:4, s:6}, {l:6, s:9}]   // Diminished 7
+          ],
+          5: [
+            [{l:2, s:4}, {l:4, s:7}, {l:6, s:10}, {l:8, s:14}], // Dominant 9
+            [{l:2, s:3}, {l:4, s:7}, {l:6, s:10}, {l:8, s:14}], // Minor 9
+            [{l:2, s:4}, {l:4, s:7}, {l:6, s:11}, {l:8, s:14}]  // Major 9
+          ]
+        };
+
+        const availableStructures = chordStructures[advancedChordSize] || chordStructures[3];
+        const selectedStructure = availableStructures[Math.floor(Math.random() * availableStructures.length)];
+
+        let chordIsValid = true;
+        for (let i = 0; i < selectedStructure.length; i++) {
+           const interval = selectedStructure[i];
+           const nextNote = getInterval(root, interval.l, interval.s);
+           if (nextNote && frequencies[nextNote]) {
+              tempPitches.push(nextNote);
+           } else {
+              chordIsValid = false;
+              break;
+           }
+        }
+
+        if (chordIsValid) {
+           if (Math.random() > 0.5) {
+             const inversionCount = Math.floor(Math.random() * (advancedChordSize - 1)) + 1;
+             for (let i = 0; i < inversionCount; i++) {
+               const noteToInvert = tempPitches.shift();
+               const higherNote = getInterval(noteToInvert, 7, 12);
+               if (higherNote && frequencies[higherNote]) {
+                 tempPitches.push(higherNote);
+               } else {
+                 tempPitches.push(noteToInvert);
+               }
+             }
+           }
+
+           tempPitches.sort((a, b) => ALL_NOTES.indexOf(a[0]+a.slice(-1)) - ALL_NOTES.indexOf(b[0]+b.slice(-1)));
+           pitches = tempPitches;
+        }
+      }
+
+      if (pitches.length > 0 && pitches.length === (gameMode === 'standard' ? pitches.length : advancedChordSize)) {
+        const allPitchesVisible = pitches.every(pitch => {
+          const baseNote = pitch[0] + pitch.slice(-1);
+          return staffOffsets[activeClef][baseNote] !== undefined;
+        });
+
+        const letters = pitches.map(p => p[0] + p.slice(-1));
+        const hasDuplicateLines = new Set(letters).size !== letters.length;
+
+        if (allPitchesVisible && !hasDuplicateLines) {
+          isValid = true;
+        }
+      }
+    }
+
+    if (!isValid) {
+      pitches = [activeClef === 'treble' ? 'C4' : 'C3'];
+    }
+
+    const answers = pitches.map(p => p.slice(0, -1));
+    const pitchStr = pitches.join(',');
+
+    if (prevQ && prevQ.pitches.join(',') === pitchStr) {
+      return generateQuestion(activeClef, prevQ);
+    }
+
+    return { pitches, answers };
+  };
+
+  useEffect(() => {
+    setCurrentQuestion(generateQuestion(clef));
+    setGuessedNotes([]);
+    setErrorsThisQuestion(0);
+    setElapsedMs(0);
+    setActiveModifier('');
+  }, [clef, gameMode, advancedChordSize, selectedKeySig]);
+
+  useEffect(() => {
+    if (!currentQuestion) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const startY = 120;
+    const lineSpacing = 16;
+    const staffPosY = (off) => startY + 2 * lineSpacing + off * lineSpacing;
+
+    const CLEF_FONT_SIZE = 4 * lineSpacing;
+    const KEYSIG_FONT_SIZE = 3 * lineSpacing;
+    const ACC_FONT_SIZE = 2.6 * lineSpacing;
+    const CLEF_X = 12;
+    const MUSIC_FONT = '"Noto Music", "Bravura", "STIX Two Math", "Segoe UI Symbol", serif';
+
+    const NOTEHEAD_HALFW = 11;
+    const NOTEHEAD_HALFH = 8;
+    const NOTE_STEP_X = 22;
+    const ACC_H_GAP = 5;
+    const ACC_COL_WIDTH = 16;
+    const ACC_W = 14;
+    const ACC_H_UP = lineSpacing * 1.4;
+    const ACC_H_DOWN = lineSpacing * 0.6;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 5; i++) {
+      const y = startY + i * lineSpacing;
+      ctx.beginPath();
+      ctx.moveTo(CLEF_X, y);
+      ctx.lineTo(canvas.width - 15, y);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = '#111';
+    ctx.font = `${CLEF_FONT_SIZE}px ${MUSIC_FONT}`;
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+    const clefGlyph = clef === 'treble' ? '𝄞' : '𝄢';
+    // Empirical y-shift per glyph (system-fallback music font, not SMuFL):
+    // 𝄞 sits 1 line above its intended baseline, 𝄢 sits 3 lines above.
+    const clefBaseY = clef === 'treble'
+      ? staffPosY(1) + lineSpacing
+      : staffPosY(-1) + 2.5 * lineSpacing + 1.5;
+    ctx.fillText(clefGlyph, CLEF_X, clefBaseY);
+    const clefW = ctx.measureText(clefGlyph).width || CLEF_FONT_SIZE * 0.55;
+
+    const alterations = getKeySignatureAlterations(selectedKeySig);
+    const KEYSIG_START_X = CLEF_X + clefW + 6;
+    const KEYSIG_SPACING = lineSpacing * 0.85;
+
+    ctx.font = `${KEYSIG_FONT_SIZE}px ${MUSIC_FONT}`;
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#111';
+    alterations.forEach((alt, index) => {
+      const noteLetter = alt.charAt(0);
+      const glyph = alt.slice(1);
+      const lookup = noteLetter + glyph;
+      const offset = keySigStaffOffsets[clef][lookup];
+      if (offset === undefined) return;
+      const x = KEYSIG_START_X + index * KEYSIG_SPACING;
+      // Empirical y-shift: textBaseline='middle' seats the ♯/♭ visual center about
+      // half a line below the em-box middle, so we raise by lineSpacing/2.
+      const y = staffPosY(offset) - lineSpacing / 2;
+      ctx.fillText(glyph === '#' ? '♯' : '♭', x, y);
+    });
+
+    const KEYSIG_END_X = KEYSIG_START_X + alterations.length * KEYSIG_SPACING;
+    const centerX = Math.max(canvas.width * 0.62, KEYSIG_END_X + lineSpacing * 3);
+
+    const noteInfoAll = currentQuestion.pitches.map(p => {
+      const letter = p[0];
+      const acc = p.length === 3 ? p[1] : '';
+      const baseNote = letter + p.slice(-1);
+      const offset = staffOffsets[clef][baseNote];
+      return { pitch: p, letter, acc, offset, y: staffPosY(offset) };
+    });
+
+    const sortedLowToHigh = [...noteInfoAll].sort((a, b) => b.offset - a.offset);
+
+    const sideMap = new Map();
+    let side = 0;
+    for (let i = 0; i < sortedLowToHigh.length; i++) {
+      if (i > 0) {
+        const diff = Math.abs(sortedLowToHigh[i - 1].offset - sortedLowToHigh[i].offset);
+        if (Math.abs(diff - 0.5) < 0.01) side = 1 - side;
+        else side = 0;
+      }
+      sideMap.set(sortedLowToHigh[i].pitch, side);
+    }
+
+    const noteInfo = noteInfoAll.map(info => {
+      const s = sideMap.get(info.pitch);
+      const x = centerX + s * NOTE_STEP_X;
+      const matchesKeySig = alterations.some(a => a.charAt(0) === info.letter && a.slice(1) === info.acc);
+      const keySigCoversLetter = alterations.some(a => a.charAt(0) === info.letter);
+      let glyph = null;
+      if (info.acc && !matchesKeySig) glyph = info.acc === '#' ? '♯' : '♭';
+      else if (!info.acc && keySigCoversLetter) glyph = '♮';
+      return { ...info, side: s, x, glyph };
+    });
+
+    const boxOf = (rightEdgeX, y) => ({
+      l: rightEdgeX - ACC_W, r: rightEdgeX, t: y - ACC_H_UP, b: y + ACC_H_DOWN,
+    });
+    const noteBoxOf = (n) => ({
+      l: n.x - NOTEHEAD_HALFW - 1, r: n.x + NOTEHEAD_HALFW + 1,
+      t: n.y - NOTEHEAD_HALFH - 1, b: n.y + NOTEHEAD_HALFH + 1,
+    });
+    const boxOverlap = (a, b) => !(a.r < b.l || b.r < a.l || a.b < b.t || b.b < a.t);
+
+    const accPlaced = [];
+    const withAcc = noteInfo.filter(n => n.glyph).sort((a, b) => a.y - b.y);
+    for (const t of withAcc) {
+      const desiredRight = t.x - NOTEHEAD_HALFW - ACC_H_GAP;
+      let placed = null;
+      for (let col = 0; col < 8; col++) {
+        const rightEdge = desiredRight - col * ACC_COL_WIDTH;
+        const box = boxOf(rightEdge, t.y);
+        const hitAcc = accPlaced.some(p => boxOverlap(box, p.box));
+        const hitNote = noteInfo.some(n => n.pitch !== t.pitch && boxOverlap(box, noteBoxOf(n)));
+        if (!hitAcc && !hitNote) {
+          placed = { rightEdge, y: t.y, glyph: t.glyph, box };
+          break;
+        }
+      }
+      if (!placed) {
+        const rightEdge = desiredRight - 8 * ACC_COL_WIDTH;
+        placed = { rightEdge, y: t.y, glyph: t.glyph, box: boxOf(rightEdge, t.y) };
+      }
+      accPlaced.push(placed);
+    }
+
+    let noteColor = '#000';
+    if (feedback === 'correct') noteColor = '#22c55e';
+    else if (feedback === 'wrong') noteColor = '#ef4444';
+    else if (feedback === 'warning') noteColor = '#f97316';
+
+    ctx.fillStyle = noteColor;
+    ctx.font = `${ACC_FONT_SIZE}px ${MUSIC_FONT}`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'right';
+    for (const p of accPlaced) {
+      ctx.fillText(p.glyph, p.rightEdge, p.y - lineSpacing / 2);
+    }
+    ctx.textAlign = 'left';
+
+    ctx.fillStyle = noteColor;
+    ctx.strokeStyle = noteColor;
+    ctx.lineWidth = 2;
+
+    for (const n of noteInfo) {
+      const drawLedger = (ly) => {
+        ctx.beginPath();
+        ctx.moveTo(n.x - 18, ly);
+        ctx.lineTo(n.x + 18, ly);
+        ctx.stroke();
+      };
+      if (n.offset >= 3) { for (let k = 3; k <= n.offset; k++) drawLedger(staffPosY(k)); }
+      if (n.offset <= -3) { for (let k = -3; k >= n.offset; k--) drawLedger(staffPosY(k)); }
+
+      ctx.beginPath();
+      ctx.ellipse(n.x, n.y, NOTEHEAD_HALFW, NOTEHEAD_HALFH, -Math.PI / 8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }, [currentQuestion, clef, feedback, selectedKeySig]);
+
+  const handleGuess = (submittedValues) => {
+    if (feedback || !currentQuestion) return;
+
+    let notesToCheck = Array.isArray(submittedValues) ? submittedValues : [submittedValues];
+    notesToCheck = notesToCheck.reduce((acc, note) => {
+      acc.push(note);
+      if (enharmonics[note]) acc.push(enharmonics[note]);
+      return acc;
+    }, []);
+
+    const matchedAnswers = currentQuestion.answers.filter(ans =>
+      notesToCheck.includes(ans) && !guessedNotes.includes(ans)
+    );
+
+    if (matchedAnswers.length > 0) {
+      const newGuessed = [...guessedNotes, ...matchedAnswers];
+      setGuessedNotes(newGuessed);
+      setActiveModifier('');
+
+      matchedAnswers.forEach(matched => {
+        const individualPitch = currentQuestion.pitches.find(p => p.slice(0, -1) === matched);
+        if (individualPitch) playPianoSound(frequencies[individualPitch]);
+      });
+
+      if (newGuessed.length === currentQuestion.answers.length) {
+        setFeedback('correct');
+        const secondsTaken = elapsedMs / 1000;
+        let multiplier = 0.8;
+        if (secondsTaken <= 2) multiplier = 1.2;
+        else if (secondsTaken <= 5) multiplier = 1.0;
+        else if (secondsTaken <= 10) multiplier = 0.9;
+
+        const basePoints = currentQuestion.pitches.length * 10;
+        setScore(s => s + Math.round(basePoints * multiplier));
+        setStreak(s => s + 1);
+
+        currentQuestion.pitches.forEach(p => playPianoSound(frequencies[p]));
+
+        setTimeout(() => {
+          setFeedback(null);
+          setGuessedNotes([]);
+          setErrorsThisQuestion(0);
+          setCurrentQuestion(generateQuestion(clefRef.current, currentQuestion));
+          setElapsedMs(0);
+        }, 600);
+      }
+    } else {
+      setScore(s => s - 5);
+      const maxAllowedErrors = currentQuestion.pitches.length - 1;
+
+      if (errorsThisQuestion < maxAllowedErrors) {
+        setFeedback('warning');
+        setErrorsThisQuestion(prev => prev + 1);
+        setActiveModifier('');
+        setTimeout(() => setFeedback(null), 500);
+      } else {
+        setFeedback('wrong');
+        setStreak(0);
+        setGuessedNotes([]);
+        setActiveModifier('');
+        setTimeout(() => {
+          setFeedback(null);
+          setErrorsThisQuestion(0);
+          setCurrentQuestion(generateQuestion(clefRef.current, currentQuestion));
+          setElapsedMs(0);
+        }, 500);
+      }
+    }
+  };
+
+  const timerData = (() => {
+    const secs = elapsedMs / 1000;
+    let color = 'bg-green-500', textColor = 'text-green-600', label = 'Speed Bonus (+20%)';
+    if (secs > 2 && secs <= 5) { color = 'bg-blue-400'; textColor = 'text-blue-500'; label = 'Standard Score (1.0x)'; }
+    else if (secs > 5 && secs <= 10) { color = 'bg-orange-400'; textColor = 'text-orange-500'; label = 'Slow Penalty (0.9x)'; }
+    else if (secs > 10) { color = 'bg-red-500'; textColor = 'text-red-500'; label = 'Time Penalty (0.8x)'; }
+    const widthPercent = Math.max(100 - (secs / 10) * 100, 1.5);
+    return { widthPercent, color, textColor, label, secs };
+  })();
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center py-6 px-4 font-sans select-none">
+      <div style={{ fontFamily: '"Noto Music", sans-serif', opacity: 0, position: 'absolute', pointerEvents: 'none' }}>{'𝄞𝄢'}</div>
+
+      <div className="max-w-md w-full">
+        <div className="flex justify-between items-end mb-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">Piano Sightreader</h1>
+            <p className="text-slate-500 text-sm">Interactive Note Recognition</p>
+          </div>
+          <div className="text-right">
+            <div className="text-slate-600 font-mono text-sm mb-1">Time: {formatTime(sessionTime)}</div>
+            <div className="text-lg font-bold text-slate-700">Score: {score}</div>
+            <div className="text-sm text-orange-500 font-medium">Streak: {streak} 🔥</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-3 rounded-xl border border-slate-200 mb-4 shadow-sm space-y-3">
+          <div className="flex bg-slate-100 rounded-lg p-1">
+            <button
+              onClick={() => setGameMode('standard')}
+              className={`flex-1 py-1.5 text-xs font-semibold rounded ${gameMode === 'standard' ? 'bg-white shadow text-indigo-600' : 'text-slate-500'}`}
+            >
+              Standard Mode
+            </button>
+            <button
+              onClick={() => setGameMode('advanced')}
+              className={`flex-1 py-1.5 text-xs font-semibold rounded ${gameMode === 'advanced' ? 'bg-white shadow text-indigo-600' : 'text-slate-500'}`}
+            >
+              Advanced Mode
+            </button>
+          </div>
+
+          {gameMode === 'advanced' ? (
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Chord Size</label>
+                <select
+                  value={advancedChordSize}
+                  onChange={(e) => setAdvancedChordSize(parseInt(e.target.value))}
+                  className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-semibold text-slate-700"
+                >
+                  <option value={3}>3 Notes (Triads)</option>
+                  <option value={4}>4 Notes (7ths)</option>
+                  <option value={5}>5 Notes (9ths)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Key Signature</label>
+                <select
+                  value={selectedKeySig}
+                  onChange={(e) => setSelectedKeySig(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-semibold text-slate-700"
+                >
+                  {['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb'].map(sig => (
+                    <option key={sig} value={sig}>{sig} Major</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          ) : (
+            <p className="text-[11px] text-slate-400 text-center">Random combinations of single notes and standard dyads/triads.</p>
+          )}
+        </div>
+
+        <div className="flex bg-slate-200 rounded-lg p-1 mb-4">
+          <button onClick={() => setClef('bass')} className={`flex-1 py-1.5 rounded-md font-semibold text-sm transition-colors ${clef === 'bass' ? 'bg-white shadow text-blue-600' : 'text-slate-600'}`}>Bass (Left Hand)</button>
+          <button onClick={() => setClef('treble')} className={`flex-1 py-1.5 rounded-md font-semibold text-sm transition-colors ${clef === 'treble' ? 'bg-white shadow text-blue-600' : 'text-slate-600'}`}>Treble (Right Hand)</button>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-4 relative">
+          <div className="bg-slate-100 h-1.5 w-full">
+            <div className={`h-full transition-all duration-75 ${timerData.color}`} style={{ width: `${timerData.widthPercent}%` }}></div>
+          </div>
+          <div className="flex justify-between px-4 pt-2 text-xs font-bold uppercase tracking-wider">
+            <span className="text-slate-400">Time: {timerData.secs.toFixed(1)}s</span>
+            <span className={timerData.textColor}>{timerData.label}</span>
+          </div>
+
+          {currentQuestion && currentQuestion.pitches.length > 1 && (
+            <div className="absolute top-10 right-4 text-[10px] font-bold text-indigo-400 bg-indigo-50 px-2 py-1 rounded">CHORD (+{currentQuestion.pitches.length * 10} pts)</div>
+          )}
+
+          <canvas
+            ref={canvasRef} width={400} height={280}
+            className={`w-full transition-colors ${feedback === 'wrong' ? 'animate-pulse bg-red-50' : feedback === 'warning' ? 'animate-pulse bg-orange-50' : ''}`}
+          />
+        </div>
+
+        <div className="mb-3 flex justify-between items-center">
+          <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Interface Mode</h3>
+          <button
+            onClick={() => setInputMode(prev => prev === 'piano' ? 'modifiers' : 'piano')}
+            className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 py-1 px-3 rounded-full font-medium transition-colors"
+          >
+            Switch to {inputMode === 'piano' ? 'Modifiers' : 'Piano Layout'}
+          </button>
+        </div>
+
+        {inputMode === 'piano' ? (
+          <div className="flex w-full mb-6 relative">
+            {['C', 'D', 'E', 'F', 'G', 'A', 'B'].map((note) => {
+              const isGuessed = guessedNotes.includes(note);
+
+              const blackKeysMap = {
+                'C': { top: 'C♯', bottom: 'D♭', values: ['C#', 'Db'] },
+                'D': { top: 'D♯', bottom: 'E♭', values: ['D#', 'Eb'] },
+                'F': { top: 'F♯', bottom: 'G♭', values: ['F#', 'Gb'] },
+                'G': { top: 'G♯', bottom: 'A♭', values: ['G#', 'Ab'] },
+                'A': { top: 'A♯', bottom: 'B♭', values: ['A#', 'Bb'] }
+              };
+              const blackKey = blackKeysMap[note];
+              const hasGap = !['E', 'B'].includes(note);
+
+              return (
+                <div key={note} className={`relative flex-1 flex flex-col justify-end ${hasGap ? 'mr-[6px]' : ''}`}>
+                  <button
+                    onClick={() => handleGuess(note)}
+                    className={`w-full h-24 rounded-b-xl border border-slate-300 font-bold text-lg shadow-sm transition-all flex items-end justify-center pb-3 ${
+                      isGuessed ? 'bg-green-500 text-white shadow-inner scale-95 border-green-600' : 'bg-white text-slate-700 hover:bg-slate-50 active:scale-95'
+                    }`}
+                  >
+                    {note}
+                  </button>
+
+                  {blackKey && (() => {
+                    const isBlackGuessed = guessedNotes.includes(blackKey.values[0]) || guessedNotes.includes(blackKey.values[1]);
+                    return (
+                      <button
+                        onClick={() => handleGuess(blackKey.values)}
+                        className={`absolute top-0 right-0 translate-x-[calc(50%+3px)] w-[65%] h-14 rounded-b-md shadow-md active:scale-95 z-10 flex flex-col items-center justify-center gap-0.5 border-x border-b border-slate-900 transition-transform ${
+                          isBlackGuessed ? 'bg-green-500 text-white border-green-600' : 'bg-slate-800 hover:bg-slate-900 text-white'
+                        }`}
+                      >
+                        <span className="text-[8px] font-bold leading-none tracking-tighter">{blackKey.top}</span>
+                        <span className="text-[8px] font-bold leading-none tracking-tighter text-slate-300">{blackKey.bottom}</span>
+                      </button>
+                    )
+                  })()}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="space-y-3 mb-6">
+            <div className="flex gap-2 justify-center">
+              {[
+                { symbol: '♭', value: 'b', label: 'Flat' },
+                { symbol: '♮', value: '', label: 'Natural' },
+                { symbol: '♯', value: '#', label: 'Sharp' }
+              ].map((mod) => (
+                <button
+                  key={mod.label} onClick={() => setActiveModifier(mod.value)}
+                  className={`px-5 py-2 rounded-lg font-bold text-base shadow-sm border ${
+                    activeModifier === mod.value
+                      ? 'bg-blue-500 text-white border-blue-600 shadow-inner'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  {mod.symbol}
+                </button>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-2">
+              {['C', 'D', 'E', 'F', 'G', 'A', 'B'].map((note) => {
+                const isGuessed = guessedNotes.includes(note + activeModifier) || guessedNotes.includes(note);
+                return (
+                  <button
+                    key={note} onClick={() => handleGuess(note + activeModifier)}
+                    className={`py-4 rounded-lg font-bold text-lg shadow-sm border border-slate-200 transition-all active:scale-95 ${
+                      isGuessed ? 'bg-green-500 text-white shadow-inner scale-95' : 'bg-white text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    {note}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}

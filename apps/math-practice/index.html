@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Viewport settings prevent auto-zooming on iOS when tapping things -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Math Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        body {
+            /* Prevents pull-to-refresh on mobile */
+            overscroll-behavior-y: contain; 
+            touch-action: pan-x pan-y;
+        }
+        
+        .shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        .correct-pop {
+            animation: pop 0.3s ease-out forwards;
+            color: #10B981 !important; /* Tailwind emerald-500 */
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* Numpad active states for touch devices */
+        .numpad-btn:active {
+            background-color: #E5E7EB;
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans h-screen w-screen overflow-hidden flex justify-center items-center">
+
+    <!-- App Container (Mobile optimized, constrained on desktop) -->
+    <div id="app-container" class="w-full h-full max-w-md bg-white shadow-2xl relative flex flex-col overflow-hidden">
+        
+        <!-- MAIN MENU -->
+        <div id="menu-screen" class="flex-1 w-full overflow-y-auto">
+            <div class="min-h-full flex flex-col items-center justify-center p-6 space-y-4 py-8">
+                <div class="text-center space-y-2 mb-4">
+                    <h1 class="text-4xl font-extrabold text-indigo-600 tracking-tight">Math Master</h1>
+                    <p class="text-slate-500 font-medium">Select a practice mode</p>
+                </div>
+
+                <!-- Basic Addition Mode -->
+                <button onclick="startPractice('add-2-9')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-6 rounded-2xl shadow-md transition-transform active:scale-95 text-lg">
+                    Basic Addition<br><span class="text-emerald-200 text-sm font-normal">Single digits (2 to 9)</span>
+                </button>
+
+                <!-- Addition/Sub 2-digit -->
+                <button onclick="startPractice('add-sub-2')" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-2xl shadow-md transition-transform active:scale-95 text-lg">
+                    Addition & Subtraction<br><span class="text-blue-200 text-sm font-normal">Up to 2-digits (&lt; 99)</span>
+                </button>
+                
+                <!-- Addition/Sub 3-digit -->
+                <button onclick="startPractice('add-sub-3')" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 px-6 rounded-2xl shadow-md transition-transform active:scale-95 text-lg">
+                    Addition & Subtraction<br><span class="text-purple-200 text-sm font-normal">Up to 3-digits (&lt; 999)</span>
+                </button>
+
+                <!-- Multiplication -->
+                <button onclick="startPractice('mult-2-9')" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 px-6 rounded-2xl shadow-md transition-transform active:scale-95 text-lg">
+                    Multiplication<br><span class="text-amber-200 text-sm font-normal">2 to 9 (with occasional ×10)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- PRACTICE SCREEN -->
+        <div id="practice-screen" class="hidden flex-1 flex flex-col h-full overflow-hidden">
+            <!-- Header Status Bar -->
+            <div class="flex justify-between items-center p-4 bg-slate-50 border-b border-slate-200 shrink-0">
+                <button onclick="goHome()" class="text-slate-400 hover:text-slate-600 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </button>
+                
+                <div class="flex gap-2 md:gap-3 text-xs md:text-sm font-bold text-slate-600">
+                    <div class="flex items-center gap-1 bg-slate-200 px-3 py-1 rounded-full">
+                        ⏱ <span id="timer-display">00:00</span>
+                    </div>
+                    <div class="flex items-center gap-1 bg-orange-100 text-orange-600 px-3 py-1 rounded-full">
+                        🔥 <span id="streak-display">0</span>
+                    </div>
+                    <div class="flex items-center gap-1 bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full">
+                        ⭐ <span id="score-display">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Bar & Status Display -->
+            <div class="w-full shrink-0 bg-white border-b border-slate-100 flex flex-col">
+                <div class="w-full bg-slate-200 h-1.5">
+                    <div id="time-bar" class="h-1.5 w-full bg-green-500 transition-all duration-75"></div>
+                </div>
+                <div class="flex justify-between items-center px-4 py-2 text-sm font-bold">
+                    <div id="time-text" class="text-slate-600 font-mono">Time: 0.0s</div>
+                    <div id="tier-text" class="text-green-600">Speed Bonus (+20%)</div>
+                </div>
+            </div>
+
+            <!-- Question Area -->
+            <div class="flex-1 flex flex-col items-center justify-center p-4 overflow-y-auto">
+                <div id="question-display" class="text-6xl md:text-7xl font-black text-slate-700 tracking-tighter transition-all duration-300 text-center">
+                    <!-- Question injected here -->
+                </div>
+                
+                <div class="mt-4 md:mt-8 h-16 md:h-20 flex items-center justify-center">
+                    <div id="user-input" class="text-5xl font-bold text-indigo-600 min-w-[3rem] text-center border-b-4 border-indigo-200 pb-2 transition-colors">
+                        <!-- User input injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Numpad -->
+            <div class="bg-slate-50 p-4 pb-8 md:pb-6 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)] shrink-0">
+                <div class="grid grid-cols-3 gap-3 md:gap-4 max-w-sm mx-auto">
+                    <!-- Numbers -->
+                    <button onclick="appendNumber('1')" class="numpad-btn bg-white text-2xl font-bold py-3 md:py-4 rounded-xl shadow-sm border border-slate-200 transition-all">1</button>
+                    <button onclick="appendNumber('2')" class="numpad-btn bg-white text-2xl font-bold py-3 md:py-4 rounded-xl shadow-sm border border-slate-200 transition-all">2</button>
+                    <button onclick="appendNumber('3')" class="numpad-btn bg-white text-2xl font-bold py-3 md:py-4 rounded-xl shadow-sm border border-slate-200 transition-all">3</button>
+                    <button onclick="appendNumber('4')" class="numpad-btn bg-white text-2xl font-bold py-3 md:py-4 rounded-xl shadow-sm border border-slate-200 transition-all">4</button>
+                    <button onclick="appendNumber('5')" class="numpad-btn bg-white text-2xl font-bold py-3 md:py-4 rounded-xl shadow-sm border border-slate-200 transition-all">5</button>
+                    <button onclick="appendNumber('6')" class="numpad-btn bg-white text-2xl font-bold py-3 md:py-4 rounded-xl shadow-sm border border-slate-200 transition-all">6</button>
+                    <button onclick="appendNumber('7')" class="numpad-btn bg-white text-2xl font-bold py-3 md:py-4 rounded-xl shadow-sm border border-slate-200 transition-all">7</button>
+                    <button onclick="appendNumber('8')" class="numpad-btn bg-white text-2xl font-bold py-3 md:py-4 rounded-xl shadow-sm border border-slate-200 transition-all">8</button>
+                    <button onclick="appendNumber('9')" class="numpad-btn bg-white text-2xl font-bold py-3 md:py-4 rounded-xl shadow-sm border border-slate-200 transition-all">9</button>
+                    
+                    <!-- Bottom Row -->
+                    <button onclick="deleteNumber()" class="numpad-btn bg-red-50 text-red-500 text-xl font-bold py-3 md:py-4 rounded-xl shadow-sm border border-red-100 flex justify-center items-center transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" />
+                        </svg>
+                    </button>
+                    <button onclick="appendNumber('0')" class="numpad-btn bg-white text-2xl font-bold py-3 md:py-4 rounded-xl shadow-sm border border-slate-200 transition-all">0</button>
+                    <button onclick="submitAnswer()" class="numpad-btn bg-indigo-500 text-white text-xl font-bold py-3 md:py-4 rounded-xl shadow-sm hover:bg-indigo-600 transition-all">
+                        ENTER
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentMode = '';
+        let currentAnswer = '';
+        let expectedAnswer = 0;
+        let score = 0;
+        let streak = 0;
+        let sessionSeconds = 0;
+        let timerInterval = null;
+        
+        // Question Timing state
+        let questionStartTime = 0;
+        let questionTimerInterval = null;
+        let isProcessing = false;
+        let hasPenalizedCurrentQuestion = false;
+        
+        // History Trackers
+        let lastThree = []; // Tracks actual displayed questions for adjacency rules
+        let multHistory = []; // Tracks base combinations (2-9) to ensure all 64 are visited
+
+        // Synth for Sound
+        let synth;
+
+        // Initialize Audio Engine
+        async function initAudio() {
+            if (Tone.context.state !== 'running') {
+                await Tone.start();
+            }
+            if (!synth) {
+                synth = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.05, decay: 0.1, sustain: 0.2, release: 1 }
+                }).toDestination();
+                synth.volume.value = -8; // Comfortable volume
+            }
+        }
+
+        function playJoyfulSound() {
+            if (!synth) return;
+            const now = Tone.now();
+            synth.triggerAttackRelease("C5", "16n", now);
+            synth.triggerAttackRelease("E5", "16n", now + 0.1);
+            synth.triggerAttackRelease("G5", "8n", now + 0.2);
+        }
+
+        // Global Session Timer
+        function startTimer() {
+            sessionSeconds = 0;
+            updateTimerDisplay();
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                sessionSeconds++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(sessionSeconds / 60).toString().padStart(2, '0');
+            const s = (sessionSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${m}:${s}`;
+        }
+        
+        // Per-Question Countdown Timer
+        function startQuestionTimer() {
+            if (questionTimerInterval) clearInterval(questionTimerInterval);
+            questionStartTime = Date.now();
+            updateTimeBar();
+            // Update every 50ms for smooth bar depletion
+            questionTimerInterval = setInterval(updateTimeBar, 50); 
+        }
+
+        function updateTimeBar() {
+            // Note: intentionally removed `if (isProcessing) return;` 
+            // so the timer continues to drain while answering incorrectly (anti-cheese)
+            let elapsedMs = Date.now() - questionStartTime;
+            let seconds = elapsedMs / 1000;
+            
+            // Calculate width, stopping at a minimum of 1.5%
+            let remainingPercent = Math.max(100 - (seconds / 10) * 100, 1.5);
+            
+            let bar = document.getElementById('time-bar');
+            let timeText = document.getElementById('time-text');
+            let tierText = document.getElementById('tier-text');
+            
+            bar.style.width = `${remainingPercent}%`;
+            timeText.innerText = `Time: ${seconds.toFixed(1)}s`;
+            
+            // Adjust visual themes based on time tiers
+            if (seconds <= 2.0) {
+                bar.className = "h-1.5 w-full transition-all duration-75 bg-green-500";
+                tierText.className = "text-green-600";
+                tierText.innerText = "Speed Bonus (+20%)";
+            } else if (seconds <= 5.0) {
+                bar.className = "h-1.5 w-full transition-all duration-75 bg-blue-400";
+                tierText.className = "text-blue-500";
+                tierText.innerText = "Standard Score (1.0x)";
+            } else if (seconds <= 10.0) {
+                bar.className = "h-1.5 w-full transition-all duration-75 bg-orange-400";
+                tierText.className = "text-orange-500";
+                tierText.innerText = "Slow Penalty (0.9x)";
+            } else {
+                bar.className = "h-1.5 w-full transition-all duration-75 bg-red-500";
+                tierText.className = "text-red-500";
+                tierText.innerText = "Time Penalty (0.8x)";
+            }
+        }
+
+        function startPractice(mode) {
+            initAudio(); // Initialize audio context on user interaction
+            currentMode = mode;
+            score = 0;
+            streak = 0;
+            lastThree = [];
+            multHistory = [];
+            updateStats();
+            
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('practice-screen').classList.remove('hidden');
+            
+            startTimer();
+            generateNewQuestion();
+        }
+
+        function goHome() {
+            stopTimer();
+            if (questionTimerInterval) clearInterval(questionTimerInterval);
+            document.getElementById('menu-screen').classList.remove('hidden');
+            document.getElementById('practice-screen').classList.add('hidden');
+        }
+
+        function isSimilarAddSub(q1, q2) {
+            let c1 = Math.abs(q1.n1 - q2.n1) <= 2 && Math.abs(q1.n2 - q2.n2) <= 2;
+            let c2 = Math.abs(q1.n1 - q2.n2) <= 2 && Math.abs(q1.n2 - q2.n1) <= 2;
+            return c1 || c2;
+        }
+
+        function generateNewQuestion() {
+            let n1, n2, operator;
+            let baseN1, baseN2;
+            let found = false;
+            let attempts = 0;
+            let maxRetries = 50;
+
+            while (!found && attempts < maxRetries) {
+                attempts++;
+
+                // BASIC ADDITION (2 to 9)
+                if (currentMode === 'add-2-9') {
+                    n1 = Math.floor(Math.random() * 8) + 2; // 2 to 9
+                    n2 = Math.floor(Math.random() * 8) + 2; // 2 to 9
+                    operator = '+';
+                    
+                    let similar = false;
+                    for (let prev of lastThree) {
+                        if (prev.op === operator && isSimilarAddSub({n1, n2}, prev)) {
+                            similar = true; break;
+                        }
+                    }
+                    if (!similar || attempts === maxRetries) {
+                        expectedAnswer = n1 + n2;
+                        found = true;
+                    }
+                }
+
+                // ADDITION & SUBTRACTION
+                else if (currentMode === 'add-sub-2' || currentMode === 'add-sub-3') {
+                    let max = currentMode === 'add-sub-2' ? 99 : 999;
+                    let min = currentMode === 'add-sub-2' ? 10 : 100;
+                    
+                    n1 = Math.floor(Math.random() * (max - min + 1)) + min;
+                    n2 = Math.floor(Math.random() * (max - min + 1)) + min;
+                    operator = Math.random() > 0.5 ? '+' : '-';
+                    
+                    if (operator === '-') {
+                        if (n1 < n2) { let temp = n1; n1 = n2; n2 = temp; }
+                    }
+                    
+                    let similar = false;
+                    for (let prev of lastThree) {
+                        if (prev.op === operator && isSimilarAddSub({n1, n2}, prev)) {
+                            similar = true; break;
+                        }
+                    }
+                    if (!similar || attempts === maxRetries) {
+                        expectedAnswer = operator === '+' ? n1 + n2 : n1 - n2;
+                        found = true;
+                    }
+                } 
+                
+                // MULTIPLICATION
+                else if (currentMode === 'mult-2-9') {
+                    let validOptions = [];
+                    
+                    // 1. Generate all valid options evaluating adjacency rules
+                    for (let i = 2; i <= 9; i++) {
+                        for (let j = 2; j <= 9; j++) {
+                            let isBad = false;
+                            
+                            // Rule: Avoid exact/swapped in last 3
+                            for (let prev of lastThree) {
+                                if (prev.op === '×') {
+                                    if ((prev.baseN1 === i && prev.baseN2 === j) ||
+                                        (prev.baseN1 === j && prev.baseN2 === i)) {
+                                        isBad = true; break;
+                                    }
+                                }
+                            }
+                            if (isBad) continue;
+                            
+                            // Rule: Adjacent question cannot have diff <= 1 for bases
+                            if (lastThree.length > 0) {
+                                let adj = lastThree[lastThree.length - 1];
+                                if (adj.op === '×') {
+                                    let c1 = Math.abs(i - adj.baseN1) <= 1 && Math.abs(j - adj.baseN2) <= 1;
+                                    let c2 = Math.abs(i - adj.baseN2) <= 1 && Math.abs(j - adj.baseN1) <= 1;
+                                    if (c1 || c2) isBad = true;
+                                }
+                            }
+                            
+                            if (!isBad) validOptions.push({n1: i, n2: j});
+                        }
+                    }
+                    
+                    // Fallback if rules were too strict
+                    if (validOptions.length === 0) {
+                        for(let i=2; i<=9; i++) for(let j=2; j<=9; j++) validOptions.push({n1:i, n2:j});
+                    }
+                    
+                    // 2. Prioritize unseen combinations from the 64-history
+                    let unseen = validOptions.filter(opt => {
+                        return !multHistory.some(hist => 
+                            (hist.n1 === opt.n1 && hist.n2 === opt.n2) || 
+                            (hist.n1 === opt.n2 && hist.n2 === opt.n1)
+                        );
+                    });
+                    
+                    let selectedOpt;
+                    if (unseen.length > 0) {
+                        selectedOpt = unseen[Math.floor(Math.random() * unseen.length)];
+                    } else {
+                        selectedOpt = validOptions[0];
+                        let oldestIndex = 999999;
+                        for (let opt of validOptions) {
+                            let idx = multHistory.findIndex(h => 
+                                (h.n1===opt.n1 && h.n2===opt.n2) || 
+                                (h.n1===opt.n2 && h.n2===opt.n1)
+                            );
+                            if (idx < oldestIndex) {
+                                oldestIndex = idx;
+                                selectedOpt = opt;
+                            }
+                        }
+                    }
+                    
+                    baseN1 = selectedOpt.n1;
+                    baseN2 = selectedOpt.n2;
+
+                    // 3. Random modifiers based on requested probabilities
+                    let rand = Math.random();
+                    
+                    if (rand < 0.04) {
+                        // 4% chance BOTH * 10
+                        n1 = baseN1 * 10;
+                        n2 = baseN2 * 10;
+                    } else if (rand < 0.165) {
+                        // 12.5% chance n1 * 10
+                        n1 = baseN1 * 10;
+                        n2 = baseN2;
+                    } else if (rand < 0.29) {
+                        // 12.5% chance n2 * 10
+                        n1 = baseN1;
+                        n2 = baseN2 * 10;
+                    } else {
+                        // 71% chance NEITHER (Basic 2-9)
+                        n1 = baseN1;
+                        n2 = baseN2;
+                    }
+
+                    operator = '×';
+                    expectedAnswer = n1 * n2;
+                    found = true;
+                }
+            }
+
+            // Track History
+            lastThree.push({ n1, n2, op: operator, baseN1: baseN1 || n1, baseN2: baseN2 || n2 });
+            if (lastThree.length > 3) lastThree.shift();
+            
+            if (currentMode === 'mult-2-9') {
+                multHistory.push({ n1: baseN1, n2: baseN2 });
+                if (multHistory.length > 64) multHistory.shift();
+            }
+
+            // Reset Penalty Tracker for the new question
+            hasPenalizedCurrentQuestion = false;
+
+            // Update UI & Start Question Timer
+            currentAnswer = '';
+            document.getElementById('question-display').innerText = `${n1} ${operator} ${n2} = `;
+            document.getElementById('question-display').classList.remove('correct-pop', 'text-red-500');
+            updateInputDisplay();
+            startQuestionTimer();
+        }
+
+        function appendNumber(num) {
+            if (isProcessing) return;
+            if (currentAnswer.length < 5) {
+                currentAnswer += num;
+                updateInputDisplay();
+            }
+        }
+
+        function deleteNumber() {
+            if (isProcessing) return;
+            currentAnswer = currentAnswer.slice(0, -1);
+            updateInputDisplay();
+        }
+
+        function updateInputDisplay() {
+            const display = document.getElementById('user-input');
+            display.innerText = currentAnswer || '?';
+            display.classList.remove('text-red-500', 'shake');
+            
+            if (!currentAnswer) {
+                display.classList.add('text-slate-300');
+                display.classList.remove('text-indigo-600');
+            } else {
+                display.classList.remove('text-slate-300');
+                display.classList.add('text-indigo-600');
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('streak-display').innerText = streak;
+        }
+
+        function submitAnswer() {
+            if (isProcessing || currentAnswer === '') return;
+            isProcessing = true;
+
+            const qDisplay = document.getElementById('question-display');
+            const iDisplay = document.getElementById('user-input');
+            
+            let elapsed = (Date.now() - questionStartTime) / 1000;
+
+            if (parseInt(currentAnswer) === expectedAnswer) {
+                // Correct - Stop Timer!
+                if (questionTimerInterval) clearInterval(questionTimerInterval);
+                
+                // Determine score multiplier based on elapsed time
+                let basePoints = 10 + (streak * 2);
+                let earned = basePoints;
+                
+                if (elapsed <= 2.0) earned = Math.round(basePoints * 1.2);
+                else if (elapsed <= 5.0) earned = basePoints;
+                else if (elapsed <= 10.0) earned = Math.round(basePoints * 0.9);
+                else earned = Math.round(basePoints * 0.8);
+
+                // Add earned points
+                score += earned;
+                streak += 1;
+                updateStats();
+                
+                playJoyfulSound();
+                
+                qDisplay.classList.add('correct-pop');
+                iDisplay.classList.add('text-emerald-500');
+                iDisplay.classList.remove('text-indigo-600');
+
+                setTimeout(() => {
+                    isProcessing = false;
+                    generateNewQuestion();
+                }, 800);
+            } else {
+                // Incorrect - Timer keeps running while user gets feedback!
+                
+                // Apply penalty only ONCE per question
+                if (!hasPenalizedCurrentQuestion) {
+                    streak = 0;
+                    score = Math.max(0, score - 5);
+                    updateStats();
+                    hasPenalizedCurrentQuestion = true;
+                }
+
+                qDisplay.classList.add('text-red-500');
+                iDisplay.classList.add('text-red-500', 'shake');
+                iDisplay.classList.remove('text-indigo-600');
+
+                setTimeout(() => {
+                    isProcessing = false;
+                    currentAnswer = ''; // Clear answer to let them try again
+                    updateInputDisplay();
+                    qDisplay.classList.remove('text-red-500');
+                }, 600);
+            }
+        }
+
+        // Hardware keyboard support for desktop/macbook users
+        window.addEventListener('keydown', (e) => {
+            if (document.getElementById('practice-screen').classList.contains('hidden')) return;
+            
+            if (e.key >= '0' && e.key <= '9') {
+                appendNumber(e.key);
+            } else if (e.key === 'Backspace') {
+                deleteNumber();
+            } else if (e.key === 'Enter') {
+                submitAnswer();
+            }
+        });
+    </script>
+</body>
+</html>
