@@ -1,0 +1,20 @@
+{
+  "name": "little-writer",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Kids' composition helper — sectioned writing with live word counts and crash-proof autosave",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild entry.js --bundle --minify --loader:.js=jsx --define:process.env.NODE_ENV=\\\"production\\\" --outfile=dist/bundle.js",
+    "dev": "esbuild entry.js --bundle --loader:.js=jsx --define:process.env.NODE_ENV=\\\"development\\\" --outfile=dist/bundle.js --watch",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "lucide-react": "^0.263.1"
+  }
+}
