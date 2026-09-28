@@ -10,6 +10,15 @@
       "level": ["國小 1-6"]
     },
     {
+      "id": "little-writer",
+      "title": "小小作家",
+      "desc": "分段寫作文＋即時字數統計，可設目標字數；自動儲存與歷史版本，跳出也不怕不見",
+      "url": "https://kids-writer.scsnake.xyz",
+      "icon": "📝",
+      "subject": "語文",
+      "level": ["國小 1-6"]
+    },
+    {
       "id": "math-practice",
       "title": "數學計算練習",
       "desc": "加減乘除、九九乘法，計時挑戰＋錯題回顧",

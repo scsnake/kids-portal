@@ -21,9 +21,14 @@ kids-portal/
 │   │   ├── index.html         # loads dist/bundle.js
 │   │   ├── package.json       # esbuild + react + lucide-react
 │   │   └── dist/bundle.js     # committed pre-built bundle (156 KB)
-│   └── piano-sightreader/     # kids-piano.scsnake.xyz
-│       ├── index.html         # Babel-in-browser React (self-contained)
-│       └── App.jsx            # kept as source reference
+│   ├── piano-sightreader/     # kids-piano.scsnake.xyz
+│   │   ├── index.html         # Babel-in-browser React (self-contained)
+│   │   └── App.jsx            # kept as source reference
+│   └── little-writer/         # kids-writer.scsnake.xyz
+│       ├── main.js            # React App (same esbuild setup as one-stroke)
+│       ├── storage.js         # localStorage persistence + snapshot history
+│       ├── wordcount.js       # 國字/注音/English word counting
+│       └── dist/bundle.js     # committed pre-built bundle
 └── README.md
 ```
 
@@ -61,6 +66,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 # math-practice:     http://127.0.0.1:8765/apps/math-practice/
 # one-stroke:        http://127.0.0.1:8765/apps/one-stroke/
 # piano-sightreader: http://127.0.0.1:8765/apps/piano-sightreader/
+# little-writer:     http://127.0.0.1:8765/apps/little-writer/
 ```
 
 Portal cards link to the deployed subdomains — local previews of each app work
@@ -78,6 +84,7 @@ via the per-app path above.
 | **math-practice** | `apps/math-practice` | `.` | (none) | `apps/math-practice/**` | `kids-math.scsnake.xyz` |
 | **one-stroke** | `apps/one-stroke` | `.` | (none, uses committed `dist/`) or `npm ci && npm run build` if you drop `dist/` from git | `apps/one-stroke/**` | `kids-onestroke.scsnake.xyz` |
 | **piano-sightreader** | `apps/piano-sightreader` | `.` | (none) | `apps/piano-sightreader/**` | `kids-piano.scsnake.xyz` |
+| **little-writer** | `apps/little-writer` | `.` | (none, uses committed `dist/`) | `apps/little-writer/**` | `kids-writer.scsnake.xyz` |
 
 Then in **Cloudflare DNS**: add a CNAME for each subdomain pointing at the same
 host `kids-chinese-writing.scsnake.xyz` already targets.
@@ -85,10 +92,13 @@ host `kids-chinese-writing.scsnake.xyz` already targets.
 **Watch Paths** is what stops every push from rebuilding every service — set it
 per Coolify application under "Advanced → Watch Paths".
 
-## Rebuilding one-stroke locally
+## Rebuilding one-stroke / little-writer locally
+
+Same for both (`little-writer` also has `npm test` for its counting and
+storage logic):
 
 ```sh
-cd apps/one-stroke
+cd apps/one-stroke    # or apps/little-writer
 npm install       # first time only
 npm run build     # rewrites dist/bundle.js
 ```

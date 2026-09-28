@@ -69,6 +69,15 @@ APPS = [
         "watch_paths": "apps/piano-sightreader/**",
         "build_pack": "static",
     },
+    {
+        "name": "kids-writer",
+        "domain": f"https://kids-writer.{DOMAIN_ROOT}",
+        "base_directory": "/apps/little-writer",
+        "publish_directory": "/",
+        "watch_paths": "apps/little-writer/**",
+        "build_pack": "static",
+        # bundle is committed to dist/, no build step needed
+    },
 ]
 
 # ── API HELPER ─────────────────────────────────────────────────────────────
