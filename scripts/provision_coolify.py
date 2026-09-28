@@ -2,19 +2,21 @@
 """Provision 4 Coolify static applications for the kids-portal monorepo.
 
 Usage:
-    # 1. In Coolify UI: Profile → Keys & Tokens → Create API token
-    # 2. Export env vars (COOLIFY_URL points at the Coolify HTTP port; on cthgpu it's :8000)
-    export COOLIFY_URL=http://cthgpu:8000
-    export COOLIFY_TOKEN=xxxxxxxx
+    # 1. In Coolify UI: Profile → Keys & Tokens → Create API token (write scope)
+    # 2. Export env (COOLIFY_URL is Coolify's HTTP port; run from cthgpu, or
+    #    SSH-tunnel: `ssh -L 8000:localhost:8000 cthgpu` and use localhost:8000)
+    export COOLIFY_URL=http://localhost:8000
+    export COOLIFY_TOKEN=$(grep '^COOLIFY_TOKEN=' ~/.env | cut -d= -f2-)
     # 3. Run — creates any app that doesn't already exist, then triggers a deploy
     python3 scripts/provision_coolify.py
 
 Config lives in this file (the APPS list). Add rows or tweak domains here.
 
 The script:
-  1. Auto-discovers your server UUID, GitHub App source UUID, and project UUID
-     (creating the project if it doesn't exist).
-  2. POSTs each app to /api/v1/applications/private-github-app.
+  1. Auto-discovers your server UUID and project UUID (creating the project if
+     it doesn't exist).
+  2. POSTs each app to /api/v1/applications/public (public repo — no GitHub
+     App or Deploy Key required).
   3. Sets domain + watch paths + base/publish directory.
   4. Triggers a deploy.
 
@@ -29,11 +31,11 @@ import urllib.request
 import urllib.error
 
 # ── CONFIG ─────────────────────────────────────────────────────────────────
-REPO           = "scsnake/kids-portal"   # GitHub owner/repo (must be reachable via the Coolify GitHub App)
+REPO_URL       = "https://github.com/scsnake/kids-portal"  # public repo URL
 BRANCH         = "main"
 PROJECT_NAME   = "kids-portal"           # created if absent
 ENVIRONMENT    = "production"
-DOMAIN_ROOT    = "scsnake.xyz"           # subdomains built from this; also used to sanity-check
+DOMAIN_ROOT    = "scsnake.xyz"           # subdomains built from this
 
 APPS = [
     {
@@ -131,30 +133,6 @@ def pick_server() -> str:
     return s["uuid"]
 
 
-def pick_github_source() -> str:
-    # Endpoint name varies by Coolify version — try both.
-    for path in ("/sources/github-apps", "/github-apps", "/sources"):
-        try:
-            items = api("GET", path)
-        except urllib.error.HTTPError:
-            continue
-        if not items:
-            continue
-        # Prefer a source whose organization matches the repo owner
-        owner = REPO.split("/")[0]
-        for it in items:
-            if it.get("organization", "").lower() == owner.lower() or it.get("name", "").lower() == owner.lower():
-                print(f"→ github source: {it.get('name')} ({it.get('uuid')})")
-                return it["uuid"]
-        it = items[0]
-        print(f"→ github source (first): {it.get('name')} ({it.get('uuid')})")
-        return it["uuid"]
-    raise SystemExit(
-        "Could not find a GitHub App source. Install the Coolify GitHub App "
-        "under Sources → GitHub Apps first, and grant it access to scsnake/kids-portal."
-    )
-
-
 def get_or_create_project() -> str:
     projects = api("GET", "/projects")
     for p in projects:
@@ -166,20 +144,32 @@ def get_or_create_project() -> str:
     return created["uuid"]
 
 
-def existing_app_names(project_uuid: str) -> set:
-    apps = api("GET", "/applications")
-    names = {a.get("name") for a in apps if a.get("project_uuid") == project_uuid}
-    return names
+def existing_apps(project_uuid: str) -> tuple[set, set]:
+    """(names, domains) of apps already in PROJECT_NAME/ENVIRONMENT.
+
+    /applications items carry no project reference, so ask the environment
+    for its applications instead. A brand-new project may not have the
+    environment yet (404) — then nothing exists.
+    """
+    try:
+        env = api("GET", f"/projects/{project_uuid}/{ENVIRONMENT}")
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return set(), set()
+        raise
+    apps = env.get("applications") or []
+    names = {a.get("name") for a in apps}
+    domains = {d.strip() for a in apps for d in (a.get("fqdn") or "").split(",") if d.strip()}
+    return names, domains
 
 
 # ── PROVISION ──────────────────────────────────────────────────────────────
-def create_app(server_uuid, source_uuid, project_uuid, spec):
+def create_app(server_uuid, project_uuid, spec):
     body = {
         "project_uuid": project_uuid,
         "server_uuid": server_uuid,
         "environment_name": ENVIRONMENT,
-        "github_app_uuid": source_uuid,
-        "git_repository": REPO,
+        "git_repository": REPO_URL,
         "git_branch": BRANCH,
         "build_pack": spec["build_pack"],
         "name": spec["name"],
@@ -190,7 +180,7 @@ def create_app(server_uuid, source_uuid, project_uuid, spec):
         "ports_exposes": "80",
         "instant_deploy": True,
     }
-    resp = api("POST", "/applications/private-github-app", body)
+    resp = api("POST", "/applications/public", body)
     uuid = resp.get("uuid")
     print(f"   ✓ created {spec['name']} ({uuid}) → {spec['domain']}")
     return uuid
@@ -199,17 +189,19 @@ def create_app(server_uuid, source_uuid, project_uuid, spec):
 def main():
     print(f"Coolify: {COOLIFY_URL}")
     server_uuid = pick_server()
-    source_uuid = pick_github_source()
     project_uuid = get_or_create_project()
-    existing = existing_app_names(project_uuid)
+    existing, taken_domains = existing_apps(project_uuid)
     print(f"→ existing apps in project: {sorted(existing) or '(none)'}")
 
     for spec in APPS:
         if spec["name"] in existing:
             print(f"   ⏭  {spec['name']} already exists — skip")
             continue
+        if spec["domain"] in taken_domains:
+            print(f"   ⏭  {spec['domain']} already served by another app in the project (renamed?) — skip")
+            continue
         try:
-            create_app(server_uuid, source_uuid, project_uuid, spec)
+            create_app(server_uuid, project_uuid, spec)
         except urllib.error.HTTPError:
             print(f"   ✗ failed to create {spec['name']} — see error above")
 
