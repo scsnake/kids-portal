@@ -605,18 +605,18 @@ export default function App() {
 
   const timerData = (() => {
     const secs = elapsedMs / 1000;
-    let color = 'bg-green-500', textColor = 'text-green-600', label = 'Speed Bonus (+20%)';
-    if (secs > 2 && secs <= 5) { color = 'bg-blue-400'; textColor = 'text-blue-500'; label = 'Standard Score (1.0x)'; }
-    else if (secs > 5 && secs <= 10) { color = 'bg-orange-400'; textColor = 'text-orange-500'; label = 'Slow Penalty (0.9x)'; }
-    else if (secs > 10) { color = 'bg-red-500'; textColor = 'text-red-500'; label = 'Time Penalty (0.8x)'; }
+    let color = 'bg-green-500', textColor = 'text-green-700', label = 'Speed Bonus (+20%)';
+    if (secs > 2 && secs <= 5) { color = 'bg-blue-400'; textColor = 'text-blue-700'; label = 'Standard Score (1.0x)'; }
+    else if (secs > 5 && secs <= 10) { color = 'bg-orange-400'; textColor = 'text-orange-700'; label = 'Slow Penalty (0.9x)'; }
+    else if (secs > 10) { color = 'bg-red-500'; textColor = 'text-red-700'; label = 'Time Penalty (0.8x)'; }
     const widthPercent = Math.max(100 - (secs / 10) * 100, 1.5);
     return { widthPercent, color, textColor, label, secs };
   })();
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center py-6 px-4 font-sans select-none">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center py-6 sm:landscape:py-3 px-4 font-sans select-none">
 
-      <div className="max-w-md sm:max-w-2xl w-full">
+      <div className="max-w-md sm:max-w-2xl sm:landscape:max-w-xl w-full">
         <div className="flex justify-between items-end mb-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">Piano Sightreader</h1>
@@ -625,7 +625,7 @@ export default function App() {
           <div className="text-right">
             <div className="text-slate-600 font-mono text-sm mb-1">Time: {formatTime(sessionTime)}</div>
             <div className="text-lg font-bold text-slate-700">Score: {score}</div>
-            <div className="text-sm text-orange-500 font-medium">Streak: {streak} 🔥</div>
+            <div className="text-sm text-orange-700 font-medium">Streak: {streak} 🔥</div>
           </div>
         </div>
 
@@ -633,13 +633,13 @@ export default function App() {
           <div className="flex bg-slate-100 rounded-lg p-1">
             <button
               onClick={() => setGameMode('standard')}
-              className={`flex-1 py-1.5 text-xs font-semibold rounded ${gameMode === 'standard' ? 'bg-white shadow text-indigo-600' : 'text-slate-500'}`}
+              className={`flex-1 py-3 text-sm font-semibold rounded ${gameMode === 'standard' ? 'bg-white shadow text-indigo-600' : 'text-slate-600'}`}
             >
               Standard Mode
             </button>
             <button
               onClick={() => setGameMode('advanced')}
-              className={`flex-1 py-1.5 text-xs font-semibold rounded ${gameMode === 'advanced' ? 'bg-white shadow text-indigo-600' : 'text-slate-500'}`}
+              className={`flex-1 py-3 text-sm font-semibold rounded ${gameMode === 'advanced' ? 'bg-white shadow text-indigo-600' : 'text-slate-600'}`}
             >
               Advanced Mode
             </button>
@@ -648,11 +648,11 @@ export default function App() {
           {gameMode === 'advanced' ? (
             <div className="grid grid-cols-2 gap-3 pt-1">
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Chord Size</label>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Chord Size</label>
                 <select
                   value={advancedChordSize}
                   onChange={(e) => setAdvancedChordSize(parseInt(e.target.value))}
-                  className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-semibold text-slate-700"
+                  className="w-full h-11 bg-slate-50 border border-slate-200 rounded px-2 text-base font-semibold text-slate-700"
                 >
                   <option value={3}>3 Notes (Triads)</option>
                   <option value={4}>4 Notes (7ths)</option>
@@ -660,11 +660,11 @@ export default function App() {
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Key Signature</label>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Key Signature</label>
                 <select
                   value={selectedKeySig}
                   onChange={(e) => setSelectedKeySig(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-semibold text-slate-700"
+                  className="w-full h-11 bg-slate-50 border border-slate-200 rounded px-2 text-base font-semibold text-slate-700"
                 >
                   {['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb'].map(sig => (
                     <option key={sig} value={sig}>{sig} Major</option>
@@ -673,13 +673,13 @@ export default function App() {
               </div>
             </div>
           ) : (
-            <p className="text-[11px] text-slate-400 text-center">Random combinations of single notes and standard dyads/triads.</p>
+            <p className="text-xs text-slate-500 text-center">Random combinations of single notes and standard dyads/triads.</p>
           )}
         </div>
 
         <div className="flex bg-slate-200 rounded-lg p-1 mb-4">
-          <button onClick={() => setClef('bass')} className={`flex-1 py-1.5 rounded-md font-semibold text-sm transition-colors ${clef === 'bass' ? 'bg-white shadow text-blue-600' : 'text-slate-600'}`}>Bass (Left Hand)</button>
-          <button onClick={() => setClef('treble')} className={`flex-1 py-1.5 rounded-md font-semibold text-sm transition-colors ${clef === 'treble' ? 'bg-white shadow text-blue-600' : 'text-slate-600'}`}>Treble (Right Hand)</button>
+          <button onClick={() => setClef('bass')} className={`flex-1 py-3 rounded-md font-semibold text-sm transition-colors ${clef === 'bass' ? 'bg-white shadow text-blue-600' : 'text-slate-600'}`}>Bass (Left Hand)</button>
+          <button onClick={() => setClef('treble')} className={`flex-1 py-3 rounded-md font-semibold text-sm transition-colors ${clef === 'treble' ? 'bg-white shadow text-blue-600' : 'text-slate-600'}`}>Treble (Right Hand)</button>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-4 relative">
@@ -687,12 +687,12 @@ export default function App() {
             <div className={`h-full transition-all duration-75 ${timerData.color}`} style={{ width: `${timerData.widthPercent}%` }}></div>
           </div>
           <div className="flex justify-between px-4 pt-2 text-xs font-bold uppercase tracking-wider">
-            <span className="text-slate-400">Time: {timerData.secs.toFixed(1)}s</span>
+            <span className="text-slate-500">Time: {timerData.secs.toFixed(1)}s</span>
             <span className={timerData.textColor}>{timerData.label}</span>
           </div>
 
           {currentQuestion && currentQuestion.pitches.length > 1 && (
-            <div className="absolute top-10 right-4 text-[10px] font-bold text-indigo-400 bg-indigo-50 px-2 py-1 rounded">CHORD (+{currentQuestion.pitches.length * 10} pts)</div>
+            <div className="absolute top-10 right-4 text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-1 rounded">CHORD (+{currentQuestion.pitches.length * 10} pts)</div>
           )}
 
           <canvas
@@ -702,10 +702,10 @@ export default function App() {
         </div>
 
         <div className="mb-3 flex justify-between items-center">
-          <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Interface Mode</h3>
+          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wide">Interface Mode</h3>
           <button
             onClick={() => setInputMode(prev => prev === 'piano' ? 'modifiers' : 'piano')}
-            className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 py-1 px-3 rounded-full font-medium transition-colors"
+            className="text-sm bg-slate-200 hover:bg-slate-300 text-slate-700 min-h-[44px] px-4 rounded-full font-medium transition-colors"
           >
             Switch to {inputMode === 'piano' ? 'Modifiers' : 'Piano Layout'}
           </button>
@@ -746,8 +746,8 @@ export default function App() {
                           isBlackGuessed ? 'bg-green-500 text-white border-green-600' : 'bg-slate-800 hover:bg-slate-900 text-white'
                         }`}
                       >
-                        <span className="text-[8px] font-bold leading-none tracking-tighter">{blackKey.top}</span>
-                        <span className="text-[8px] font-bold leading-none tracking-tighter text-slate-300">{blackKey.bottom}</span>
+                        <span className="text-xs font-bold leading-none">{blackKey.top}</span>
+                        <span className="text-xs font-bold leading-none text-slate-300">{blackKey.bottom}</span>
                       </button>
                     )
                   })()}
@@ -765,9 +765,9 @@ export default function App() {
               ].map((mod) => (
                 <button
                   key={mod.label} onClick={() => setActiveModifier(mod.value)}
-                  className={`px-5 py-2 rounded-lg font-bold text-base shadow-sm border ${
+                  className={`px-5 py-2.5 rounded-lg font-bold text-base shadow-sm border ${
                     activeModifier === mod.value
-                      ? 'bg-blue-500 text-white border-blue-600 shadow-inner'
+                      ? 'bg-blue-600 text-white border-blue-700 shadow-inner'
                       : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                   }`}
                 >
