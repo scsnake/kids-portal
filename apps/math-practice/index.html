@@ -91,14 +91,14 @@
                     </svg>
                 </button>
                 
-                <div class="flex gap-2 md:gap-3 text-xs md:text-sm font-bold text-slate-600">
+                <div class="flex gap-2 md:gap-3 text-base font-bold text-slate-600">
                     <div class="flex items-center gap-1 bg-slate-200 px-3 py-1 rounded-full">
                         ⏱ <span id="timer-display">00:00</span>
                     </div>
-                    <div class="flex items-center gap-1 bg-orange-100 text-orange-600 px-3 py-1 rounded-full">
+                    <div class="flex items-center gap-1 bg-orange-100 text-orange-700 px-3 py-1 rounded-full">
                         🔥 <span id="streak-display">0</span>
                     </div>
-                    <div class="flex items-center gap-1 bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full">
+                    <div class="flex items-center gap-1 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">
                         ⭐ <span id="score-display">0</span>
                     </div>
                 </div>
@@ -106,12 +106,11 @@
 
             <!-- Time Bar & Status Display -->
             <div class="w-full shrink-0 bg-white border-b border-slate-100 flex flex-col">
-                <div class="w-full bg-slate-200 h-1.5">
-                    <div id="time-bar" class="h-1.5 w-full bg-green-500 transition-all duration-75"></div>
+                <div class="w-full bg-slate-200 h-2.5">
+                    <div id="time-bar" class="h-2.5 w-full bg-green-500 transition-all duration-75"></div>
                 </div>
-                <div class="flex justify-between items-center px-4 py-2 text-sm font-bold">
-                    <div id="time-text" class="text-slate-600 font-mono">Time: 0.0s</div>
-                    <div id="tier-text" class="text-green-600">Speed Bonus (+20%)</div>
+                <div class="flex justify-center items-center px-4 py-2 text-base font-bold">
+                    <div id="tier-text" class="text-green-700">⚡ Super fast!</div>
                 </div>
             </div>
 
@@ -244,29 +243,27 @@
             let remainingPercent = Math.max(100 - (seconds / 10) * 100, 1.5);
             
             let bar = document.getElementById('time-bar');
-            let timeText = document.getElementById('time-text');
             let tierText = document.getElementById('tier-text');
             
             bar.style.width = `${remainingPercent}%`;
-            timeText.innerText = `Time: ${seconds.toFixed(1)}s`;
             
             // Adjust visual themes based on time tiers
             if (seconds <= 2.0) {
-                bar.className = "h-1.5 w-full transition-all duration-75 bg-green-500";
-                tierText.className = "text-green-600";
-                tierText.innerText = "Speed Bonus (+20%)";
+                bar.className = "h-2.5 w-full transition-all duration-75 bg-green-500";
+                tierText.className = "text-green-700";
+                tierText.innerText = "⚡ Super fast!";
             } else if (seconds <= 5.0) {
-                bar.className = "h-1.5 w-full transition-all duration-75 bg-blue-400";
-                tierText.className = "text-blue-500";
-                tierText.innerText = "Standard Score (1.0x)";
+                bar.className = "h-2.5 w-full transition-all duration-75 bg-blue-400";
+                tierText.className = "text-blue-700";
+                tierText.innerText = "👍 Good pace";
             } else if (seconds <= 10.0) {
-                bar.className = "h-1.5 w-full transition-all duration-75 bg-orange-400";
-                tierText.className = "text-orange-500";
-                tierText.innerText = "Slow Penalty (0.9x)";
+                bar.className = "h-2.5 w-full transition-all duration-75 bg-orange-400";
+                tierText.className = "text-orange-700";
+                tierText.innerText = "🐢 Take your time";
             } else {
-                bar.className = "h-1.5 w-full transition-all duration-75 bg-red-500";
-                tierText.className = "text-red-500";
-                tierText.innerText = "Time Penalty (0.8x)";
+                bar.className = "h-2.5 w-full transition-all duration-75 bg-red-500";
+                tierText.className = "text-red-700";
+                tierText.innerText = "💪 You can do it!";
             }
         }
 
