@@ -17,8 +17,19 @@ const frequencies = {
   'C6': 1046.50
 };
 
+// Spellings played on a white key: Cb = B an octave down, Fb = E, E# = F, B# = C an octave up.
+// (Keys such as G-flat and F-sharp major use them; without a pitch the chord was silent.)
+for (let oct = 2; oct <= 6; oct++) {
+  if (frequencies['B' + (oct - 1)]) frequencies['Cb' + oct] = frequencies['B' + (oct - 1)];
+  if (frequencies['E' + oct]) frequencies['Fb' + oct] = frequencies['E' + oct];
+  if (frequencies['F' + oct]) frequencies['E#' + oct] = frequencies['F' + oct];
+  if (frequencies['C' + (oct + 1)]) frequencies['B#' + oct] = frequencies['C' + (oct + 1)];
+}
+
 const enharmonics = {
-  'C#': 'Db', 'Db': 'C#', 'D#': 'Eb', 'Eb': 'D#', 'F#': 'Gb', 'Gb': 'F#', 'G#': 'Ab', 'Ab': 'G#', 'A#': 'Bb', 'Bb': 'A#'
+  'C#': 'Db', 'Db': 'C#', 'D#': 'Eb', 'Eb': 'D#', 'F#': 'Gb', 'Gb': 'F#', 'G#': 'Ab', 'Ab': 'G#', 'A#': 'Bb', 'Bb': 'A#',
+  // white keys with a second name, so e.g. the B key answers a C-flat
+  'B': 'Cb', 'Cb': 'B', 'E': 'Fb', 'Fb': 'E', 'F': 'E#', 'E#': 'F', 'C': 'B#', 'B#': 'C'
 };
 
 const staffOffsets = {
@@ -682,7 +693,7 @@ export default function App() {
         {inputMode === 'piano' ? (
           <div className="flex w-full mb-6 relative">
             {['C', 'D', 'E', 'F', 'G', 'A', 'B'].map((note) => {
-              const isGuessed = guessedNotes.includes(note);
+              const isGuessed = guessedNotes.includes(note) || guessedNotes.includes(enharmonics[note]);
 
               const blackKeysMap = {
                 'C': { top: 'C♯', bottom: 'D♭', values: ['C#', 'Db'] },
