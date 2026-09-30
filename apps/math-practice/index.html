@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <!-- Viewport settings prevent auto-zooming on iOS when tapping things -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Math Practice</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         body {
+            /* 100dvh = the visible area, so Safari's toolbar can't cover the keypad (100vh is the fallback) */
+            height: 100vh;
+            height: 100dvh;
             /* Prevents pull-to-refresh on mobile */
             overscroll-behavior-y: contain; 
             touch-action: pan-x pan-y;
@@ -43,7 +46,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans h-screen w-screen overflow-hidden flex justify-center items-center">
+<body class="bg-slate-100 text-slate-800 font-sans w-screen overflow-hidden flex justify-center items-center">
 
     <!-- App Container (Mobile optimized, constrained on desktop) -->
     <div id="app-container" class="w-full h-full max-w-md bg-white shadow-2xl relative flex flex-col overflow-hidden">
@@ -81,7 +84,7 @@
         <!-- PRACTICE SCREEN -->
         <div id="practice-screen" class="hidden flex-1 flex flex-col h-full overflow-hidden">
             <!-- Header Status Bar -->
-            <div class="flex justify-between items-center p-4 bg-slate-50 border-b border-slate-200 shrink-0">
+            <div class="flex justify-between items-center p-4 pt-[max(1rem,env(safe-area-inset-top))] bg-slate-50 border-b border-slate-200 shrink-0">
                 <button onclick="goHome()" class="text-slate-400 hover:text-slate-600 p-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -126,7 +129,7 @@
             </div>
 
             <!-- Custom Numpad -->
-            <div class="bg-slate-50 p-4 pb-8 md:pb-6 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)] shrink-0">
+            <div class="bg-slate-50 p-4 pb-[max(2rem,env(safe-area-inset-bottom))] md:pb-[max(1.5rem,env(safe-area-inset-bottom))] rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)] shrink-0">
                 <div class="grid grid-cols-3 gap-3 md:gap-4 max-w-sm mx-auto">
                     <!-- Numbers -->
                     <button onclick="appendNumber('1')" class="numpad-btn bg-white text-2xl font-bold py-3 md:py-4 rounded-xl shadow-sm border border-slate-200 transition-all">1</button>
