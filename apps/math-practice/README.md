@@ -1,6 +1,6 @@
 # Math Practice
 
-Addition, subtraction, multiplication (九九乘法) and division drill for kids. Timed challenges + shake/pop feedback.
+Addition, 2- and 3-digit addition/subtraction, and multiplication (九九乘法) drill for kids. Timed challenges with streak bonuses; the answer is shown after two wrong tries.
 
 ## Local dev
 
