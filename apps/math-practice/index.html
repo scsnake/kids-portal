@@ -172,6 +172,8 @@
         let questionTimerInterval = null;
         let isProcessing = false;
         let hasPenalizedCurrentQuestion = false;
+        let wrongAttempts = 0;
+        let feedbackTimeout = null; // Pending "next step" after feedback; cancelled on goHome
         
         // History Trackers
         let lastThree = []; // Tracks actual displayed questions for adjacency rules
@@ -287,6 +289,9 @@
         function goHome() {
             stopTimer();
             if (questionTimerInterval) clearInterval(questionTimerInterval);
+            // Don't let a pending feedback step leak into the next session
+            clearTimeout(feedbackTimeout);
+            isProcessing = false;
             document.getElementById('menu-screen').classList.remove('hidden');
             document.getElementById('practice-screen').classList.add('hidden');
         }
@@ -456,6 +461,7 @@
 
             // Reset Penalty Tracker for the new question
             hasPenalizedCurrentQuestion = false;
+            wrongAttempts = 0;
 
             // Update UI & Start Question Timer
             currentAnswer = '';
@@ -483,7 +489,7 @@
         function updateInputDisplay() {
             const display = document.getElementById('user-input');
             display.innerText = currentAnswer || '?';
-            display.classList.remove('text-red-500', 'text-emerald-500', 'shake');
+            display.classList.remove('text-red-500', 'text-emerald-500', 'text-slate-500', 'shake');
             
             if (!currentAnswer) {
                 display.classList.add('text-slate-300');
@@ -532,12 +538,13 @@
                 iDisplay.classList.add('text-emerald-500');
                 iDisplay.classList.remove('text-indigo-600');
 
-                setTimeout(() => {
+                feedbackTimeout = setTimeout(() => {
                     isProcessing = false;
                     generateNewQuestion();
                 }, 800);
             } else {
                 // Incorrect - Timer keeps running while user gets feedback!
+                wrongAttempts++;
                 
                 // Apply penalty only ONCE per question
                 if (!hasPenalizedCurrentQuestion) {
@@ -553,7 +560,14 @@
                 iDisplay.classList.add('text-red-500', 'shake');
                 iDisplay.classList.remove('text-indigo-600');
 
-                setTimeout(() => {
+                // Second miss: show the answer and move on instead of leaving them stuck guessing
+                if (wrongAttempts >= 2) {
+                    if (questionTimerInterval) clearInterval(questionTimerInterval);
+                    feedbackTimeout = setTimeout(showAnswer, 600);
+                    return;
+                }
+
+                feedbackTimeout = setTimeout(() => {
                     isProcessing = false;
                     currentAnswer = ''; // Clear answer to let them try again
                     updateInputDisplay();
@@ -561,6 +575,22 @@
                     qDisplay.classList.add('text-slate-700');
                 }, 600);
             }
+        }
+
+        function showAnswer() {
+            const qDisplay = document.getElementById('question-display');
+            const iDisplay = document.getElementById('user-input');
+
+            qDisplay.classList.remove('text-red-500');
+            qDisplay.classList.add('text-slate-700');
+            iDisplay.innerText = expectedAnswer;
+            iDisplay.classList.remove('text-red-500', 'shake');
+            iDisplay.classList.add('text-slate-500');
+
+            feedbackTimeout = setTimeout(() => {
+                isProcessing = false;
+                generateNewQuestion();
+            }, 1500);
         }
 
         // Hardware keyboard support for desktop/macbook users
