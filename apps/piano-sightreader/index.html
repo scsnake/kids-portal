@@ -385,7 +385,7 @@ function App() {
 
     const CLEF_FONT_SIZE = 4 * lineSpacing;
     const KEYSIG_FONT_SIZE = 3 * lineSpacing;
-    const ACC_FONT_SIZE = 2.6 * lineSpacing;
+    const ACC_FONT_SIZE = KEYSIG_FONT_SIZE; // one accidental size on the staff, as in engraved music
     const CLEF_X = 12;
     const MUSIC_FONT = '"Noto Music", "Bravura", "STIX Two Math", "Segoe UI Symbol", serif';
 
@@ -393,10 +393,12 @@ function App() {
     const NOTEHEAD_HALFH = 8;
     const NOTE_STEP_X = 22;
     const ACC_H_GAP = 5;
-    const ACC_COL_WIDTH = 16;
-    const ACC_W = 14;
+    // Collision box around an accidental's anchor, from its measured ink at ACC_FONT_SIZE:
+    // widest is ♯ (15.6px); ♭ reaches 1.38 spaces above, ♯ 1.2 spaces below.
+    const ACC_COL_WIDTH = 18;
+    const ACC_W = 16;
     const ACC_H_UP = lineSpacing * 1.4;
-    const ACC_H_DOWN = lineSpacing * 0.6;
+    const ACC_H_DOWN = lineSpacing * 1.2;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
