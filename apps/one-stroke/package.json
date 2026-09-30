@@ -1,11 +1,13 @@
 {
   "name": "one-stroke",
   "private": true,
+  "type": "module",
   "version": "0.1.0",
-  "description": "Kid's one-stroke geometry puzzle — 24 levels",
+  "description": "Kid's one-stroke geometry puzzle — 48 levels",
   "scripts": {
     "build": "esbuild entry.js --bundle --minify --loader:.js=jsx --define:process.env.NODE_ENV=\\\"production\\\" --outfile=dist/bundle.js",
-    "dev": "esbuild entry.js --bundle --loader:.js=jsx --define:process.env.NODE_ENV=\\\"development\\\" --outfile=dist/bundle.js --watch"
+    "dev": "esbuild entry.js --bundle --loader:.js=jsx --define:process.env.NODE_ENV=\\\"development\\\" --outfile=dist/bundle.js --watch",
+    "test": "node --test"
   },
   "devDependencies": {
     "esbuild": "^0.24.0"
