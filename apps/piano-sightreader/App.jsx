@@ -196,6 +196,7 @@ export default function App() {
     let pitches = [];
     let isValid = false;
     let attempts = 0;
+    let repeat = null; // a valid question identical to prevQ, used only if nothing else turns up
 
     const alterations = getKeySignatureAlterations(selectedKeySig);
 
@@ -243,8 +244,14 @@ export default function App() {
         }
       } else {
         // Advanced Mode with realistic tertian structures
-        let minIdx = activeClef === 'treble' ? ALL_NOTES.indexOf('C4') : ALL_NOTES.indexOf('C3');
-        let maxIdx = activeClef === 'treble' ? ALL_NOTES.indexOf('E5') : ALL_NOTES.indexOf('E4');
+        // Roots from the usual range, capped so the whole chord (stacked thirds: 2 letters per added
+        // note) fits on the staff. The bass staff tops out at C4, which leaves less than an octave of
+        // roots there (none at all for 9th chords), so the floor moves down to keep an octave of roots.
+        const span = 2 * (advancedChordSize - 1);
+        const staffBottomIdx = ALL_NOTES.indexOf(activeClef === 'treble' ? 'C4' : 'C2');
+        const staffTopIdx = ALL_NOTES.indexOf(activeClef === 'treble' ? 'C6' : 'C4');
+        const maxIdx = Math.min(ALL_NOTES.indexOf(activeClef === 'treble' ? 'E5' : 'E4'), staffTopIdx - span);
+        const minIdx = Math.max(staffBottomIdx, Math.min(ALL_NOTES.indexOf(activeClef === 'treble' ? 'C4' : 'C3'), maxIdx - 6));
 
         const baseNatIdx = Math.floor(Math.random() * (maxIdx - minIdx + 1)) + minIdx;
         const baseNat = ALL_NOTES[baseNatIdx];
@@ -323,21 +330,19 @@ export default function App() {
         const hasDuplicateLines = new Set(letters).size !== letters.length;
 
         if (allPitchesVisible && !hasDuplicateLines) {
-          isValid = true;
+          // A repeat of the previous question is just another failed attempt. (Re-rolling it by
+          // recursion overflowed the stack whenever only one question was possible.)
+          if (prevQ && prevQ.pitches.join(',') === pitches.join(',')) repeat = pitches;
+          else isValid = true;
         }
       }
     }
 
     if (!isValid) {
-      pitches = [activeClef === 'treble' ? 'C4' : 'C3'];
+      pitches = repeat || [activeClef === 'treble' ? 'C4' : 'C3'];
     }
 
     const answers = pitches.map(p => p.slice(0, -1));
-    const pitchStr = pitches.join(',');
-
-    if (prevQ && prevQ.pitches.join(',') === pitchStr) {
-      return generateQuestion(activeClef, prevQ);
-    }
 
     return { pitches, answers };
   };
