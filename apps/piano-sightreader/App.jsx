@@ -54,6 +54,12 @@ const keySigStaffOffsets = {
   }
 };
 
+// Staff drawing area in layout units. The canvas's pixel size follows its on-screen width times the
+// screen density, so it is drawn sharp at any width. 190 tall fits the highest and lowest ledger
+// notes with their accidentals (content spans about y 11-173) without empty bands around the staff.
+const CANVAS_W = 400;
+const CANVAS_H = 190;
+
 const NOTE_LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 const semitoneMap = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
 
@@ -90,6 +96,17 @@ function getInterval(rootStr, letterOffset, semiOffset) {
 export default function App() {
   const canvasRef = useRef(null);
   const [clef, setClef] = useState('treble');
+  const [canvasPx, setCanvasPx] = useState(CANVAS_W * 2);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !window.ResizeObserver) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      setCanvasPx(Math.round(entry.contentRect.width * dpr));
+    });
+    ro.observe(canvas);
+    return () => ro.disconnect();
+  }, []);
   const clefRef = useRef(clef);
 
   const [gameMode, setGameMode] = useState('standard');
@@ -338,8 +355,10 @@ export default function App() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
+    const scale = canvas.width / CANVAS_W;
+    ctx.setTransform(scale, 0, 0, scale, 0, 0); // draw in layout units at full pixel density
 
-    const startY = 120;
+    const startY = 66; // top staff line
     const lineSpacing = 16;
     const staffPosY = (off) => startY + 2 * lineSpacing + off * lineSpacing;
 
@@ -360,7 +379,7 @@ export default function App() {
     const ACC_H_UP = lineSpacing * 1.4;
     const ACC_H_DOWN = lineSpacing * 1.2;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
     ctx.strokeStyle = '#333';
     ctx.lineWidth = 1.5;
@@ -368,7 +387,7 @@ export default function App() {
       const y = startY + i * lineSpacing;
       ctx.beginPath();
       ctx.moveTo(CLEF_X, y);
-      ctx.lineTo(canvas.width - 15, y);
+      ctx.lineTo(CANVAS_W - 15, y);
       ctx.stroke();
     }
 
@@ -415,7 +434,7 @@ export default function App() {
     });
 
     const KEYSIG_END_X = KEYSIG_START_X + alterations.length * KEYSIG_SPACING;
-    const centerX = Math.max(canvas.width * 0.62, KEYSIG_END_X + lineSpacing * 3);
+    const centerX = Math.max(CANVAS_W * 0.62, KEYSIG_END_X + lineSpacing * 3);
 
     const noteInfoAll = currentQuestion.pitches.map(p => {
       const letter = p[0];
@@ -512,7 +531,7 @@ export default function App() {
       ctx.ellipse(n.x, n.y, NOTEHEAD_HALFW, NOTEHEAD_HALFH, -Math.PI / 8, 0, Math.PI * 2);
       ctx.fill();
     }
-  }, [currentQuestion, clef, feedback, selectedKeySig, fontReady]);
+  }, [currentQuestion, clef, feedback, selectedKeySig, fontReady, canvasPx]);
 
   const handleGuess = (submittedValues) => {
     if (feedback || !currentQuestion) return;
@@ -597,7 +616,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center py-6 px-4 font-sans select-none">
 
-      <div className="max-w-md w-full">
+      <div className="max-w-md sm:max-w-2xl w-full">
         <div className="flex justify-between items-end mb-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">Piano Sightreader</h1>
@@ -677,7 +696,7 @@ export default function App() {
           )}
 
           <canvas
-            ref={canvasRef} width={400} height={280}
+            ref={canvasRef} width={canvasPx} height={Math.round(canvasPx * CANVAS_H / CANVAS_W)}
             className={`w-full transition-colors ${feedback === 'wrong' ? 'animate-pulse bg-red-50' : feedback === 'warning' ? 'animate-pulse bg-orange-50' : ''}`}
           />
         </div>
