@@ -365,8 +365,19 @@ export default function App() {
     const KEYSIG_START_X = CLEF_X + clefW + 6;
     const KEYSIG_SPACING = lineSpacing * 0.85;
 
+    // ♯ ♮ ♭ are placed from their measured ink on the alphabetic baseline, which every browser
+    // computes the same way. (textBaseline 'middle' does not: Safari drew key signatures half a
+    // space lower than Chrome.) ACC_ANCHOR is how far down the ink the glyph's reference point
+    // sits — the middle box of ♯/♮, the bowl of ♭ — measured on Noto Music.
+    const ACC_ANCHOR = { '♯': 0.47, '♮': 0.475, '♭': 0.685 };
+    const accBaselineY = (accGlyph, targetY) => {
+      const m = ctx.measureText(accGlyph);
+      const inkH = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+      return targetY + m.actualBoundingBoxAscent - ACC_ANCHOR[accGlyph] * inkH;
+    };
+
     ctx.font = `${KEYSIG_FONT_SIZE}px ${MUSIC_FONT}`;
-    ctx.textBaseline = 'middle';
+    ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = '#111';
     alterations.forEach((alt, index) => {
       const noteLetter = alt.charAt(0);
@@ -375,10 +386,8 @@ export default function App() {
       const offset = keySigStaffOffsets[clef][lookup];
       if (offset === undefined) return;
       const x = KEYSIG_START_X + index * KEYSIG_SPACING;
-      // Empirical y-shift: textBaseline='middle' seats the ♯/♭ visual center about
-      // half a line below the em-box middle, so we raise by lineSpacing/2.
-      const y = staffPosY(offset) - lineSpacing / 2;
-      ctx.fillText(glyph === '#' ? '♯' : '♭', x, y);
+      const accGlyph = glyph === '#' ? '♯' : '♭';
+      ctx.fillText(accGlyph, x, accBaselineY(accGlyph, staffPosY(offset)));
     });
 
     const KEYSIG_END_X = KEYSIG_START_X + alterations.length * KEYSIG_SPACING;
@@ -454,10 +463,10 @@ export default function App() {
 
     ctx.fillStyle = noteColor;
     ctx.font = `${ACC_FONT_SIZE}px ${MUSIC_FONT}`;
-    ctx.textBaseline = 'middle';
+    ctx.textBaseline = 'alphabetic';
     ctx.textAlign = 'right';
     for (const p of accPlaced) {
-      ctx.fillText(p.glyph, p.rightEdge, p.y - lineSpacing / 2);
+      ctx.fillText(p.glyph, p.rightEdge, accBaselineY(p.glyph, p.y));
     }
     ctx.textAlign = 'left';
 
