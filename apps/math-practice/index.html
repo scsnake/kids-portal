@@ -458,6 +458,7 @@
             currentAnswer = '';
             document.getElementById('question-display').innerText = `${n1} ${operator} ${n2} = `;
             document.getElementById('question-display').classList.remove('correct-pop', 'text-red-500');
+            document.getElementById('question-display').classList.add('text-slate-700');
             updateInputDisplay();
             startQuestionTimer();
         }
@@ -479,7 +480,7 @@
         function updateInputDisplay() {
             const display = document.getElementById('user-input');
             display.innerText = currentAnswer || '?';
-            display.classList.remove('text-red-500', 'shake');
+            display.classList.remove('text-red-500', 'text-emerald-500', 'shake');
             
             if (!currentAnswer) {
                 display.classList.add('text-slate-300');
@@ -543,6 +544,8 @@
                     hasPenalizedCurrentQuestion = true;
                 }
 
+                // Swap (not stack) color classes: the stylesheet order would otherwise decide the winner
+                qDisplay.classList.remove('text-slate-700');
                 qDisplay.classList.add('text-red-500');
                 iDisplay.classList.add('text-red-500', 'shake');
                 iDisplay.classList.remove('text-indigo-600');
@@ -552,6 +555,7 @@
                     currentAnswer = ''; // Clear answer to let them try again
                     updateInputDisplay();
                     qDisplay.classList.remove('text-red-500');
+                    qDisplay.classList.add('text-slate-700');
                 }, 600);
             }
         }
