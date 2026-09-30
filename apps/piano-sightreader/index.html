@@ -8,8 +8,19 @@
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Music&display=swap" rel="stylesheet">
 <style>
+  /* Noto Music (SIL Open Font License, see fonts/OFL.txt), bundled with the app so the staff
+     never has to be drawn with a fallback font. Only the music-symbol subset is needed (clefs, ♭ ♮ ♯);
+     Google Fonts is a backup source, e.g. when the page is opened from file://. */
+  @font-face {
+    font-family: 'Noto Music';
+    font-style: normal;
+    font-weight: 400;
+    font-display: block;
+    src: url('fonts/NotoMusic-music.woff2') format('woff2'),
+         url('https://fonts.gstatic.com/s/notomusic/v21/pe0rMIiSN5pO63htf1sxEkW7I9tAcVwob5A.woff2') format('woff2');
+    unicode-range: U+25CC, U+2669-266F, U+1D000-1D0F5, U+1D100-1D126, U+1D129-1D1EA, U+1D200-1D245;
+  }
   body { margin: 0; }
   #err { color:#b91c1c; padding:16px; font-family:monospace; white-space:pre-wrap; }
 </style>
@@ -129,6 +140,17 @@ function App() {
   const [elapsedMs, setElapsedMs] = useState(0);
 
   useEffect(() => { clefRef.current = clef; }, [clef]);
+
+  // Draw the staff only once the music font is ready: canvas text is not redrawn when a web font
+  // arrives later, and a fallback font puts the clef and accidentals in the wrong places.
+  const [fontReady, setFontReady] = useState(false);
+  useEffect(() => {
+    let done = false;
+    const ready = () => { if (!done) { done = true; setFontReady(true); } };
+    document.fonts.load('64px "Noto Music"', '𝄞𝄢♭♮♯').then(ready, ready);
+    const fallbackTimer = setTimeout(ready, 3000); // never leave the staff blank if the font can't load
+    return () => clearTimeout(fallbackTimer);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => { setSessionTime(prev => prev + 1); }, 1000);
@@ -341,7 +363,7 @@ function App() {
   }, [clef, gameMode, advancedChordSize, selectedKeySig]);
 
   useEffect(() => {
-    if (!currentQuestion) return;
+    if (!currentQuestion || !fontReady) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -522,7 +544,7 @@ function App() {
       ctx.ellipse(n.x, n.y, NOTEHEAD_HALFW, NOTEHEAD_HALFH, -Math.PI / 8, 0, Math.PI * 2);
       ctx.fill();
     }
-  }, [currentQuestion, clef, feedback, selectedKeySig]);
+  }, [currentQuestion, clef, feedback, selectedKeySig, fontReady]);
 
   const handleGuess = (submittedValues) => {
     if (feedback || !currentQuestion) return;
@@ -606,7 +628,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center py-6 px-4 font-sans select-none">
-      <div style={{ fontFamily: '"Noto Music", sans-serif', opacity: 0, position: 'absolute', pointerEvents: 'none' }}>{'𝄞𝄢'}</div>
 
       <div className="max-w-md w-full">
         <div className="flex justify-between items-end mb-4">

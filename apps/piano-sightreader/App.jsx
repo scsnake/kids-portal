@@ -100,6 +100,17 @@ export default function App() {
 
   useEffect(() => { clefRef.current = clef; }, [clef]);
 
+  // Draw the staff only once the music font is ready: canvas text is not redrawn when a web font
+  // arrives later, and a fallback font puts the clef and accidentals in the wrong places.
+  const [fontReady, setFontReady] = useState(false);
+  useEffect(() => {
+    let done = false;
+    const ready = () => { if (!done) { done = true; setFontReady(true); } };
+    document.fonts.load('64px "Noto Music"', '𝄞𝄢♭♮♯').then(ready, ready);
+    const fallbackTimer = setTimeout(ready, 3000); // never leave the staff blank if the font can't load
+    return () => clearTimeout(fallbackTimer);
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => { setSessionTime(prev => prev + 1); }, 1000);
     return () => clearInterval(timer);
@@ -312,7 +323,7 @@ export default function App() {
   }, [clef, gameMode, advancedChordSize, selectedKeySig]);
 
   useEffect(() => {
-    if (!currentQuestion) return;
+    if (!currentQuestion || !fontReady) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -488,7 +499,7 @@ export default function App() {
       ctx.ellipse(n.x, n.y, NOTEHEAD_HALFW, NOTEHEAD_HALFH, -Math.PI / 8, 0, Math.PI * 2);
       ctx.fill();
     }
-  }, [currentQuestion, clef, feedback, selectedKeySig]);
+  }, [currentQuestion, clef, feedback, selectedKeySig, fontReady]);
 
   const handleGuess = (submittedValues) => {
     if (feedback || !currentQuestion) return;
@@ -572,7 +583,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center py-6 px-4 font-sans select-none">
-      <div style={{ fontFamily: '"Noto Music", sans-serif', opacity: 0, position: 'absolute', pointerEvents: 'none' }}>{'𝄞𝄢'}</div>
 
       <div className="max-w-md w-full">
         <div className="flex justify-between items-end mb-4">
