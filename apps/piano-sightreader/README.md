@@ -7,13 +7,13 @@ A browser-based sight-reading trainer for piano. Notes are drawn on treble or ba
 - **Standard mode** — single notes or short intervals in a chosen key signature.
 - **Advanced mode** — tertian chords (triads, 7ths, and larger) with realistic voicings.
 - **Clef selection** — treble or bass.
-- **Key signatures** — all 15 major keys, with automatic accidental/natural rendering.
+- **Key signatures** — 13 major keys, up to six sharps (F♯) or six flats (G♭), with automatic accidental/natural rendering.
 - **Two input modes** — piano keyboard layout, or letter + accidental modifier grid.
 - **Audio playback** via WebAudio oscillators (no samples needed).
 
 ## Running
 
-Everything is self-contained in `index.html` — React, Babel, and Tailwind are loaded from CDNs and JSX is compiled in the browser. Just open the file:
+Everything is self-contained in `index.html` — React, Babel, and Tailwind are loaded from CDNs and JSX is compiled in the browser. The Noto Music font used for the clefs and accidentals is bundled in `fonts/`, so the staff never falls back to another font. Just open the file:
 
 ```sh
 open index.html
@@ -31,4 +31,4 @@ then visit `http://localhost:8000/`.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE). The bundled Noto Music font is under the SIL Open Font License ([fonts/OFL.txt](fonts/OFL.txt)).
