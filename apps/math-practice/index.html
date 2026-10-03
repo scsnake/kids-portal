@@ -64,6 +64,59 @@
         .numpad-btn:active {
             transform: scale(0.95);
         }
+
+        /* Practice layout: question on top, keypad at the bottom */
+        #practice-body {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: minmax(0, 1fr) auto;
+            grid-template-areas: "question" "numpad";
+        }
+        #question-area { grid-area: question; }
+        #numpad { grid-area: numpad; }
+        #scratch-pad { grid-area: scratch; display: none; }
+
+        /* 3- and 4-digit modes put a scratch pad between the question and the keypad.
+           Below this height (a phone in Safari) it would be a sliver too short to write in, so it stays off. */
+        @media (min-height: 786px) {
+            .with-scratch #practice-body {
+                grid-template-rows: auto minmax(0, 1fr) auto;
+                grid-template-areas: "question" "scratch" "numpad";
+            }
+            .with-scratch #scratch-pad {
+                display: block;
+                margin: 0 1rem 1rem;
+            }
+        }
+        /* On a landscape tablet or computer, stacking leaves the pad too short, so it goes alongside */
+        @media (min-width: 768px) and (min-height: 600px) and (orientation: landscape) {
+            #app-container.with-scratch { max-width: 64rem; }
+            .with-scratch #practice-body {
+                grid-template-columns: 28rem minmax(0, 1fr);
+                grid-template-rows: minmax(0, 1fr) auto;
+                grid-template-areas: "question scratch" "numpad scratch";
+            }
+            .with-scratch #scratch-pad {
+                display: block;
+                margin: 1rem 1rem max(1rem, env(safe-area-inset-bottom)) 0;
+            }
+        }
+
+        #scratch-pad {
+            background-color: #fff;
+            /* Faint squares help line up digits in columns */
+            background-image:
+                linear-gradient(to right, #eef2f7 1px, transparent 1px),
+                linear-gradient(to bottom, #eef2f7 1px, transparent 1px);
+            background-size: 40px 40px;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+        /* The pad takes every touch, so drawing never scrolls or zooms the page */
+        #scratch-canvas { touch-action: none; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans w-screen overflow-hidden flex justify-center items-center">
@@ -139,8 +192,11 @@
                 </div>
             </div>
 
+            <!-- Question, scratch pad and keypad (arranged by #practice-body in the stylesheet) -->
+            <div id="practice-body">
+
             <!-- Question Area -->
-            <div class="flex-1 flex flex-col items-center justify-center p-4 overflow-y-auto">
+            <div id="question-area" class="flex flex-col items-center justify-center p-4 overflow-y-auto">
                 <div id="question-display" class="text-6xl md:text-7xl font-black text-slate-700 tracking-tighter transition-colors duration-300 text-center">
                     <!-- Question injected here -->
                 </div>
@@ -152,8 +208,22 @@
                 </div>
             </div>
 
+            <!-- Scratch Pad (3- and 4-digit modes): free writing space for working it out -->
+            <div id="scratch-pad" class="relative rounded-2xl border-2 border-slate-200 overflow-hidden">
+                <canvas id="scratch-canvas" class="absolute inset-0 w-full h-full"></canvas>
+                <div id="scratch-hint" class="absolute inset-0 flex items-center justify-center text-slate-400 text-lg font-medium pointer-events-none">
+                    ✏️ Work it out here
+                </div>
+                <button id="scratch-clear" onclick="clearScratch()" class="hidden absolute top-2 right-2 flex items-center gap-1 bg-white active:bg-slate-100 text-slate-600 text-base font-bold px-3 py-2 rounded-full border border-slate-200 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Clear
+                </button>
+            </div>
+
             <!-- Custom Numpad -->
-            <div class="bg-slate-50 p-4 pb-[max(2rem,env(safe-area-inset-bottom))] md:pb-[max(1.5rem,env(safe-area-inset-bottom))] rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)] shrink-0">
+            <div id="numpad" class="bg-slate-50 p-4 pb-[max(2rem,env(safe-area-inset-bottom))] md:pb-[max(1.5rem,env(safe-area-inset-bottom))] rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)] shrink-0">
                 <div class="grid grid-cols-3 gap-3 md:gap-4 max-w-sm mx-auto">
                     <!-- Numbers -->
                     <button onclick="appendNumber('1')" class="numpad-btn bg-white active:bg-gray-200 text-2xl font-bold py-3 md:py-4 rounded-xl shadow-sm border border-slate-200 transition-all">1</button>
@@ -178,6 +248,8 @@
                     </button>
                 </div>
             </div>
+
+            </div>
         </div>
     </div>
 
@@ -198,6 +270,7 @@
         let hasPenalizedCurrentQuestion = false;
         let wrongAttempts = 0;
         let feedbackTimeout = null; // Pending "next step" after feedback; cancelled on goHome
+        let timeScale = 1; // 4-digit sums take longer, so that mode's time bar and speed bonus run 3x slower
         
         // History Trackers
         let lastThree = []; // Tracks actual displayed questions for adjacency rules
@@ -262,7 +335,7 @@
             // Note: intentionally removed `if (isProcessing) return;` 
             // so the timer continues to drain while answering incorrectly (anti-cheese)
             let elapsedMs = Date.now() - questionStartTime;
-            let seconds = elapsedMs / 1000;
+            let seconds = elapsedMs / 1000 / timeScale;
             
             // Calculate width, stopping at a minimum of 1.5%
             let remainingPercent = Math.max(100 - (seconds / 10) * 100, 1.5);
@@ -300,7 +373,9 @@
             lastThree = [];
             multHistory = [];
             updateStats();
+            timeScale = mode === 'add-sub-4' ? 3 : 1;
             document.getElementById('question-display').classList.toggle('long-question', mode === 'add-sub-4');
+            document.getElementById('app-container').classList.toggle('with-scratch', SCRATCH_MODES.includes(mode));
 
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('practice-screen').classList.remove('hidden');
@@ -317,6 +392,7 @@
             // Don't let a pending feedback step leak into the next session
             clearTimeout(feedbackTimeout);
             isProcessing = false;
+            document.getElementById('app-container').classList.remove('with-scratch');
             document.getElementById('menu-screen').classList.remove('hidden');
             document.getElementById('practice-screen').classList.add('hidden');
         }
@@ -488,6 +564,7 @@
             // Reset Penalty Tracker for the new question
             hasPenalizedCurrentQuestion = false;
             wrongAttempts = 0;
+            clearScratch();
 
             // Update UI & Start Question Timer
             currentAnswer = '';
@@ -538,7 +615,7 @@
             const qDisplay = document.getElementById('question-display');
             const iDisplay = document.getElementById('user-input');
             
-            let elapsed = (Date.now() - questionStartTime) / 1000;
+            let elapsed = (Date.now() - questionStartTime) / 1000 / timeScale;
 
             if (parseInt(currentAnswer) === expectedAnswer) {
                 // Correct - Stop Timer!
@@ -618,6 +695,97 @@
                 generateNewQuestion();
             }, 1500);
         }
+
+        // Scratch Pad (3- and 4-digit modes): write with a finger or Apple Pencil.
+        // Strokes are kept as points so a resize or rotation can redraw them.
+        const SCRATCH_MODES = ['add-sub-3', 'add-sub-4'];
+        const scratchCanvas = document.getElementById('scratch-canvas');
+        const scratchCtx = scratchCanvas.getContext('2d');
+        let scratchStrokes = [];
+        let activeStroke = null;
+        let activePointerId = null;
+        let canvasRect = null;
+        let penSeen = false; // After an Apple Pencil draws, ignore fingers so a resting palm can't scribble
+
+        function resizeScratch() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = scratchCanvas.getBoundingClientRect();
+            scratchCanvas.width = Math.round(rect.width * dpr);
+            scratchCanvas.height = Math.round(rect.height * dpr);
+            // Resizing resets the context, so the pen settings go back on every time
+            scratchCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            scratchCtx.lineWidth = 3;
+            scratchCtx.lineCap = 'round';
+            scratchCtx.lineJoin = 'round';
+            scratchCtx.strokeStyle = scratchCtx.fillStyle = '#334155'; // slate-700
+            for (const stroke of scratchStrokes) drawStroke(stroke);
+        }
+
+        // Draws a stroke from point `from` onward; a stroke of one point is a dot
+        function drawStroke(stroke, from = 1) {
+            scratchCtx.beginPath();
+            if (stroke.length === 1) {
+                scratchCtx.arc(stroke[0].x, stroke[0].y, scratchCtx.lineWidth / 2, 0, Math.PI * 2);
+                scratchCtx.fill();
+                return;
+            }
+            scratchCtx.moveTo(stroke[from - 1].x, stroke[from - 1].y);
+            for (let i = from; i < stroke.length; i++) scratchCtx.lineTo(stroke[i].x, stroke[i].y);
+            scratchCtx.stroke();
+        }
+
+        function scratchPoint(e) {
+            return { x: e.clientX - canvasRect.left, y: e.clientY - canvasRect.top };
+        }
+
+        function clearScratch() {
+            scratchStrokes = [];
+            activeStroke = null; // A stroke in progress stops here; the next touch starts a new one
+            scratchCtx.save();
+            scratchCtx.setTransform(1, 0, 0, 1, 0, 0);
+            scratchCtx.clearRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+            scratchCtx.restore();
+            updateScratchControls();
+        }
+
+        // The hint shows on an empty pad, the Clear button once there's something to clear
+        function updateScratchControls() {
+            const empty = scratchStrokes.length === 0;
+            document.getElementById('scratch-hint').classList.toggle('hidden', !empty);
+            document.getElementById('scratch-clear').classList.toggle('hidden', empty);
+        }
+
+        scratchCanvas.addEventListener('pointerdown', (e) => {
+            if (e.pointerType === 'pen') penSeen = true;
+            else if (e.pointerType === 'touch' && penSeen) return;
+            if (activePointerId !== null) return; // One stroke at a time: a second finger doesn't draw
+            activePointerId = e.pointerId;
+            scratchCanvas.setPointerCapture(e.pointerId);
+            canvasRect = scratchCanvas.getBoundingClientRect();
+            activeStroke = [scratchPoint(e)];
+            scratchStrokes.push(activeStroke);
+            drawStroke(activeStroke);
+            updateScratchControls();
+        });
+
+        scratchCanvas.addEventListener('pointermove', (e) => {
+            if (e.pointerId !== activePointerId || !activeStroke) return;
+            const from = activeStroke.length;
+            // Coalesced events carry every sample between frames, so fast Pencil strokes stay smooth
+            const samples = (e.getCoalescedEvents && e.getCoalescedEvents()) || [];
+            for (const s of (samples.length ? samples : [e])) activeStroke.push(scratchPoint(s));
+            drawStroke(activeStroke, from);
+        });
+
+        function endStroke(e) {
+            if (e.pointerId !== activePointerId) return;
+            activePointerId = null;
+            activeStroke = null;
+        }
+        scratchCanvas.addEventListener('pointerup', endStroke);
+        scratchCanvas.addEventListener('pointercancel', endStroke);
+
+        new ResizeObserver(resizeScratch).observe(scratchCanvas);
 
         // iOS Safari only applies :active styles when the page listens for touches
         document.addEventListener('touchstart', () => {}, { passive: true });
