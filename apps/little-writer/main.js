@@ -15,7 +15,8 @@ import {
   AlertTriangle,
   History,
   Target,
-  X
+  X,
+  Home
 } from 'lucide-react';
 import { countWords, sumCounts, goalProgress } from './wordcount.js';
 import { createStore, defaultDoc, docKey } from './storage.js';
@@ -28,6 +29,8 @@ const AUTO_SNAPSHOT_MS = 2 * 60 * 1000;
 const TEXT = {
   zh: {
     appName: '小小作家',
+    backToPortal: '回到 Kids Portal',
+    madeBy: '製作者',
     htmlLang: 'zh-Hant-TW',
     locale: 'zh-TW',
     speechLang: 'zh-TW',
@@ -100,6 +103,8 @@ const TEXT = {
   },
   en: {
     appName: 'Little Writer',
+    backToPortal: 'Back to Kids Portal',
+    madeBy: 'Made by',
     htmlLang: 'en',
     locale: 'en-US',
     speechLang: 'en-US',
@@ -914,6 +919,14 @@ const App = () => {
       <header className="bg-white shadow-sm border-b-4 border-sky-100 sticky top-0 z-40">
         <div className="max-w-3xl mx-auto px-4 py-3 flex justify-between items-center gap-2">
           <div className="flex items-center gap-3 min-w-0">
+            <a
+              href="https://kids.scsnake.xyz/"
+              className="p-2 -ml-2 text-slate-500 hover:text-sky-600 hover:bg-sky-50 rounded-full transition-colors flex-shrink-0"
+              title={t.backToPortal}
+              aria-label={t.backToPortal}
+            >
+              <Home size={22} />
+            </a>
             <div className="bg-sky-500 p-2 rounded-xl text-white flex-shrink-0">
               <BookOpen size={24} />
             </div>
@@ -1030,6 +1043,13 @@ const App = () => {
           {t.addSection}
         </button>
       </main>
+
+      <p className="max-w-3xl mx-auto px-4 text-center text-sm text-slate-500">
+        {t.madeBy}{' '}
+        <a href="mailto:scsnake@gmail.com" className="font-medium text-slate-600 underline underline-offset-2 decoration-slate-300 hover:text-sky-600">
+          scsnake@gmail.com
+        </a>
+      </p>
 
       {/* Footer / Global Actions */}
       <footer className="fixed left-0 right-0 pointer-events-none z-50 footer-safe">

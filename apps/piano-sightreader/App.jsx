@@ -623,9 +623,23 @@ export default function App() {
 
       <div className="max-w-md sm:max-w-2xl sm:landscape:max-w-xl w-full">
         <div className="flex justify-between items-end mb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Piano Sightreader</h1>
-            <p className="text-slate-500 text-sm">Interactive Note Recognition</p>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://kids.scsnake.xyz/"
+              // One tap shouldn't silently throw away a score in progress
+              onClick={(e) => { if (score > 0 && !confirm('Leave? Your score will not be saved.')) e.preventDefault(); }}
+              className="p-2.5 rounded-full bg-white border border-slate-200 text-slate-600 shadow-sm hover:bg-slate-100 active:bg-slate-200 flex-shrink-0"
+              aria-label="Back to Kids Portal"
+              title="Kids Portal"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </a>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">Piano Sightreader</h1>
+              <p className="text-slate-500 text-sm">Interactive Note Recognition</p>
+            </div>
           </div>
           <div className="text-right">
             <div className="text-slate-600 font-mono text-sm mb-1">Time: {formatTime(sessionTime)}</div>
@@ -797,6 +811,13 @@ export default function App() {
             </div>
           </div>
         )}
+
+        <p className="mt-6 text-center text-sm text-slate-500">
+          Made by{' '}
+          <a href="mailto:scsnake@gmail.com" className="font-medium text-slate-600 underline underline-offset-2 decoration-slate-300 hover:text-indigo-600">
+            scsnake@gmail.com
+          </a>
+        </p>
 
       </div>
     </div>

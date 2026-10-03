@@ -269,6 +269,23 @@ html, body {
     font-size: 12px;
 }
 
+.footer-owner {
+    margin: 8px 0 0;
+    font-size: 13px;
+}
+
+.footer-owner a {
+    color: var(--color-text);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: var(--color-border);
+    text-underline-offset: 2px;
+}
+
+.footer-owner a:hover {
+    color: var(--color-primary);
+}
+
 @media (max-width: 500px) {
     .page {
         padding: 20px 14px 40px;

@@ -59,6 +59,7 @@ createApp({
 
         <footer class="page-footer">
             <span class="footer-count">{{ filteredApps.length }} / {{ apps.length }} 個</span>
+            <p class="footer-owner">製作者 <a href="mailto:scsnake@gmail.com">scsnake@gmail.com</a></p>
         </footer>
     </div>
     `,

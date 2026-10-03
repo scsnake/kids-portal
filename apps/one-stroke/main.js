@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Play, RotateCcw, Star, CheckCircle, ArrowRight, Sparkles,
-  Trophy, Grid, SkipBack, SkipForward, X, Undo2
+  Trophy, Grid, SkipBack, SkipForward, X, Undo2, Home
 } from 'lucide-react';
 import { LEVELS } from './levels.js';
 import { canStep, extendPath, hasMoves, nodeAt } from './trace.js';
@@ -301,6 +301,14 @@ export default function App() {
             <div className="absolute top-0 right-0 p-4 opacity-20 transform rotate-12">
               <Sparkles size={64} />
             </div>
+            <a
+              href="https://kids.scsnake.xyz/"
+              className="absolute top-4 left-4 z-10 p-2.5 bg-white/20 hover:bg-white/30 rounded-full transition"
+              aria-label="Back to Kids Portal"
+              title="Kids Portal"
+            >
+              <Home size={22} />
+            </a>
             <h1 className="text-2xl font-extrabold tracking-tight drop-shadow-md">
               Magic One-Stroke
             </h1>
@@ -527,6 +535,15 @@ export default function App() {
 
         </div>
       </div>
+
+      {gameState === 'menu' && (
+        <p className="mt-5 text-sm text-slate-500 relative z-10">
+          Made by{' '}
+          <a href="mailto:scsnake@gmail.com" className="font-medium text-slate-600 underline underline-offset-2 decoration-slate-300 hover:text-fuchsia-600">
+            scsnake@gmail.com
+          </a>
+        </p>
+      )}
 
       <style>{`
         @keyframes spin-slow {

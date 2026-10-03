@@ -53,7 +53,7 @@
         }
 
         /* No gray tap flash, no text selection or callout on long-press */
-        button {
+        button, #portal-link {
             -webkit-tap-highlight-color: transparent;
             -webkit-user-select: none;
             user-select: none;
@@ -126,7 +126,7 @@
         
         <!-- MAIN MENU -->
         <div id="menu-screen" class="flex-1 w-full overflow-y-auto">
-            <div class="min-h-full flex flex-col items-center justify-center p-6 space-y-4 py-8">
+            <div class="relative min-h-full flex flex-col items-center justify-center p-6 space-y-4 py-8">
                 <div class="text-center space-y-2 mb-4">
                     <h1 class="text-4xl font-extrabold text-indigo-600 tracking-tight">Math Master</h1>
                     <p class="text-slate-500 font-medium">Select a practice mode</p>
@@ -156,6 +156,17 @@
                 <button onclick="startPractice('mult-2-9')" class="w-full bg-amber-700 hover:bg-amber-800 text-white font-bold py-4 px-6 rounded-2xl shadow-md transition-transform active:scale-95 text-lg">
                     Multiplication<br><span class="text-white text-base font-normal">2 to 9 (with occasional ×10)</span>
                 </button>
+
+                <p class="pt-2 text-sm text-slate-500">
+                    Made by <a href="mailto:scsnake@gmail.com" class="font-medium text-slate-600 underline underline-offset-2 decoration-slate-300 hover:text-indigo-600">scsnake@gmail.com</a>
+                </p>
+
+                <!-- Back to the Kids Portal (last child, so space-y doesn't push the title down) -->
+                <a id="portal-link" href="https://kids.scsnake.xyz/" aria-label="Back to Kids Portal" title="Kids Portal" class="absolute top-[max(0.5rem,env(safe-area-inset-top))] left-2 p-3 rounded-full text-slate-600 hover:bg-slate-100 active:bg-slate-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                </a>
             </div>
         </div>
 
