@@ -43,6 +43,15 @@
             100% { transform: scale(1); }
         }
 
+        /* "9999 + 9999 =" wraps at the normal size, so 4-digit mode steps down one size */
+        #question-display.long-question {
+            font-size: 3rem; /* text-5xl */
+            line-height: 1;
+        }
+        @media (min-width: 768px) {
+            #question-display.long-question { font-size: 3.75rem; } /* text-6xl */
+        }
+
         /* No gray tap flash, no text selection or callout on long-press */
         button {
             -webkit-tap-highlight-color: transparent;
@@ -83,6 +92,11 @@
                 <!-- Addition/Sub 3-digit -->
                 <button onclick="startPractice('add-sub-3')" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-6 rounded-2xl shadow-md transition-transform active:scale-95 text-lg">
                     Addition & Subtraction<br><span class="text-white text-base font-normal">Up to 3-digits (&lt; 999)</span>
+                </button>
+
+                <!-- Addition/Sub 4-digit -->
+                <button onclick="startPractice('add-sub-4')" class="w-full bg-fuchsia-700 hover:bg-fuchsia-800 text-white font-bold py-4 px-6 rounded-2xl shadow-md transition-transform active:scale-95 text-lg">
+                    Addition & Subtraction<br><span class="text-white text-base font-normal">Up to 4-digits (&lt; 9999)</span>
                 </button>
 
                 <!-- Multiplication -->
@@ -127,7 +141,7 @@
 
             <!-- Question Area -->
             <div class="flex-1 flex flex-col items-center justify-center p-4 overflow-y-auto">
-                <div id="question-display" class="text-6xl md:text-7xl font-black text-slate-700 tracking-tighter transition-all duration-300 text-center">
+                <div id="question-display" class="text-6xl md:text-7xl font-black text-slate-700 tracking-tighter transition-colors duration-300 text-center">
                     <!-- Question injected here -->
                 </div>
                 
@@ -286,7 +300,8 @@
             lastThree = [];
             multHistory = [];
             updateStats();
-            
+            document.getElementById('question-display').classList.toggle('long-question', mode === 'add-sub-4');
+
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('practice-screen').classList.remove('hidden');
             
@@ -341,9 +356,10 @@
                 }
 
                 // ADDITION & SUBTRACTION
-                else if (currentMode === 'add-sub-2' || currentMode === 'add-sub-3') {
-                    let max = currentMode === 'add-sub-2' ? 99 : 999;
-                    let min = currentMode === 'add-sub-2' ? 10 : 100;
+                else if (currentMode.startsWith('add-sub-')) {
+                    let digits = parseInt(currentMode.slice(-1)); // 2, 3 or 4
+                    let max = 10 ** digits - 1;
+                    let min = 10 ** (digits - 1);
                     
                     n1 = Math.floor(Math.random() * (max - min + 1)) + min;
                     n2 = Math.floor(Math.random() * (max - min + 1)) + min;

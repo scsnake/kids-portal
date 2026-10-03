@@ -1,6 +1,6 @@
 # Math Practice
 
-Addition, 2- and 3-digit addition/subtraction, and multiplication (九九乘法) drill for kids. Timed challenges with streak bonuses; the answer is shown after two wrong tries.
+Addition, 2-, 3- and 4-digit addition/subtraction, and multiplication (九九乘法) drill for kids. Timed challenges with streak bonuses; the answer is shown after two wrong tries.
 
 ## Local dev
 
@@ -12,7 +12,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 
 ## Tech
 
-- Single-file `index.html` (~27 KB)
+- Single-file `index.html` (~31 KB)
 - Tailwind CDN + Tone.js (audio) via CDN
 - No build step, mobile-optimized
 
