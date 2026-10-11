@@ -55,7 +55,7 @@ const frequencies = {
   'C3': 130.81, 'C#3': 138.59, 'Db3': 138.59, 'D3': 146.83, 'D#3': 155.56, 'Eb3': 155.56, 'E3': 164.81, 'F3': 174.61, 'F#3': 185.00, 'Gb3': 185.00, 'G3': 196.00, 'G#3': 207.65, 'Ab3': 207.65, 'A3': 220.00, 'A#3': 233.08, 'Bb3': 233.08, 'B3': 246.94,
   'C4': 261.63, 'C#4': 277.18, 'Db4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'Eb4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'Gb4': 369.99, 'G4': 392.00, 'G#4': 415.30, 'Ab4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'Bb4': 466.16, 'B4': 493.88,
   'C5': 523.25, 'C#5': 554.37, 'Db5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'Eb5': 622.25, 'E5': 659.25, 'F5': 698.46, 'F#5': 739.99, 'Gb5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'Ab5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'Bb5': 932.33, 'B5': 987.77,
-  'C6': 1046.50
+  'C6': 1046.50, 'C#6': 1108.73 // C-sharp 6 sits on the top ledger line, e.g. the ninth of a B chord
 };
 
 // Spellings played on a white key: Cb = B an octave down, Fb = E, E# = F, B# = C an octave up.
@@ -132,6 +132,184 @@ function getInterval(rootStr, letterOffset, semiOffset) {
   let targetAcc = accDiff === 1 ? '#' : accDiff === -1 ? 'b' : '';
 
   return `${targetLetter}${targetAcc}${targetOct}`;
+}
+
+const KEY_SIGNATURES = {
+  'C': [],
+  'G': ['F#'], 'D': ['F#', 'C#'], 'A': ['F#', 'C#', 'G#'], 'E': ['F#', 'C#', 'G#', 'D#'],
+  'B': ['F#', 'C#', 'G#', 'D#', 'A#'], 'F#': ['F#', 'C#', 'G#', 'D#', 'A#', 'E#'],
+  'F': ['Bb'], 'Bb': ['Bb', 'Eb'], 'Eb': ['Bb', 'Eb', 'Ab'], 'Ab': ['Bb', 'Eb', 'Ab', 'Db'],
+  'Db': ['Bb', 'Eb', 'Ab', 'Db', 'Gb'], 'Gb': ['Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb']
+};
+
+function getKeySignatureAlterations(key) {
+  return KEY_SIGNATURES[key] || [];
+}
+
+// Pick one group by its share (the shares of a list add up to 1).
+function pickByShare(groups) {
+  let r = Math.random();
+  for (const group of groups) {
+    r -= group.share;
+    if (r < 0) return group;
+  }
+  return groups[0];
+}
+
+const pickOne = (list) => list[Math.floor(Math.random() * list.length)];
+
+// "Random key" draws a key for every question, but not evenly: keys with few sharps or flats come
+// up most, as they do in the music a child meets first. No key has more than six.
+const KEY_ODDS = [
+  { share: 0.55, keys: ['C', 'G', 'F', 'D', 'Bb'] }, // 0-2 sharps or flats
+  { share: 0.30, keys: ['A', 'Eb', 'E', 'Ab'] },     // 3-4
+  { share: 0.15, keys: ['B', 'Db', 'F#', 'Gb'] }     // 5-6
+];
+
+const pickRandomKey = () => pickOne(pickByShare(KEY_ODDS).keys);
+
+// Chord shapes as thirds stacked on the root: l = letter steps, s = semitones.
+const CHORD_SHAPES = {
+  maj:    [{l:2, s:4}, {l:4, s:7}],
+  min:    [{l:2, s:3}, {l:4, s:7}],
+  dim:    [{l:2, s:3}, {l:4, s:6}],
+  dom7:   [{l:2, s:4}, {l:4, s:7}, {l:6, s:10}],
+  maj7:   [{l:2, s:4}, {l:4, s:7}, {l:6, s:11}],
+  min7:   [{l:2, s:3}, {l:4, s:7}, {l:6, s:10}],
+  hdim7:  [{l:2, s:3}, {l:4, s:6}, {l:6, s:10}],
+  dim7:   [{l:2, s:3}, {l:4, s:6}, {l:6, s:9}],
+  dom9:   [{l:2, s:4}, {l:4, s:7}, {l:6, s:10}, {l:8, s:14}],
+  maj9:   [{l:2, s:4}, {l:4, s:7}, {l:6, s:11}, {l:8, s:14}],
+  min9:   [{l:2, s:3}, {l:4, s:7}, {l:6, s:10}, {l:8, s:14}],
+  dom7b9: [{l:2, s:4}, {l:4, s:7}, {l:6, s:10}, {l:8, s:13}]
+};
+
+// The chords of each size that tonal music really uses in a major key and its relative minor,
+// instead of any shape on any note. deg is the scale degree of the root (0 = tonic); alt moves the
+// root a semitone off the scale. A question first draws a tier by its share, then one of the
+// tier's chords evenly, so the chords of the key are the usual case and the accidentals come from
+// chords a player will meet: secondary dominants, chords borrowed from the minor, diminished
+// sevenths. Odd colours (augmented triads, sevenths on arbitrary roots) are left out.
+const TONAL_CHORDS = {
+  3: [
+    { share: 0.55, chords: [ // the triads of the key
+      { deg: 0, q: 'maj' }, { deg: 3, q: 'maj' }, { deg: 4, q: 'maj' }, // I IV V
+      { deg: 1, q: 'min' }, { deg: 5, q: 'min' }, { deg: 2, q: 'min' }  // ii vi iii
+    ] },
+    { share: 0.33, chords: [
+      { deg: 6, q: 'dim' },                                             // vii°
+      { deg: 1, q: 'maj' }, { deg: 2, q: 'maj' }, { deg: 5, q: 'maj' }, // V of V, of vi, of ii
+      { deg: 3, q: 'min' },                                             // iv
+      { deg: 6, alt: -1, q: 'maj' }, { deg: 5, alt: -1, q: 'maj' }      // bVII bVI
+    ] },
+    { share: 0.12, chords: [
+      { deg: 6, q: 'maj' },                                             // V of iii
+      { deg: 0, q: 'min' }, { deg: 2, alt: -1, q: 'maj' },              // i bIII
+      { deg: 1, alt: -1, q: 'maj' },                                    // bII (Neapolitan)
+      { deg: 1, q: 'dim' },                                             // ii°
+      { deg: 3, alt: 1, q: 'dim' }, { deg: 4, alt: 1, q: 'dim' }        // vii° of V, of vi
+    ] }
+  ],
+  4: [
+    { share: 0.55, chords: [ // the sevenths of the key
+      { deg: 4, q: 'dom7' }, { deg: 1, q: 'min7' }, { deg: 5, q: 'min7' }, // V7 ii7 vi7
+      { deg: 0, q: 'maj7' }, { deg: 3, q: 'maj7' }, { deg: 2, q: 'min7' }  // Imaj7 IVmaj7 iii7
+    ] },
+    { share: 0.33, chords: [
+      { deg: 6, q: 'hdim7' },                                              // viiø7
+      { deg: 1, q: 'dom7' }, { deg: 2, q: 'dom7' }, { deg: 5, q: 'dom7' }, // V7 of V, of vi, of ii
+      { deg: 0, q: 'dom7' },                                               // V7 of IV
+      { deg: 6, q: 'dim7' }, { deg: 1, q: 'hdim7' }                        // vii°7 iiø7
+    ] },
+    { share: 0.12, chords: [
+      { deg: 6, q: 'dom7' },                                               // V7 of iii
+      { deg: 3, q: 'min7' },                                               // iv7
+      { deg: 6, alt: -1, q: 'dom7' }, { deg: 5, alt: -1, q: 'maj7' },      // bVII7 bVImaj7
+      { deg: 3, alt: 1, q: 'dim7' }, { deg: 0, alt: 1, q: 'dim7' },        // vii°7 of V, of ii
+      { deg: 4, alt: 1, q: 'dim7' }                                        // vii°7 of vi
+    ] }
+  ],
+  5: [
+    { share: 0.55, chords: [ // the ninths of the key (iii would carry a harsh minor ninth)
+      { deg: 4, q: 'dom9' }, { deg: 1, q: 'min9' }, { deg: 5, q: 'min9' }, // V9 ii9 vi9
+      { deg: 0, q: 'maj9' }, { deg: 3, q: 'maj9' }                         // Imaj9 IVmaj9
+    ] },
+    { share: 0.33, chords: [
+      { deg: 4, q: 'dom7b9' },                                             // V7b9
+      { deg: 1, q: 'dom9' }, { deg: 0, q: 'dom9' },                        // V9 of V, of IV
+      { deg: 2, q: 'dom7b9' }, { deg: 5, q: 'dom7b9' }                     // V7b9 of vi, of ii
+    ] },
+    { share: 0.12, chords: [
+      { deg: 5, q: 'dom9' }, { deg: 6, alt: -1, q: 'dom9' }                // V9 of ii, bVII9
+    ] }
+  ]
+};
+
+// How often a triad or seventh chord is shown inverted.
+const INVERSION_SHARE = 0.5;
+
+// Root of a chord in a key, e.g. (E-flat major, deg 5, alt -1) is C-flat.
+// null when the root would need a double sharp or flat.
+function chordRootInKey(keySig, deg, alt) {
+  const letter = NOTE_LETTERS[(NOTE_LETTERS.indexOf(keySig.charAt(0)) + deg) % 7];
+  const keyAlt = getKeySignatureAlterations(keySig).find(a => a.charAt(0) === letter);
+  const shift = (keyAlt ? (keyAlt.charAt(1) === '#' ? 1 : -1) : 0) + alt;
+  if (shift > 1 || shift < -1) return null;
+  return { letter, acc: shift === 1 ? '#' : shift === -1 ? 'b' : '' };
+}
+
+// Every way a chord can be written on the staff: each octave of the root, each inversion.
+// Empty when the chord cannot be spelled with single sharps and flats in this key.
+function chordVoicings(chord, keySig, clef, size) {
+  const rootName = chordRootInKey(keySig, chord.deg, chord.alt || 0);
+  if (!rootName) return [];
+
+  // Roots from the usual range, capped so the whole chord (stacked thirds: 2 letters per added
+  // note) fits on the staff. The bass staff tops out at C4, which leaves less than an octave of
+  // roots there (none at all for 9th chords), so the floor moves down to keep an octave of roots.
+  const span = 2 * (size - 1);
+  const staffBottomIdx = ALL_NOTES.indexOf(clef === 'treble' ? 'C4' : 'C2');
+  const staffTopIdx = ALL_NOTES.indexOf(clef === 'treble' ? 'C6' : 'C4');
+  const maxIdx = Math.min(ALL_NOTES.indexOf(clef === 'treble' ? 'E5' : 'E4'), staffTopIdx - span);
+  const minIdx = Math.max(staffBottomIdx, Math.min(ALL_NOTES.indexOf(clef === 'treble' ? 'C4' : 'C3'), maxIdx - 6));
+
+  const onStaff = (p) => !!p && !!frequencies[p] && staffOffsets[clef][p[0] + p.slice(-1)] !== undefined;
+
+  const voicings = [];
+  for (let i = minIdx; i <= maxIdx; i++) {
+    if (ALL_NOTES[i].charAt(0) !== rootName.letter) continue;
+    const root = rootName.letter + rootName.acc + ALL_NOTES[i].slice(-1);
+    let pitches = [root, ...CHORD_SHAPES[chord.q].map(iv => getInterval(root, iv.l, iv.s))];
+    if (!pitches.every(onStaff)) continue;
+    voicings.push({ pitches, inversion: 0 });
+
+    // 9th chords stay in root position: inverted, they close up into clusters of seconds.
+    for (let inv = 1; inv < size && size < 5; inv++) {
+      pitches = [...pitches.slice(1), getInterval(pitches[0], 7, 12)];
+      if (!pitches.every(onStaff)) break;
+      voicings.push({ pitches, inversion: inv });
+    }
+  }
+  return voicings;
+}
+
+function generateTonalChord(clef, keySig, size) {
+  const tiers = (TONAL_CHORDS[size] || TONAL_CHORDS[3]).map(tier => ({
+    share: tier.share,
+    playable: tier.chords.map(chord => chordVoicings(chord, keySig, clef, size)).filter(v => v.length > 0)
+  }));
+
+  // In a key with many sharps or flats a tier can come up empty (its chords would need double
+  // accidentals). The chords of the key always fit, so they stand in.
+  const drawn = pickByShare(tiers);
+  const playable = drawn.playable.length > 0 ? drawn.playable : tiers[0].playable;
+  if (playable.length === 0) return null;
+
+  const voicings = pickOne(playable);
+  const inverted = voicings.filter(v => v.inversion > 0);
+  const rootPosition = voicings.filter(v => v.inversion === 0);
+  const pool = inverted.length > 0 && Math.random() < INVERSION_SHARE ? inverted : rootPosition;
+  return pickOne(pool).pitches;
 }
 
 function App() {
@@ -222,24 +400,16 @@ function App() {
     osc1.start(t); osc2.start(t); osc1.stop(t + 1.5); osc2.stop(t + 1.5);
   };
 
-  const getKeySignatureAlterations = (key) => {
-    const keySigs = {
-      'C': [],
-      'G': ['F#'], 'D': ['F#', 'C#'], 'A': ['F#', 'C#', 'G#'], 'E': ['F#', 'C#', 'G#', 'D#'],
-      'B': ['F#', 'C#', 'G#', 'D#', 'A#'], 'F#': ['F#', 'C#', 'G#', 'D#', 'A#', 'E#'],
-      'F': ['Bb'], 'Bb': ['Bb', 'Eb'], 'Eb': ['Bb', 'Eb', 'Ab'], 'Ab': ['Bb', 'Eb', 'Ab', 'Db'],
-      'Db': ['Bb', 'Eb', 'Ab', 'Db', 'Gb'], 'Gb': ['Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb']
-    };
-    return keySigs[key] || [];
-  };
-
   const generateQuestion = (activeClef, prevQ = null) => {
     let pitches = [];
     let isValid = false;
     let attempts = 0;
     let repeat = null; // a valid question identical to prevQ, used only if nothing else turns up
 
-    const alterations = getKeySignatureAlterations(selectedKeySig);
+    // One key for the whole question. "Random key" belongs to advanced mode; standard mode, which
+    // has no key picker, then stays in C.
+    const keySig = selectedKeySig !== 'random' ? selectedKeySig
+      : gameMode === 'advanced' ? pickRandomKey() : 'C';
 
     while (!isValid && attempts < 100) {
       attempts++;
@@ -284,80 +454,7 @@ function App() {
           }
         }
       } else {
-        // Roots from the usual range, capped so the whole chord (stacked thirds: 2 letters per added
-        // note) fits on the staff. The bass staff tops out at C4, which leaves less than an octave of
-        // roots there (none at all for 9th chords), so the floor moves down to keep an octave of roots.
-        const span = 2 * (advancedChordSize - 1);
-        const staffBottomIdx = ALL_NOTES.indexOf(activeClef === 'treble' ? 'C4' : 'C2');
-        const staffTopIdx = ALL_NOTES.indexOf(activeClef === 'treble' ? 'C6' : 'C4');
-        const maxIdx = Math.min(ALL_NOTES.indexOf(activeClef === 'treble' ? 'E5' : 'E4'), staffTopIdx - span);
-        const minIdx = Math.max(staffBottomIdx, Math.min(ALL_NOTES.indexOf(activeClef === 'treble' ? 'C4' : 'C3'), maxIdx - 6));
-
-        const baseNatIdx = Math.floor(Math.random() * (maxIdx - minIdx + 1)) + minIdx;
-        const baseNat = ALL_NOTES[baseNatIdx];
-        const letter = baseNat.charAt(0);
-
-        let rootAcc = '';
-        const matchingAlt = alterations.find(alt => alt.charAt(0) === letter);
-        if (matchingAlt) {
-          rootAcc = matchingAlt.slice(1);
-        }
-
-        const root = letter + rootAcc + baseNat.slice(-1);
-        const tempPitches = [root];
-
-        const chordStructures = {
-          3: [
-            [{l:2, s:4}, {l:4, s:7}],
-            [{l:2, s:3}, {l:4, s:7}],
-            [{l:2, s:3}, {l:4, s:6}],
-            [{l:2, s:4}, {l:4, s:8}]
-          ],
-          4: [
-            [{l:2, s:4}, {l:4, s:7}, {l:6, s:10}],
-            [{l:2, s:4}, {l:4, s:7}, {l:6, s:11}],
-            [{l:2, s:3}, {l:4, s:7}, {l:6, s:10}],
-            [{l:2, s:3}, {l:4, s:6}, {l:6, s:9}]
-          ],
-          5: [
-            [{l:2, s:4}, {l:4, s:7}, {l:6, s:10}, {l:8, s:14}],
-            [{l:2, s:3}, {l:4, s:7}, {l:6, s:10}, {l:8, s:14}],
-            [{l:2, s:4}, {l:4, s:7}, {l:6, s:11}, {l:8, s:14}]
-          ]
-        };
-
-        const availableStructures = chordStructures[advancedChordSize] || chordStructures[3];
-        const selectedStructure = availableStructures[Math.floor(Math.random() * availableStructures.length)];
-
-        let chordIsValid = true;
-        for (let i = 0; i < selectedStructure.length; i++) {
-           const interval = selectedStructure[i];
-           const nextNote = getInterval(root, interval.l, interval.s);
-           if (nextNote && frequencies[nextNote]) {
-              tempPitches.push(nextNote);
-           } else {
-              chordIsValid = false;
-              break;
-           }
-        }
-
-        if (chordIsValid) {
-           if (Math.random() > 0.5) {
-             const inversionCount = Math.floor(Math.random() * (advancedChordSize - 1)) + 1;
-             for (let i = 0; i < inversionCount; i++) {
-               const noteToInvert = tempPitches.shift();
-               const higherNote = getInterval(noteToInvert, 7, 12);
-               if (higherNote && frequencies[higherNote]) {
-                 tempPitches.push(higherNote);
-               } else {
-                 tempPitches.push(noteToInvert);
-               }
-             }
-           }
-
-           tempPitches.sort((a, b) => ALL_NOTES.indexOf(a[0]+a.slice(-1)) - ALL_NOTES.indexOf(b[0]+b.slice(-1)));
-           pitches = tempPitches;
-        }
+        pitches = generateTonalChord(activeClef, keySig, advancedChordSize) || [];
       }
 
       if (pitches.length > 0 && pitches.length === (gameMode === 'standard' ? pitches.length : advancedChordSize)) {
@@ -384,7 +481,7 @@ function App() {
 
     const answers = pitches.map(p => p.slice(0, -1));
 
-    return { pitches, answers };
+    return { pitches, answers, keySig };
   };
 
   useEffect(() => {
@@ -449,7 +546,7 @@ function App() {
     ctx.fillText(clefGlyph, CLEF_X, clefBaseY);
     const clefW = ctx.measureText(clefGlyph).width || CLEF_FONT_SIZE * 0.55;
 
-    const alterations = getKeySignatureAlterations(selectedKeySig);
+    const alterations = getKeySignatureAlterations(currentQuestion.keySig);
     const KEYSIG_START_X = CLEF_X + clefW + 6;
     const KEYSIG_SPACING = lineSpacing * 0.85;
 
@@ -581,7 +678,7 @@ function App() {
       ctx.ellipse(n.x, n.y, NOTEHEAD_HALFW, NOTEHEAD_HALFH, -Math.PI / 8, 0, Math.PI * 2);
       ctx.fill();
     }
-  }, [currentQuestion, clef, feedback, selectedKeySig, fontReady, canvasPx]);
+  }, [currentQuestion, clef, feedback, fontReady, canvasPx]);
 
   const handleGuess = (submittedValues) => {
     if (feedback || !currentQuestion) return;
@@ -730,6 +827,7 @@ function App() {
                   onChange={(e) => setSelectedKeySig(e.target.value)}
                   className="w-full h-11 bg-slate-50 border border-slate-200 rounded px-2 text-base font-semibold text-slate-700"
                 >
+                  <option value="random">Random key</option>
                   {['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb'].map(sig => (
                     <option key={sig} value={sig}>{sig} Major</option>
                   ))}
