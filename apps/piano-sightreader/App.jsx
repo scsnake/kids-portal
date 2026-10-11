@@ -915,6 +915,10 @@ export default function App() {
             scsnake@gmail.com
           </a>
         </p>
+        {/* "?" + date of the last update; opens the list in changelog.json */}
+        <div className="text-center text-sm text-slate-500">
+          <app-changelog src="changelog.json" lang="en"></app-changelog>
+        </div>
 
       </div>
     </div>

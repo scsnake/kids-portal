@@ -11,6 +11,7 @@
         tailwind.config = { future: { hoverOnlyWhenSupported: true } };
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="changelog-widget.js?v=1" defer></script>
     <style>
         body {
             /* 100dvh = the visible area, so Safari's toolbar can't cover the keypad (100vh is the fallback) */
@@ -160,6 +161,8 @@
                 <p class="pt-2 text-sm text-slate-500">
                     Made by <a href="mailto:scsnake@gmail.com" class="font-medium text-slate-600 underline underline-offset-2 decoration-slate-300 hover:text-indigo-600">scsnake@gmail.com</a>
                 </p>
+                <!-- "?" + date of the last update; opens the list in changelog.json -->
+                <app-changelog src="changelog.json" lang="en" class="text-sm text-slate-500" style="margin-top: 0"></app-changelog>
 
                 <!-- Back to the Kids Portal (last child, so space-y doesn't push the title down) -->
                 <a id="portal-link" href="https://kids.scsnake.xyz/" aria-label="Back to Kids Portal" title="Kids Portal" class="absolute top-[max(0.5rem,env(safe-area-inset-top))] left-2 p-3 rounded-full text-slate-600 hover:bg-slate-100 active:bg-slate-200">

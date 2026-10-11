@@ -1050,6 +1050,10 @@ const App = () => {
           scsnake@gmail.com
         </a>
       </p>
+      {/* "?" + date of the last update; opens the list in changelog.json */}
+      <div className="max-w-3xl mx-auto px-4 text-center text-sm text-slate-500">
+        <app-changelog src="changelog.json" lang={lang}></app-changelog>
+      </div>
 
       {/* Footer / Global Actions */}
       <footer className="fixed left-0 right-0 pointer-events-none z-50 footer-safe">

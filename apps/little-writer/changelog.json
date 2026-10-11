@@ -1,0 +1,23 @@
+[
+  {
+    "date": "2026-10-11",
+    "changes": [
+      { "zh": "新增「?」按鈕，可以看更新紀錄。", "en": "New “?” button: it shows this list of changes." }
+    ]
+  },
+  {
+    "date": "2026-10-03",
+    "changes": [
+      { "zh": "新增回到 Kids Portal 的首頁按鈕。", "en": "New home button to go back to the Kids Portal." }
+    ]
+  },
+  {
+    "date": "2026-09-28",
+    "changes": [
+      { "zh": "第一版：分段寫作文（標題、大綱、內文）。", "en": "First version: write a composition in sections (title, outline, body)." },
+      { "zh": "每次輸入都會自動儲存，還可以從歷史紀錄還原。", "en": "Every edit is saved automatically, and you can restore an earlier copy." },
+      { "zh": "即時計算字數，可以設定字數目標。", "en": "Live word count, with a word goal." },
+      { "zh": "語音輸入、複製、下載；中文和英文作文分開保存。", "en": "Voice typing, copy and download. Chinese and English articles are kept separately." }
+    ]
+  }
+]

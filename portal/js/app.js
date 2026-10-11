@@ -1,6 +1,6 @@
 const { createApp, ref, computed, onMounted } = Vue;
 
-createApp({
+const app = createApp({
     template: `
     <div class="page">
         <header class="page-header">
@@ -60,6 +60,7 @@ createApp({
         <footer class="page-footer">
             <span class="footer-count">{{ filteredApps.length }} / {{ apps.length }} 個</span>
             <p class="footer-owner">製作者 <a href="mailto:scsnake@gmail.com">scsnake@gmail.com</a></p>
+            <app-changelog src="changelog.json" lang="zh"></app-changelog>
         </footer>
     </div>
     `,
@@ -104,4 +105,9 @@ createApp({
 
         return { apps, loading, q, subjectFilter, subjects, filteredApps, resetFilters };
     }
-}).mount('#app');
+});
+
+// <app-changelog> is a custom element (changelog-widget.js), not a Vue component.
+app.config.compilerOptions.isCustomElement = (tag) => tag === 'app-changelog';
+
+app.mount('#app');

@@ -29,6 +29,9 @@ kids-portal/
 │       ├── storage.js         # localStorage persistence + snapshot history
 │       ├── wordcount.js       # 國字/注音/English word counting
 │       └── dist/bundle.js     # committed pre-built bundle
+├── shared/
+│   └── changelog-widget.js    # the "?" button; copied into every app (see below)
+├── scripts/sync-shared.sh     # copies shared/ into every app
 └── README.md
 ```
 
@@ -56,6 +59,27 @@ kids-portal/
    (thanks to per-application **Watch Paths**; see deploy notes below).
 
 `subject` becomes a filter chip in the portal automatically.
+
+## The "?" button (changelog)
+
+Every app shows a "?" button with the date of its last update at the bottom of
+its main page. A tap lists the major changes. Two files per app drive it:
+
+- `changelog.json` — the list, newest first. **Add an entry here when a change
+  is worth telling the user about**; the date on the button is the date of the
+  first entry. It is fetched fresh each time, so it needs no `?v=` bump.
+
+  ```json
+  [{ "date": "2026-10-11", "changes": ["One line per change"] }]
+  ```
+
+  In an app with two languages (little-writer) a change is
+  `{ "zh": "…", "en": "…" }` instead of a string.
+- `changelog-widget.js` — the `<app-changelog src="changelog.json" lang="en">`
+  element. It is the same file in every app: edit `shared/changelog-widget.js`,
+  run `scripts/sync-shared.sh`, and bump its `?v=` in each `index.html`.
+  `chinese-writing` (other repo) holds a copy at `js/changelog-widget.js`; copy
+  it there by hand.
 
 ## Local dev (whole monorepo)
 

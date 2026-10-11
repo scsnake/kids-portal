@@ -286,6 +286,11 @@ html, body {
     color: var(--color-primary);
 }
 
+.page-footer app-changelog {
+    margin-top: 4px;
+    font-size: 13px;
+}
+
 @media (max-width: 500px) {
     .page {
         padding: 20px 14px 40px;

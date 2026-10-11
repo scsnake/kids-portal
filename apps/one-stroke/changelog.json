@@ -1,0 +1,30 @@
+[
+  {
+    "date": "2026-10-11",
+    "changes": [
+      "New “?” button: it shows this list of changes."
+    ]
+  },
+  {
+    "date": "2026-10-03",
+    "changes": [
+      "New home button to go back to the Kids Portal."
+    ]
+  },
+  {
+    "date": "2026-09-30",
+    "changes": [
+      "48 levels: 24 new shapes.",
+      "Fast swipes now join every dot they cross, and only those.",
+      "New Undo button, and help when you are stuck.",
+      "The app remembers solved levels and shows stars on the level map.",
+      "Bigger board on iPad."
+    ]
+  },
+  {
+    "date": "2026-09-05",
+    "changes": [
+      "First version: 24 one-stroke puzzles."
+    ]
+  }
+]

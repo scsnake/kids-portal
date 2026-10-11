@@ -544,6 +544,12 @@ export default function App() {
           </a>
         </p>
       )}
+      {/* "?" + date of the last update; opens the list in changelog.json */}
+      {gameState === 'menu' && (
+        <div className="text-sm text-slate-500 relative z-10">
+          <app-changelog src="changelog.json" lang="en"></app-changelog>
+        </div>
+      )}
 
       <style>{`
         @keyframes spin-slow {

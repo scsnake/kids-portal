@@ -1,0 +1,33 @@
+[
+  {
+    "date": "2026-10-11",
+    "changes": [
+      "Advanced Mode now uses the chords of real music. The chords of the key come most often; secondary dominants, chords borrowed from the minor and diminished sevenths come less often.",
+      "New “Random key” choice: each question gets its own key signature, up to six sharps or flats.",
+      "9th chords are always in root position, so they no longer turn into note clusters.",
+      "New “?” button: it shows this list of changes."
+    ]
+  },
+  {
+    "date": "2026-10-03",
+    "changes": [
+      "New home button to go back to the Kids Portal."
+    ]
+  },
+  {
+    "date": "2026-09-30",
+    "changes": [
+      "Sharper and larger staff on iPad.",
+      "Sharps, flats and naturals sit on the correct line in every browser.",
+      "Bigger and clearer buttons.",
+      "The white key is now a correct answer for C♭, F♭, E♯ and B♯.",
+      "Fixed a crash with 9th chords in the bass clef."
+    ]
+  },
+  {
+    "date": "2026-09-05",
+    "changes": [
+      "First version: notes and chords on the treble or bass staff, 13 key signatures, piano or letter buttons."
+    ]
+  }
+]

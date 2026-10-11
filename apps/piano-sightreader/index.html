@@ -8,6 +8,7 @@
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="changelog-widget.js?v=1" defer></script>
 <style>
   /* Noto Music (SIL Open Font License, see fonts/OFL.txt), bundled with the app so the staff
      never has to be drawn with a fallback font. Only the music-symbol subset is needed (clefs, ♭ ♮ ♯);
@@ -961,6 +962,10 @@ function App() {
             scsnake@gmail.com
           </a>
         </p>
+        {/* "?" + date of the last update; opens the list in changelog.json */}
+        <div className="text-center text-sm text-slate-500">
+          <app-changelog src="changelog.json" lang="en"></app-changelog>
+        </div>
 
       </div>
     </div>

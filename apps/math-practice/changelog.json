@@ -1,0 +1,33 @@
+[
+  {
+    "date": "2026-10-11",
+    "changes": [
+      "New “?” button: it shows this list of changes."
+    ]
+  },
+  {
+    "date": "2026-10-03",
+    "changes": [
+      "New mode: addition and subtraction up to 4 digits.",
+      "New scratch pad for 3- and 4-digit sums. Write with a finger or Apple Pencil.",
+      "4-digit questions get three times as much time.",
+      "New home button to go back to the Kids Portal."
+    ]
+  },
+  {
+    "date": "2026-09-30",
+    "changes": [
+      "After a second wrong try, the app shows the correct answer and moves on.",
+      "Wrong answers now show in red.",
+      "The keypad stays above the Safari toolbar on iPhone.",
+      "Menu buttons are easier to read, and the status bar is simpler.",
+      "The back button is bigger and asks before it drops your score."
+    ]
+  },
+  {
+    "date": "2026-09-05",
+    "changes": [
+      "First version: addition, subtraction and times tables with a timer and streaks."
+    ]
+  }
+]
