@@ -35,9 +35,6 @@ kids-portal/
 └── README.md
 ```
 
-`chinese-writing` stays in its own repo (`scsnake/ChineseWriting`) at
-`kids-chinese-writing.scsnake.xyz` — already deployed.
-
 ## Add or change an app
 
 1. Drop the app under `apps/<slug>/` (must contain a servable `index.html`)
@@ -78,8 +75,8 @@ its main page. A tap lists the major changes. Two files per app drive it:
 - `changelog-widget.js` — the `<app-changelog src="changelog.json" lang="en">`
   element. It is the same file in every app: edit `shared/changelog-widget.js`,
   run `scripts/sync-shared.sh`, and bump its `?v=` in each `index.html`.
-  `chinese-writing` (other repo) holds a copy at `js/changelog-widget.js`; copy
-  it there by hand.
+  `chinese-writing` holds a copy at `js/changelog-widget.js`; copy it there by
+  hand.
 
 ## Local dev (whole monorepo)
 
