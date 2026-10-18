@@ -274,29 +274,53 @@ export const WIDGETS = {
     }
   },
 
-  // Tap the cards in the right order; each right tap moves the card up into the list.
+  // Numbered slots 1..N: tap the cards in order (each fills the next slot), or drag a card
+  // onto its number. A card only goes into the slot it belongs to.
   order(host, { items }, api) {
     host.innerHTML = `
       <div class="w-order">
-        <ol class="seq"></ol>
+        <ol class="seq">${items.map((_, i) => `<li class="ord-slot" data-zone="${i}"><span class="ord-hole">第 ${i + 1} 步</span></li>`).join('')}</ol>
+        <p class="ord-hint">依順序點卡片，或把卡片拖到對的號碼</p>
         <div class="pool"></div>
       </div>`;
-    const seq = host.querySelector('.seq');
-    let next = 0;
+    const slots = [...host.querySelectorAll('.ord-slot')];
+    const hint = host.querySelector('.ord-hint');
+    const filled = new Set();
+    const place = (card, i) => {
+      card.classList.add('placed');
+      slots[i].replaceChildren(card);
+      slots[i].classList.add('ord-done');
+      filled.add(i);
+      pop(card);
+      api.good();
+      if (filled.size === items.length) {
+        hint.textContent = '🎉 順序都對了！';
+        api.done();
+      }
+    };
+    const wrong = (card, i, slot) => {
+      shake(card);
+      if (slot) shake(slot);
+      hint.textContent = `這張不是第 ${i + 1} 步喔，再想想`;
+      api.bad();
+    };
     for (const it of shuffle(items, true)) {
       const idx = items.indexOf(it);
       const card = h(`<button class="chip"><span class="chip-icon">${it.icon}</span><span>${it.label}${en(it.en)}</span></button>`);
-      card.onclick = () => {
-        if (card.classList.contains('placed')) return;
-        if (idx !== next) { shake(card); api.bad(); return; }
-        card.classList.add('placed');
-        const li = h('<li></li>');
-        li.append(card);
-        seq.append(li);
-        pop(card);
-        api.good();
-        if (++next === items.length) api.done();
-      };
+      drag(card, {
+        onTap: () => {
+          const i = items.findIndex((_, k) => !filled.has(k));
+          if (idx === i) place(card, i);
+          else wrong(card, i);
+        },
+        onDrop: zone => {
+          if (!zone) return;
+          const i = +zone.dataset.zone;
+          if (filled.has(i)) return;
+          if (idx === i) place(card, i);
+          else wrong(card, i, zone);
+        },
+      });
       host.querySelector('.pool').append(card);
     }
   },
