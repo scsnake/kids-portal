@@ -2968,6 +2968,73 @@ export const WIDGETS = {
     };
   },
 
+  // TLS in five animated steps between the browser and the website; tap 下一步 for each.
+  tls(host, _, api) {
+    // Each step: the caption, and what happens on the stage (`fly` moves a token along the
+    // path; `left`/`right` show something beside one side; `mid` sits between them).
+    const steps = [
+      { say: '瀏覽器先打招呼：「你好，我想安全連線！」', fly: { text: '👋 你好！', dir: 'lr' } },
+      { say: '網站拿出它的憑證，就像身分證，證明「我真的是這個網站」', fly: { text: '🪪 憑證', dir: 'rl' } },
+      { say: '瀏覽器檢查憑證：是可以信任的機構發的，名字也對，是真的 ✅', left: '<span class="tl-card">🪪<b class="tl-mag">🔍</b><b class="tl-ok">✅</b></span>' },
+      { say: '雙方用剛剛交換的資料，各自算出同一把祕密鑰匙。鑰匙本身不在路上傳！', left: '<span class="tl-key">🔑</span>', right: '<span class="tl-key">🔑</span>', mid: '<span class="tl-shake">🤝</span>' },
+      { say: '之後的資料都用這把鑰匙鎖起來。中間有人偷看，也只看到亂碼！', loop: true, mid: '<span class="tl-spy">👀<small>？？？</small></span>' },
+    ];
+    host.innerHTML = `
+      <div class="w-tls">
+        <ol class="tl-dots">${steps.map((_, i) => `<li>${i + 1}</li>`).join('')}</ol>
+        <div class="tl-stage">
+          <div class="tl-side tl-me"><span>💻</span><b>瀏覽器</b><div class="tl-near"></div></div>
+          <div class="tl-path"><div class="tl-mid"></div></div>
+          <div class="tl-side tl-site"><span>🏦</span><b>網站</b><div class="tl-near"></div></div>
+        </div>
+        <p class="tl-say">按「開始」，看瀏覽器和網站怎麼握手</p>
+        <button class="go glow" data-act="next">開始 ▶</button>
+      </div>`;
+    const $ = s => host.querySelector(s);
+    const path = $('.tl-path'), next = $('[data-act="next"]');
+    let k = -1, loopT = 0, run = 0;
+    const near = side => host.querySelector(`.tl-${side} .tl-near`);
+    // Send a token across the path; resolves when it lands.
+    const fly = (text, dir, cls = '') => {
+      const tok = document.createElement('span');
+      tok.className = 'tl-tok ' + cls;
+      tok.textContent = text;
+      path.append(tok);
+      const [a, b] = dir === 'lr' ? ['0%', '100%'] : ['100%', '0%'];
+      return tok.animate([{ left: a, opacity: 0 }, { opacity: 1, offset: 0.15 }, { opacity: 1, offset: 0.85 }, { left: b, opacity: 0 }],
+        { duration: 1400, easing: 'ease-in-out' }).finished.then(() => tok.remove(), () => tok.remove());
+    };
+    function show() {
+      const s = steps[k], my = ++run;
+      clearTimeout(loopT);
+      host.querySelectorAll('.tl-dots li').forEach((li, i) => { li.classList.toggle('on', i === k); li.classList.toggle('done', i < k); });
+      near('me').innerHTML = s.left || '';
+      near('site').innerHTML = s.right || '';
+      $('.tl-mid').innerHTML = s.mid || '';
+      path.querySelectorAll('.tl-tok').forEach(t => t.remove());
+      $('.tl-say').innerHTML = `<b>${k + 1}.</b> ${s.say}`;
+      pop($('.tl-say'));
+      if (s.fly) fly(s.fly.text, s.fly.dir);
+      if (s.loop) {
+        // Locked messages going both ways, again and again.
+        const again = dir => {
+          if (my !== run || !api.alive()) return;
+          fly('🔒✉️', dir, 'tl-locked');
+          loopT = setTimeout(() => again(dir === 'lr' ? 'rl' : 'lr'), 900);
+        };
+        again('lr');
+      }
+      const last = k === steps.length - 1;
+      next.textContent = last ? '🔁 再看一次' : '下一步 ▶';
+      next.classList.toggle('glow', !last);
+      if (last) api.done();
+    }
+    next.onclick = () => {
+      k = k === steps.length - 1 ? 0 : k + 1;
+      show();
+    };
+  },
+
   // A small file manager: rename, move, delete, restore, and delete for good.
   files(host, _, api) {
     const tasks = [

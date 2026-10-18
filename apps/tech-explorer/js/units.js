@@ -1788,17 +1788,8 @@ export const UNITS = [
       },
       {
         title: 'TLS：先握手，再說悄悄話',
-        text: `https 用一套叫 ${t('TLS', 'Transport Layer Security')} 的規則來上鎖。開始傳資料前，瀏覽器和網站會先${t('握手', 'handshake')}：檢查網站的${t('憑證', 'certificate')}（像身分證），再約好一把只有雙方知道的鑰匙。依順序點一點。`,
-        widget: 'order',
-        params: {
-          items: [
-            { icon: '👋', label: '瀏覽器：你好，我想安全連線' },
-            { icon: '🪪', label: '網站拿出憑證（身分證）' },
-            { icon: '🔍', label: '瀏覽器檢查憑證是真的' },
-            { icon: '🔑', label: '雙方約好一把祕密鑰匙' },
-            { icon: '🔒', label: '用鑰匙加密，開始傳資料' },
-          ],
-        },
+        text: `https 用一套叫 ${t('TLS', 'Transport Layer Security')} 的規則來上鎖。開始傳資料前，瀏覽器和網站會先${t('握手', 'handshake')}：檢查網站的${t('憑證', 'certificate')}（像身分證），再約好一把只有雙方知道的鑰匙。按「下一步」，一步一步看！`,
+        widget: 'tls',
       },
     ],
   },
