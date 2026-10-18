@@ -754,8 +754,10 @@ export const WIDGETS = {
           }).join('')}
         </div>
         <button class="go glow">📨 送出</button>
-        <div class="arrived" hidden><p>收到的封包（亂掉了）：照號碼點 1 → ${parts.length}</p><div class="pool"></div></div>
-        <p class="rebuilt" hidden>排好的訊息：<b></b></p>
+        <div class="arrived" hidden><p>收到的封包（亂掉了）：照號碼點 1 → ${parts.length}，或拖到對的格子</p><div class="pool"></div></div>
+        <div class="pk-rebuild" hidden><p>排好的訊息：</p>
+          <ol class="pk-slots">${parts.map((_, i) => `<li class="pk-slot" data-zone="${i}"><i>${i + 1}</i><span>？</span></li>`).join('')}</ol>
+          <p class="pk-done" hidden></p></div>
       </div>`;
     const net = host.querySelector('.net');
     const go = host.querySelector('.go');
@@ -778,26 +780,46 @@ export const WIDGETS = {
           card.dataset.n = i;
           pool.append(card);
           host.querySelector('.arrived').hidden = false;
+          host.querySelector('.pk-rebuild').hidden = false;
           if (++landed === parts.length) ready();
         }, () => {});
       });
     };
+    // Numbered slots: tap the packets 1 → N (each fills the next slot) or drag one onto its number.
     const ready = () => {
-      let next = 0;
-      const out = host.querySelector('.rebuilt b');
+      const slots = [...host.querySelectorAll('.pk-slot')];
+      const filled = new Set();
+      const put = (card, i) => {
+        card.classList.add('placed');
+        slots[i].classList.add('pk-in');
+        slots[i].querySelector('span').textContent = parts[i];
+        filled.add(i);
+        pop(slots[i]);
+        api.good();
+        if (filled.size === parts.length) {
+          const done = host.querySelector('.pk-done');
+          done.textContent = `✅ ${parts.join('')}`;
+          done.hidden = false;
+          api.done();
+        }
+      };
+      const wrong = (card, slot) => { shake(card); if (slot) shake(slot); api.bad(); };
       host.querySelectorAll('.packet-card').forEach(card => {
-        card.onclick = () => {
-          if (card.classList.contains('placed')) return;
-          if (+card.dataset.n !== next) { shake(card); api.bad(); return; }
-          card.classList.add('placed');
-          host.querySelector('.rebuilt').hidden = false;
-          out.textContent += parts[next];
-          api.good();
-          if (++next === parts.length) {
-            out.textContent += ' ✅';
-            api.done();
-          }
-        };
+        const n = +card.dataset.n;
+        drag(card, {
+          onTap: () => {
+            const i = parts.findIndex((_, k) => !filled.has(k));
+            if (n === i) put(card, i);
+            else wrong(card);
+          },
+          onDrop: zone => {
+            if (!zone) return;
+            const i = +zone.dataset.zone;
+            if (filled.has(i)) return;
+            if (n === i) put(card, i);
+            else wrong(card, zone);
+          },
+        });
       });
     };
   },

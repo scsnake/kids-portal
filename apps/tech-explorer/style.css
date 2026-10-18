@@ -599,8 +599,7 @@ a.unit-card:active { transform: scale(.98); }
 /* ---------- packets ---------- */
 
 .w-packets { display: flex; flex-direction: column; gap: 12px; }
-.w-packets .msg, .w-packets .rebuilt { margin: 0; font-size: 1.2rem; }
-.w-packets .rebuilt b { color: var(--c); font-size: 1.4rem; }
+.w-packets .msg { margin: 0; font-size: 1.2rem; }
 .net { position: relative; width: 100%; aspect-ratio: 600 / 220; border-radius: 18px; background: var(--card); border: 2px solid var(--line); }
 .net svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .net line { stroke: #ced4da; stroke-width: 4; stroke-linecap: round; vector-effect: non-scaling-stroke; }
@@ -612,6 +611,14 @@ a.unit-card:active { transform: scale(.98); }
 .w-packets .go { align-self: center; }
 .arrived p { margin: 0 0 8px; font-weight: 800; }
 .packet-card.placed { opacity: .35; }
+.pk-rebuild p { margin: 0 0 8px; font-weight: 800; }
+.pk-slots { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0; padding: 0; }
+.pk-slot { display: inline-flex; align-items: center; gap: .4rem; min-width: 96px; min-height: 52px; padding: 0 12px; border: 2px dashed var(--line); border-radius: 14px; background: var(--card); font-weight: 800; font-size: 1.2rem; color: var(--ink-3); }
+.pk-slot i { display: grid; place-items: center; width: 1.5em; height: 1.5em; border-radius: 50%; background: var(--line); color: var(--ink-2); font-style: normal; font-size: .75em; }
+.pk-slot.over { border-color: var(--c); background: color-mix(in srgb, var(--c) 8%, white); }
+.pk-slot.pk-in { border-style: solid; border-color: color-mix(in srgb, var(--good) 40%, white); background: #ebfbee; color: var(--ink); }
+.pk-slot.pk-in i { background: var(--c); color: white; }
+.w-packets .pk-done { margin: 8px 0 0; text-align: center; color: var(--c); font-size: 1.4rem; }
 
 /* ---------- race ---------- */
 
