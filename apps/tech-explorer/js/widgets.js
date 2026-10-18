@@ -4553,13 +4553,56 @@ export const WIDGETS = {
     });
   },
 
-  // Sort the cards by swapping neighbors, like a bubble sort.
+  // Sort the cards by swapping neighbors, like a bubble sort. Below, three buttons play bubble,
+  // selection and quick sort on bars, with counts of compares and swaps.
   swapsort(host, { nums }, api) {
     const a = shuffle(nums, true);
+    // Three famous sorting algorithms, played step by step on bars: each records a list of
+    // steps (compare, swap, pivot, done), and the player shows them one at a time.
+    const algos = {
+      bubble: { icon: '🫧', zh: '泡泡排序', en: 'bubble sort', say: '一次比相鄰兩根，大的往後換，像泡泡往上冒。跟你剛剛的做法一樣！', run(a, s) {
+        for (let end = a.length - 1; end > 0; end--) {
+          for (let j = 0; j < end; j++) { s.push(['cmp', j, j + 1]); if (a[j] > a[j + 1]) { s.push(['swap', j, j + 1]); [a[j], a[j + 1]] = [a[j + 1], a[j]]; } }
+          s.push(['done', end]);
+        }
+        s.push(['done', 0]);
+      } },
+      select: { icon: '👆', zh: '選擇排序', en: 'selection sort', say: '每一輪找出最小的那根，換到最前面。', run(a, s) {
+        for (let i = 0; i < a.length; i++) {
+          let m = i;
+          s.push(['pivot', m]);
+          for (let j = i + 1; j < a.length; j++) { s.push(['cmp', m, j]); if (a[j] < a[m]) { m = j; s.push(['pivot', m]); } }
+          if (m !== i) { s.push(['swap', i, m]); [a[i], a[m]] = [a[m], a[i]]; }
+          s.push(['done', i]);
+        }
+      } },
+      quick: { icon: '⚡', zh: '快速排序', en: 'quick sort', say: '選一根當「基準」，比它小的放左邊、比它大的放右邊，再把兩邊分開排。', run(a, s) {
+        const q = (lo, hi) => {
+          if (lo > hi) return;
+          if (lo === hi) { s.push(['done', lo]); return; }
+          s.push(['pivot', hi]);
+          let i = lo;
+          for (let j = lo; j < hi; j++) { s.push(['cmp', j, hi]); if (a[j] < a[hi]) { if (i !== j) { s.push(['swap', i, j]); [a[i], a[j]] = [a[j], a[i]]; } i++; } }
+          if (i !== hi) { s.push(['swap', i, hi]); [a[i], a[hi]] = [a[hi], a[i]]; }
+          s.push(['done', i]);
+          q(lo, i - 1);
+          q(i + 1, hi);
+        };
+        q(0, a.length - 1);
+      } },
+    };
+    const bars = shuffle([1, 2, 3, 4, 5, 6, 7, 8], true);
     host.innerHTML = `
       <div class="w-swap">
         <div class="cards-row"></div>
         <p class="readout">按 ⇄ 交換兩張相鄰的卡片，從小排到大</p>
+        <div class="srt-demo">
+          <p class="srt-h">看看電腦的三種排序方法：</p>
+          <div class="controls">${Object.entries(algos).map(([k, x]) => `<button class="option" data-algo="${k}">${x.icon} ${x.zh}</button>`).join('')}</div>
+          <div class="srt-bars">${bars.map(v => `<span class="srt-bar" data-v="${v}" style="height:${(v / bars.length) * 100}%"><b>${v}</b></span>`).join('')}</div>
+          <p class="srt-say">選一種，看它怎麼排這 ${bars.length} 根柱子</p>
+          <p class="srt-score"></p>
+        </div>
       </div>`;
     let swaps = 0, solved = false;
     const draw = () => {
@@ -4577,6 +4620,45 @@ export const WIDGETS = {
       if (ok) { solved = true; api.good(); api.done(); }
     });
     draw();
+
+    // The player: bars slide to their new place on a swap; colors show what is happening.
+    // barEls[v - 1] is the bar for value v (the DOM order is the shuffled one).
+    const barEls = [...host.querySelectorAll('.srt-bar')].sort((x, y) => x.dataset.v - y.dataset.v);
+    const place = order => order.forEach((v, i) => { barEls[v - 1].style.left = (i / bars.length) * 100 + '%'; });
+    const scores = {};
+    let play = 0;
+    place(bars);
+    host.querySelector('.srt-demo .controls').addEventListener('click', e => {
+      const b = e.target.closest('[data-algo]');
+      if (!b) return;
+      const x = algos[b.dataset.algo], my = ++play;
+      host.querySelectorAll('[data-algo]').forEach(y => y.classList.toggle('on', y === b));
+      const order = bars.slice(), steps = [];
+      x.run(bars.slice(), steps);
+      let cmp = 0, swp = 0, k = 0;
+      barEls.forEach(el => el.classList.remove('cmp', 'swap', 'pivot', 'done'));
+      place(order);
+      host.querySelector('.srt-say').innerHTML = `<b>${x.zh}</b> ${x.en ? `<small lang="en">${x.en}</small>` : ''}：${x.say}`;
+      const tick = () => {
+        if (my !== play || !api.alive()) return;
+        barEls.forEach(el => el.classList.remove('cmp', 'swap'));
+        if (k === steps.length) {
+          scores[b.dataset.algo] = cmp;
+          host.querySelector('.srt-score').innerHTML = `✅ 排好了！比較 ${cmp} 次、交換 ${swp} 次` +
+            `<br>${Object.entries(scores).map(([a, n]) => `${algos[a].zh}：比較 ${n} 次`).join('　')}`;
+          return;
+        }
+        const [op, i, j] = steps[k++];
+        const el = n => barEls[order[n] - 1];
+        if (op === 'cmp') { cmp++; el(i).classList.add('cmp'); el(j).classList.add('cmp'); }
+        if (op === 'swap') { swp++; [order[i], order[j]] = [order[j], order[i]]; place(order); el(i).classList.add('swap'); el(j).classList.add('swap'); }
+        if (op === 'pivot') { barEls.forEach(y => y.classList.remove('pivot')); el(i).classList.add('pivot'); }
+        if (op === 'done') { el(i).classList.remove('pivot'); el(i).classList.add('done'); }
+        host.querySelector('.srt-score').textContent = `比較 ${cmp} 次、交換 ${swp} 次`;
+        api.later(tick, op === 'swap' ? 380 : 260);
+      };
+      tick();
+    });
   },
 
   // Run-length codes ("2白3紅2白"): paint the picture they describe.
