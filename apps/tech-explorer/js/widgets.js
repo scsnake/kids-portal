@@ -4505,11 +4505,13 @@ export const WIDGETS = {
         <div class="g-grid">${Array.from({ length: max }, (_, i) => `<button class="g-n" data-n="${i + 1}">${i + 1}</button>`).join('')}</div>
         <div class="g-play" hidden>
           <p class="g-say"></p>
-          <div class="controls"><button class="option" data-a="up">⬆️ 要再大一點</button><button class="option" data-a="down">⬇️ 要再小一點</button><button class="go" data-a="hit">🎯 猜對了</button></div>
+          <div class="controls"><button class="option" data-a="up"></button><button class="option" data-a="down"></button></div>
         </div>
       </div>`;
     const $ = sel => host.querySelector(sel);
     let secret = null, lo = 1, hi = max, g = 0, tries = 0, finished = false;
+    // The answer buttons name the guess ("比 32 大"); when the guess is your number, the
+    // computer sees it by itself and celebrates.
     const next = () => {
       g = Math.floor((lo + hi) / 2);
       tries++;
@@ -4519,28 +4521,33 @@ export const WIDGETS = {
         b.classList.toggle('out', n < lo || n > hi);
         b.classList.toggle('guess', n === g);
       });
+      $('[data-a="up"]').textContent = `⬆️ 比 ${g} 大`;
+      $('[data-a="down"]').textContent = `⬇️ 比 ${g} 小`;
+      if (g !== secret) return;
+      finished = true;
+      $('.g-play .controls').hidden = true;
+      const cell = host.querySelector(`.g-n[data-n="${g}"]`);
+      api.later(() => {
+        cell.classList.add('hit');
+        $('.g-say').innerHTML = `電腦第 ${tries} 次猜：<b>${g}</b> <span class="g-yes">🎯 猜對了！</span><br>每次刪掉一半，1 到 ${max} 最多 ${Math.ceil(Math.log2(max + 1))} 次一定猜到。`;
+        api.good();
+        api.done();
+      }, 700);
     };
     host.querySelector('.g-grid').addEventListener('click', e => {
       const b = e.target.closest('[data-n]');
       if (!b || secret !== null) return;
       secret = +b.dataset.n;
       b.classList.add('mine');
-      $('.g-step').innerHTML = `② 你選了 <b>${secret}</b>。告訴電腦要大一點、小一點，還是猜對了`;
+      $('.g-step').innerHTML = `② 你選了 <b>${secret}</b>。告訴電腦：你的數字比它猜的大，還是小？`;
       $('.g-play').hidden = false;
       next();
     });
     host.querySelector('.g-play').addEventListener('click', e => {
       const b = e.target.closest('[data-a]');
       if (!b || finished) return;
-      const truth = secret > g ? 'up' : secret < g ? 'down' : 'hit';
-      if (b.dataset.a !== truth) { shake(b); api.bad(); $('.g-say').innerHTML += `<br>咦？你選的是 ${secret}，再看一次`; return; }
-      if (truth === 'hit') {
-        finished = true;
-        $('.g-say').innerHTML = `🎉 電腦只猜了 <b>${tries}</b> 次！每次刪掉一半，1 到 ${max} 最多 ${Math.ceil(Math.log2(max + 1))} 次一定猜到。`;
-        api.good();
-        api.done();
-        return;
-      }
+      const truth = secret > g ? 'up' : 'down';
+      if (b.dataset.a !== truth) { shake(b); api.bad(); $('.g-say').innerHTML = `電腦第 ${tries} 次猜：<b>${g}</b><br>咦？你選的是 ${secret}，再看一次`; return; }
       if (truth === 'up') lo = g + 1; else hi = g - 1;
       next();
     });

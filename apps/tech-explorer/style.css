@@ -1655,6 +1655,11 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .g-n.out { opacity: .2; }
 .g-n.guess { background: var(--c); color: white; }
 .g-n.mine { outline: 3px solid var(--star); }
+.g-n.hit { background: var(--good); color: white; animation: g-cheer .9s ease-out 2; position: relative; z-index: 1; }
+@keyframes g-cheer { 30% { scale: 1.5; box-shadow: 0 0 0 8px rgba(43, 138, 62, .25); } 100% { scale: 1; } }
+.g-yes { display: inline-block; color: var(--good); font-size: 1.4rem; animation: g-pop .5s ease-out; }
+@keyframes g-pop { from { scale: .3; opacity: 0; } 70% { scale: 1.2; } to { scale: 1; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .g-n.hit, .g-yes { animation: none; } }
 .g-play { display: flex; flex-direction: column; gap: 8px; align-items: center; }
 
 /* ---------- swap sort ---------- */

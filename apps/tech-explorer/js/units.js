@@ -1819,7 +1819,7 @@ export const UNITS = [
       },
       {
         title: '猜數字的聰明方法',
-        text: `每次都猜中間，再依照「大一點」或「小一點」刪掉一半，叫做${t('二分搜尋', 'binary search')}。想一個數字，讓電腦來猜！`,
+        text: `每次都猜中間，再依照「比它大」或「比它小」刪掉一半，叫做${t('二分搜尋', 'binary search')}。想一個數字，讓電腦來猜！`,
         widget: 'guess',
         params: { max: 64 },
       },
