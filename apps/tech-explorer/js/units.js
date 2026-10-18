@@ -821,7 +821,7 @@ export const UNITS = [
     slides: [
       {
         title: '用瀏覽器看網頁',
-        text: `看網頁的 App 叫做${t('瀏覽器', 'browser')}，像 Safari、Chrome。上面的${t('網址列', 'address bar')}可以輸入網址；點網頁上的${t('連結', 'link')}會到另一頁。按${t('上一頁', 'back')} ← 回去，${t('下一頁', 'forward')} → 再過去，${t('重新整理', 'reload')} ⟳ 會重新載入這一頁。`,
+        text: `看網頁的 App 叫做${t('瀏覽器', 'browser')}，像 Safari、Chrome。上面的${t('網址列', 'address bar')}可以輸入網址，打好以後要按 Enter 才會出發；點網頁上的${t('連結', 'link')}會到另一頁。按${t('上一頁', 'back')} ← 回去，${t('下一頁', 'forward')} → 再過去，${t('重新整理', 'reload')} ⟳ 會重新載入這一頁。`,
         widget: 'browser',
       },
       {

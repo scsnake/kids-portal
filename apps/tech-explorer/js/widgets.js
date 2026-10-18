@@ -4127,7 +4127,7 @@ export const WIDGETS = {
       { id: 'back', zh: '回上一頁', en: 'back' },
       { id: 'fwd', zh: '再到下一頁', en: 'forward' },
       { id: 'reload', zh: '重新整理', en: 'reload' },
-      { id: 'type', zh: '在網址列輸入網址', en: 'address bar' },
+      { id: 'type', zh: '在網址列輸入網址，按 Enter', en: 'address bar', alt: '打 library.example.tw' },
     ];
     const pages = {
       'zoo.example.tw': { title: '🦁 動物園', body: '歡迎來到動物園！想看哪一種動物？', links: [['zoo.example.tw/panda', '🐼 看貓熊'], ['zoo.example.tw/penguin', '🐧 看企鵝']] },
@@ -4145,7 +4145,14 @@ export const WIDGETS = {
             <form class="br-url" novalidate><span>🔒</span><input type="url" inputmode="url" autocapitalize="off" spellcheck="false" aria-label="網址列"></form>
           </div>
           <div class="br-page"></div>
-          <p class="br-hint">試試在網址列輸入 <button class="br-sug" type="button">library.example.tw</button></p>
+          <div class="br-hint">
+            <p>到圖書館網站：</p>
+            <ol>
+              <li data-s="1">點上面的網址列</li>
+              <li data-s="2">打 <code>library.example.tw</code> <button class="br-sug" type="button">⌨️ 幫我打</button></li>
+              <li data-s="3">按 <kbd>Enter</kbd>（iPad 鍵盤上是「前往」），才會出發 <button class="br-enter" type="button">⏎ Enter</button></li>
+            </ol>
+          </div>
           <div class="br-hist"></div>
         </div>
         <ul class="tasks"></ul>
@@ -4187,8 +4194,39 @@ export const WIDGETS = {
       go(url);
       if (pages[url]) check('type');
     };
-    $('.br-url').addEventListener('submit', e => { e.preventDefault(); typed($('.br-url input').value); $('.br-url input').blur(); });
-    $('.br-sug').onclick = () => { $('.br-url input').value = 'library.example.tw'; typed('library.example.tw'); };
+    // Which step of the address-bar hint is next: typing alone goes nowhere until Enter.
+    const stepAt = n => host.querySelectorAll('.br-hint li').forEach(li => {
+      li.classList.toggle('br-now', +li.dataset.s === n);
+      li.classList.toggle('br-ok', +li.dataset.s < n);
+    });
+    const input = $('.br-url input');
+    const enter = () => { typed(input.value); input.blur(); stepAt(0); };
+    // Like a real address bar, a tap selects the whole address so typing replaces it.
+    // Safari clears the selection on mouseup, so select again after it.
+    let fresh = false;
+    input.addEventListener('focus', () => { fresh = true; input.select(); stepAt(2); });
+    input.addEventListener('mouseup', e => { if (fresh) { e.preventDefault(); input.select(); } fresh = false; });
+    input.addEventListener('touchend', () => { if (fresh) setTimeout(() => input.select()); fresh = false; });
+    input.addEventListener('input', () => stepAt(input.value.trim() ? 3 : 2));
+    $('.br-url').addEventListener('submit', e => { e.preventDefault(); enter(); });
+    $('.br-enter').onclick = () => {
+      if (input.value.trim() === hist[at]) { stepAt(input === document.activeElement ? 2 : 1); shake($('.br-url')); return; }
+      enter();
+    };
+    // Type the address one letter at a time, then wait for Enter.
+    $('.br-sug').onclick = () => {
+      const text = 'library.example.tw';
+      let k = 0;
+      input.value = '';
+      stepAt(2);
+      const type = () => {
+        input.value = text.slice(0, ++k);
+        if (k < text.length) api.later(type, 45);
+        else { stepAt(3); pop($('.br-enter')); }
+      };
+      type();
+    };
+    stepAt(1);
     show();
   },
 };
