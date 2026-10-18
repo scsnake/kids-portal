@@ -644,6 +644,7 @@ a.unit-card:active { transform: scale(.98); }
 .scene.via-cable .link { background: var(--c); height: 8px; }
 .scene.via-wifi .link { background: repeating-linear-gradient(90deg, var(--c) 0 6px, transparent 6px 16px); }
 .scene.via-cell .link { background: repeating-linear-gradient(90deg, var(--c) 0 14px, transparent 14px 22px); }
+.scene.via-sat .link { background: repeating-linear-gradient(90deg, var(--c) 0 4px, transparent 4px 12px); }
 @keyframes flow { to { background-position: 32px 0; } }
 .where { margin: 0; font-size: 1.25rem; font-weight: 800; text-align: center; }
 .status { margin: 0; font-size: 1.1rem; text-align: center; }

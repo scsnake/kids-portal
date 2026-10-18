@@ -171,7 +171,7 @@ function toaster(el, api) {
 
 const byWhat = { mouse: '用滑鼠完成 🖱️', touch: '用手指完成 👆', pen: '用觸控筆完成 ✏️' };
 
-// Drawn icons: an Ethernet plug (not a power plug), Wi-Fi waves, and a cell tower.
+// Drawn icons: an Ethernet plug (not a power plug), Wi-Fi waves, a cell tower and a satellite.
 const WAY_ICONS = {
   cable: `<svg class="way-svg" viewBox="0 0 48 48" aria-hidden="true">
     <path d="M24 35v11" stroke="#1971c2" stroke-width="6" stroke-linecap="round"/>
@@ -185,6 +185,13 @@ const WAY_ICONS = {
   cell: `<svg class="way-svg" viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#1d2738" stroke-width="4" stroke-linecap="round">
     <circle cx="24" cy="19" r="5.5" fill="#1d2738" stroke="none"/><path d="M24 24v20"/>
     <path d="M15.5 10.5a12 12 0 0 0 0 17M32.5 10.5a12 12 0 0 1 0 17"/><path d="M9 5a21 21 0 0 0 0 28M39 5a21 21 0 0 1 0 28"/></svg>`,
+  sat: `<svg class="way-svg" viewBox="0 0 48 48" aria-hidden="true" stroke="#1d2738" stroke-width="2.5" stroke-linejoin="round">
+    <g transform="rotate(-35 24 24)">
+      <rect x="2" y="18" width="13" height="12" rx="1.5" fill="#4dabf7"/><rect x="33" y="18" width="13" height="12" rx="1.5" fill="#4dabf7"/>
+      <path d="M8.5 18v12M39.5 18v12" stroke-width="1.5"/><path d="M15 24h3M30 24h3"/>
+      <rect x="18" y="17" width="12" height="14" rx="2" fill="#ced4da"/>
+    </g>
+    <path d="M30 34a8 8 0 0 0 8 8M27 37a13 13 0 0 0 13 6" fill="none" stroke-linecap="round"/></svg>`,
 };
 
 export const WIDGETS = {
@@ -877,6 +884,7 @@ export const WIDGETS = {
       cable: { icon: WAY_ICONS.cable, zh: '網路線', en: 'cable', no: '這裡沒有網路線可以插喔' },
       wifi: { icon: WAY_ICONS.wifi, zh: 'Wi-Fi', en: 'wireless', no: '這裡沒有 Wi-Fi 喔' },
       cell: { icon: WAY_ICONS.cell, zh: '行動網路', en: 'cellular', no: '有更方便、更穩定的方法喔' },
+      sat: { icon: WAY_ICONS.sat, zh: '衛星網路', en: 'satellite', no: '衛星網路比較貴，有別的方法時先用別的' },
     };
     host.innerHTML = `
       <div class="w-connect">
@@ -916,7 +924,7 @@ export const WIDGETS = {
         b.classList.add('wrong');
         b.disabled = true;
         shake(b);
-        status.innerHTML = `<span class="pill off">離線 offline</span> ${ways[k].no}`;
+        status.innerHTML = `<span class="pill off">離線 offline</span> ${r.no?.[k] || ways[k].no}`;
         api.bad();
         return;
       }

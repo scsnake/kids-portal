@@ -732,13 +732,14 @@ export const UNITS = [
       },
       {
         title: '三種上網的方法',
-        text: `插${t('網路線', 'Ethernet cable')}最穩定；${t('Wi-Fi', 'wireless network')}用看不見的${t('無線電波', 'radio waves')}，在家裡、學校不用線；出門在外，手機用${t('行動網路', 'cellular data')}連到基地台，像 4G、5G。幫每個人選對方法！`,
+        text: `插${t('網路線', 'Ethernet cable')}最穩定；${t('Wi-Fi', 'wireless network')}用看不見的${t('無線電波', 'radio waves')}，在家裡、學校不用線；出門在外，手機用${t('行動網路', 'cellular data')}連到基地台，像 4G、5G。在大海、高山這些特別的地方，沒有基地台，還可以用${t('衛星網路', 'satellite internet')}，訊號從太空傳下來。幫每個人選對方法！`,
         widget: 'connect',
         params: {
           rounds: [
             { who: '🖥️', scene: '電腦教室的桌上型電腦，旁邊有網路孔', want: 'cable' },
             { who: '📱', scene: '在公車上，沒有 Wi-Fi，也沒有網路線', want: 'cell' },
             { who: '📲', scene: '在家裡的沙發上用平板', want: 'wifi' },
+            { who: '🚢', scene: '在大海中間的船上，附近沒有基地台', want: 'sat', no: { cell: '大海中間離基地台太遠，收不到訊號' } },
           ],
         },
       },
