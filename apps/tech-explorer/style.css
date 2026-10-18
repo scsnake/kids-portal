@@ -1519,3 +1519,88 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .tasks li.na { opacity: .7; }
 .tasks li.na .tick { border: 0; font-size: 18px; line-height: 24px; text-align: center; }
 .tasks li.na .alt { color: var(--ink-2); }
+
+/* ---------- system gestures: a drawn iPad with room around it to start a swipe outside the screen ---------- */
+
+/* --gw: as wide as fits, leaving height for the message row and the checklist */
+.w-gs { --gw: min(100%, calc((100dvh - 430px) * 1.55)); display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.gs-say { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; width: var(--gw); }
+.gs-msg { flex: 1; min-width: 12em; font-weight: 800; font-size: 1.1rem; line-height: 1.4; }
+.gs-msg > b:first-child { font-size: 1.3rem; }
+.gs-say button { min-height: 44px; padding: 0 14px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); font-weight: 800; }
+.gs-say button:disabled { opacity: .45; }
+.gs-say button.glow { border-color: var(--c); animation: glow 1.4s infinite; }
+.gs-next { background: var(--c) !important; border-color: var(--c) !important; color: white; }
+
+.gs-stage {
+  position: relative;
+  width: var(--gw);
+  aspect-ratio: 1.55;
+  border-radius: var(--radius);
+  background: repeating-linear-gradient(45deg, #f3eee3 0 10px, #f7f3ea 10px 20px);
+  border: 2px dashed var(--line);
+  touch-action: none;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  overflow: hidden;
+}
+.gs-ink { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+.gs-ipad {
+  position: absolute; left: 50%; top: 50%; translate: -50% -50%;
+  height: 76%; aspect-ratio: 1.38;
+  padding: 2.6%;
+  border-radius: 6% / 8.3%;
+  background: #1f232b;
+  box-shadow: 0 10px 24px rgba(29, 39, 56, .25), inset 0 0 0 2px #3a404c;
+  container-type: inline-size;
+}
+.gs-screen {
+  position: relative; width: 100%; height: 100%;
+  overflow: hidden;
+  border-radius: 3.4% / 4.6%;
+  background: linear-gradient(160deg, #74c0fc, #b197fc 60%, #f783ac);
+  font-size: 3.4cqw;
+}
+.gs-status { position: absolute; inset: 0 0 auto; z-index: 4; display: flex; justify-content: space-between; padding: .5% 4%; font-size: .8em; font-weight: 800; color: #1d2738; pointer-events: none; }
+.gs-home { position: absolute; inset: 9% 6% 4%; display: grid; grid-template-columns: repeat(4, 1fr); align-content: start; gap: 6% 4%; transition: filter .3s, transform .3s; }
+.gs-icon { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: .62em; font-weight: 800; color: white; text-shadow: 0 1px 2px rgba(0, 0, 0, .35); }
+.gs-icon b, .gs-dock b { display: grid; place-items: center; width: 2.6em; aspect-ratio: 1; border-radius: 24%; background: rgba(255, 255, 255, .9); font-size: 1.6em; text-shadow: none; }
+.gs-dock { position: absolute; left: 50%; bottom: 0; translate: -50% 0; display: flex; gap: .5em; padding: .4em; border-radius: .9em; background: rgba(255, 255, 255, .35); font-size: .62em; }
+.gs-dock b { width: 2.3em; }
+
+.gs-card { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; background: white; transition: transform .35s ease, opacity .35s ease, border-radius .35s; transform-origin: 50% 50%; }
+.gs-card p { margin: 0; padding: 5.5% 4% 2%; font-weight: 900; font-size: .9em; border-bottom: 1px solid #eee; }
+.gs-card > span { flex: 1; display: grid; place-items: center; font-size: 2.6em; }
+.gs-art { display: flex !important; justify-content: center; align-items: center; gap: .3em; background: #fffdf5; }
+.gs-art i { font-style: normal; transition: opacity .3s, transform .3s; }
+.undone .gs-last { opacity: 0; transform: scale(.3); }
+.gs-other { opacity: 0; pointer-events: none; background: #343a40; color: white; }
+.gs-other p { border-color: #495057; }
+/* in an app: the app covers the home screen; on the home screen it shrinks into its icon */
+.on-home .gs-app { transform: translate(-37%, -36%) scale(.08); opacity: 0; border-radius: 30%; }
+.show-cards .gs-home { filter: blur(3px) brightness(.8); }
+.show-cards .gs-app { transform: translateX(22%) scale(.52); border-radius: 4%; box-shadow: 0 8px 20px rgba(0, 0, 0, .3); }
+.show-cards .gs-other { opacity: 1; transform: translateX(-30%) scale(.52); border-radius: 4%; box-shadow: 0 8px 20px rgba(0, 0, 0, .3); }
+
+.gs-search, .gs-nc, .gs-cc { position: absolute; z-index: 3; transform: translateY(-110%); transition: transform .35s ease; }
+.gs-search { left: 15%; right: 15%; top: 0; display: flex; flex-direction: column; gap: .3em; padding: 7% 3% 3%; border-radius: 0 0 .8em .8em; background: rgba(255, 255, 255, .95); font-size: .8em; font-weight: 800; }
+.gs-search p { margin: 0 0 .2em; padding: .3em .6em; border-radius: .6em; background: #eef1f5; color: #6b7280; }
+.show-search .gs-search { transform: none; }
+.show-search .gs-home { filter: blur(3px); }
+.gs-nc { inset: 0; display: flex; flex-direction: column; gap: .5em; padding: 8% 20% 0; background: rgba(29, 39, 56, .55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); color: white; font-size: .8em; font-weight: 800; }
+.gs-nc p { margin: 0 0 .3em; font-size: 1.4em; }
+.gs-nc span { padding: .7em 1em; border-radius: .8em; background: rgba(255, 255, 255, .9); color: #1d2738; }
+.show-nc .gs-nc { transform: none; }
+.gs-cc { right: 3%; top: 8%; width: 40%; display: grid; grid-template-columns: repeat(4, 1fr); gap: .4em; padding: .6em; border-radius: 1em; background: rgba(40, 44, 52, .75); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); transform: translateY(-140%); }
+.gs-cc b { display: grid; place-items: center; aspect-ratio: 1; border-radius: 30%; background: rgba(255, 255, 255, .85); font-size: 1em; }
+.gs-cc .gs-wide { grid-column: span 2; aspect-ratio: auto; padding: .5em 0; font-size: .7em; }
+.show-cc .gs-cc { transform: none; }
+.gs-hud { position: absolute; left: 50%; top: 18%; translate: -50% 0; z-index: 4; padding: .4em .9em; border-radius: .7em; background: rgba(29, 39, 56, .85); color: white; font-weight: 800; font-size: .8em; white-space: nowrap; }
+.gs-bar { position: absolute; left: 50%; bottom: 1.6%; translate: -50% 0; z-index: 4; width: 26%; height: 1.4%; min-height: 4px; border-radius: 9px; background: #1d2738; opacity: .75; pointer-events: none; }
+
+.gs-tasks { width: var(--gw); display: grid !important; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 2px 12px !important; }
+.gs-tasks li { border-radius: 10px; cursor: default; }
+.gs-tasks li.done { cursor: pointer; }
+.gs-tasks li.gs-now { background: color-mix(in srgb, var(--c) 10%, white); outline: 2px solid var(--c); }
+.w-gs .toast { white-space: normal; width: max-content; max-width: 90%; text-align: center; }
+@media (orientation: portrait) { .gs-stage { aspect-ratio: 1.7; } }
+@media (orientation: landscape) and (max-height: 740px) { .gs-tasks .alt { display: none; } }

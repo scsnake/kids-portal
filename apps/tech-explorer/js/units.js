@@ -124,22 +124,8 @@ export const UNITS = [
       },
       {
         title: 'iPad 和 iPhone 的系統手勢',
-        text: `有些手勢在任何 App 裡都能用，叫做${t('系統手勢', 'system gesture')}。這些是沒有主畫面按鈕的 iPad 和 iPhone 的手勢。把手勢拖到它會做的事。`,
-        widget: 'sort',
-        params: {
-          bins: [
-            { id: 'home', icon: '🏠', label: '回到主畫面', en: 'Home Screen' },
-            { id: 'cc', icon: '🎛️', label: '打開控制中心', en: 'Control Center' },
-            { id: 'search', icon: '🔍', label: '打開搜尋', en: 'Search' },
-            { id: 'undo', icon: '↩️', label: '復原上一步', en: 'undo' },
-          ],
-          items: [
-            { icon: '⬆️', label: '從螢幕最下面往上滑', bin: 'home' },
-            { icon: '↙️', label: '從右上角往下滑', bin: 'cc' },
-            { icon: '⬇️', label: '在主畫面中間往下滑', bin: 'search' },
-            { icon: '🤟', label: '三根手指往左滑', bin: 'undo' },
-          ],
-        },
+        text: `有些手勢在任何 App 裡都能用，叫做${t('系統手勢', 'system gesture')}。這些是沒有主畫面按鈕的 iPad 和 iPhone 的手勢。先看示範的手指怎麼滑，再換你在下面的 iPad 上試一次。從 iPad 外面的空白開始滑，就像從螢幕的邊邊滑進來。`,
+        widget: 'sysgesture',
       },
       {
         title: '傾斜也是一種輸入',

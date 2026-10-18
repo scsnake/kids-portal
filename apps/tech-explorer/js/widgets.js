@@ -160,12 +160,12 @@ function checklist(ul, tasks, api) {
 // A short message that fades out by itself.
 function toaster(el, api) {
   let timer = null;
-  return msg => {
+  return (msg, ms = 2000) => {
     el.textContent = msg;
     el.hidden = false;
     pop(el);
     clearTimeout(timer);
-    timer = setTimeout(() => { if (api.alive()) el.hidden = true; }, 2000);
+    timer = setTimeout(() => { if (api.alive()) el.hidden = true; }, ms);
   };
 }
 
@@ -1216,6 +1216,346 @@ export const WIDGETS = {
       toast('這是練習，不會真的儲存或分享');
     });
     show();
+  },
+
+  // iPad system gestures on a drawn iPad with room around it, so a swipe can start outside the
+  // screen edge. Each gesture: a demo with moving finger dots, then the child tries it once.
+  sysgesture(host, _, api) {
+    const many = navigator.maxTouchPoints >= 3;
+    // Finger paths are [x0, y0, x1, y1] in screen units: 0..1 is on the screen,
+    // below 0 or above 1 is the frame or the space around the iPad.
+    const steps = [
+      { id: 'undo', zh: '三根手指往左滑', en: 'three-finger swipe', alt: '↩️ 復原上一步', scene: 'app',
+        fingers: [[0.42, 0.42, 0.14, 0.42], [0.54, 0.36, 0.26, 0.36], [0.66, 0.42, 0.38, 0.42]],
+        tip: '三根手指一起放在畫面上，一起往左滑',
+        na: many ? '' : '這台裝置不能三根手指一起滑，看示範就好' },
+      { id: 'switcher', zh: '從最下面往上滑，停一下', en: 'App Switcher', alt: '🗂️ 看到開著的 App', scene: 'app',
+        fingers: [[0.5, 1.16, 0.5, 0.56]], hold: 800,
+        tip: '從 iPad 下面的外面開始往上滑，滑到一半停住不動' },
+      { id: 'home', zh: '從最下面往上滑', en: 'Home Screen', alt: '🏠 回到主畫面', scene: 'app',
+        fingers: [[0.5, 1.16, 0.5, 0.42]],
+        tip: '從 iPad 下面的外面開始，一口氣往上滑，不要停' },
+      { id: 'search', zh: '在主畫面中間往下滑', en: 'Search', alt: '🔍 打開搜尋', scene: 'home',
+        fingers: [[0.5, 0.34, 0.5, 0.72]],
+        tip: '在主畫面的中間按住，往下滑' },
+      { id: 'nc', zh: '從最上面左邊往下滑', en: 'Notification Center', alt: '🔔 看通知', scene: 'home',
+        fingers: [[0.2, -0.16, 0.2, 0.6]],
+        tip: '從 iPad 上面的外面、靠左邊開始往下滑' },
+      { id: 'cc', zh: '從右上角往下滑', en: 'Control Center', alt: '🎛️ 打開控制中心', scene: 'home',
+        fingers: [[0.92, -0.16, 0.92, 0.56]],
+        tip: '從 iPad 右上角的外面開始往下滑' },
+    ];
+    const names = { undo: '復原', switcher: 'App 切換器', home: '回到主畫面', search: '搜尋', nc: '通知中心', cc: '控制中心' };
+
+    host.innerHTML = `
+      <div class="w-gs">
+        <div class="gs-say"><span class="gs-msg"></span>
+          <button class="gs-again">🔁 再看一次</button><button class="gs-next" hidden>下一個 ▶</button></div>
+        <div class="gs-stage">
+          <div class="gs-ipad"><div class="gs-screen">
+            <div class="gs-status"><span>9:41</span><span>📶 🔋</span></div>
+            <div class="gs-home">
+              ${[['🎨', '畫畫'], ['📷', '相機'], ['🗺️', '地圖'], ['🎵', '音樂'], ['📚', '書籍'], ['⏰', '時鐘'], ['🧮', '計算機'], ['⚙️', '設定']]
+                .map(([i, n]) => `<span class="gs-icon"><b>${i}</b>${n}</span>`).join('')}
+              <span class="gs-dock"><b>💬</b><b>🧭</b><b>🖼️</b><b>📝</b></span>
+            </div>
+            <div class="gs-card gs-other"><p>📷 相機</p><span>📸</span></div>
+            <div class="gs-card gs-app"><p>🎨 畫畫</p><span class="gs-art"><i>⭐</i><i>🌈</i><i class="gs-last">🐱</i></span></div>
+            <div class="gs-search"><p>🔍 搜尋</p><span>📷 相機</span><span>🗺️ 地圖</span><span>🎵 音樂</span></div>
+            <div class="gs-nc"><p>通知中心</p><span>💬 媽媽：晚餐好了！</span><span>⏰ 鬧鐘：練習鋼琴</span></div>
+            <div class="gs-cc"><b>✈️</b><b>📶</b><b>🔵</b><b>🔒</b><b class="gs-wide">☀️ 亮度</b><b class="gs-wide">🔊 音量</b></div>
+            <div class="gs-hud" hidden>↩️ 復原：拿掉 🐱</div>
+            <i class="gs-bar"></i>
+          </div></div>
+          <canvas class="gs-ink"></canvas>
+          <div class="toast" hidden></div>
+        </div>
+        <ul class="tasks gs-tasks"></ul>
+      </div>`;
+    const $ = s => host.querySelector(s);
+    const stage = $('.gs-stage'), scr = $('.gs-screen'), ink = $('.gs-ink'), msg = $('.gs-msg');
+    const again = $('.gs-again'), next = $('.gs-next'), hud = $('.gs-hud');
+    const check = checklist($('.gs-tasks'), steps, api);
+    const toast = toaster($('.toast'), api);
+    const rows = [...host.querySelectorAll('.gs-tasks li')];
+
+    const STOP = {};
+    let run = 0, mode = 'demo', step = null, scene = 'app', misses = 0;
+    const passed = new Set(); // steps the flow has moved past (an N/A one counts once its demo is shown)
+    let tracks = [];          // finger dots and trails, in screen units
+
+    const say = (icon, text) => { msg.innerHTML = `<b>${icon}</b> ${text}`; pop(msg); };
+    const setScene = name => {
+      scene = name;
+      scr.className = `gs-screen on-${name}`;
+      hud.hidden = true;
+    };
+    const effect = id => {
+      if (id === 'undo') { scr.classList.add('undone'); hud.hidden = false; pop(hud); }
+      else if (id === 'home') { scr.classList.replace('on-app', 'on-home'); scene = 'home'; }
+      else if (id === 'switcher') scr.classList.add('show-cards');
+      else scr.classList.add('show-' + id);
+    };
+
+    const frame = () => new Promise(r => requestAnimationFrame(r));
+    async function tween(ms, fn, tok) {
+      const t0 = performance.now();
+      for (;;) {
+        await frame();
+        if (tok !== run || !api.alive()) throw STOP;
+        const k = Math.min(1, (performance.now() - t0) / ms);
+        fn(k);
+        if (k === 1) return;
+      }
+    }
+    const wait = (ms, tok) => tween(ms, () => {}, tok);
+    const ease = k => (k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2);
+    const track = (x, y) => {
+      const t = { pts: [{ x, y, t: performance.now() }], end: 0 };
+      tracks.push(t);
+      return t;
+    };
+    const push = (t, x, y) => t.pts.push({ x, y, t: performance.now() });
+
+    function mark(s) {
+      rows.forEach((li, i) => li.classList.toggle('gs-now', steps[i] === s));
+    }
+
+    async function demo(s) {
+      const tok = ++run;
+      step = s;
+      mode = 'demo';
+      misses = 0;
+      tracks = [];
+      mark(s);
+      next.hidden = true;
+      again.disabled = true;
+      again.classList.remove('glow');
+      setScene(s.scene);
+      say('👀', `看示範：<b>${s.zh}</b>`);
+      try {
+        await wait(800, tok);
+        const tr = s.fingers.map(([x, y]) => track(x, y));
+        await wait(300, tok);
+        await tween(s.hold ? 650 : 600, k => {
+          const e = ease(k);
+          s.fingers.forEach(([x0, y0, x1, y1], i) => push(tr[i], x0 + (x1 - x0) * e, y0 + (y1 - y0) * e));
+        }, tok);
+        if (s.hold) { await wait(350, tok); effect(s.id); await wait(s.hold, tok); }
+        else effect(s.id);
+        tr.forEach(t => { t.end = performance.now(); });
+        await wait(1500, tok);
+        setScene(s.scene);
+        await wait(450, tok);
+        practice(s);
+      } catch (err) {
+        if (err !== STOP) throw err;
+      }
+    }
+
+    function practice(s) {
+      again.disabled = false;
+      if (s.na) {
+        mode = 'na';
+        say('🚫', s.na);
+        passed.add(s.id);
+        next.hidden = !steps.some(x => !passed.has(x.id));
+        return;
+      }
+      mode = 'try';
+      say('👉', `換你試試看：<b>${s.zh}</b>`);
+    }
+
+    function advance() {
+      const s = steps.find(x => !passed.has(x.id));
+      if (s) { demo(s); return; }
+      run++;
+      step = null;
+      mode = 'free';
+      mark(null);
+      again.disabled = true;
+      next.hidden = true;
+      say('🎉', '系統手勢都學會了！點清單裡的手勢，可以再看一次。');
+    }
+
+    // Which gesture did these fingers make? Distances are in screen units.
+    function what(g) {
+      const ps = [...g.all];
+      if (g.max >= 3) {
+        const dx = ps.reduce((n, p) => n + p.x - p.sx, 0) / ps.length;
+        return dx < -0.12 ? 'undo' : null;
+      }
+      if (g.max > 1) return null;
+      const p = ps[0], dx = p.x - p.sx, dy = p.y - p.sy;
+      if (p.sy > 0.9 && dy < -0.15) return g.held ? 'switcher' : 'home';
+      if (p.sy < 0.1 && dy > 0.15) return p.sx >= 0.7 ? 'cc' : p.sx <= 0.6 ? 'nc' : null;
+      if (scene === 'home' && dy > 0.15 && dy > Math.abs(dx)) return 'search';
+      return null;
+    }
+
+    function judge(g) {
+      const got = what(g);
+      const s = step;
+      if (got === s.id) {
+        if (got !== 'switcher') effect(got); // the switcher already opened while the finger held still
+        check(s.id);
+        passed.add(s.id);
+        mode = 'wait';
+        say('✅', `做到了！${s.alt}`);
+        api.later(advance, 1900);
+        return;
+      }
+      misses++;
+      if (got) {
+        if (got === 'switcher') api.later(() => { if (mode === 'try') setScene(s.scene); }, 1200);
+        toast(got === 'switcher' && s.id === 'home'
+          ? '停住了，變成 App 切換器。這次一口氣滑上去，不要停'
+          : `這是「${names[got]}」喔！現在要練習：${s.zh}`, 3000);
+      } else {
+        toast(`再試一次：${s.tip}`, 3000);
+      }
+      if (misses >= 2) again.classList.add('glow');
+    }
+
+    // The child's fingers.
+    let g = null;
+    const toScreen = e => {
+      const r = scr.getBoundingClientRect();
+      return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+    };
+    stage.addEventListener('pointerdown', e => {
+      if (mode !== 'try' || e.button > 0) return;
+      e.preventDefault();
+      stage.setPointerCapture(e.pointerId);
+      const { x, y } = toScreen(e), now = performance.now();
+      if (!g) g = { live: new Map(), all: new Set(), max: 0, held: false };
+      const p = { sx: x, sy: y, x, y, ax: x, ay: y, still: now, tr: track(x, y) };
+      g.live.set(e.pointerId, p);
+      g.all.add(p);
+      g.max = Math.max(g.max, g.live.size);
+    });
+    stage.addEventListener('pointermove', e => {
+      const p = g?.live.get(e.pointerId);
+      if (!p) return;
+      const { x, y } = toScreen(e);
+      p.x = x;
+      p.y = y;
+      push(p.tr, x, y);
+      if (Math.hypot(x - p.ax, y - p.ay) > 0.02) { p.ax = x; p.ay = y; p.still = performance.now(); }
+    });
+    // iPadOS may take over a three-finger swipe and cancel the touches; judge it all the same.
+    const up = e => {
+      const p = g?.live.get(e.pointerId);
+      if (!p) return;
+      p.tr.end = performance.now();
+      g.live.delete(e.pointerId);
+      if (g.live.size) return;
+      const done = g;
+      g = null;
+      if (mode === 'try') judge(done);
+    };
+    stage.addEventListener('pointerup', up);
+    stage.addEventListener('pointercancel', up);
+
+    // A finger that slides up from the bottom and then holds still opens the App Switcher.
+    function holdCheck(now) {
+      if (!g || g.held || g.max !== 1 || g.live.size !== 1) return;
+      const [p] = g.live.values();
+      if (p.sy > 0.9 && p.y - p.sy < -0.15 && now - p.still > 380) {
+        g.held = true;
+        effect('switcher');
+      }
+    }
+
+    next.onclick = () => advance();
+    again.onclick = () => { if (step) demo(step); };
+    rows.forEach((li, i) => {
+      li.addEventListener('click', () => {
+        if (passed.has(steps[i].id) && mode !== 'demo') { passed.delete(steps[i].id); demo(steps[i]); }
+      });
+    });
+
+    // Drawing: finger dots with short fading trails, and a pulse where to start.
+    const ctx = ink.getContext('2d');
+    const hex = (getComputedStyle(host).getPropertyValue('--c').trim() || '#9c36b5').replace('#', '');
+    const rgb = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16)).join(',');
+    let dpr = 1;
+    const fit = () => {
+      dpr = devicePixelRatio || 1;
+      ink.width = Math.round(stage.clientWidth * dpr);
+      ink.height = Math.round(stage.clientHeight * dpr);
+    };
+    new ResizeObserver(fit).observe(stage);
+    fit();
+
+    function draw() {
+      if (!api.alive()) return;
+      requestAnimationFrame(draw);
+      const now = performance.now();
+      holdCheck(now);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, ink.width, ink.height);
+      const st = stage.getBoundingClientRect(), sr = scr.getBoundingClientRect();
+      const P = (x, y) => [sr.left - st.left + x * sr.width, sr.top - st.top + y * sr.height];
+
+      if (mode === 'try' && step && !g) {
+        const k = (now % 1400) / 1400;
+        for (const [x, y] of step.fingers) {
+          const [px, py] = P(x, y);
+          ctx.beginPath();
+          ctx.arc(px, py, 16 + k * 18, 0, Math.PI * 2);
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = `rgba(${rgb},${0.7 * (1 - k)})`;
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(px, py, 7, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${rgb},.35)`;
+          ctx.fill();
+        }
+      }
+
+      tracks = tracks.filter(t => !t.end || now - t.end < 450);
+      ctx.lineCap = 'butt'; // round caps overlap at each joint and look like beads
+      ctx.lineWidth = 12;
+      for (const t of tracks) {
+        while (t.pts.length > 2 && now - t.pts[0].t > 700) t.pts.shift();
+        for (let i = 1; i < t.pts.length; i++) {
+          const age = now - t.pts[i].t;
+          if (age > 650) continue;
+          const [ax, ay] = P(t.pts[i - 1].x, t.pts[i - 1].y), [bx, by] = P(t.pts[i].x, t.pts[i].y);
+          ctx.beginPath();
+          ctx.moveTo(ax, ay);
+          ctx.lineTo(bx, by);
+          ctx.strokeStyle = `rgba(${rgb},${0.3 * (1 - age / 650)})`;
+          ctx.stroke();
+        }
+        const last = t.pts[t.pts.length - 1], fade = t.end ? 1 - (now - t.end) / 450 : 1;
+        const [px, py] = P(last.x, last.y);
+        ctx.beginPath();
+        ctx.arc(px, py, 22, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${rgb},${0.35 * fade})`;
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = `rgba(255,255,255,${0.9 * fade})`;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(px, py, 9, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${rgb},${0.85 * fade})`;
+        ctx.fill();
+        ctx.lineWidth = 12;
+        if (!t.end && now - last.t > 300) { // holding still
+          const k = ((now - last.t) % 900) / 900;
+          ctx.beginPath();
+          ctx.arc(px, py, 24 + k * 16, 0, Math.PI * 2);
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = `rgba(${rgb},${0.8 * (1 - k)})`;
+          ctx.stroke();
+          ctx.lineWidth = 12;
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+    advance();
   },
 
   // Roll a ball into the hole by tilting: a joystick, or the real gyroscope when allowed.
