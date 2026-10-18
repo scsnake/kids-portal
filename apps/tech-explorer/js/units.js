@@ -1769,8 +1769,8 @@ export const UNITS = [
         params: {
           items: [
             { icon: '⌨️', label: '你輸入網址 kids.example.tw' },
-            { icon: '📒', label: 'DNS 查通訊錄，找到 IP 位址' },
-            { icon: '📨', label: '平板連到那個 IP 位址的伺服器' },
+            { icon: '📒', label: 'DNS 查通訊錄：kids.example.tw → 203.0.113.25' },
+            { icon: '📨', label: '平板連到 203.0.113.25 的伺服器' },
             { icon: '📄', label: '伺服器把網頁傳回來' },
           ],
         },
