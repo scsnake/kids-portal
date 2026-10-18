@@ -2521,7 +2521,17 @@ export const WIDGETS = {
     const toast = toaster($('.toast'), api);
     const made = [];
     const inside = {};
-    let view = null;
+    let view = null, picked = null; // picked: a file chosen by tap, waiting for a folder tap
+    // Put a file into a folder (by drag or by tap-then-tap); a wrong folder shakes the chip.
+    const placeInto = (f, name, chip) => {
+      if (name !== f.to) { shake(chip); api.bad(); toast(made.includes(f.to) ? `「${f.name}」應該放進「${f.to}」` : `先新增一個「${f.to}」資料夾`); return; }
+      f.placed = true;
+      picked = null;
+      (inside[f.to] ||= []).push(f);
+      api.good();
+      if (files.every(x => x.placed)) check('sort');
+      draw();
+    };
     const draw = () => {
       $('.crumbs').innerHTML = `<button data-go="root">🏠 我的檔案</button>${view ? ` › <b>📁 ${view}</b>` : ''}`;
       const area = $('.fold-area');
@@ -2534,18 +2544,15 @@ export const WIDGETS = {
       } else {
         made.forEach(n => area.append(h(`<button class="fold" data-zone="${n}" data-open="${n}"><span>📁</span>${n}<small>${(inside[n] || []).length} 個</small></button>`)));
         files.filter(f => !f.placed).forEach(f => {
-          const chip = h(`<button class="chip"><span class="chip-icon">${f.icon}</span><span>${f.name}</span></button>`);
+          const chip = h(`<button class="chip${picked === f ? ' selected' : ''}"><span class="chip-icon">${f.icon}</span><span>${f.name}</span></button>`);
+          chip.file = f;
           drag(chip, {
-            onDrop: zone => {
-              if (!zone) return;
-              if (zone.dataset.zone !== f.to) { shake(chip); api.bad(); toast(made.includes(f.to) ? `「${f.name}」應該放進「${f.to}」` : `先新增一個「${f.to}」資料夾`); return; }
-              f.placed = true;
-              (inside[f.to] ||= []).push(f);
-              api.good();
-              if (files.every(x => x.placed)) check('sort');
-              draw();
+            onDrop: zone => { if (zone) placeInto(f, zone.dataset.zone, chip); },
+            onTap: () => {
+              picked = picked === f ? null : f;
+              area.querySelectorAll('.chip').forEach(c => c.classList.toggle('selected', c.file === picked));
+              if (picked) toast(made.length ? '再點要放進去的資料夾' : `先新增一個「${f.to}」資料夾`);
             },
-            onTap: () => toast(made.includes(f.to) ? '把檔案拖到資料夾上' : `先新增一個「${f.to}」資料夾`),
           });
           area.append(chip);
         });
@@ -2556,6 +2563,11 @@ export const WIDGETS = {
       const go = e.target.closest('[data-go]');
       if (go) { view = null; draw(); return; }
       const open = e.target.closest('[data-open]');
+      if (open && picked) {
+        const chip = [...host.querySelectorAll('.fold-area .chip')].find(c => c.file === picked);
+        placeInto(picked, open.dataset.open, chip);
+        return;
+      }
       if (open && !open.classList.contains('dragging')) {
         view = open.dataset.open;
         draw();
