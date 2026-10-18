@@ -137,9 +137,16 @@ function checklist(ul, tasks, api) {
       <span>${t.zh}${en(t.en)}<small class="alt">${t.na || t.alt || ''}</small></span>
     </li>`).join('');
   const got = new Set();
-  return (id, note) => {
+  // force: the device turned out to support it after all (a trackpad pinch), so count it
+  return (id, note, force) => {
     const task = tasks.find(t => t.id === id);
-    if (got.has(id) || task?.na) return;
+    if (got.has(id) || (task?.na && !force)) return;
+    if (task?.na) {
+      task.na = '';
+      const row = ul.querySelector(`[data-task="${id}"]`);
+      row.classList.remove('na');
+      row.querySelector('.tick').textContent = '';
+    }
     got.add(id);
     const li = ul.querySelector(`[data-task="${id}"]`);
     li.classList.add('done');
@@ -1041,7 +1048,7 @@ export const WIDGETS = {
   // A photo that answers taps, swipes and two-finger gestures.
   touchlab(host, _, api) {
     const hasTouch = navigator.maxTouchPoints > 0;
-    const noTouch = hasTouch ? '' : '這台裝置沒有觸控螢幕，看說明就好：兩根手指放在螢幕上';
+    const noTouch = hasTouch ? '' : '這台裝置沒有觸控螢幕，看說明就好（有觸控板的話可以試試）：兩根手指放在螢幕上';
     const tasks = [
       { id: 'tap', zh: '點一下', en: 'tap', alt: '顯示說明' },
       { id: 'dbl', zh: '點兩下', en: 'double-tap', alt: '放大或縮回' },
@@ -1190,7 +1197,7 @@ export const WIDGETS = {
       e.preventDefault();
       sc = Math.min(4, Math.max(0.6, sc * Math.exp(-e.deltaY / 100)));
       apply();
-      if (Math.abs(sc - 1) > 0.2) check('pinch');
+      if (Math.abs(sc - 1) > 0.2) check('pinch', '用觸控板做到了', true);
     }, { passive: false });
     let gs = null;
     frame.addEventListener('gesturestart', e => { e.preventDefault(); gs = { sc, rot }; });
@@ -1200,8 +1207,8 @@ export const WIDGETS = {
       sc = Math.min(4, Math.max(0.6, gs.sc * e.scale));
       rot = gs.rot + e.rotation;
       apply();
-      if (Math.abs(e.scale - 1) > 0.2) check('pinch');
-      if (Math.abs(e.rotation) > 25) check('rotate');
+      if (Math.abs(e.scale - 1) > 0.2) check('pinch', '用觸控板做到了', true);
+      if (Math.abs(e.rotation) > 25) check('rotate', '用觸控板做到了', true);
     });
     menu.addEventListener('click', e => {
       if (!e.target.closest('button')) return;
