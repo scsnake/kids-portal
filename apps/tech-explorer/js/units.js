@@ -1496,7 +1496,7 @@ export const UNITS = [
       },
       {
         title: '印表機用小墨點畫圖',
-        text: `${t('印表機', 'printer')}的噴頭一行一行來回跑，在對的地方噴上小墨點。先畫一張圖，再按「列印」。`,
+        text: `${t('印表機', 'printer')}有兩種常見的：${t('噴墨印表機', 'inkjet printer')}的噴頭一行一行來回跑，在對的地方噴上小墨點。${t('雷射印表機', 'laser printer')}用雷射在滾筒上畫出靜電圖，吸住${t('碳粉', 'toner')}，再加熱燙到紙上，一次印一整頁。先畫一張圖，兩種都印印看！`,
         widget: 'printer',
         params: { size: 7 },
       },

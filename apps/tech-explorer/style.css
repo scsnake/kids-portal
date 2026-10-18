@@ -664,6 +664,13 @@ a.unit-card:active { transform: scale(.98); }
 .paper .px.on { background: #212529; }
 .head { position: absolute; width: 26px; height: 18px; translate: -50% -60%; border-radius: 4px; background: var(--c); opacity: 0; transition: top .05s, left .05s; pointer-events: none; }
 .head.show { opacity: .9; }
+.w-printer .mid { display: flex; flex-direction: column; gap: 10px; }
+.lz-beam { position: absolute; left: 4px; right: 4px; height: 3px; translate: 0 -50%; border-radius: 2px; background: #ff3b3b; box-shadow: 0 0 8px #ff3b3b; opacity: 0; transition: top .1s; pointer-events: none; }
+.lz-beam.show { opacity: 1; }
+.paper .px.lz-charge { background: #fff; box-shadow: inset 0 0 0 2px #ced4da; }
+.paper .px.lz-toner { background: #868e96; transition: background .3s; }
+.lz-heat { position: absolute; inset: 0; border-radius: 6px; background: radial-gradient(circle, rgba(255, 146, 43, .45), rgba(255, 146, 43, 0) 70%); opacity: 0; transition: opacity .3s; pointer-events: none; }
+.lz-heat.show { opacity: 1; }
 .paper .head { margin: 8px; }
 
 /* ---------- connect ---------- */

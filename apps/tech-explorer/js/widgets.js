@@ -967,34 +967,39 @@ export const WIDGETS = {
     };
   },
 
-  // Draw a picture, then watch the print head place the dots row by row.
+  // Draw a picture, then print it with an inkjet head (dot by dot, row by row) or a laser
+  // printer (laser charges the drum, toner sticks, paper rolls, heat fuses, whole page at once).
   printer(host, { size }, api) {
     host.innerHTML = `
       <div class="w-printer">
         <figure><figcaption>① 畫一張圖</figcaption>${gridHTML(size, size, 'canvas')}</figure>
-        <div class="mid"><button class="go">🖨️ 列印</button></div>
-        <figure><figcaption>② 印出來的紙</figcaption><div class="paper">${gridHTML(size, size, 'out')}<span class="head"></span></div></figure>
-        <p class="hint">點格子畫圖，再按「列印」</p>
+        <div class="mid"><button class="go" data-kind="ink">🖨️ 噴墨列印</button><button class="go" data-kind="laser">⚡ 雷射列印</button></div>
+        <figure><figcaption>② 印出來的紙</figcaption><div class="paper">${gridHTML(size, size, 'out')}<span class="head"></span><span class="lz-beam"></span><span class="lz-heat"></span></div></figure>
+        <p class="hint">點格子畫圖，再選一種印表機列印</p>
       </div>`;
     const canvas = host.querySelector('.canvas');
     const src = [...canvas.querySelectorAll('.px')];
     const out = [...host.querySelectorAll('.out .px')];
-    const head = host.querySelector('.head');
-    const go = host.querySelector('.go');
+    const paper = host.querySelector('.paper');
+    const head = host.querySelector('.head'), beam = host.querySelector('.lz-beam'), heat = host.querySelector('.lz-heat');
+    const btns = [...host.querySelectorAll('[data-kind]')];
     const hint = host.querySelector('.hint');
-    paintable(canvas, () => go.classList.toggle('glow', src.some(c => c.classList.contains('on'))));
-    go.onclick = () => {
-      if (!src.some(c => c.classList.contains('on'))) {
-        hint.textContent = '先畫一點東西吧！';
-        shake(canvas);
-        return;
-      }
-      go.disabled = true;
-      go.classList.remove('glow');
-      canvas.classList.add('locked');
-      out.forEach(c => c.classList.remove('on'));
+    const used = new Set();
+    paintable(canvas, () => btns.forEach(b => b.classList.toggle('glow', src.some(c => c.classList.contains('on')) && !used.has(b.dataset.kind))));
+    const finish = (kind, msg) => {
+      btns.forEach(b => { b.disabled = false; });
+      canvas.classList.remove('locked');
+      used.add(kind);
+      const other = kind === 'ink' ? '雷射' : '噴墨';
+      hint.textContent = msg + (used.size < 2 ? ` 再用${other}印表機印印看！` : '');
+      btns.forEach(b => b.classList.toggle('glow', !used.has(b.dataset.kind)));
+      api.good();
+      if (used.size === 2) api.done();
+    };
+    // Inkjet: the head runs row by row and sprays a dot where the picture has one.
+    const inkjet = () => {
       head.classList.add('show');
-      hint.textContent = '噴頭一行一行來回跑，在要上色的地方噴墨點…';
+      hint.textContent = '噴墨：噴頭一行一行來回跑，在要上色的地方噴墨點…';
       let i = 0;
       const step = () => {
         if (!api.alive()) return;
@@ -1007,14 +1012,55 @@ export const WIDGETS = {
         if (src[k].classList.contains('on')) out[k].classList.add('on');
         if (++i < size * size) { api.later(step, 55); return; }
         head.classList.remove('show');
-        go.disabled = false;
-        canvas.classList.remove('locked');
-        hint.textContent = '🎉 印好了！真正的印表機一吋要噴好幾百個點，所以看起來很平滑。';
-        api.good();
-        api.done();
+        finish('ink', '🎉 印好了！真正的印表機一吋要噴好幾百個點，所以看起來很平滑。');
       };
       step();
     };
+    // Laser: four quick stages, and the whole page comes out at once.
+    const laser = () => {
+      const marks = src.map(c => c.classList.contains('on'));
+      hint.textContent = '雷射 ①：雷射光掃過滾筒，畫出看不見的「靜電圖」';
+      beam.classList.add('show');
+      let r = 0;
+      const scan = () => {
+        if (!api.alive()) return;
+        beam.style.top = ((r + 0.5) / size) * 100 + '%';
+        for (let c = 0; c < size; c++) if (marks[r * size + c]) out[r * size + c].classList.add('lz-charge');
+        if (++r < size) { api.later(scan, 120); return; }
+        beam.classList.remove('show');
+        api.later(() => {
+          hint.textContent = '雷射 ②：碳粉被靜電吸住，黏在圖案的地方';
+          out.forEach(c => { if (c.classList.contains('lz-charge')) c.classList.replace('lz-charge', 'lz-toner'); });
+          api.later(() => {
+            hint.textContent = '雷射 ③：紙從滾筒下面滾過去，碳粉印到紙上';
+            paper.animate([{ transform: 'translateY(30px)', opacity: 0.4 }, { transform: 'none', opacity: 1 }], { duration: 600, easing: 'ease-out' });
+            api.later(() => {
+              hint.textContent = '雷射 ④：加熱，把碳粉燙在紙上，就不會掉了';
+              heat.classList.add('show');
+              api.later(() => {
+                heat.classList.remove('show');
+                out.forEach(c => { if (c.classList.contains('lz-toner')) { c.classList.remove('lz-toner'); c.classList.add('on'); } });
+                finish('laser', '🎉 雷射印表機一次印一整頁，又快又清楚，學校和辦公室常用。');
+              }, 900);
+            }, 900);
+          }, 900);
+        }, 300);
+      };
+      scan();
+    };
+    btns.forEach(b => {
+      b.onclick = () => {
+        if (!src.some(c => c.classList.contains('on'))) {
+          hint.textContent = '先畫一點東西吧！';
+          shake(canvas);
+          return;
+        }
+        btns.forEach(x => { x.disabled = true; x.classList.remove('glow'); });
+        canvas.classList.add('locked');
+        out.forEach(c => c.classList.remove('on', 'lz-charge', 'lz-toner'));
+        (b.dataset.kind === 'ink' ? inkjet : laser)();
+      };
+    });
   },
 
   // For each person, pick the way to get online: cable, Wi-Fi or cellular.
