@@ -24,11 +24,15 @@ kids-portal/
 │   ├── piano-sightreader/     # kids-piano.scsnake.xyz
 │   │   ├── index.html         # Babel-in-browser React (self-contained)
 │   │   └── App.jsx            # kept as source reference
-│   └── little-writer/         # kids-writer.scsnake.xyz
-│       ├── main.js            # React App (same esbuild setup as one-stroke)
-│       ├── storage.js         # localStorage persistence + snapshot history
-│       ├── wordcount.js       # 國字/注音/English word counting
-│       └── dist/bundle.js     # committed pre-built bundle
+│   ├── little-writer/         # kids-writer.scsnake.xyz
+│   │   ├── main.js            # React App (same esbuild setup as one-stroke)
+│   │   ├── storage.js         # localStorage persistence + snapshot history
+│   │   ├── wordcount.js       # 國字/注音/English word counting
+│   │   └── dist/bundle.js     # committed pre-built bundle
+│   └── tech-explorer/         # kids-tech.scsnake.xyz
+│       ├── index.html         # no build step; plain ES modules
+│       ├── js/units.js        # lesson content (edit lessons here)
+│       └── js/widgets.js      # the interactions (drag, tap, mini-simulations)
 ├── shared/
 │   └── changelog-widget.js    # the "?" button; copied into every app (see below)
 ├── scripts/sync-shared.sh     # copies shared/ into every app

@@ -1,0 +1,3436 @@
+// Interactions, one per slide. Each widget is `(host, params, api) => void`:
+//   host   the element to draw into (emptied before each slide)
+//   api    { good(), bad(), done(), later(fn, ms), alive() }
+// done() marks the slide as finished (it earns a star). later() is setTimeout that is
+// cancelled when the slide changes; alive() is false once the slide has gone.
+
+const h = html => {
+  const t = document.createElement('template');
+  t.innerHTML = html.trim();
+  return t.content.firstElementChild;
+};
+
+function shuffle(list, notSame = false) {
+  const a = list.slice();
+  do {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+  } while (notSame && a.length > 1 && a.every((x, i) => x === list[i]));
+  return a;
+}
+
+function shake(el) {
+  el.classList.remove('shake');
+  void el.offsetWidth; // restart the animation
+  el.classList.add('shake');
+}
+
+function pop(el) {
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
+}
+
+// Drag with a finger, pen or mouse. Drop targets are any element with data-zone.
+// A press that does not move counts as a tap.
+function drag(el, { onDrop, onTap }) {
+  el.addEventListener('pointerdown', e => {
+    if (el.classList.contains('placed') || el.disabled || e.button > 0) return;
+    e.preventDefault();
+    const sx = e.clientX, sy = e.clientY, id = e.pointerId;
+    let moved = false, over = null;
+    const zoneAt = (x, y) => {
+      el.style.visibility = 'hidden';
+      const t = document.elementFromPoint(x, y);
+      el.style.visibility = '';
+      return t && t.closest('[data-zone]');
+    };
+    const move = ev => {
+      if (ev.pointerId !== id) return;
+      const dx = ev.clientX - sx, dy = ev.clientY - sy;
+      if (!moved && Math.hypot(dx, dy) < 8) return;
+      if (!moved) { moved = true; el.classList.add('dragging'); }
+      el.style.transform = `translate(${dx}px, ${dy}px) scale(1.06)`;
+      const z = zoneAt(ev.clientX, ev.clientY);
+      if (z !== over) {
+        over?.classList.remove('over');
+        z?.classList.add('over');
+        over = z;
+      }
+    };
+    const up = ev => {
+      if (ev.pointerId !== id) return;
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      over?.classList.remove('over');
+      el.classList.remove('dragging');
+      el.style.transform = '';
+      if (!moved) { onTap?.(); return; }
+      if (ev.type !== 'pointercancel') onDrop(zoneAt(ev.clientX, ev.clientY));
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+  });
+}
+
+// A grid of cells you paint by tapping or by sliding a finger across.
+// The first cell touched decides whether this stroke paints or erases.
+function paintable(grid, onChange) {
+  let mode = null;
+  const cellAt = (x, y) => {
+    const t = document.elementFromPoint(x, y);
+    return t && t.classList.contains('px') && grid.contains(t) ? t : null;
+  };
+  const apply = cell => {
+    if (!cell || cell.classList.contains('on') === mode) return;
+    cell.classList.toggle('on', mode);
+    onChange();
+  };
+  grid.addEventListener('pointerdown', e => {
+    const cell = cellAt(e.clientX, e.clientY);
+    if (!cell || grid.classList.contains('locked')) return;
+    e.preventDefault();
+    mode = !cell.classList.contains('on');
+    apply(cell);
+  });
+  window.addEventListener('pointermove', e => { if (mode !== null) apply(cellAt(e.clientX, e.clientY)); });
+  window.addEventListener('pointerup', () => { mode = null; });
+}
+
+const en = x => (x ? `<small class="en" lang="en">${x}</small>` : '');
+
+const gridHTML = (rows, cols, cls = '') =>
+  `<div class="pxgrid ${cls}" style="--cols:${cols}">${'<i class="px"></i>'.repeat(rows * cols)}</div>`;
+
+// Position of `el`'s center relative to `box`, in pixels.
+function centerIn(el, box) {
+  const a = el.getBoundingClientRect(), b = box.getBoundingClientRect();
+  return { x: a.left + a.width / 2 - b.left, y: a.top + a.height / 2 - b.top };
+}
+
+// Fly a small token from one element to another inside `box`.
+function fly(box, text, from, to, ms = 550) {
+  const tok = h(`<span class="token">${text}</span>`);
+  box.append(tok);
+  const p = centerIn(from, box), q = centerIn(to, box);
+  return tok.animate(
+    [
+      { transform: `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) scale(.6)` },
+      { transform: `translate(${(p.x + q.x) / 2}px, ${Math.min(p.y, q.y) - 30}px) translate(-50%, -50%) scale(1)`, offset: 0.5 },
+      { transform: `translate(${q.x}px, ${q.y}px) translate(-50%, -50%) scale(.8)` },
+    ],
+    { duration: ms, easing: 'ease-in-out' }
+  ).finished.then(() => tok.remove(), () => tok.remove());
+}
+
+// A task checklist: check(id, note) ticks one task; done() fires once every required task is ticked.
+function checklist(ul, tasks, api) {
+  ul.innerHTML = tasks.map(t => `
+    <li data-task="${t.id}"${t.optional ? ' class="optional"' : ''}>
+      <span class="tick"></span>
+      <span>${t.zh}${en(t.en)}<small class="alt">${t.alt || ''}</small></span>
+    </li>`).join('');
+  const got = new Set();
+  return (id, note) => {
+    if (got.has(id)) return;
+    got.add(id);
+    const li = ul.querySelector(`[data-task="${id}"]`);
+    li.classList.add('done');
+    if (note) li.querySelector('.alt').textContent = note;
+    pop(li);
+    api.good();
+    if (tasks.every(t => t.optional || got.has(t.id))) api.done();
+  };
+}
+
+// A short message that fades out by itself.
+function toaster(el, api) {
+  let timer = null;
+  return msg => {
+    el.textContent = msg;
+    el.hidden = false;
+    pop(el);
+    clearTimeout(timer);
+    timer = setTimeout(() => { if (api.alive()) el.hidden = true; }, 2000);
+  };
+}
+
+const byWhat = { mouse: '用滑鼠完成 🖱️', touch: '用手指完成 👆', pen: '用觸控筆完成 ✏️' };
+
+export const WIDGETS = {
+  // Drag (or tap, then tap a box) each chip into the right box.
+  sort(host, { bins, items }, api) {
+    host.innerHTML = `
+      <div class="w-sort">
+        <div class="tray"></div>
+        <div class="bins" style="--n:${bins.length}"></div>
+        <p class="hint">拖到框框裡，或先點一下，再點框框</p>
+      </div>`;
+    const tray = host.querySelector('.tray');
+    const binsEl = host.querySelector('.bins');
+    for (const b of bins) {
+      binsEl.append(h(`
+        <div class="bin" data-zone="${b.id}" role="button" tabindex="0">
+          <div class="bin-head"><span class="bin-icon">${b.icon}</span><span>${b.label}${en(b.en)}</span></div>
+          <div class="bin-items"></div>
+        </div>`));
+    }
+    let left = items.length, selected = null;
+    const select = chip => {
+      selected?.classList.remove('selected');
+      selected = chip === selected ? null : chip;
+      selected?.classList.add('selected');
+    };
+    for (const it of shuffle(items, true)) {
+      const chip = h(`<button class="chip"><span class="chip-icon">${it.icon}</span><span>${it.label}${en(it.en)}</span></button>`);
+      chip.place = zone => {
+        if (!zone) return;
+        if (zone.dataset.zone === it.bin) {
+          if (selected === chip) select(chip);
+          chip.classList.add('placed');
+          zone.querySelector('.bin-items').append(chip);
+          pop(zone);
+          api.good();
+          if (--left === 0) api.done();
+        } else {
+          api.bad();
+          shake(chip);
+        }
+      };
+      drag(chip, { onDrop: chip.place, onTap: () => select(chip) });
+      tray.append(chip);
+    }
+    binsEl.addEventListener('click', e => {
+      const zone = e.target.closest('[data-zone]');
+      if (zone && selected && !e.target.closest('.chip')) selected.place(zone);
+    });
+  },
+
+  // Pick the one right answer; wrong answers grey out.
+  choice(host, { question, options, explain }, api) {
+    host.innerHTML = `
+      <div class="w-choice">
+        <p class="question">${question}</p>
+        <div class="options"></div>
+        <p class="explain" hidden>💡 ${explain}</p>
+      </div>`;
+    const box = host.querySelector('.options');
+    let solved = false;
+    for (const o of shuffle(options)) {
+      const btn = h(`<button class="option">${o.text}</button>`);
+      btn.onclick = () => {
+        if (solved) return;
+        if (o.correct) {
+          solved = true;
+          btn.classList.add('right');
+          host.querySelector('.explain').hidden = false;
+          api.good();
+          api.done();
+        } else {
+          btn.classList.add('wrong');
+          btn.disabled = true;
+          shake(btn);
+          api.bad();
+        }
+      };
+      box.append(btn);
+    }
+  },
+
+  // Tap the cards in the right order; each right tap moves the card up into the list.
+  order(host, { items }, api) {
+    host.innerHTML = `
+      <div class="w-order">
+        <ol class="seq"></ol>
+        <div class="pool"></div>
+      </div>`;
+    const seq = host.querySelector('.seq');
+    let next = 0;
+    for (const it of shuffle(items, true)) {
+      const idx = items.indexOf(it);
+      const card = h(`<button class="chip"><span class="chip-icon">${it.icon}</span><span>${it.label}${en(it.en)}</span></button>`);
+      card.onclick = () => {
+        if (card.classList.contains('placed')) return;
+        if (idx !== next) { shake(card); api.bad(); return; }
+        card.classList.add('placed');
+        const li = h('<li></li>');
+        li.append(card);
+        seq.append(li);
+        pop(card);
+        api.good();
+        if (++next === items.length) api.done();
+      };
+      host.querySelector('.pool').append(card);
+    }
+  },
+
+  // Light bulbs worth 8, 4, 2, 1 add up to the target number.
+  binary(host, { bits, targets }, api) {
+    host.innerHTML = `
+      <div class="w-binary">
+        <p class="target"></p>
+        <div class="bulbs"></div>
+        <p class="sum"></p>
+      </div>`;
+    const bulbsEl = host.querySelector('.bulbs');
+    const on = bits.map(() => false);
+    let round = 0, busy = false;
+    const bulbs = bits.map((v, i) => {
+      const b = h(`
+        <button class="bulb" aria-pressed="false">
+          <span class="bit">0</span><span class="bico">💡</span><span class="val">${v}</span>
+        </button>`);
+      b.onclick = () => {
+        if (busy || round >= targets.length) return;
+        on[i] = !on[i];
+        draw();
+        check();
+      };
+      bulbsEl.append(b);
+      return b;
+    });
+    const sum = () => bits.reduce((s, v, i) => s + (on[i] ? v : 0), 0);
+    const draw = () => {
+      bulbs.forEach((b, i) => {
+        b.classList.toggle('on', on[i]);
+        b.setAttribute('aria-pressed', on[i]);
+        b.querySelector('.bit').textContent = on[i] ? '1' : '0';
+      });
+      const parts = bits.filter((_, i) => on[i]);
+      host.querySelector('.sum').innerHTML =
+        `<span class="code">${on.map(x => (x ? 1 : 0)).join('')}</span> = ${parts.length ? parts.join(' + ') + ' = ' : ''}<b>${sum()}</b>`;
+      host.querySelector('.target').innerHTML = round < targets.length
+        ? `湊出 <b class="big">${targets[round]}</b><span class="rdots">${targets.map((_, i) => `<i class="${i < round ? 'ok' : ''}"></i>`).join('')}</span>`
+        : '🎉 全部湊出來了！';
+    };
+    const check = () => {
+      if (sum() !== targets[round]) return;
+      api.good();
+      busy = true;
+      pop(host.querySelector('.sum'));
+      api.later(() => {
+        round++;
+        busy = false;
+        if (round < targets.length) on.fill(false);
+        else api.done();
+        draw();
+      }, 900);
+    };
+    draw();
+  },
+
+  // Copy a small picture by painting cells.
+  pixels(host, { pattern, color }, api) {
+    const rows = pattern.length, cols = pattern[0].length;
+    host.innerHTML = `
+      <div class="w-pixels" style="--px:${color}">
+        <figure><figcaption>照著畫</figcaption>${gridHTML(rows, cols, 'model')}</figure>
+        <figure><figcaption>你的螢幕</figcaption>${gridHTML(rows, cols, 'canvas')}</figure>
+        <p class="hint">點一下塗色，再點一下擦掉，也可以用手指滑過去</p>
+      </div>`;
+    const want = pattern.join('').split('').map(c => c === '1');
+    host.querySelectorAll('.model .px').forEach((c, i) => c.classList.toggle('on', want[i]));
+    const canvas = host.querySelector('.canvas');
+    const cells = [...canvas.querySelectorAll('.px')];
+    let solved = false;
+    paintable(canvas, () => {
+      if (solved || !cells.every((c, i) => c.classList.contains('on') === want[i])) return;
+      solved = true;
+      canvas.classList.add('locked');
+      host.querySelector('.hint').textContent = '🎉 一模一樣！螢幕上的圖就是這樣拼出來的。';
+      pop(canvas);
+      api.good();
+      api.done();
+    });
+  },
+
+  // Three lights mix into colors: make each target color.
+  rgb(host, { targets }, api) {
+    const names = ['紅', '綠', '藍'];
+    const rgbOf = on => `rgb(${on.map(x => (x ? 255 : 0)).join(',')})`;
+    host.innerHTML = `
+      <div class="w-rgb">
+        <div class="mix" aria-hidden="true"><i class="r"></i><i class="g"></i><i class="b"></i></div>
+        <div class="side">
+          <p class="target"></p>
+          <div class="lamps">${names.map((n, i) => `<button class="lamp lamp-${i}" aria-pressed="false">${n}</button>`).join('')}</div>
+          <p class="result"></p>
+        </div>
+      </div>`;
+    const on = [0, 0, 0];
+    const lamps = [...host.querySelectorAll('.lamp')];
+    const circles = [...host.querySelectorAll('.mix i')];
+    let round = 0, busy = false;
+    const draw = () => {
+      lamps.forEach((l, i) => { l.classList.toggle('on', !!on[i]); l.setAttribute('aria-pressed', !!on[i]); });
+      circles.forEach((c, i) => c.classList.toggle('on', !!on[i]));
+      host.querySelector('.result').innerHTML =
+        `混出來：<span class="swatch" style="background:${rgbOf(on)}"></span>${on.some(Boolean) ? '' : '（全關是黑色）'}`;
+      const t = targets[round];
+      host.querySelector('.target').innerHTML = t
+        ? `請混出 <span class="swatch" style="background:${rgbOf(t.on)}"></span><b>${t.name}</b>`
+        : '🎉 你是調色高手！';
+    };
+    lamps.forEach((l, i) => {
+      l.onclick = () => {
+        if (busy || round >= targets.length) return;
+        on[i] = on[i] ? 0 : 1;
+        draw();
+        if (on.every((x, k) => x === targets[round].on[k])) {
+          api.good();
+          busy = true;
+          api.later(() => {
+            busy = false;
+            if (++round >= targets.length) api.done();
+            draw();
+          }, 900);
+        }
+      };
+    });
+    draw();
+  },
+
+  // Press a key: it travels to the brain, then to the screen.
+  keys(host, { keys, goal, showCode }, api) {
+    host.innerHTML = `
+      <div class="w-keys">
+        <div class="kb" aria-label="鍵盤">${keys.map(k => `<button class="key">${k}</button>`).join('')}</div>
+        <div class="stage-lbl kb-lbl">輸入 ${en('input')}</div>
+        <div class="cpu"><span>🧠</span><small>處理 ${en('process')}</small></div>
+        <div class="screen"><span class="typed"></span><span class="caret"></span></div>
+        <div class="stage-lbl screen-lbl">輸出 ${en('output')}</div>
+        <p class="caption">按一個鍵試試看</p>
+      </div>`;
+    const box = host.querySelector('.w-keys');
+    const cpu = host.querySelector('.cpu');
+    const screen = host.querySelector('.screen');
+    const typed = host.querySelector('.typed');
+    let count = 0;
+    host.querySelectorAll('.key').forEach(btn => {
+      btn.onclick = async () => {
+        const k = btn.textContent;
+        const code = k.charCodeAt(0);
+        const token = showCode ? code : k;
+        pop(btn);
+        host.querySelector('.caption').innerHTML = showCode
+          ? `<b>${k}</b> 的號碼是 <b>${code}</b>`
+          : `輸入 <b>${k}</b> → 處理 → 輸出 <b>${k}</b>`;
+        await fly(box, token, btn, cpu);
+        if (!api.alive()) return;
+        pop(cpu);
+        await fly(box, token, cpu, screen);
+        if (!api.alive()) return;
+        typed.textContent = (typed.textContent + k).slice(-12);
+        api.good();
+        if (++count === goal) api.done();
+      };
+    });
+  },
+
+  // Move a mouse on the desk; the arrow on the screen moves by the same amount.
+  mouse(host, { stars }, api) {
+    host.innerHTML = `
+      <div class="w-mouse">
+        <div class="screen"><span class="star">⭐</span><svg class="cursor" viewBox="0 0 24 24"><path d="M4 2l16 10-7 1.5L9.5 21z"/></svg></div>
+        <p class="readout">在下面的桌面上拖動滑鼠</p>
+        <div class="desk"><span class="mouse">🖱️</span></div>
+      </div>`;
+    const screen = host.querySelector('.screen');
+    const desk = host.querySelector('.desk');
+    const cursor = host.querySelector('.cursor');
+    const star = host.querySelector('.star');
+    const mouseEl = host.querySelector('.mouse');
+    const readout = host.querySelector('.readout');
+    let cx = 0.5, cy = 0.5, mx = 0.5, my = 0.5, sx = 0, sy = 0, got = 0, last = null;
+    const placeStar = () => {
+      do { sx = 0.1 + Math.random() * 0.8; sy = 0.12 + Math.random() * 0.76; } while (Math.hypot(sx - cx, sy - cy) < 0.3);
+      star.style.left = sx * 100 + '%';
+      star.style.top = sy * 100 + '%';
+    };
+    const draw = () => {
+      cursor.style.left = cx * 100 + '%';
+      cursor.style.top = cy * 100 + '%';
+      mouseEl.style.left = mx * 100 + '%';
+      mouseEl.style.top = my * 100 + '%';
+    };
+    const clamp = v => Math.min(1, Math.max(0, v));
+    desk.addEventListener('pointerdown', e => {
+      if (got >= stars) return;
+      e.preventDefault();
+      desk.setPointerCapture(e.pointerId);
+      last = { x: e.clientX, y: e.clientY };
+    });
+    desk.addEventListener('pointermove', e => {
+      if (!last) return;
+      const d = desk.getBoundingClientRect(), s = screen.getBoundingClientRect();
+      const dx = e.clientX - last.x, dy = e.clientY - last.y;
+      last = { x: e.clientX, y: e.clientY };
+      mx = clamp(mx + dx / d.width);
+      my = clamp(my + dy / d.height);
+      // The arrow moves 1.5x as far as the mouse, like a real pointer speed setting.
+      cx = clamp(cx + (dx * 1.5) / s.width);
+      cy = clamp(cy + (dy * 1.5) / s.height);
+      draw();
+      const h = Math.round(dx), v = Math.round(dy);
+      if (h || v) readout.textContent = `${h >= 0 ? '往右' : '往左'} ${Math.abs(h)}、${v >= 0 ? '往下' : '往上'} ${Math.abs(v)}`;
+      const dist = Math.hypot((cx - sx) * s.width, (cy - sy) * s.height);
+      if (dist < 26) {
+        got++;
+        api.good();
+        pop(star);
+        if (got >= stars) {
+          star.textContent = '🎉';
+          readout.textContent = `抓到 ${stars} 顆星星了！`;
+          last = null;
+          api.done();
+        } else placeStar();
+      }
+    });
+    const end = () => { last = null; };
+    desk.addEventListener('pointerup', end);
+    desk.addEventListener('pointercancel', end);
+    placeStar();
+    draw();
+  },
+
+  // Tap the cat: the wires under the tap light up and give its row and column.
+  touch(host, { rows, cols, rounds }, api) {
+    const hl = Array.from({ length: rows }, (_, i) => `<i class="hline" style="top:${((i + 0.5) / rows) * 100}%"></i>`).join('');
+    const vl = Array.from({ length: cols }, (_, j) => `<i class="vline" style="left:${((j + 0.5) / cols) * 100}%"></i>`).join('');
+    host.innerHTML = `
+      <div class="w-touch">
+        <div class="pad">${hl}${vl}<span class="cat">🐱</span><span class="dot"></span></div>
+        <p class="readout">用手指點小貓</p>
+      </div>`;
+    const pad = host.querySelector('.pad');
+    const cat = host.querySelector('.cat');
+    const dot = host.querySelector('.dot');
+    const hlines = [...host.querySelectorAll('.hline')];
+    const vlines = [...host.querySelectorAll('.vline')];
+    let tr = 0, tc = 0, got = 0, busy = false;
+    const at = (r, c) => ({ top: ((r + 0.5) / rows) * 100 + '%', left: ((c + 0.5) / cols) * 100 + '%' });
+    const placeCat = () => {
+      const [r0, c0] = [tr, tc];
+      do { tr = Math.floor(Math.random() * rows); tc = Math.floor(Math.random() * cols); } while (tr === r0 && tc === c0);
+      Object.assign(cat.style, at(tr, tc));
+    };
+    pad.addEventListener('pointerdown', e => {
+      if (got >= rounds || busy) return;
+      // measure inside the bezel (the border), where the lines and the cat are placed
+      const b = pad.getBoundingClientRect();
+      const fx = (e.clientX - b.left - pad.clientLeft) / pad.clientWidth;
+      const fy = (e.clientY - b.top - pad.clientTop) / pad.clientHeight;
+      const r = Math.min(rows - 1, Math.max(0, Math.floor(fy * rows)));
+      const c = Math.min(cols - 1, Math.max(0, Math.floor(fx * cols)));
+      hlines.forEach((l, i) => l.classList.toggle('lit', i === r));
+      vlines.forEach((l, j) => l.classList.toggle('lit', j === c));
+      Object.assign(dot.style, at(r, c));
+      dot.classList.add('show');
+      const where = `第 ${r + 1} 條橫線 × 第 ${c + 1} 條直線`;
+      if (r === tr && c === tc) {
+        got++;
+        api.good();
+        pop(cat);
+        host.querySelector('.readout').innerHTML = `${where}：點到了！${got >= rounds ? ' 🎉' : ''}`;
+        if (got >= rounds) api.done();
+        else { busy = true; api.later(() => { busy = false; placeCat(); }, 600); }
+      } else {
+        host.querySelector('.readout').textContent = `${where}，小貓不在這裡`;
+      }
+    });
+    placeCat();
+  },
+
+  // Guided steps: draw, save, draw again, power off, power on.
+  power(host, _, api) {
+    const steps = [
+      '① 按「畫圖」，在書桌上畫一張圖',
+      '② 按「存檔」，把圖收進書櫃',
+      '③ 再畫一張，這次<b>不要</b>存檔',
+      '④ 按「關機」',
+      '⑤ 按「開機」，看看還剩什麼？',
+    ];
+    host.innerHTML = `
+      <div class="w-power">
+        <p class="step"></p>
+        <div class="pc">
+          <div class="area ram"><div class="area-lbl">🗒️ 書桌：記憶體 ${en('RAM')}</div><div class="things"></div></div>
+          <div class="area shelf"><div class="area-lbl">📚 書櫃：硬碟 ${en('hard drive')}</div><div class="things"></div></div>
+          <div class="off-veil">💤</div>
+        </div>
+        <div class="controls">
+          <button data-act="draw">🎨 畫圖</button>
+          <button data-act="save">💾 存檔</button>
+          <button data-act="power">⏻ 關機</button>
+        </div>
+      </div>`;
+    const pics = ['🐱', '🚀', '🌈', '🌻', '🦖'];
+    const desk = host.querySelector('.ram .things');
+    const shelf = host.querySelector('.shelf .things');
+    const pc = host.querySelector('.pc');
+    const btns = Object.fromEntries([...host.querySelectorAll('[data-act]')].map(b => [b.dataset.act, b]));
+    let step = 0;
+    const want = ['draw', 'save', 'draw', 'power', 'power'];
+    const draw = () => {
+      host.querySelector('.step').innerHTML = steps[step] ?? '🎉 書櫃的圖還在，書桌上沒存檔的圖不見了！';
+      for (const [k, b] of Object.entries(btns)) {
+        b.disabled = step >= steps.length || want[step] !== k;
+        b.classList.toggle('glow', !b.disabled);
+      }
+      btns.power.textContent = step === 4 ? '⏻ 開機' : '⏻ 關機';
+    };
+    host.querySelector('.controls').addEventListener('click', e => {
+      const b = e.target.closest('[data-act]');
+      if (!b || b.disabled) return;
+      const act = b.dataset.act;
+      if (act === 'draw') {
+        const pic = h(`<span class="thing">${pics[step === 0 ? 0 : 1 + Math.floor(Math.random() * 4)]}</span>`);
+        desk.append(pic);
+        pop(pic);
+      } else if (act === 'save') {
+        for (const t of desk.children) shelf.append(t.cloneNode(true));
+        pop(shelf.parentElement);
+      } else if (step === 3) {
+        pc.classList.add('off');
+        desk.querySelectorAll('.thing').forEach(t => t.classList.add('vanish'));
+      } else {
+        pc.classList.remove('off');
+        desk.replaceChildren();
+        pop(shelf.parentElement);
+        api.done();
+      }
+      api.good();
+      step++;
+      draw();
+    });
+    draw();
+  },
+
+  // Upload a photo to the cloud, lose phone A, download it on tablet B.
+  cloud(host, _, api) {
+    host.innerHTML = `
+      <div class="w-cloud">
+        <p class="step">① 把照片拖到雲端上傳 ${en('upload')}</p>
+        <div class="sky" data-zone="cloud"><span class="cloud-icon">☁️</span><span class="cloud-lbl">遠方的伺服器 ${en('server')}</span><div class="things"></div></div>
+        <div class="phones">
+          <div class="device a"><div class="dev-lbl">手機 A</div><div class="dev-screen"><button class="chip photo"><span class="chip-icon">🐶</span></button></div></div>
+          <div class="device b"><div class="dev-lbl">新平板 B</div><div class="dev-screen"></div><button class="dl" disabled>⬇️ 下載 ${en('download')}</button></div>
+        </div>
+      </div>`;
+    const photo = host.querySelector('.photo');
+    const sky = host.querySelector('.sky');
+    const box = host.querySelector('.w-cloud');
+    const dl = host.querySelector('.dl');
+    const stepEl = host.querySelector('.step');
+    const upload = async zone => {
+      if (zone !== sky) { if (zone) shake(photo); return; }
+      photo.classList.add('placed');
+      await fly(box, '🐶', photo, sky);
+      if (!api.alive()) return;
+      sky.querySelector('.things').append(h('<span class="thing">🐶</span>'));
+      pop(sky);
+      api.good();
+      stepEl.textContent = '上傳好了！';
+      api.later(() => {
+        host.querySelector('.device.a').classList.add('broken');
+        stepEl.innerHTML = '② 糟糕！手機 A 掉進水裡壞掉了 💦<br>用新平板 B，按「下載」';
+        dl.disabled = false;
+        dl.classList.add('glow');
+      }, 1000);
+    };
+    drag(photo, { onDrop: upload, onTap: () => upload(sky) });
+    dl.onclick = async () => {
+      dl.disabled = true;
+      dl.classList.remove('glow');
+      const target = host.querySelector('.device.b .dev-screen');
+      await fly(box, '🐶', sky, target);
+      if (!api.alive()) return;
+      target.append(h('<span class="thing">🐶</span>'));
+      pop(target);
+      stepEl.textContent = '🎉 照片回來了！放在雲端，換一台裝置也拿得到。';
+      api.good();
+      api.done();
+    };
+  },
+
+  // Send a message as numbered packets on different roads, then put them back in order.
+  packets(host, { parts }, api) {
+    const nodes = { S: [40, 110], A: [190, 40], B: [190, 180], C: [300, 110], D: [410, 40], E: [410, 180], R: [560, 110] };
+    const edges = ['SA', 'SB', 'AC', 'BC', 'CD', 'CE', 'AD', 'BE', 'DR', 'ER'];
+    const routes = ['SADR', 'SBCDR', 'SACER', 'SBER'];
+    const pct = ([x, y]) => ({ left: (x / 600) * 100 + '%', top: (y / 220) * 100 + '%' });
+    host.innerHTML = `
+      <div class="w-packets">
+        <p class="msg">要傳的訊息：<b>${parts.join('')}</b></p>
+        <div class="net">
+          <svg viewBox="0 0 600 220" preserveAspectRatio="none" aria-hidden="true">
+            ${edges.map(([a, b]) => `<line x1="${nodes[a][0]}" y1="${nodes[a][1]}" x2="${nodes[b][0]}" y2="${nodes[b][1]}"/>`).join('')}
+          </svg>
+          ${Object.entries(nodes).map(([k, p]) => {
+            const s = pct(p);
+            const icon = k === 'S' ? '📱' : k === 'R' ? '💻' : '📡';
+            return `<span class="node${k === 'S' || k === 'R' ? ' end' : ''}" style="left:${s.left};top:${s.top}">${icon}</span>`;
+          }).join('')}
+        </div>
+        <button class="go glow">📨 送出</button>
+        <div class="arrived" hidden><p>收到的封包（亂掉了）：照號碼點 1 → ${parts.length}</p><div class="pool"></div></div>
+        <p class="rebuilt" hidden>排好的訊息：<b></b></p>
+      </div>`;
+    const net = host.querySelector('.net');
+    const go = host.querySelector('.go');
+    go.onclick = () => {
+      go.disabled = true;
+      go.classList.remove('glow');
+      // Arrival order: any shuffle except 1, 2, 3, …
+      const arrival = shuffle(parts.map((_, i) => i), true);
+      const pool = host.querySelector('.pool');
+      let landed = 0;
+      parts.forEach((txt, i) => {
+        const pk = h(`<span class="packet"><i>${i + 1}</i>${txt}</span>`);
+        net.append(pk);
+        const path = routes[i % routes.length].split('').map(k => pct(nodes[k]));
+        const anim = pk.animate(path, { duration: 1400 + arrival.indexOf(i) * 500, easing: 'linear', fill: 'forwards' });
+        anim.finished.then(() => {
+          if (!api.alive()) return;
+          pk.remove();
+          const card = h(`<button class="chip packet-card"><i>${i + 1}</i>${txt}</button>`);
+          card.dataset.n = i;
+          pool.append(card);
+          host.querySelector('.arrived').hidden = false;
+          if (++landed === parts.length) ready();
+        }, () => {});
+      });
+    };
+    const ready = () => {
+      let next = 0;
+      const out = host.querySelector('.rebuilt b');
+      host.querySelectorAll('.packet-card').forEach(card => {
+        card.onclick = () => {
+          if (card.classList.contains('placed')) return;
+          if (+card.dataset.n !== next) { shake(card); api.bad(); return; }
+          card.classList.add('placed');
+          host.querySelector('.rebuilt').hidden = false;
+          out.textContent += parts[next];
+          api.good();
+          if (++next === parts.length) {
+            out.textContent += ' ✅';
+            api.done();
+          }
+        };
+      });
+    };
+  },
+
+  // 4 cooks paint 4 cells at a time; 64 helpers paint every cell at once, but each is slower.
+  race(host, _, api) {
+    const pic = [
+      '..yyyy..',
+      '.yyyyyy.',
+      'yykyykyy',
+      'yyyyyyyy',
+      'ykyyyyky',
+      'yykkkkyy',
+      '.yyyyyy.',
+      '..yyyy..',
+    ].join('');
+    const colors = { '.': '#a5d8ff', y: '#ffd43b', k: '#343a40' };
+    const panel = (cls, who, sub) => `
+      <figure class="lane ${cls}">
+        <figcaption><b>${who}</b><small>${sub}</small></figcaption>
+        ${gridHTML(8, 8)}
+        <p class="time">0.0 秒</p>
+      </figure>`;
+    host.innerHTML = `
+      <div class="w-race">
+        <div class="lanes">
+          ${panel('cpu', '👨‍🍳 CPU', '4 位大廚，每人很快')}
+          ${panel('gpu', '🐜 GPU', '64 個小幫手，每人比較慢')}
+        </div>
+        <button class="go glow">🏁 開始比賽</button>
+        <p class="result"></p>
+      </div>`;
+    const go = host.querySelector('.go');
+    const lane = cls => ({
+      cells: [...host.querySelectorAll(`.${cls} .px`)],
+      time: host.querySelector(`.${cls} .time`),
+    });
+    const cpu = lane('cpu'), gpu = lane('gpu');
+    const reset = l => l.cells.forEach(c => (c.style.background = ''));
+    const paint = (l, from, to) => l.cells.slice(from, to).forEach((c, k) => (c.style.background = colors[pic[from + k]]));
+    go.onclick = () => {
+      go.disabled = true;
+      go.classList.remove('glow');
+      reset(cpu); reset(gpu);
+      host.querySelector('.result').textContent = '';
+      const t0 = performance.now();
+      let cpuDone = false, gpuDone = false, filled = 0;
+      const finish = () => {
+        if (!cpuDone || !gpuDone) return;
+        host.querySelector('.result').innerHTML = '🐜 <b>GPU 先完成！</b>每個小幫手比較慢，可是 64 個人<b>同時</b>一起塗。';
+        go.disabled = false;
+        go.textContent = '🔁 再比一次';
+        api.good();
+        api.done();
+      };
+      const tickCpu = () => {
+        if (!api.alive()) return;
+        paint(cpu, filled, filled + 4);
+        filled += 4;
+        cpu.time.textContent = ((performance.now() - t0) / 1000).toFixed(1) + ' 秒';
+        if (filled < 64) api.later(tickCpu, 150);
+        else { cpuDone = true; finish(); }
+      };
+      api.later(tickCpu, 150);
+      api.later(() => {
+        paint(gpu, 0, 64);
+        gpu.time.textContent = ((performance.now() - t0) / 1000).toFixed(1) + ' 秒';
+        pop(host.querySelector('.gpu .pxgrid'));
+        gpuDone = true;
+        finish();
+      }, 500);
+    };
+  },
+
+  // Draw a picture, then watch the print head place the dots row by row.
+  printer(host, { size }, api) {
+    host.innerHTML = `
+      <div class="w-printer">
+        <figure><figcaption>① 畫一張圖</figcaption>${gridHTML(size, size, 'canvas')}</figure>
+        <div class="mid"><button class="go">🖨️ 列印</button></div>
+        <figure><figcaption>② 印出來的紙</figcaption><div class="paper">${gridHTML(size, size, 'out')}<span class="head"></span></div></figure>
+        <p class="hint">點格子畫圖，再按「列印」</p>
+      </div>`;
+    const canvas = host.querySelector('.canvas');
+    const src = [...canvas.querySelectorAll('.px')];
+    const out = [...host.querySelectorAll('.out .px')];
+    const head = host.querySelector('.head');
+    const go = host.querySelector('.go');
+    const hint = host.querySelector('.hint');
+    paintable(canvas, () => go.classList.toggle('glow', src.some(c => c.classList.contains('on'))));
+    go.onclick = () => {
+      if (!src.some(c => c.classList.contains('on'))) {
+        hint.textContent = '先畫一點東西吧！';
+        shake(canvas);
+        return;
+      }
+      go.disabled = true;
+      go.classList.remove('glow');
+      canvas.classList.add('locked');
+      out.forEach(c => c.classList.remove('on'));
+      head.classList.add('show');
+      hint.textContent = '噴頭一行一行來回跑，在要上色的地方噴墨點…';
+      let i = 0;
+      const step = () => {
+        if (!api.alive()) return;
+        const r = Math.floor(i / size);
+        // Every other row runs right to left, like a real print head.
+        const c = r % 2 ? size - 1 - (i % size) : i % size;
+        const k = r * size + c;
+        head.style.top = ((r + 0.5) / size) * 100 + '%';
+        head.style.left = ((c + 0.5) / size) * 100 + '%';
+        if (src[k].classList.contains('on')) out[k].classList.add('on');
+        if (++i < size * size) { api.later(step, 55); return; }
+        head.classList.remove('show');
+        go.disabled = false;
+        canvas.classList.remove('locked');
+        hint.textContent = '🎉 印好了！真正的印表機一吋要噴好幾百個點，所以看起來很平滑。';
+        api.good();
+        api.done();
+      };
+      step();
+    };
+  },
+
+  // For each person, pick the way to get online: cable, Wi-Fi or cellular.
+  connect(host, { rounds }, api) {
+    const ways = {
+      cable: { icon: '🔌', zh: '網路線', en: 'cable', no: '這裡沒有網路線可以插喔' },
+      wifi: { icon: '📶', zh: 'Wi-Fi', en: 'wireless', no: '這裡沒有 Wi-Fi 喔' },
+      cell: { icon: '🗼', zh: '行動網路', en: 'cellular', no: '有更方便、更穩定的方法喔' },
+    };
+    host.innerHTML = `
+      <div class="w-connect">
+        <div class="scene">
+          <span class="who"></span>
+          <span class="link" aria-hidden="true"></span>
+          <span class="globe">🌐</span>
+        </div>
+        <p class="where"></p>
+        <p class="status"></p>
+        <div class="ways">${Object.entries(ways).map(([k, w]) =>
+          `<button class="way" data-way="${k}"><span class="chip-icon">${w.icon}</span><span>${w.zh}${en(w.en)}</span></button>`).join('')}</div>
+      </div>`;
+    const scene = host.querySelector('.scene');
+    const status = host.querySelector('.status');
+    let round = 0, busy = false;
+    const draw = () => {
+      const r = rounds[round];
+      scene.className = 'scene';
+      if (!r) {
+        host.querySelector('.who').textContent = '🎉';
+        host.querySelector('.where').textContent = '大家都上線了！';
+        status.textContent = '';
+        return;
+      }
+      host.querySelector('.who').textContent = r.who;
+      host.querySelector('.where').textContent = r.scene;
+      status.innerHTML = `<span class="pill off">離線 offline</span> 要用哪一種方法連上網路？`;
+      host.querySelectorAll('.way').forEach(b => { b.disabled = false; b.classList.remove('wrong', 'right'); });
+    };
+    host.querySelector('.ways').addEventListener('click', e => {
+      const b = e.target.closest('.way');
+      if (!b || b.disabled || busy || round >= rounds.length) return;
+      const k = b.dataset.way;
+      const r = rounds[round];
+      if (k !== r.want) {
+        b.classList.add('wrong');
+        b.disabled = true;
+        shake(b);
+        status.innerHTML = `<span class="pill off">離線 offline</span> ${ways[k].no}`;
+        api.bad();
+        return;
+      }
+      busy = true;
+      b.classList.add('right');
+      scene.classList.add('online', 'via-' + k);
+      status.innerHTML = `<span class="pill on">上線 online</span> 用${ways[k].zh}連上了！`;
+      api.good();
+      api.later(() => {
+        busy = false;
+        if (++round >= rounds.length) api.done();
+        draw();
+      }, 1400);
+    });
+    draw();
+  },
+
+  // A playground where each object answers one mouse action; a finger works too.
+  mouselab(host, _, api) {
+    const canHover = matchMedia('(hover: hover)').matches;
+    const tasks = [
+      { id: 'click', zh: '按一下', en: 'click', alt: '手指：點一下' },
+      { id: 'dbl', zh: '按兩下', en: 'double-click', alt: '手指：很快點兩下' },
+      { id: 'right', zh: '右鍵', en: 'right-click', alt: '手指：長按' },
+      { id: 'wheel', zh: '滾輪捲動', en: 'scroll', alt: '手指：往上滑' },
+      { id: 'drag', zh: '拖曳', en: 'drag', alt: '手指：按住再移動' },
+      { id: 'hover', zh: '移過去不按', en: 'hover', alt: canHover ? '把游標停在東西上' : '只有滑鼠做得到', optional: !canHover },
+    ];
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="playground">
+          <div class="cell"><button class="obj gift" data-tip="禮物">🎁</button><p>按一下打開</p></div>
+          <div class="cell"><button class="obj folder" data-tip="資料夾">📁</button><p>按兩下打開</p></div>
+          <div class="cell"><button class="obj cat" data-tip="小貓">🐱</button><p>右鍵／長按</p>
+            <div class="ctx" hidden><button>🍖 餵食</button><button>✋ 摸摸</button></div></div>
+          <div class="cell"><div class="obj scroller" data-tip="捲動區"><div>${'🌊<br>'.repeat(7)}💎</div></div><p>捲到最下面</p></div>
+          <div class="cell wide"><span class="obj apple" data-tip="蘋果">🍎</span><span class="arrow">→</span><span class="obj basket" data-zone="basket" data-tip="籃子">🧺</span><p>把蘋果拖進籃子</p></div>
+          <span class="coords">x 0, y 0</span>
+          <span class="tip" hidden></span>
+          <div class="toast" hidden></div>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const pg = host.querySelector('.playground');
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    const toast = toaster($('.toast'), api);
+    let how = 'mouse';
+    pg.addEventListener('pointerdown', e => { how = e.pointerType || 'mouse'; }, true);
+    const done = id => check(id, byWhat[how]);
+
+    // x, y of the pointer: the computer keeps the pointer's place as two numbers
+    pg.addEventListener('pointermove', e => {
+      const b = pg.getBoundingClientRect();
+      $('.coords').textContent = `x ${Math.round(e.clientX - b.left)}, y ${Math.round(e.clientY - b.top)}`;
+    });
+
+    $('.gift').addEventListener('click', e => {
+      e.currentTarget.textContent = e.currentTarget.textContent === '🎁' ? '🎉' : '🎁';
+      done('click');
+    });
+
+    // Our own double-click timing, so a double tap on iPad counts too.
+    let lastFolder = 0;
+    const folder = $('.folder');
+    folder.addEventListener('click', () => {
+      const now = performance.now();
+      if (now - lastFolder < 450) {
+        lastFolder = 0;
+        folder.textContent = folder.textContent === '📂' ? '📁' : '📂';
+        done('dbl');
+        return;
+      }
+      lastFolder = now;
+      api.later(() => { if (lastFolder === now) toast('資料夾要「很快連按兩下」才會打開'); }, 470);
+    });
+
+    const cat = $('.cat'), ctx = $('.ctx');
+    const openMenu = () => { ctx.hidden = false; done('right'); };
+    cat.addEventListener('contextmenu', e => { e.preventDefault(); openMenu(); });
+    let press = null;
+    cat.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse') return;
+      const x = e.clientX, y = e.clientY;
+      press = { x, y, timer: setTimeout(() => { press = null; if (api.alive()) openMenu(); }, 550) };
+    });
+    cat.addEventListener('pointermove', e => {
+      if (press && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 10) { clearTimeout(press.timer); press = null; }
+    });
+    for (const t of ['pointerup', 'pointercancel', 'pointerleave']) {
+      cat.addEventListener(t, () => { if (press) { clearTimeout(press.timer); press = null; } });
+    }
+    cat.addEventListener('click', () => { if (ctx.hidden) toast('小貓要按右鍵，或用手指長按'); });
+    ctx.addEventListener('click', e => {
+      if (!e.target.closest('button')) return;
+      cat.textContent = '😻';
+      ctx.hidden = true;
+    });
+    pg.addEventListener('pointerdown', e => {
+      if (!ctx.hidden && !e.target.closest('.ctx') && !e.target.closest('.cat')) ctx.hidden = true;
+    });
+    pg.addEventListener('contextmenu', e => {
+      if (e.target.closest('.cat')) return;
+      e.preventDefault();
+      toast('右鍵要按在小貓身上喔');
+    });
+    pg.addEventListener('mousedown', e => { if (e.button === 1) e.preventDefault(); });
+    pg.addEventListener('auxclick', e => { if (e.button === 1) toast('這是中鍵：把滾輪按下去！'); });
+
+    const scroller = $('.scroller');
+    let wheelSeen = false;
+    scroller.addEventListener('wheel', () => { wheelSeen = true; }, { passive: true });
+    scroller.addEventListener('scroll', () => {
+      if (scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 4) {
+        check('wheel', wheelSeen ? '用滾輪或觸控板完成 🖱️' : byWhat[how]);
+      }
+    });
+
+    const apple = $('.apple'), basket = $('.basket');
+    drag(apple, {
+      onDrop: zone => {
+        if (zone !== basket) return;
+        apple.classList.add('placed');
+        basket.classList.add('full');
+        done('drag');
+      },
+      onTap: () => toast('要按住不放，再移到籃子上'),
+    });
+
+    const tip = $('.tip');
+    pg.querySelectorAll('[data-tip]').forEach(o => {
+      o.addEventListener('pointerenter', e => {
+        if (e.pointerType !== 'mouse') return;
+        const b = pg.getBoundingClientRect(), r = o.getBoundingClientRect();
+        tip.textContent = o.dataset.tip;
+        tip.style.left = r.left - b.left + r.width / 2 + 'px';
+        tip.style.top = r.top - b.top + 'px';
+        tip.hidden = false;
+        check('hover', '用滑鼠完成 🖱️');
+      });
+      o.addEventListener('pointerleave', () => { tip.hidden = true; });
+    });
+  },
+
+  // A photo that answers taps, swipes and two-finger gestures.
+  touchlab(host, _, api) {
+    const hasTouch = navigator.maxTouchPoints > 0;
+    const two = hasTouch ? '' : '要用觸控螢幕或觸控板';
+    const tasks = [
+      { id: 'tap', zh: '點一下', en: 'tap', alt: '顯示說明' },
+      { id: 'dbl', zh: '點兩下', en: 'double-tap', alt: '放大或縮回' },
+      { id: 'long', zh: '長按', en: 'long press', alt: '跳出選單' },
+      { id: 'swipe', zh: '左右滑動', en: 'swipe', alt: '換下一張' },
+      { id: 'pinch', zh: '兩指縮放', en: 'pinch', alt: two || '兩根手指張開、捏起', optional: !hasTouch },
+      { id: 'rotate', zh: '兩指旋轉', en: 'rotate', alt: two || '兩根手指一起轉', optional: !hasTouch },
+      { id: 'pan', zh: '放大後拖移', en: 'pan', alt: '一根手指移動照片' },
+    ];
+    const photos = [['🦁', '獅子'], ['🐼', '貓熊'], ['🐧', '企鵝'], ['🦒', '長頸鹿']];
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="frame">
+          <div class="pic"><span class="corner tl">🌿</span><span class="corner br">🌼</span><span class="beast"></span></div>
+          <p class="photo-cap" hidden></p>
+          <div class="menu" hidden><button>💾 儲存</button><button>📤 分享</button><button>📋 拷貝</button></div>
+          <span class="count"></span>
+          <div class="toast" hidden></div>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const frame = $('.frame'), photo = $('.pic'), menu = $('.menu'), caption = $('.photo-cap');
+    const check = checklist($('.tasks'), tasks, api);
+    const toast = toaster($('.toast'), api);
+    let idx = 0, sc = 1, rot = 0, tx = 0, ty = 0;
+    const apply = (settle = false) => {
+      photo.classList.toggle('settle', settle);
+      photo.style.transform = `translate(${tx}px, ${ty}px) rotate(${rot}deg) scale(${sc})`;
+    };
+    const show = () => {
+      $('.beast').textContent = photos[idx][0];
+      caption.textContent = `${photos[idx][0]} ${photos[idx][1]}：第 ${idx + 1} 張，共 ${photos.length} 張`;
+      $('.count').textContent = `${idx + 1} / ${photos.length}`;
+    };
+    const reset = () => { sc = 1; rot = 0; tx = 0; ty = 0; };
+    const next = d => {
+      idx = (idx + d + photos.length) % photos.length;
+      reset();
+      apply();
+      show();
+      photo.animate([{ translate: `${d * 60}% 0`, opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 250, easing: 'ease-out' });
+    };
+    const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+    const angle = (a, b) => (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+
+    const pts = new Map();
+    let one = null, g = null, longT = null, tapT = null, lastTap = 0;
+    frame.addEventListener('pointerdown', e => {
+      if (e.target.closest('.menu')) return;
+      e.preventDefault();
+      frame.setPointerCapture(e.pointerId);
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (!menu.hidden) menu.hidden = true;
+      if (pts.size === 1) {
+        one = { x0: e.clientX, y0: e.clientY, t0: performance.now(), lx: e.clientX, ly: e.clientY, moved: false, multi: false, long: false, panned: 0 };
+        longT = setTimeout(() => {
+          if (!api.alive() || !one || one.moved || one.multi) return;
+          one.long = true;
+          menu.hidden = false;
+          check('long');
+        }, 550);
+      } else if (pts.size === 2) {
+        clearTimeout(longT);
+        if (one) one.multi = true;
+        const [a, b] = [...pts.values()];
+        g = { d: dist(a, b), ang: angle(a, b), sc, rot };
+      }
+    });
+    frame.addEventListener('pointermove', e => {
+      if (!pts.has(e.pointerId)) return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size >= 2 && g) {
+        const [a, b] = [...pts.values()];
+        const k = dist(a, b) / g.d;
+        let turn = angle(a, b) - g.ang;
+        if (turn > 180) turn -= 360;
+        if (turn < -180) turn += 360;
+        sc = Math.min(4, Math.max(0.6, g.sc * k));
+        rot = g.rot + turn;
+        apply();
+        if (Math.abs(k - 1) > 0.2) check('pinch');
+        if (Math.abs(turn) > 25) check('rotate');
+        return;
+      }
+      if (!one || one.multi) return;
+      const dx = e.clientX - one.lx, dy = e.clientY - one.ly;
+      one.lx = e.clientX;
+      one.ly = e.clientY;
+      if (Math.hypot(e.clientX - one.x0, e.clientY - one.y0) > 10) { one.moved = true; clearTimeout(longT); }
+      if (!one.moved || one.long) return;
+      if (sc > 1.1) {
+        tx += dx;
+        ty += dy;
+        one.panned += Math.hypot(dx, dy);
+        if (one.panned > 40) check('pan');
+        apply();
+      } else {
+        photo.style.transform = `translate(${e.clientX - one.x0}px, 0) rotate(${rot}deg) scale(${sc})`;
+      }
+    });
+    const up = e => {
+      if (!pts.has(e.pointerId)) return;
+      pts.delete(e.pointerId);
+      clearTimeout(longT);
+      if (pts.size < 2) g = null;
+      if (pts.size === 1 && one) {
+        const [r] = [...pts.values()];
+        one.lx = r.x;
+        one.ly = r.y;
+      }
+      if (pts.size > 0 || !one) return;
+      const s = one;
+      one = null;
+      if (s.multi || s.long) { apply(true); return; }
+      const dt = performance.now() - s.t0, dx = e.clientX - s.x0, dy = e.clientY - s.y0;
+      if (!s.moved && dt < 350) {
+        const now = performance.now();
+        if (now - lastTap < 320) {
+          clearTimeout(tapT);
+          lastTap = 0;
+          if (sc > 1.1) { reset(); } else { sc = 2.2; tx = 0; ty = 0; }
+          apply(true);
+          check('dbl');
+        } else {
+          lastTap = now;
+          tapT = setTimeout(() => {
+            if (!api.alive()) return;
+            caption.hidden = !caption.hidden;
+            check('tap');
+          }, 320);
+        }
+      } else if (sc <= 1.1 && Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+        next(dx < 0 ? 1 : -1);
+        check('swipe');
+      } else {
+        apply(true);
+      }
+    };
+    frame.addEventListener('pointerup', up);
+    frame.addEventListener('pointercancel', up);
+
+    // Mac trackpad: a pinch arrives as ctrl + wheel, and Safari also sends gesture events.
+    frame.addEventListener('wheel', e => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      sc = Math.min(4, Math.max(0.6, sc * Math.exp(-e.deltaY / 100)));
+      apply();
+      if (Math.abs(sc - 1) > 0.2) check('pinch');
+    }, { passive: false });
+    let gs = null;
+    frame.addEventListener('gesturestart', e => { e.preventDefault(); gs = { sc, rot }; });
+    frame.addEventListener('gesturechange', e => {
+      e.preventDefault();
+      if (!gs || pts.size) return; // on iPad the pointer events above already handle it
+      sc = Math.min(4, Math.max(0.6, gs.sc * e.scale));
+      rot = gs.rot + e.rotation;
+      apply();
+      if (Math.abs(e.scale - 1) > 0.2) check('pinch');
+      if (Math.abs(e.rotation) > 25) check('rotate');
+    });
+    menu.addEventListener('click', e => {
+      if (!e.target.closest('button')) return;
+      menu.hidden = true;
+      toast('這是練習，不會真的儲存或分享');
+    });
+    show();
+  },
+
+  // Roll a ball into the hole by tilting: a joystick, or the real gyroscope when allowed.
+  tilt(host, { goal }, api) {
+    host.innerHTML = `
+      <div class="w-tilt">
+        <div class="board"><span class="hole"></span><span class="ball"></span><span class="score"></span></div>
+        <div class="tilt-side">
+          <div class="stick"><span class="knob"></span></div>
+          <p class="readout">拖動搖桿，就像把平板歪一邊</p>
+          <button class="go sensor" hidden>📱 改用平板的陀螺儀</button>
+          <p class="note"></p>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const board = $('.board'), ball = $('.ball'), hole = $('.hole'), stick = $('.stick'), knob = $('.knob');
+    const tilt = { x: 0, y: 0 };
+    let bx = 0, by = 0, vx = 0, vy = 0, hx = 0, hy = 0, score = 0, ready = false, sensorOn = false;
+    const R = 16, H = 26;
+    const placeHole = (w, h) => {
+      do { hx = H + Math.random() * (w - 2 * H); hy = H + Math.random() * (h - 2 * H); } while (Math.hypot(hx - bx, hy - by) < Math.min(w, h) * 0.45);
+      hole.style.left = hx + 'px';
+      hole.style.top = hy + 'px';
+    };
+    const drawScore = () => { $('.score').textContent = score >= goal ? '🎉 全部進洞！' : `進洞 ${score} / ${goal}`; };
+    const showTilt = () => {
+      const h = Math.round(tilt.x * 30), v = Math.round(tilt.y * 30);
+      $('.readout').textContent = `${h < 0 ? '往左' : '往右'}歪 ${Math.abs(h)}°、${v < 0 ? '往上' : '往下'}歪 ${Math.abs(v)}°`;
+    };
+
+    // joystick
+    let stickId = null;
+    const setStick = e => {
+      const b = stick.getBoundingClientRect();
+      let x = (e.clientX - b.left - b.width / 2) / (b.width / 2);
+      let y = (e.clientY - b.top - b.height / 2) / (b.height / 2);
+      const m = Math.hypot(x, y);
+      if (m > 1) { x /= m; y /= m; }
+      tilt.x = x; tilt.y = y;
+      knob.style.translate = `${x * 50}% ${y * 50}%`;
+      showTilt();
+    };
+    stick.addEventListener('pointerdown', e => {
+      if (sensorOn) return;
+      e.preventDefault();
+      stick.setPointerCapture(e.pointerId);
+      stickId = e.pointerId;
+      setStick(e);
+    });
+    stick.addEventListener('pointermove', e => { if (e.pointerId === stickId) setStick(e); });
+    const release = e => {
+      if (e.pointerId !== stickId) return;
+      stickId = null;
+      tilt.x = tilt.y = 0;
+      knob.style.translate = '0 0';
+    };
+    stick.addEventListener('pointerup', release);
+    stick.addEventListener('pointercancel', release);
+
+    // real sensor (iOS asks for permission, and only on an https page)
+    const btn = $('.sensor');
+    if ('DeviceOrientationEvent' in window && navigator.maxTouchPoints > 0) btn.hidden = false;
+    let base = null;
+    const onTurn = e => {
+      if (!api.alive()) { window.removeEventListener('deviceorientation', onTurn); return; }
+      if (e.beta == null) return;
+      const a = (screen.orientation && screen.orientation.angle) ?? window.orientation ?? 0;
+      const [x, y] = a === 90 ? [e.beta, -e.gamma] : a === -90 || a === 270 ? [-e.beta, e.gamma] : a === 180 ? [-e.gamma, -e.beta] : [e.gamma, e.beta];
+      base ??= { x, y };
+      tilt.x = Math.max(-1, Math.min(1, (x - base.x) / 25));
+      tilt.y = Math.max(-1, Math.min(1, (y - base.y) / 25));
+      knob.style.translate = `${tilt.x * 50}% ${tilt.y * 50}%`;
+      showTilt();
+    };
+    btn.onclick = async () => {
+      if (!window.isSecureContext) {
+        $('.note').textContent = '要用 https 網址打開，才能用真的陀螺儀。現在先用搖桿玩。';
+        return;
+      }
+      try {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+          if ((await DeviceOrientationEvent.requestPermission()) !== 'granted') {
+            $('.note').textContent = '沒有拿到使用權限，先用搖桿玩。';
+            return;
+          }
+        }
+      } catch {
+        $('.note').textContent = '沒辦法使用陀螺儀，先用搖桿玩。';
+        return;
+      }
+      sensorOn = true;
+      base = null;
+      btn.hidden = true;
+      stick.classList.add('off');
+      $('.note').textContent = '現在的姿勢當作「平的」。慢慢歪平板試試看！';
+      window.addEventListener('deviceorientation', onTurn);
+    };
+
+    let last = performance.now();
+    const frameStep = now => {
+      if (!api.alive()) { window.removeEventListener('deviceorientation', onTurn); return; }
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const w = board.clientWidth, h = board.clientHeight;
+      if (!ready && w) { bx = w / 2; by = h / 2; placeHole(w, h); drawScore(); ready = true; }
+      if (score < goal) {
+        vx = (vx + tilt.x * 900 * dt) * (1 - 1.2 * dt);
+        vy = (vy + tilt.y * 900 * dt) * (1 - 1.2 * dt);
+        bx += vx * dt;
+        by += vy * dt;
+        if (bx < R) { bx = R; vx = -vx * 0.5; }
+        if (bx > w - R) { bx = w - R; vx = -vx * 0.5; }
+        if (by < R) { by = R; vy = -vy * 0.5; }
+        if (by > h - R) { by = h - R; vy = -vy * 0.5; }
+        if (Math.hypot(bx - hx, by - hy) < H - R / 2) {
+          score++;
+          api.good();
+          pop(hole);
+          vx = vy = 0;
+          drawScore();
+          if (score >= goal) api.done();
+          else placeHole(w, h);
+        }
+      }
+      ball.style.left = bx + 'px';
+      ball.style.top = by + 'px';
+      requestAnimationFrame(frameStep);
+    };
+    requestAnimationFrame(frameStep);
+  },
+
+  // Turn a pretend tablet with and without rotation lock; also notice the real one turning.
+  orient(host, _, api) {
+    host.innerHTML = `
+      <div class="w-orient">
+        <p class="real"></p>
+        <div class="tab-stage"><div class="tab"><div class="tab-screen"><div class="content"><span>🐶</span><b>Hi!</b></div></div></div></div>
+        <div class="controls">
+          <button data-act="rotate">↻ 轉動平板</button>
+          <button data-act="lock">🔓 旋轉鎖定：關</button>
+        </div>
+        <p class="step"></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const tab = $('.tab'), content = $('.content'), rotBtn = $('[data-act="rotate"]'), lockBtn = $('[data-act="lock"]');
+    let rot = 0, rel = 0, locked = false, step = 0;
+    const steps = [
+      '① 按「轉動平板」，看看畫面會怎樣',
+      '② 畫面自己轉正了！現在打開「旋轉鎖定」',
+      '③ 再按一次「轉動平板」',
+      '🎉 鎖定以後，畫面跟著平板一起歪了。躺著看書時很好用！',
+    ];
+    const draw = () => {
+      $('.step').textContent = steps[step];
+      lockBtn.textContent = locked ? '🔒 旋轉鎖定：開' : '🔓 旋轉鎖定：關';
+      lockBtn.classList.toggle('on', locked);
+      rotBtn.classList.toggle('glow', step === 0 || step === 2);
+      lockBtn.classList.toggle('glow', step === 1);
+    };
+    rotBtn.onclick = () => {
+      rot += 90;
+      tab.style.rotate = rot + 'deg';
+      if (!locked) rel = -rot;
+      content.style.rotate = rel + 'deg';
+      api.good();
+      if (step === 0 && !locked) step = 1;
+      else if (step === 2 && locked) { step = 3; api.done(); }
+      draw();
+    };
+    lockBtn.onclick = () => {
+      locked = !locked;
+      if (!locked) { rel = -rot; content.style.rotate = rel + 'deg'; }
+      if (step === 1 && locked) step = 2;
+      draw();
+    };
+    const mq = matchMedia('(orientation: portrait)');
+    const real = changed => {
+      $('.real').innerHTML = `你的螢幕現在是：<b>${mq.matches ? '直的' : '橫的'}</b>${en(mq.matches ? 'portrait' : 'landscape')}${changed ? '　你轉了真的平板，畫面也跟著轉正了！' : ''}`;
+    };
+    const onChange = () => {
+      if (!api.alive()) { mq.removeEventListener('change', onChange); return; }
+      real(true);
+    };
+    mq.addEventListener('change', onChange);
+    real(false);
+    draw();
+  },
+
+  // Charge with a small charger and a fast charger; fast charging slows down near full.
+  charge(host, _, api) {
+    const kinds = {
+      5: { name: '5W 小充電器', fast: 0.55 },
+      20: { name: '20W 快充充電器', fast: 1.55 },
+    };
+    host.innerHTML = `
+      <div class="w-charge">
+        <div class="chargers">${Object.entries(kinds).map(([w, k]) => `<button class="option" data-w="${w}">${w === '20' ? '⚡' : '🔌'} ${k.name}</button>`).join('')}</div>
+        <div class="rig">
+          <span class="brick">🔌<small></small></span>
+          <span class="cable"></span>
+          <div class="charge-tab"><div class="batt"><i></i></div><b class="pct">10%</b></div>
+        </div>
+        <p class="clock">模擬時間 0 小時 0 分</p>
+        <p class="readout">選一個充電器，看看充滿要多久</p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const btns = [...host.querySelectorAll('[data-w]')];
+    const tried = new Set();
+    const results = [];
+    const hm = m => `${Math.floor(m / 60)} 小時 ${Math.round(m % 60)} 分`;
+    btns.forEach(b => {
+      b.onclick = () => {
+        const w = b.dataset.w, k = kinds[w];
+        btns.forEach(x => (x.disabled = true));
+        $('.brick small').textContent = w + 'W';
+        $('.rig').classList.add('on');
+        let level = 10, mins = 0;
+        const tick = () => {
+          // 2 simulated minutes per tick; above 80% both chargers slow down to protect the battery
+          for (let i = 0; i < 2 && level < 100; i++) { level = Math.min(100, level + (level < 80 ? k.fast : 0.4)); mins++; }
+          $('.batt i').style.width = level + '%';
+          $('.batt').classList.toggle('slow', level >= 80);
+          $('.pct').textContent = Math.floor(level) + '%';
+          $('.clock').textContent = '模擬時間 ' + hm(mins);
+          if (level < 100) { api.later(tick, 40); return; }
+          $('.rig').classList.remove('on');
+          btns.forEach(x => (x.disabled = false));
+          tried.add(w);
+          results.push(`${k.name}：大約 ${hm(mins)}`);
+          $('.readout').innerHTML = results.join('<br>') + (tried.size === 2 ? '<br>💡 快充前面很快，快滿時會變慢，這是在保護電池。' : '<br>再試試另一個充電器！');
+          api.good();
+          if (tried.size === 2) api.done();
+        };
+        tick();
+      };
+    });
+  },
+
+  // A pretend camera app: take a photo, switch to video, record, flip to the front camera.
+  camera(host, _, api) {
+    const tasks = [
+      { id: 'photo', zh: '拍一張照片', en: 'take a photo' },
+      { id: 'mode', zh: '切換到錄影', en: 'video mode' },
+      { id: 'record', zh: '錄一段影片', en: 'record', alt: '按一下開始，再按一下停止' },
+      { id: 'flip', zh: '換成前鏡頭自拍', en: 'selfie' },
+    ];
+    const scenes = { back: '<span>🌳</span><span>🏠</span><span>🌳</span><span class="dog">🐕</span>', front: '<span class="me">🧒</span><span class="peace">✌️</span>' };
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="cam">
+          <div class="viewfinder"><div class="shot"></div><span class="rec" hidden>● <b>00:00</b></span><div class="flash"></div></div>
+          <div class="modes"><button data-mode="video">錄影</button><button data-mode="photo" class="on">拍照</button></div>
+          <div class="cam-bar">
+            <div class="thumb" aria-label="相簿"></div>
+            <button class="shutter" aria-label="快門"><i></i></button>
+            <button class="flip" aria-label="切換前後鏡頭">🔄</button>
+          </div>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    let mode = 'photo', front = false, recording = false, secs = 0;
+    const scene = $('.shot'), shutter = $('.shutter'), rec = $('.rec');
+    const drawScene = () => { scene.innerHTML = front ? scenes.front : scenes.back; scene.classList.toggle('front', front); };
+    const thumb = (html, video) => { $('.thumb').innerHTML = `<span>${html}</span>${video ? '<b>▶</b>' : ''}`; pop($('.thumb')); };
+    host.querySelector('.modes').addEventListener('click', e => {
+      const b = e.target.closest('[data-mode]');
+      if (!b || recording) return;
+      mode = b.dataset.mode;
+      host.querySelectorAll('[data-mode]').forEach(x => x.classList.toggle('on', x === b));
+      shutter.classList.toggle('video', mode === 'video');
+      if (mode === 'video') check('mode');
+    });
+    const tickRec = () => {
+      if (!recording) return;
+      secs++;
+      rec.querySelector('b').textContent = `00:${String(secs).padStart(2, '0')}`;
+      api.later(tickRec, 1000);
+    };
+    shutter.onclick = () => {
+      if (mode === 'photo') {
+        const f = $('.flash');
+        f.classList.remove('go');
+        void f.offsetWidth;
+        f.classList.add('go');
+        thumb(front ? '🧒' : '🏠');
+        check('photo');
+        return;
+      }
+      recording = !recording;
+      shutter.classList.toggle('recording', recording);
+      rec.hidden = !recording;
+      if (recording) {
+        secs = 0;
+        rec.querySelector('b').textContent = '00:00';
+        api.later(tickRec, 1000);
+      } else {
+        thumb(front ? '🧒' : '🐕', true);
+        check('record', `錄了 ${secs} 秒`);
+      }
+    };
+    $('.flip').onclick = () => {
+      front = !front;
+      scene.animate([{ transform: 'rotateY(90deg)' }, { transform: 'rotateY(0)' }], { duration: 300 });
+      drawScene();
+      if (front) check('flip');
+    };
+    drawScene();
+  },
+
+  // Find the camera on a laptop, a tablet and the back of a phone.
+  findcam(host, _, api) {
+    const devs = [
+      { id: 'laptop', name: '筆電', at: [50, 5], note: '在螢幕上方。旁邊的小燈亮了，就表示鏡頭正在拍。' },
+      { id: 'tablet', name: '平板', at: [50, 4.5], note: '在螢幕邊框的中間。有些新的 iPad 在橫放時的上方。' },
+      { id: 'phone', name: '手機背面', at: [27, 13], note: '這是後鏡頭，通常比前鏡頭拍得更清楚。' },
+    ];
+    host.innerHTML = `
+      <div class="w-findcam">
+        <div class="devs">${devs.map(d => `
+          <figure class="dev ${d.id}" data-id="${d.id}">
+            <div class="body"><i class="lens"></i>${d.id === 'laptop' ? '<i class="led"></i>' : ''}<span class="ring" hidden></span><span class="miss" hidden></span></div>
+            ${d.id === 'laptop' ? '<div class="base"></div>' : ''}
+            <figcaption><b>${d.name}</b><small></small></figcaption>
+          </figure>`).join('')}</div>
+        <p class="hint">在每台裝置上點出鏡頭的位置</p>
+      </div>`;
+    let found = 0;
+    devs.forEach(d => {
+      const fig = host.querySelector(`[data-id="${d.id}"]`);
+      const body = fig.querySelector('.body');
+      const ring = fig.querySelector('.ring'), miss = fig.querySelector('.miss');
+      ring.style.left = d.at[0] + '%';
+      ring.style.top = d.at[1] + '%';
+      body.addEventListener('pointerdown', e => {
+        if (fig.classList.contains('found')) return;
+        const b = body.getBoundingClientRect();
+        const x = e.clientX - b.left, y = e.clientY - b.top;
+        const cx = (d.at[0] / 100) * b.width, cy = (d.at[1] / 100) * b.height;
+        if (Math.hypot(x - cx, y - cy) < Math.max(28, b.width * 0.14)) {
+          fig.classList.add('found');
+          ring.hidden = false;
+          fig.querySelector('small').textContent = d.note;
+          api.good();
+          if (++found === devs.length) api.done();
+        } else {
+          miss.style.left = x + 'px';
+          miss.style.top = y + 'px';
+          miss.hidden = false;
+          pop(miss);
+          api.bad();
+          api.later(() => { miss.hidden = true; }, 500);
+        }
+      });
+    });
+  },
+
+  // Tap each part of a web address to learn what it means.
+  url(host, _, api) {
+    const parts = [
+      { cls: 'proto', text: 'https://', zh: '協定', en: 'protocol', say: '用哪一種方式和網站說話。最後的 s 表示「有加密」。' },
+      { cls: 'domain', text: 'kids.example.tw', zh: '網域名稱', en: 'domain name', say: '網站的名字，像門牌。最後的 .tw 表示台灣。' },
+      { cls: 'path', text: '/animals/panda', zh: '路徑', en: 'path', say: '網站裡的哪一頁，像房子裡的哪一個房間。' },
+    ];
+    host.innerHTML = `
+      <div class="w-url">
+        <div class="addr"><span class="lock">🔒</span>${parts.map((p, i) => `<button class="part ${p.cls}" data-i="${i}">${p.text}</button>`).join('')}</div>
+        <div class="explain-box"><p>點上面網址的每一段</p></div>
+        <div class="seen">${parts.map(p => `<span class="${p.cls}">${p.zh}${en(p.en)}</span>`).join('')}</div>
+      </div>`;
+    const seen = new Set();
+    host.querySelectorAll('.part').forEach(b => {
+      b.onclick = () => {
+        const p = parts[b.dataset.i];
+        host.querySelectorAll('.part').forEach(x => x.classList.toggle('on', x === b));
+        host.querySelector('.explain-box').innerHTML = `<p class="${p.cls}"><b>${p.zh}</b>${en(p.en)}</p><p>${p.say}</p>`;
+        host.querySelector(`.seen .${p.cls}`).classList.add('got');
+        if (seen.has(b.dataset.i)) return;
+        seen.add(b.dataset.i);
+        api.good();
+        if (seen.size === parts.length) api.done();
+      };
+    });
+  },
+
+  // Pass a note through classmates: without a lock the one in the middle can read it.
+  cipher(host, _, api) {
+    const msg = '我的密碼是 cat123';
+    host.innerHTML = `
+      <div class="w-cipher">
+        <p class="note-msg">紙條：<b>${msg}</b></p>
+        <div class="chain">
+          <div class="kid me"><span>🧒</span><small>你</small></div>
+          <div class="kid"><span>👦</span><small>同學</small></div>
+          <div class="kid peek"><span>🧐</span><small>好奇的同學</small><p class="bubble" hidden></p></div>
+          <div class="kid end"><span>👧</span><small>好朋友</small><p class="bubble" hidden></p></div>
+        </div>
+        <div class="controls">
+          <button class="lockbtn" data-act="lock">🔓 沒上鎖</button>
+          <button class="go glow" data-act="send">📨 傳出去</button>
+        </div>
+        <p class="step">① 先不上鎖，直接傳出去</p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const box = $('.w-cipher');
+    const kids = [...host.querySelectorAll('.kid')];
+    const lockBtn = $('.lockbtn'), send = $('[data-act="send"]');
+    let locked = false, plainSent = false, lockedSent = false, busy = false;
+    const scramble = () => '🔒 ' + Array.from({ length: 8 }, () => '#$%&@*xq7k'[Math.floor(Math.random() * 10)]).join('');
+    lockBtn.onclick = () => {
+      if (busy) return;
+      locked = !locked;
+      lockBtn.textContent = locked ? '🔒 加密上鎖' : '🔓 沒上鎖';
+      lockBtn.classList.toggle('on', locked);
+    };
+    send.onclick = async () => {
+      if (busy) return;
+      busy = true;
+      send.disabled = true;
+      host.querySelectorAll('.bubble').forEach(b => (b.hidden = true));
+      const token = locked ? '🔒' : '📝';
+      for (let i = 0; i < kids.length - 1; i++) {
+        await fly(box, token, kids[i], kids[i + 1], 500);
+        if (!api.alive()) return;
+        if (i === 1) {
+          const b = kids[2].querySelector('.bubble');
+          b.textContent = locked ? `${scramble()}…看不懂 😵` : `「${msg}」嘿嘿，看到了 😏`;
+          b.hidden = false;
+          pop(b);
+        }
+      }
+      const b = kids[3].querySelector('.bubble');
+      b.textContent = locked ? `用鑰匙打開：「${msg}」` : `「${msg}」`;
+      b.hidden = false;
+      pop(b);
+      api.good();
+      if (locked) lockedSent = true; else plainSent = true;
+      $('.step').textContent = plainSent && lockedSent
+        ? '🎉 上了鎖，中間的人只看到亂碼，只有好朋友打得開！'
+        : plainSent ? '② 糟糕，被偷看了！按「沒上鎖」把它鎖起來，再傳一次' : '① 也試試看不上鎖會怎樣';
+      lockBtn.classList.toggle('glow', plainSent && !lockedSent);
+      if (plainSent && lockedSent) api.done();
+      busy = false;
+      send.disabled = false;
+    };
+  },
+
+  // A shift cipher: slide the key until the secret word appears.
+  caesar(host, { secret, key }, api) {
+    const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const shift = (w, k) => w.replace(/[A-Z]/g, c => A[(A.indexOf(c) + k + 26) % 26]);
+    const code = shift(secret, key);
+    host.innerHTML = `
+      <div class="w-caesar">
+        <p class="coded">收到的暗號：<b>${code}</b></p>
+        <div class="rows"><div class="row top"></div><div class="row bottom"></div></div>
+        <div class="keybar">
+          <button class="option minus" aria-label="金鑰減一">－</button>
+          <label>金鑰：往回移 <b class="k">0</b> 格<input type="range" min="0" max="6" value="0"></label>
+          <button class="option plus" aria-label="金鑰加一">＋</button>
+        </div>
+        <p class="decoded">解開來：<b></b></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const range = $('input');
+    let solved = false;
+    const draw = () => {
+      const k = +range.value;
+      $('.k').textContent = k;
+      $('.row.top').innerHTML = A.slice(0, 10).split('').map(c => `<i>${shift(c, k)}</i>`).join('') + '<i>…</i>';
+      $('.row.bottom').innerHTML = A.slice(0, 10).split('').map(c => `<i>${c}</i>`).join('') + '<i>…</i>';
+      const out = shift(code, -k);
+      $('.decoded b').textContent = out;
+      if (!solved && out === secret) {
+        solved = true;
+        $('.decoded').classList.add('ok');
+        $('.decoded b').textContent = `${out} 🐼 解開了！`;
+        api.good();
+        api.done();
+      }
+    };
+    range.oninput = draw;
+    $('.minus').onclick = () => { range.value = +range.value - 1; draw(); };
+    $('.plus').onclick = () => { range.value = +range.value + 1; draw(); };
+    draw();
+  },
+
+  // An app with a bug and a security hole; the update fixes both and adds a feature.
+  update(host, _, api) {
+    host.innerHTML = `
+      <div class="w-update">
+        <p class="step">① 按「存檔」試試看</p>
+        <div class="app">
+          <div class="app-head"><b>🎨 小畫家</b><span class="ver">v1.0</span></div>
+          <div class="app-canvas"><span class="art-pic">🌈🏠</span><span class="leak" title="安全漏洞">🕳️<i>🦹</i></span></div>
+          <div class="app-tools">
+            <button data-act="save">💾 存檔</button>
+            <button data-act="rainbow" hidden>🌈 新功能：彩虹筆</button>
+          </div>
+        </div>
+        <div class="upd">
+          <button class="go" data-act="update" disabled>⬇️ 更新到 v1.1</button>
+          <div class="progress" hidden><i></i><span></span></div>
+        </div>
+        <ul class="notes" hidden>
+          <li>🐛 修好：按「存檔」會當掉的錯誤</li>
+          <li>🛡️ 補好：壞人能鑽進來的安全漏洞</li>
+          <li>🌈 新增：彩虹筆</li>
+        </ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const app = $('.app'), save = $('[data-act="save"]'), upd = $('[data-act="update"]');
+    let stage = 0; // 0 before crash, 1 crashed, 2 updating, 3 updated
+    save.onclick = () => {
+      if (stage === 0 || stage === 1) {
+        shake(app);
+        app.classList.add('crash');
+        api.bad();
+        api.later(() => app.classList.remove('crash'), 700);
+        stage = 1;
+        $('.step').textContent = '💥 當掉了！這是一個錯誤（bug）。② 按「更新」';
+        upd.disabled = false;
+        upd.classList.add('glow');
+      } else if (stage === 3) {
+        pop(app);
+        $('.step').textContent = '🎉 存好了！更新修好了錯誤，也補好了漏洞，小偷進不來了。';
+        api.good();
+        api.done();
+      }
+    };
+    $('[data-act="rainbow"]').onclick = () => { $('.art-pic').textContent = '🌈🌈🏠🌈'; pop($('.art-pic')); };
+    upd.onclick = () => {
+      stage = 2;
+      upd.disabled = true;
+      upd.classList.remove('glow');
+      const bar = $('.progress');
+      bar.hidden = false;
+      let pct = 0;
+      const tick = () => {
+        pct += 4;
+        bar.querySelector('i').style.width = pct + '%';
+        bar.querySelector('span').textContent = pct < 60 ? `下載中 ${pct}%` : pct < 100 ? `安裝中 ${pct}%` : '更新完成！';
+        if (pct < 100) { api.later(tick, 60); return; }
+        stage = 3;
+        $('.ver').textContent = 'v1.1';
+        $('.leak').classList.add('fixed');
+        $('[data-act="rainbow"]').hidden = false;
+        $('.notes').hidden = false;
+        $('.step').textContent = '③ 更新好了！再按一次「存檔」';
+        save.classList.add('glow');
+        api.good();
+      };
+      tick();
+    };
+  },
+
+  // LCD vs OLED: the layers of each, and how each one shows black.
+  screen(host, _, api) {
+    const modes = {
+      lcd: {
+        name: '液晶 LCD',
+        layers: `
+          <div class="ly eye">👀 你的眼睛</div>
+          <div class="ly filter"><i class="r"></i><i class="g"></i><i class="b"></i><span>彩色濾光片</span></div>
+          <div class="ly blinds"><i></i><i></i><i></i><span>液晶（百葉窗）</span></div>
+          <div class="ly back"><span>背光：一直亮著</span></div>`,
+        black: '背光還亮著，百葉窗關不緊，會漏一點光，所以黑色有點灰灰的。',
+      },
+      oled: {
+        name: 'OLED',
+        layers: `
+          <div class="ly eye">👀 你的眼睛</div>
+          <div class="ly emit"><i class="r"></i><i class="g"></i><i class="b"></i><span>每個小點自己發光</span></div>`,
+        black: '小點全部關掉，是真正的黑色，而且關掉的點不耗電。',
+      },
+    };
+    host.innerHTML = `
+      <div class="w-screen">
+        <div class="tabs">${Object.entries(modes).map(([k, m]) => `<button class="option" data-m="${k}">${m.name}</button>`).join('')}</div>
+        <div class="split">
+          <div class="layers"></div>
+          <div class="demo">
+            <div class="mini"><span>🌙</span><span class="stars">✨</span></div>
+            <button class="option black-btn">⬛ 顯示全黑畫面</button>
+          </div>
+        </div>
+        <p class="say">先選一種螢幕</p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const seen = new Set();
+    let mode = null, black = false;
+    const draw = () => {
+      host.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === mode));
+      $('.w-screen').dataset.mode = mode || '';
+      $('.mini').classList.toggle('black', black);
+      $('.layers').classList.toggle('black', black);
+      $('.black-btn').textContent = black ? '🌙 顯示夜空' : '⬛ 顯示全黑畫面';
+    };
+    host.querySelectorAll('[data-m]').forEach(b => {
+      b.onclick = () => {
+        mode = b.dataset.m;
+        black = false;
+        $('.layers').innerHTML = modes[mode].layers;
+        $('.say').textContent = '按「顯示全黑畫面」，看看黑色是怎麼來的';
+        draw();
+      };
+    });
+    $('.black-btn').onclick = () => {
+      if (!mode) { $('.say').textContent = '先選一種螢幕'; return; }
+      black = !black;
+      draw();
+      if (!black) return;
+      $('.say').textContent = modes[mode].black + (seen.size === 0 ? ' 再換另一種螢幕比比看！' : '');
+      if (seen.has(mode)) return;
+      seen.add(mode);
+      api.good();
+      if (seen.size === 2) api.done();
+    };
+    draw();
+  },
+
+  // The family of electromagnetic waves, from long radio waves to short X-rays.
+  waves(host, _, api) {
+    const zones = [
+      { icon: '📻', zh: '無線電波', en: 'radio waves', use: '廣播電台、行動網路。波很長，可以穿過牆壁。', len: 150 },
+      { icon: '📶', zh: '微波', en: 'microwaves', use: 'Wi-Fi、藍牙，還有微波爐。Wi-Fi 的能量小很多很多，不會把東西煮熱。', len: 90 },
+      { icon: '🔥', zh: '紅外線', en: 'infrared', use: '電視遙控器，還有 Face ID 打在臉上的看不見的小點點。', len: 55 },
+      { icon: '🌈', zh: '可見光', en: 'visible light', use: '眼睛唯一看得到的一段，螢幕發出的就是它。', len: 34 },
+      { icon: '☀️', zh: '紫外線', en: 'ultraviolet', use: '太陽光裡有，會曬傷皮膚，所以要擦防曬。', len: 20 },
+      { icon: '🦴', zh: 'X 光', en: 'X-rays', use: '可以穿過皮肉，醫院用它拍骨頭的照片。', len: 11 },
+    ];
+    host.innerHTML = `
+      <div class="w-waves">
+        <svg class="wave" viewBox="0 0 600 120" preserveAspectRatio="none" aria-hidden="true"><path d=""/></svg>
+        <div class="band">${zones.map((z, i) => `<button class="zone z${i}" data-i="${i}"><span>${z.icon}</span><small>${z.zh}</small></button>`).join('')}</div>
+        <div class="axis"><span>← 波長很長</span><span>波長很短 →</span></div>
+        <div class="explain-box"><p>點上面的每一段</p></div>
+      </div>`;
+    const path = host.querySelector('.wave path');
+    const drawWave = len => {
+      let d = 'M0 60';
+      for (let x = 0; x <= 600; x += 3) d += ` L${x} ${60 - 42 * Math.sin((x / len) * 2 * Math.PI)}`;
+      path.setAttribute('d', d);
+    };
+    const seen = new Set();
+    host.querySelectorAll('.zone').forEach(b => {
+      b.onclick = () => {
+        const z = zones[b.dataset.i];
+        host.querySelectorAll('.zone').forEach(x => x.classList.toggle('on', x === b));
+        b.classList.add('got');
+        drawWave(z.len);
+        host.querySelector('.wave').dataset.zone = b.dataset.i;
+        host.querySelector('.explain-box').innerHTML = `<p><b>${z.icon} ${z.zh}</b>${en(z.en)}</p><p>${z.use}</p>`;
+        if (seen.has(b.dataset.i)) return;
+        seen.add(b.dataset.i);
+        if (seen.size === zones.length) { api.good(); api.done(); }
+      };
+    });
+    drawWave(60);
+  },
+
+  // Slide the phone onto the pad; it only charges when the coils line up.
+  qi(host, _, api) {
+    host.innerHTML = `
+      <div class="w-qi">
+        <div class="desk2">
+          <div class="qpad"><i></i><i></i><i></i></div>
+          <div class="qphone"><div class="qcoil"><i></i><i></i></div><span class="bolt" hidden>⚡</span></div>
+        </div>
+        <div class="qbatt"><div class="batt"><i></i></div><b class="pct">20%</b></div>
+        <p class="readout">把手機拖到充電板的正中間</p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const desk = $('.desk2'), phone = $('.qphone'), pad = $('.qpad');
+    let px = 0.18, py = 0.5, level = 20, dragId = null, offX = 0, offY = 0, finished = false;
+    const place = () => { phone.style.left = px * 100 + '%'; phone.style.top = py * 100 + '%'; };
+    const aligned = () => {
+      const a = phone.getBoundingClientRect(), b = pad.getBoundingClientRect();
+      return Math.hypot(a.left + a.width / 2 - (b.left + b.width / 2), a.top + a.height / 2 - (b.top + b.height / 2)) < b.width * 0.18;
+    };
+    phone.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      phone.setPointerCapture(e.pointerId);
+      dragId = e.pointerId;
+      const r = phone.getBoundingClientRect();
+      offX = e.clientX - (r.left + r.width / 2);
+      offY = e.clientY - (r.top + r.height / 2);
+    });
+    phone.addEventListener('pointermove', e => {
+      if (e.pointerId !== dragId) return;
+      const d = desk.getBoundingClientRect();
+      px = Math.min(0.92, Math.max(0.08, (e.clientX - offX - d.left) / d.width));
+      py = Math.min(0.85, Math.max(0.15, (e.clientY - offY - d.top) / d.height));
+      place();
+    });
+    const end = e => { if (e.pointerId === dragId) dragId = null; };
+    phone.addEventListener('pointerup', end);
+    phone.addEventListener('pointercancel', end);
+    const tick = () => {
+      const on = aligned();
+      phone.classList.toggle('charging', on);
+      $('.bolt').hidden = !on;
+      pad.classList.toggle('on', on);
+      if (on && level < 100) level = Math.min(100, level + 1.5);
+      $('.batt i').style.width = level + '%';
+      $('.pct').textContent = Math.floor(level) + '%';
+      if (!finished) {
+        $('.readout').textContent = on ? '⚡ 對準了！線圈接到磁場，開始充電' : '沒對準，線圈接不到磁場，充不到電';
+        if (level >= 40) {
+          finished = true;
+          $('.readout').textContent = '🎉 充到 40% 了！無線充電要對準，也比插線慢一點。';
+          api.good();
+          api.done();
+        }
+      }
+      api.later(tick, 100);
+    };
+    place();
+    tick();
+  },
+
+  // Program a robot with arrow commands; a crash is a bug to fix.
+  code(host, _, api) {
+    const map = [
+      '....*',
+      '.##..',
+      '...#.',
+      'R....',
+    ];
+    const rows = map.length, cols = map[0].length;
+    let start = null, goal = null;
+    map.forEach((r, y) => [...r].forEach((c, x) => { if (c === 'R') start = { x, y }; if (c === '*') goal = { x, y }; }));
+    const moves = { up: [0, -1, '⬆️'], down: [0, 1, '⬇️'], left: [-1, 0, '⬅️'], right: [1, 0, '➡️'] };
+    host.innerHTML = `
+      <div class="w-code">
+        <div class="cgrid" style="--cols:${cols}">${map.map(r => [...r].map(c => `<i class="${c === '#' ? 'rock' : ''}">${c === '#' ? '🪨' : c === '*' ? '⭐' : ''}</i>`).join('')).join('')}<span class="bot">🤖</span></div>
+        <div class="cside">
+          <div class="prog" aria-label="程式"><span class="empty">程式是空的，按下面的箭頭加指令</span></div>
+          <div class="cmds">${Object.entries(moves).map(([k, m]) => `<button class="option" data-cmd="${k}">${m[2]}</button>`).join('')}</div>
+          <div class="cmds">
+            <button class="option" data-act="back">⌫ 刪一個</button>
+            <button class="option" data-act="clear">🗑️ 清空</button>
+            <button class="go" data-act="run">▶ 執行</button>
+          </div>
+          <p class="readout">指令最多 12 個</p>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const bot = $('.bot'), progEl = $('.prog');
+    const prog = [];
+    let running = false, solved = false;
+    const putBot = (p, bump = false) => {
+      bot.style.left = ((p.x + 0.5) / cols) * 100 + '%';
+      bot.style.top = ((p.y + 0.5) / rows) * 100 + '%';
+      if (bump) shake(bot);
+    };
+    const drawProg = (active = -1) => {
+      progEl.innerHTML = prog.length
+        ? prog.map((k, i) => `<span class="step-chip${i === active ? ' on' : ''}">${moves[k][2]}</span>`).join('')
+        : '<span class="empty">程式是空的，按下面的箭頭加指令</span>';
+    };
+    host.querySelectorAll('[data-cmd]').forEach(b => {
+      b.onclick = () => {
+        if (running || prog.length >= 12) return;
+        prog.push(b.dataset.cmd);
+        drawProg();
+      };
+    });
+    $('[data-act="back"]').onclick = () => { if (!running) { prog.pop(); drawProg(); } };
+    $('[data-act="clear"]').onclick = () => { if (!running) { prog.length = 0; drawProg(); putBot(start); } };
+    $('[data-act="run"]').onclick = () => {
+      if (running || !prog.length) return;
+      running = true;
+      const p = { ...start };
+      putBot(p);
+      let i = 0;
+      const step = () => {
+        if (i >= prog.length) {
+          running = false;
+          drawProg();
+          if (p.x === goal.x && p.y === goal.y) {
+            $('.readout').textContent = solved ? '又成功了！' : '🎉 成功走到星星！你寫出了一個程式。';
+            if (!solved) { solved = true; api.good(); api.done(); }
+          } else {
+            $('.readout').textContent = '還沒走到星星，再多加幾個指令';
+            api.bad();
+          }
+          return;
+        }
+        drawProg(i);
+        const [dx, dy] = moves[prog[i]];
+        const nx = p.x + dx, ny = p.y + dy;
+        if (nx < 0 || ny < 0 || nx >= cols || ny >= rows || map[ny][nx] === '#') {
+          putBot(p, true);
+          $('.readout').textContent = `🐞 第 ${i + 1} 個指令撞到了！這就是 bug，改一改再試。`;
+          api.bad();
+          running = false;
+          api.later(() => putBot(start), 700);
+          return;
+        }
+        p.x = nx;
+        p.y = ny;
+        putBot(p);
+        i++;
+        api.later(step, 380);
+      };
+      api.later(step, 250);
+    };
+    putBot(start);
+  },
+
+  // Drop a phone with or without a case and a screen protector.
+  drop(host, _, api) {
+    const outcomes = {
+      '': { crack: 'screen', text: '💥 螢幕破了！玻璃很脆，一摔就可能裂開。' },
+      case: { crack: 'screen', text: '邊角沒事，可是螢幕朝下撞到，還是裂了。' },
+      film: { crack: 'film', dent: true, text: '保護貼裂了，螢幕沒事；可是邊角撞凹了一塊。' },
+      'case film': { crack: 'film', text: '✅ 只有保護貼裂了一點，手機沒事！換保護貼比換螢幕便宜很多。' },
+    };
+    host.innerHTML = `
+      <div class="w-drop">
+        <div class="opts">
+          <button class="option" data-o="case" aria-pressed="false">🛡️ 保護殼</button>
+          <button class="option" data-o="film" aria-pressed="false">🩹 保護貼</button>
+        </div>
+        <div class="drop-stage">
+          <div class="table"></div>
+          <div class="dphone"><div class="dscreen"></div></div>
+          <div class="floor"></div>
+        </div>
+        <button class="go glow" data-act="drop">⬇️ 從桌上掉下去</button>
+        <p class="result">選好保護裝備，再讓手機掉下去</p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const phone = $('.dphone');
+    const on = { case: false, film: false };
+    const tried = new Set();
+    let busy = false;
+    host.querySelectorAll('[data-o]').forEach(b => {
+      b.onclick = () => {
+        if (busy) return;
+        on[b.dataset.o] = !on[b.dataset.o];
+        b.classList.toggle('on', on[b.dataset.o]);
+        b.setAttribute('aria-pressed', on[b.dataset.o]);
+        phone.className = 'dphone' + (on.case ? ' has-case' : '') + (on.film ? ' has-film' : '');
+      };
+    });
+    $('[data-act="drop"]').onclick = async () => {
+      if (busy) return;
+      busy = true;
+      const key = ['case', 'film'].filter(k => on[k]).join(' ');
+      const o = outcomes[key];
+      phone.className = 'dphone' + (on.case ? ' has-case' : '') + (on.film ? ' has-film' : '');
+      $('.result').textContent = '…';
+      await phone.animate(
+        [{ transform: 'translateY(0) rotate(0)' }, { transform: 'translateY(var(--fall)) rotate(80deg)', offset: 0.8 }, { transform: 'translateY(calc(var(--fall) - 14px)) rotate(84deg)', offset: 0.9 }, { transform: 'translateY(var(--fall)) rotate(90deg)' }],
+        { duration: 700, easing: 'ease-in', fill: 'forwards' }
+      ).finished;
+      if (!api.alive()) return;
+      phone.classList.add('crack-' + o.crack);
+      if (o.dent) phone.classList.add('dent');
+      key === 'case film' ? api.good() : api.bad();
+      $('.result').textContent = o.text;
+      tried.add(key);
+      api.later(() => {
+        phone.getAnimations().forEach(a => a.cancel());
+        phone.className = 'dphone' + (on.case ? ' has-case' : '') + (on.film ? ' has-film' : '');
+        busy = false;
+        if (tried.has('case film') && tried.size >= 2) api.done();
+        else if (!tried.has('case film')) $('.result').textContent += ' 換別的保護裝備再試一次！';
+        else $('.result').textContent += ' 也試試沒有保護的時候會怎樣。';
+      }, 1600);
+    };
+  },
+
+  // A small file manager: rename, move, delete, restore, and delete for good.
+  files(host, _, api) {
+    const tasks = [
+      { id: 'rename', zh: '重新命名', en: 'rename' },
+      { id: 'move', zh: '移到資料夾', en: 'move' },
+      { id: 'delete', zh: '刪除', en: 'delete', alt: '會先放進「最近刪除」' },
+      { id: 'restore', zh: '救回來', en: 'restore' },
+      { id: 'forever', zh: '永久刪除', en: 'delete permanently', alt: '刪了就找不回來' },
+    ];
+    const items = [
+      { id: 1, icon: '🐶', name: '小狗.jpg', loc: 'home' },
+      { id: 2, icon: '🎂', name: '生日.jpg', loc: 'home' },
+      { id: 3, icon: '📄', name: '作業.pages', loc: 'home' },
+      { id: 4, icon: '🌊', name: '海邊.jpg', loc: 'home' },
+    ];
+    const places = { home: '🏠 我的檔案', trip: '📁 旅行', trash: '🗑️ 最近刪除' };
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="fm">
+          <div class="fm-side">${Object.entries(places).map(([k, v]) => `<button data-loc="${k}">${v}<b></b></button>`).join('')}</div>
+          <div class="fm-main">
+            <p class="fm-title"></p>
+            <div class="fm-items"></div>
+            <div class="fm-actions"></div>
+          </div>
+          <div class="dialog" hidden>
+            <p>⚠️ 確定要<b>永久刪除</b>嗎？<br>刪掉以後，就再也找不回來了！</p>
+            <div><button class="option" data-d="no">取消</button><button class="option danger" data-d="yes">永久刪除</button></div>
+          </div>
+          <div class="toast" hidden></div>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    const toast = toaster($('.toast'), api);
+    let view = 'home', sel = null, renaming = false;
+    const draw = () => {
+      host.querySelectorAll('[data-loc]').forEach(b => {
+        b.classList.toggle('on', b.dataset.loc === view);
+        const n = items.filter(i => i.loc === b.dataset.loc).length;
+        b.querySelector('b').textContent = n ? ` ${n}` : '';
+      });
+      $('.fm-title').textContent = places[view] + (view === 'trash' ? '：30 天內還能救回來' : '');
+      const here = items.filter(i => i.loc === view);
+      $('.fm-items').innerHTML = here.length
+        ? here.map(i => `<button class="file${i.id === sel ? ' sel' : ''}" data-id="${i.id}"><span>${i.icon}</span><small>${i.name}</small></button>`).join('')
+        : '<p class="empty">這裡是空的</p>';
+      const it = items.find(i => i.id === sel);
+      let acts = '';
+      if (it && renaming) {
+        acts = `<input class="rename" value="${it.name.replace(/\.\w+$/, '')}" maxlength="12" aria-label="新的名字"><button class="option" data-a="ok">✔ 好了</button>`;
+      } else if (it && view === 'trash') {
+        acts = '<button class="option" data-a="restore">↩️ 復原</button><button class="option danger" data-a="forever">❌ 永久刪除</button>';
+      } else if (it) {
+        acts = `<button class="option" data-a="rename">✏️ 重新命名</button>${view === 'home' ? '<button class="option" data-a="move">📁 移到「旅行」</button>' : '<button class="option" data-a="moveback">🏠 移回我的檔案</button>'}<button class="option danger" data-a="delete">🗑️ 刪除</button>`;
+      } else {
+        acts = '<p class="empty">點一個檔案選取它</p>';
+      }
+      $('.fm-actions').innerHTML = acts;
+      if (renaming) $('.rename')?.focus();
+    };
+    host.querySelector('.fm-side').addEventListener('click', e => {
+      const b = e.target.closest('[data-loc]');
+      if (!b) return;
+      view = b.dataset.loc;
+      sel = null;
+      renaming = false;
+      draw();
+    });
+    $('.fm-items').addEventListener('click', e => {
+      const b = e.target.closest('[data-id]');
+      if (!b) return;
+      sel = +b.dataset.id === sel ? null : +b.dataset.id;
+      renaming = false;
+      draw();
+    });
+    $('.fm-actions').addEventListener('click', e => {
+      const b = e.target.closest('[data-a]');
+      if (!b) return;
+      const it = items.find(i => i.id === sel);
+      const a = b.dataset.a;
+      if (a === 'rename') { renaming = true; draw(); return; }
+      if (a === 'ok') {
+        const ext = it.name.match(/\.\w+$/)[0];
+        const v = $('.rename').value.trim() || '新檔案';
+        it.name = v + ext;
+        renaming = false;
+        check('rename');
+      } else if (a === 'move') {
+        it.loc = 'trip';
+        sel = null;
+        toast('移到「旅行」資料夾了');
+        check('move');
+      } else if (a === 'moveback') {
+        it.loc = 'home';
+        sel = null;
+      } else if (a === 'delete') {
+        it.from = it.loc;
+        it.loc = 'trash';
+        sel = null;
+        toast('放進「最近刪除」了，還救得回來');
+        check('delete');
+      } else if (a === 'restore') {
+        it.loc = it.from || 'home';
+        sel = null;
+        toast('救回來了！');
+        check('restore');
+      } else if (a === 'forever') {
+        $('.dialog').hidden = false;
+        return;
+      }
+      draw();
+    });
+    $('.dialog').addEventListener('click', e => {
+      const b = e.target.closest('[data-d]');
+      if (!b) return;
+      $('.dialog').hidden = true;
+      if (b.dataset.d === 'yes') {
+        items.splice(items.findIndex(i => i.id === sel), 1);
+        sel = null;
+        toast('永遠消失了，再也找不回來');
+        check('forever');
+      }
+      draw();
+    });
+    draw();
+  },
+
+  // A lock screen: unlock with a passcode or a face, then lock again.
+  passcode(host, { code }, api) {
+    const tasks = [
+      { id: 'code', zh: '用密碼解鎖', en: 'passcode' },
+      { id: 'lock', zh: '再鎖起來', en: 'lock' },
+      { id: 'face', zh: '用臉解鎖', en: 'Face ID' },
+    ];
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="lockwrap">
+          <div class="lockphone">
+            <div class="lock-top"><span class="padlock">🔒</span><b>09:41</b></div>
+            <div class="locked">
+              <p class="lock-msg">輸入密碼</p>
+              <div class="pdots">${'<i></i>'.repeat(code.length)}</div>
+              <div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, '⌫'].map(k => k === '' ? '<span></span>' : `<button data-k="${k}">${k}</button>`).join('')}</div>
+            </div>
+            <div class="unlocked" hidden>
+              <div class="apps">${['📷', '🖼️', '💬', '🎵', '🗺️', '🧮', '📚', '⚙️'].map(i => `<span>${i}</span>`).join('')}</div>
+              <button class="option" data-act="lock">🔒 鎖定螢幕</button>
+            </div>
+            <div class="scan" hidden><span>🙂</span></div>
+          </div>
+          <button class="option" data-act="face">🙂 用 Face ID 看一下螢幕</button>
+          <p class="hint">這台的密碼是 <b>${code}</b>（偷偷告訴你）</p>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    let typed = '', open = false, wrong = 0;
+    const setOpen = v => {
+      open = v;
+      $('.locked').hidden = v;
+      $('.unlocked').hidden = !v;
+      $('.padlock').textContent = v ? '🔓' : '🔒';
+      typed = '';
+      drawDots();
+    };
+    const drawDots = () => host.querySelectorAll('.pdots i').forEach((d, i) => d.classList.toggle('on', i < typed.length));
+    $('.keypad').addEventListener('click', e => {
+      const b = e.target.closest('[data-k]');
+      if (!b || open) return;
+      const k = b.dataset.k;
+      if (k === '⌫') { typed = typed.slice(0, -1); drawDots(); return; }
+      typed += k;
+      drawDots();
+      if (typed.length < code.length) return;
+      if (typed === code) {
+        wrong = 0;
+        $('.lock-msg').textContent = '輸入密碼';
+        setOpen(true);
+        check('code');
+      } else {
+        wrong++;
+        shake($('.pdots'));
+        api.bad();
+        $('.lock-msg').textContent = wrong >= 3 ? '錯太多次，真的手機會鎖住一段時間！' : '密碼錯了，再試一次';
+        typed = '';
+        api.later(drawDots, 300);
+      }
+    });
+    $('[data-act="lock"]').onclick = () => { setOpen(false); check('lock'); };
+    $('[data-act="face"]').onclick = () => {
+      if (open) { $('.lock-msg').textContent = '已經打開了，先鎖起來再試'; setOpen(false); return; }
+      $('.scan').hidden = false;
+      api.later(() => {
+        $('.scan').hidden = true;
+        setOpen(true);
+        check('face', '看你的臉形，別人的臉打不開');
+      }, 1100);
+    };
+  },
+
+  // Sign up with a user name and a strong password, then log in with the same ones.
+  account(host, _, api) {
+    const names = ['小熊熊', '星星王', '飛天貓'];
+    const tiles = ['cat', 'Moon', 'run', '7', '42', '!', '#'];
+    host.innerHTML = `
+      <div class="w-account">
+        <div class="form">
+          <p class="form-title">📝 註冊新帳號</p>
+          <p class="lbl">使用者名稱 ${en('user name')}</p>
+          <div class="names">${names.map(n => `<button class="option" data-n="${n}">${n}</button>`).join('')}</div>
+          <p class="lbl">密碼 ${en('password')} <button class="eye-btn" aria-label="顯示或隱藏密碼">👁️</button></p>
+          <div class="pw"><span class="pw-text"></span><button class="option" data-act="del">⌫</button></div>
+          <div class="tiles">${tiles.map(t => `<button class="option" data-t="${t}">${t}</button>`).join('')}</div>
+          <div class="meter"><i></i><span></span></div>
+          <button class="go" data-act="submit" disabled>註冊</button>
+          <p class="msg"></p>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let stage = 'signup', name = null, pw = [], saved = null, show = false;
+    const strength = list => {
+      const t = list.join('');
+      let k = 0;
+      if (t.length >= 8) k++;
+      if (t.length >= 11) k++;
+      if (/[a-z]/.test(t) && /[A-Z]/.test(t)) k++;
+      if (/\d/.test(t)) k++;
+      if (/[^a-zA-Z0-9]/.test(t)) k++;
+      return k;
+    };
+    const draw = () => {
+      host.querySelectorAll('[data-n]').forEach(b => b.classList.toggle('on', b.dataset.n === name));
+      const t = pw.join('');
+      $('.pw-text').textContent = t ? (show ? t : '•'.repeat(t.length)) : '點下面的方塊組出密碼';
+      const k = strength(pw);
+      const labels = ['太弱', '太弱', '普通', '還可以', '強', '很強'];
+      $('.meter i').style.width = (k / 5) * 100 + '%';
+      $('.meter').dataset.k = k;
+      $('.meter span').textContent = stage === 'signup' ? `密碼強度：${labels[k]}` : '';
+      $('.meter').hidden = stage !== 'signup';
+      $('[data-act="submit"]').disabled = !name || !pw.length || (stage === 'signup' && k < 4);
+    };
+    host.querySelector('.names').addEventListener('click', e => {
+      const b = e.target.closest('[data-n]');
+      if (b) { name = b.dataset.n; draw(); }
+    });
+    host.querySelector('.tiles').addEventListener('click', e => {
+      const b = e.target.closest('[data-t]');
+      if (b && pw.length < 8) { pw.push(b.dataset.t); draw(); }
+    });
+    $('[data-act="del"]').onclick = () => { pw.pop(); draw(); };
+    $('.eye-btn').onclick = () => { show = !show; draw(); };
+    $('[data-act="submit"]').onclick = () => {
+      if (stage === 'signup') {
+        saved = { name, pw: pw.join('') };
+        stage = 'login';
+        name = null;
+        pw = [];
+        show = false;
+        $('.form-title').textContent = '🔑 登入';
+        $('[data-act="submit"]').textContent = '登入';
+        $('.msg').textContent = `✅ 帳號「${saved.name}」建立好了！現在用同一組名稱和密碼登入看看。`;
+        api.good();
+      } else if (stage === 'login') {
+        if (name === saved.name && pw.join('') === saved.pw) {
+          stage = 'done';
+          $('.form-title').textContent = `👋 歡迎回來，${saved.name}！`;
+          $('.msg').textContent = '🎉 登入成功！名稱和密碼要一模一樣，電腦才認得你。';
+          $('[data-act="submit"]').hidden = true;
+          api.good();
+          api.done();
+        } else {
+          shake($('.form'));
+          api.bad();
+          $('.msg').textContent = '❌ 帳號或密碼錯誤。要和註冊時一模一樣喔！';
+          pw = [];
+        }
+      }
+      draw();
+    };
+    draw();
+  },
+
+  // Download the same file at three speeds and compare the time.
+  speed(host, { sizeMB }, api) {
+    const speeds = [
+      { mbps: 1, where: '訊號很差的時候' },
+      { mbps: 10, where: '一般的行動網路' },
+      { mbps: 100, where: '家裡的光纖網路' },
+    ];
+    host.innerHTML = `
+      <div class="w-speed">
+        <div class="speeds">${speeds.map((v, i) => `<button class="option" data-i="${i}"><b>${v.mbps} Mbps</b><small>${v.where}</small></button>`).join('')}</div>
+        <div class="dl-card"><span class="dl-icon">🎬</span><div class="dl-body"><b>影片．${sizeMB} MB</b><div class="dl-bar"><i></i></div><small class="dl-text">選一種網速開始下載</small></div></div>
+        <p class="readout"></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const btns = [...host.querySelectorAll('[data-i]')];
+    const tried = new Set();
+    const lines = [];
+    const fmt = sec => (sec >= 60 ? `${Math.floor(sec / 60)} 分 ${Math.round(sec % 60)} 秒` : `${Math.round(sec)} 秒`);
+    btns.forEach(b => {
+      b.onclick = () => {
+        const v = speeds[b.dataset.i];
+        const secs = (sizeMB * 8) / v.mbps; // MB → megabits, then divide by megabits per second
+        const real = Math.min(4000, 400 + secs * 9);
+        btns.forEach(x => (x.disabled = true));
+        const t0 = performance.now();
+        const tick = () => {
+          const k = Math.min(1, (performance.now() - t0) / real);
+          $('.dl-bar i').style.width = k * 100 + '%';
+          $('.dl-text').textContent = `已下載 ${Math.round(k * sizeMB)} MB．經過 ${fmt(k * secs)}（模擬）`;
+          if (k < 1) { api.later(tick, 50); return; }
+          btns.forEach(x => (x.disabled = false));
+          tried.add(v.mbps);
+          lines.push(`${v.mbps} Mbps：大約 ${fmt(secs)}`);
+          $('.readout').innerHTML = lines.join('<br>') + (tried.size >= 2 ? '<br>💡 網速快 10 倍，等待的時間就少 10 倍。' : '<br>再換一種網速試試看！');
+          api.good();
+          if (tried.size >= 2) api.done();
+        };
+        tick();
+      };
+    });
+  },
+
+  // Select one, unselect, select a range (Shift), select some (⌘ / Ctrl), select all.
+  select(host, _, api) {
+    const mac = /Mac|iPhone|iPad/.test(navigator.userAgent);
+    const jumpKey = mac ? '⌘ Command' : 'Ctrl';
+    const tasks = [
+      { id: 'one', zh: '選取一個', en: 'select', alt: '點一下' },
+      { id: 'none', zh: '取消選取', en: 'deselect', alt: '再點一下，或點空白的地方' },
+      { id: 'range', zh: '連續選取', en: 'range select', alt: '點第一個，按住 Shift 再點最後一個' },
+      { id: 'jump', zh: '跳著選取', en: 'multi-select', alt: `按住 ${jumpKey}，一個一個點` },
+      { id: 'all', zh: '全選', en: 'select all', alt: mac ? '⌘ + A' : 'Ctrl + A' },
+    ];
+    const pics = ['🐶', '🐱', '🐰', '🦊', '🐼', '🐨', '🐯', '🐸'];
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="selbox">
+          <div class="mods">
+            <button class="option" data-mod="shift">⇧ Shift：連續</button>
+            <button class="option" data-mod="jump">${jumpKey}：跳著選</button>
+            <button class="option" data-act="all">全選</button>
+          </div>
+          <div class="tiles-grid">${pics.map((p, i) => `<button class="tile" data-i="${i}"><span>${p}</span><i></i></button>`).join('')}</div>
+          <p class="selcount">還沒選取</p>
+          <p class="hint">用滑鼠的話直接按住鍵盤的 Shift 或 ${jumpKey}；用平板就先點上面的按鈕</p>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    const sel = new Set();
+    let anchor = null, mod = null;
+    const draw = () => {
+      host.querySelectorAll('.tile').forEach(t => t.classList.toggle('on', sel.has(+t.dataset.i)));
+      host.querySelectorAll('[data-mod]').forEach(b => b.classList.toggle('on', b.dataset.mod === mod));
+      $('.selcount').textContent = sel.size ? `已選取 ${sel.size} 個` : '還沒選取';
+    };
+    const gap = () => {
+      const a = [...sel].sort((x, y) => x - y);
+      return a.some((v, i) => i && v - a[i - 1] > 1);
+    };
+    const selectAll = () => { pics.forEach((_, i) => sel.add(i)); draw(); check('all'); };
+    host.querySelector('.tiles-grid').addEventListener('click', e => {
+      const t = e.target.closest('.tile');
+      if (!t) { if (sel.size) { sel.clear(); check('none'); draw(); } return; }
+      const i = +t.dataset.i;
+      const shift = e.shiftKey || mod === 'shift';
+      const jump = e.metaKey || e.ctrlKey || mod === 'jump';
+      if (shift && anchor !== null) {
+        sel.clear();
+        for (let k = Math.min(anchor, i); k <= Math.max(anchor, i); k++) sel.add(k);
+        if (sel.size >= 3) check('range');
+      } else if (jump) {
+        sel.has(i) ? sel.delete(i) : sel.add(i);
+        anchor = i;
+        if (sel.size >= 2 && gap()) check('jump');
+      } else if (sel.size === 1 && sel.has(i)) {
+        sel.clear();
+        check('none');
+      } else {
+        sel.clear();
+        sel.add(i);
+        anchor = i;
+        check('one');
+      }
+      draw();
+    });
+    host.querySelector('.mods').addEventListener('click', e => {
+      const b = e.target.closest('[data-mod]');
+      if (b) { mod = mod === b.dataset.mod ? null : b.dataset.mod; draw(); }
+      if (e.target.closest('[data-act="all"]')) selectAll();
+    });
+    const onKey = e => {
+      if (!api.alive()) { window.removeEventListener('keydown', onKey); return; }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a') { e.preventDefault(); selectAll(); }
+    };
+    window.addEventListener('keydown', onKey);
+    draw();
+  },
+
+  // Make folders, drag files into them, and open one to see its path.
+  folders(host, _, api) {
+    const tasks = [
+      { id: 'create', zh: '新增資料夾', en: 'new folder', alt: '做出「學校」和「照片」' },
+      { id: 'sort', zh: '把檔案放進資料夾', en: 'organize' },
+      { id: 'open', zh: '打開資料夾看路徑', en: 'path' },
+    ];
+    const names = ['學校', '照片', '音樂'];
+    const files = [
+      { icon: '📄', name: '數學作業', to: '學校' },
+      { icon: '📄', name: '國語作業', to: '學校' },
+      { icon: '🐶', name: '小狗.jpg', to: '照片' },
+      { icon: '🎂', name: '生日.jpg', to: '照片' },
+    ];
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="fold-box">
+          <div class="crumbs"></div>
+          <div class="fold-tools"><button class="option" data-act="new">＋ 新增資料夾</button><span class="name-pick" hidden>取名字：${names.map(n => `<button class="option" data-name="${n}">${n}</button>`).join('')}</span></div>
+          <div class="fold-area"></div>
+          <div class="tree"></div>
+          <div class="toast" hidden></div>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    const toast = toaster($('.toast'), api);
+    const made = [];
+    const inside = {};
+    let view = null;
+    const draw = () => {
+      $('.crumbs').innerHTML = `<button data-go="root">🏠 我的檔案</button>${view ? ` › <b>📁 ${view}</b>` : ''}`;
+      const area = $('.fold-area');
+      area.innerHTML = '';
+      if (view) {
+        area.append(h('<button class="option up" data-go="root">⬅ 上一層</button>'));
+        const list = inside[view] || [];
+        if (!list.length) area.append(h('<p class="empty">這個資料夾是空的</p>'));
+        list.forEach(f => area.append(h(`<div class="file-chip"><span>${f.icon}</span>${f.name}</div>`)));
+      } else {
+        made.forEach(n => area.append(h(`<button class="fold" data-zone="${n}" data-open="${n}"><span>📁</span>${n}<small>${(inside[n] || []).length} 個</small></button>`)));
+        files.filter(f => !f.placed).forEach(f => {
+          const chip = h(`<button class="chip"><span class="chip-icon">${f.icon}</span><span>${f.name}</span></button>`);
+          drag(chip, {
+            onDrop: zone => {
+              if (!zone) return;
+              if (zone.dataset.zone !== f.to) { shake(chip); api.bad(); toast(made.includes(f.to) ? `「${f.name}」應該放進「${f.to}」` : `先新增一個「${f.to}」資料夾`); return; }
+              f.placed = true;
+              (inside[f.to] ||= []).push(f);
+              api.good();
+              if (files.every(x => x.placed)) check('sort');
+              draw();
+            },
+            onTap: () => toast(made.includes(f.to) ? '把檔案拖到資料夾上' : `先新增一個「${f.to}」資料夾`),
+          });
+          area.append(chip);
+        });
+      }
+      $('.tree').innerHTML = `<p>資料夾的樹狀結構：</p><ul><li>📁 我的檔案<ul>${made.map(n => `<li>📁 ${n}${(inside[n] || []).length ? `<ul>${inside[n].map(f => `<li>${f.icon} ${f.name}</li>`).join('')}</ul>` : ''}</li>`).join('')}${files.filter(f => !f.placed).map(f => `<li>${f.icon} ${f.name}</li>`).join('')}</ul></li></ul>`;
+    };
+    host.addEventListener('click', e => {
+      const go = e.target.closest('[data-go]');
+      if (go) { view = null; draw(); return; }
+      const open = e.target.closest('[data-open]');
+      if (open && !open.classList.contains('dragging')) {
+        view = open.dataset.open;
+        draw();
+        check('open', `路徑：我的檔案 › ${view}`);
+        return;
+      }
+      if (e.target.closest('[data-act="new"]')) { $('.name-pick').hidden = !$('.name-pick').hidden; return; }
+      const nm = e.target.closest('[data-name]');
+      if (nm) {
+        const n = nm.dataset.name;
+        $('.name-pick').hidden = true;
+        if (made.includes(n)) { toast(`已經有「${n}」了`); return; }
+        made.push(n);
+        view = null;
+        if (made.includes('學校') && made.includes('照片')) check('create');
+        draw();
+      }
+    });
+    draw();
+  },
+
+  // Copy, cut and paste words between two notes through the clipboard.
+  clipboard(host, _, api) {
+    const mac = /Mac|iPhone|iPad/.test(navigator.userAgent);
+    const k = mac ? '⌘' : 'Ctrl+';
+    const tasks = [
+      { id: 'copy', zh: '拷貝，再貼上', en: 'copy & paste', alt: '原本的還在' },
+      { id: 'cut', zh: '剪下，再貼上', en: 'cut & paste', alt: '原本的被搬走了' },
+    ];
+    const start = ['小狗', '很', '可愛', '！'];
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="clip-box">
+          <div class="cnote"><p class="note-title">📝 筆記 A（點字選取）</p><div class="wordrow a"></div></div>
+          <div class="clip-bar">
+            <button class="option" data-act="copy">📄 拷貝 ${k}C</button>
+            <button class="option" data-act="cut">✂️ 剪下 ${k}X</button>
+            <button class="option" data-act="paste">📋 貼到 B ${k}V</button>
+            <button class="option" data-act="reset">↺ 重來</button>
+          </div>
+          <p class="clip">📋 剪貼簿：<b>（空的）</b></p>
+          <div class="cnote"><p class="note-title">📝 筆記 B</p><div class="wordrow b"></div></div>
+          <p class="hint">檔案也一樣：拷貝會變成兩份，剪下再貼上就是搬家。</p>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    let a = start.map(w => ({ w, on: false })), b = [], clip = null;
+    const draw = () => {
+      $('.wordrow.a').innerHTML = a.length ? a.map((x, i) => `<button class="wd${x.on ? ' on' : ''}" data-i="${i}">${x.w}</button>`).join('') : '<span class="empty">（空的）</span>';
+      $('.wordrow.b').innerHTML = b.length ? b.map(w => `<span class="wd">${w}</span>`).join('') : '<span class="empty">（空的）</span>';
+      $('.clip b').textContent = clip ? `「${clip.text}」（${clip.mode === 'copy' ? '拷貝' : '剪下'}）` : '（空的）';
+    };
+    const picked = () => a.filter(x => x.on);
+    const act = name => {
+      if (name === 'reset') { a = start.map(w => ({ w, on: false })); b = []; clip = null; draw(); return; }
+      if (name === 'copy' || name === 'cut') {
+        const p = picked();
+        if (!p.length) { shake($('.wordrow.a')); api.bad(); return; }
+        clip = { text: p.map(x => x.w).join(''), mode: name };
+        if (name === 'cut') a = a.filter(x => !x.on);
+        a.forEach(x => (x.on = false));
+        pop($('.clip'));
+      } else if (name === 'paste') {
+        if (!clip) { shake($('.clip')); api.bad(); return; }
+        b.push(clip.text);
+        check(clip.mode, clip.mode === 'copy' ? '原本的還在 A 裡' : '原本的從 A 搬走了');
+      }
+      draw();
+    };
+    $('.wordrow.a').addEventListener('click', e => {
+      const w = e.target.closest('[data-i]');
+      if (w) { a[w.dataset.i].on = !a[w.dataset.i].on; draw(); }
+    });
+    $('.clip-bar').addEventListener('click', e => {
+      const btn = e.target.closest('[data-act]');
+      if (btn) act(btn.dataset.act);
+    });
+    const onKey = e => {
+      if (!api.alive()) { window.removeEventListener('keydown', onKey); return; }
+      if (!(e.metaKey || e.ctrlKey)) return;
+      const m = { c: 'copy', x: 'cut', v: 'paste' }[e.key.toLowerCase()];
+      if (m) { e.preventDefault(); act(m); }
+    };
+    window.addEventListener('keydown', onKey);
+    draw();
+  },
+
+  // What drains the battery: change the settings and watch the hours left.
+  battery(host, _, api) {
+    const opts = [
+      { id: 'bright', zh: '螢幕亮度', en: 'brightness', choices: [['暗', 1], ['亮', 3]] },
+      { id: 'task', zh: '正在做什麼', en: 'activity', choices: [['看書', 0], ['看影片', 2], ['玩遊戲', 4]] },
+      { id: 'signal', zh: '網路訊號', en: 'signal', choices: [['很好', 0], ['很差', 1.5]] },
+      { id: 'gps', zh: '定位', en: 'location', choices: [['關', 0], ['開', 1]] },
+      { id: 'low', zh: '低耗電模式', en: 'Low Power Mode', choices: [['關', 1], ['開', 0.8]] },
+    ];
+    const tasks = [
+      { id: 'worst', zh: '調成最耗電', en: 'drain fast', alt: '電池撐不到 2.5 小時' },
+      { id: 'best', zh: '調成最省電', en: 'save power', alt: '電池撐 10 小時以上' },
+    ];
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="bat-box">
+          ${opts.map(o => `
+            <div class="bat-row" data-o="${o.id}"><span class="bat-lbl">${o.zh}${en(o.en)}</span>
+              <span class="seg">${o.choices.map(([t], i) => `<button data-c="${i}">${t}</button>`).join('')}</span></div>`).join('')}
+          <div class="bat-out">
+            <div class="drain"><i></i></div>
+            <p class="hours"></p>
+          </div>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    const pick = { bright: 1, task: 1, signal: 0, gps: 0, low: 0 };
+    const draw = () => {
+      host.querySelectorAll('.bat-row').forEach(r => r.querySelectorAll('[data-c]').forEach(b => b.classList.toggle('on', +b.dataset.c === pick[r.dataset.o])));
+      const v = id => opts.find(o => o.id === id).choices[pick[id]][1];
+      // made-up but proportional units: a base load plus each part, Low Power Mode trims 20%
+      const use = (1 + v('bright') + v('task') + v('signal') + v('gps')) * v('low');
+      const hours = 20 / use;
+      $('.drain i').style.width = Math.min(100, (use / 10.5) * 100) + '%';
+      $('.drain').dataset.level = use > 6 ? 'high' : use > 3 ? 'mid' : 'low';
+      $('.hours').innerHTML = `🔋 充滿電大約可以用 <b>${hours.toFixed(1)}</b> 小時（模擬）`;
+      if (hours < 2.5) check('worst');
+      if (hours >= 10) check('best');
+    };
+    host.querySelector('.bat-box').addEventListener('click', e => {
+      const b = e.target.closest('[data-c]');
+      if (!b) return;
+      pick[b.closest('.bat-row').dataset.o] = +b.dataset.c;
+      draw();
+    });
+    draw();
+  },
+
+  // GPS: each satellite tells how far away you are; three circles meet where you stand.
+  gps(host, _, api) {
+    const me = [210, 175];
+    const sats = [[60, 40], [345, 55], [215, 22]];
+    const dist = ([x, y]) => Math.hypot(x - me[0], y - me[1]);
+    host.innerHTML = `
+      <div class="w-gps">
+        <div class="sky2">
+          <svg viewBox="0 0 400 260" aria-hidden="true">${sats.map((p, i) => `<circle class="orbit r${i}" cx="${p[0]}" cy="${p[1]}" r="${dist(p)}"/>`).join('')}</svg>
+          ${sats.map((p, i) => `<button class="sat" data-i="${i}" style="left:${p[0] / 4}%;top:${(p[1] / 260) * 100}%">🛰️</button>`).join('')}
+          <span class="here" style="left:${me[0] / 4}%;top:${(me[1] / 260) * 100}%">❓</span>
+        </div>
+        <p class="readout">點衛星，接收它的訊號</p>
+      </div>`;
+    const got = new Set();
+    host.querySelectorAll('.sat').forEach(b => {
+      b.onclick = () => {
+        const i = +b.dataset.i;
+        if (got.has(i)) return;
+        got.add(i);
+        b.classList.add('on');
+        host.querySelector(`.orbit.r${i}`).classList.add('show');
+        api.good();
+        const r = host.querySelector('.readout');
+        if (got.size === 1) r.textContent = '收到 1 顆：你在這個圓圈上的某個地方';
+        else if (got.size === 2) r.textContent = '收到 2 顆：兩個圓圈交叉的地方，還有兩個可能';
+        else {
+          const m = host.querySelector('.here');
+          m.textContent = '📍';
+          pop(m);
+          r.textContent = '🎉 收到 3 顆：三個圓圈只交在一點，就是你在的地方！';
+          api.done();
+        }
+      };
+    });
+  },
+
+  // Control Center: airplane mode turns the radios off; Wi-Fi and Bluetooth can come back.
+  radios(host, _, api) {
+    const tasks = [
+      { id: 'air', zh: '打開飛航模式', en: 'airplane mode' },
+      { id: 'wifi', zh: '在飛航模式下打開 Wi-Fi', en: 'in-flight Wi-Fi' },
+      { id: 'bt', zh: '再打開藍牙聽耳機', en: 'Bluetooth' },
+    ];
+    const st = { air: false, cell: true, wifi: true, bt: true };
+    const tiles = [
+      ['air', '✈️', '飛航模式'],
+      ['cell', '📶', '行動網路'],
+      ['wifi', '🛜', 'Wi-Fi'],
+      ['bt', '🔵', '藍牙'],
+    ];
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="cc-box">
+          <div class="cc">${tiles.map(([k, i, n]) => `<button class="cc-tile" data-k="${k}"><span>${i}</span><small>${n}</small></button>`).join('')}</div>
+          <ul class="can"></ul>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    const draw = () => {
+      host.querySelectorAll('.cc-tile').forEach(b => {
+        b.classList.toggle('on', st[b.dataset.k]);
+        b.disabled = b.dataset.k === 'cell' && st.air;
+      });
+      const row = (ok, icon, yes, no) => `<li class="${ok ? 'ok' : 'no'}">${icon} ${ok ? yes : no}</li>`;
+      $('.can').innerHTML =
+        row(st.wifi || st.cell, '🌐', '可以上網', '不能上網') +
+        row(st.cell, '📞', '可以打電話', '收不到電話') +
+        row(st.bt, '🎧', '耳機連著', '耳機斷了') +
+        '<li class="ok">📍 GPS 還能定位：它只接收衛星訊號，不會發出訊號</li>';
+    };
+    host.querySelector('.cc').addEventListener('click', e => {
+      const b = e.target.closest('[data-k]');
+      if (!b || b.disabled) return;
+      const k = b.dataset.k;
+      if (k === 'air') {
+        st.air = !st.air;
+        st.cell = st.wifi = st.bt = !st.air;
+        if (st.air) check('air', '電話、網路和藍牙全部關掉了');
+      } else {
+        st[k] = !st[k];
+        if (st.air && st.wifi) check('wifi');
+        if (st.air && st.bt) check('bt');
+      }
+      draw();
+    });
+    draw();
+  },
+
+  // Share the phone's mobile data as a small Wi-Fi so a tablet can get online.
+  hotspot(host, _, api) {
+    const pw = 'panda123';
+    host.innerHTML = `
+      <div class="w-hot">
+        <p class="step">① 在手機上打開「個人熱點」</p>
+        <div class="hot-row">
+          <div class="hdev hphone">
+            <span class="hicon">📱</span><b>小明的手機</b><small>📶 行動網路 4G</small>
+            <button class="option" data-act="on">個人熱點：關</button>
+            <small class="hpw" hidden>熱點密碼：<b>${pw}</b></small>
+          </div>
+          <div class="beam" aria-hidden="true"></div>
+          <div class="hdev htab">
+            <span class="hicon">📲</span><b>平板</b><small>沒有 SIM 卡，只能用 Wi-Fi</small>
+            <div class="nets" hidden><small>Wi-Fi 網路：</small><button class="option" data-act="pick">🛜 小明的手機 🔒</button></div>
+            <div class="pwpick" hidden><small>輸入密碼：</small>${[pw, '12345678', 'iphone'].sort().map(p => `<button class="option" data-pw="${p}">${p}</button>`).join('')}</div>
+            <span class="pill off">離線 offline</span>
+          </div>
+        </div>
+        <p class="usage"></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let on = false, linked = false, mb = 0;
+    const step = t => { $('.step').textContent = t; };
+    $('[data-act="on"]').onclick = () => {
+      if (on) return;
+      on = true;
+      $('[data-act="on"]').textContent = '個人熱點：開';
+      $('[data-act="on"]').classList.add('on');
+      $('.hpw').hidden = false;
+      $('.nets').hidden = false;
+      $('.w-hot').classList.add('sharing');
+      api.good();
+      step('② 在平板的 Wi-Fi 清單裡，點「小明的手機」');
+    };
+    $('[data-act="pick"]').onclick = () => {
+      $('.pwpick').hidden = false;
+      step('③ 輸入手機上顯示的熱點密碼');
+    };
+    $('.pwpick').addEventListener('click', e => {
+      const b = e.target.closest('[data-pw]');
+      if (!b || linked) return;
+      if (b.dataset.pw !== pw) { shake(b); api.bad(); step('密碼不對，看看手機上寫的熱點密碼'); return; }
+      linked = true;
+      $('.pwpick').hidden = true;
+      $('.htab .pill').className = 'pill on';
+      $('.htab .pill').textContent = '上線 online';
+      $('.w-hot').classList.add('linked');
+      step('🎉 平板上網了！它借用的是手機的行動網路。');
+      api.good();
+      api.done();
+      const tick = () => {
+        mb += 7;
+        $('.usage').textContent = `平板看影片中…手機已用掉 ${mb} MB 流量，電也掉得比較快`;
+        if (mb < 700) api.later(tick, 120);
+        else $('.usage').textContent = '手機已用掉 700 MB 流量！行動網路通常每個月有用量限制，用完要記得關掉熱點。';
+      };
+      tick();
+    });
+  },
+
+  // An inbox: mark each message as normal or suspicious; the clue shows after a right answer.
+  inbox(host, { messages }, api) {
+    host.innerHTML = `
+      <div class="w-inbox">
+        <p class="ib-left"></p>
+        <div class="msgs">${messages.map((m, i) => `
+          <div class="msg-card" data-i="${i}">
+            <p class="from">${m.from}</p>
+            <p class="body">${m.text}</p>
+            <div class="ib-btns"><button class="option" data-v="ok">👍 正常</button><button class="option" data-v="scam">🚩 可疑</button></div>
+            <p class="why" hidden>${m.why}</p>
+          </div>`).join('')}</div>
+      </div>`;
+    let left = messages.length;
+    const count = () => { host.querySelector('.ib-left').textContent = left ? `還有 ${left} 則要判斷` : '🎉 全部判斷完了！'; };
+    host.querySelector('.msgs').addEventListener('click', e => {
+      const b = e.target.closest('[data-v]');
+      if (!b) return;
+      const card = b.closest('.msg-card');
+      if (card.classList.contains('judged')) return;
+      const m = messages[card.dataset.i];
+      if ((b.dataset.v === 'scam') !== !!m.scam) { shake(card); api.bad(); return; }
+      card.classList.add('judged', m.scam ? 'is-scam' : 'is-ok');
+      card.querySelector('.why').hidden = false;
+      api.good();
+      left--;
+      count();
+      if (!left) api.done();
+    });
+    count();
+  },
+
+  // An iPad keyboard: Zhuyin, English, handwriting, emoji, and dictation.
+  ime(host, _, api) {
+    const tasks = [
+      { id: 'zhuyin', zh: '用注音打出「貓」', en: 'Zhuyin', alt: 'ㄇ ㄠ，再按「一聲」' },
+      { id: 'hand', zh: '用手寫寫出「貓」', en: 'handwriting' },
+      { id: 'voice', zh: '用說的輸入', en: 'dictation', alt: '按 🎤' },
+      { id: 'globe', zh: '用 🌐 換鍵盤', en: 'switch keyboard' },
+    ];
+    const modes = ['注音', 'English', '手寫', '表情符號'];
+    const zhuyin = ['ㄅ', 'ㄆ', 'ㄇ', 'ㄈ', 'ㄉ', 'ㄊ', 'ㄋ', 'ㄌ', 'ㄠ', 'ㄧ', 'ㄢ', 'ㄤ'];
+    const tones = [['一聲', ''], ['ˊ', 'ˊ'], ['ˇ', 'ˇ'], ['ˋ', 'ˋ']];
+    const dict = { 'ㄇㄠ': ['貓', '喵'], 'ㄇㄠˊ': ['毛', '茅'], 'ㄇㄠˇ': ['卯'], 'ㄇㄠˋ': ['帽', '冒', '貌'], 'ㄉㄠˋ': ['到', '道'], 'ㄇㄢˋ': ['慢', '曼'], 'ㄋㄧˇ': ['你', '妳'], 'ㄇㄧˇ': ['米'], 'ㄅㄠ': ['包'], 'ㄊㄤˊ': ['糖', '堂'] };
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="ime">
+          <div class="ime-text"><span class="typed"></span><u class="buf"></u><span class="caret"></span></div>
+          <div class="cands"></div>
+          <div class="kbd"></div>
+          <div class="kbd-bar">
+            <button class="kk" data-k="globe" aria-label="換鍵盤">🌐</button>
+            <span class="mode-name"></span>
+            <button class="kk" data-k="mic" aria-label="語音輸入">🎤</button>
+            <button class="kk" data-k="del" aria-label="刪除">⌫</button>
+          </div>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    let mode = 0, buf = '', typed = '', listening = false;
+    const put = t => { typed = (typed + t).slice(-16); $('.typed').textContent = typed; };
+    const cands = list => {
+      $('.cands').innerHTML = list.map(c => `<button class="cand" data-c="${c}">${c}</button>`).join('');
+    };
+    const drawKbd = () => {
+      $('.mode-name').textContent = modes[mode];
+      $('.buf').textContent = buf;
+      cands([]);
+      const k = $('.kbd');
+      if (mode === 0) {
+        k.innerHTML = `<div class="krow">${zhuyin.map(z => `<button class="kk" data-z="${z}">${z}</button>`).join('')}</div>
+          <div class="krow">${tones.map(([l, v]) => `<button class="kk tone" data-t="${v}">${l}</button>`).join('')}</div>`;
+      } else if (mode === 1) {
+        k.innerHTML = `<div class="krow">${'catdog'.split('').map(c => `<button class="kk" data-a="${c}">${c}</button>`).join('')}<button class="kk" data-a=" ">space</button></div>`;
+      } else if (mode === 2) {
+        k.innerHTML = '<canvas class="pad-ink" width="320" height="170" aria-label="手寫區"></canvas><p class="hint">用手指寫一個字</p>';
+        inkPad($('.pad-ink'));
+      } else {
+        k.innerHTML = `<div class="krow">${['😀', '😂', '🥰', '😺', '🐶', '🍎', '⚽', '🎉'].map(c => `<button class="kk" data-a="${c}">${c}</button>`).join('')}</div>`;
+      }
+    };
+    const inkPad = cv => {
+      const g = cv.getContext('2d');
+      g.lineWidth = 6; g.lineCap = 'round'; g.strokeStyle = '#1d2738';
+      let last = null, len = 0;
+      const at = e => { const b = cv.getBoundingClientRect(); return [(e.clientX - b.left) * (cv.width / b.width), (e.clientY - b.top) * (cv.height / b.height)]; };
+      cv.addEventListener('pointerdown', e => { e.preventDefault(); cv.setPointerCapture(e.pointerId); last = at(e); });
+      cv.addEventListener('pointermove', e => {
+        if (!last) return;
+        const p = at(e);
+        g.beginPath(); g.moveTo(...last); g.lineTo(...p); g.stroke();
+        len += Math.hypot(p[0] - last[0], p[1] - last[1]);
+        last = p;
+      });
+      const up = () => {
+        last = null;
+        // a pretend recognizer: once something is written, offer the likely characters
+        if (len > 40) cands(['貓', '描', '錨', '瞄']);
+      };
+      cv.addEventListener('pointerup', up);
+      cv.addEventListener('pointercancel', up);
+    };
+    host.querySelector('.ime').addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b || listening) return;
+      if (b.dataset.z) { buf = (buf + b.dataset.z).slice(-3); $('.buf').textContent = buf; cands([]); return; }
+      if (b.dataset.t !== undefined) {
+        const key = buf + b.dataset.t;
+        const list = dict[key];
+        $('.buf').textContent = key;
+        cands(list || []);
+        if (!list) $('.cands').innerHTML = '<span class="hint">找不到這個字，試試 ㄇ ㄠ 一聲</span>';
+        return;
+      }
+      if (b.dataset.c) {
+        put(b.dataset.c);
+        if (mode === 0 && b.dataset.c === '貓') check('zhuyin');
+        if (mode === 2 && b.dataset.c === '貓') check('hand');
+        buf = '';
+        if (mode === 2) drawKbd(); else { $('.buf').textContent = ''; cands([]); }
+        return;
+      }
+      if (b.dataset.a) { put(b.dataset.a); return; }
+      const k = b.dataset.k;
+      if (k === 'globe') { mode = (mode + 1) % modes.length; buf = ''; drawKbd(); check('globe'); }
+      else if (k === 'del') { if (buf) { buf = buf.slice(0, -1); $('.buf').textContent = buf; cands([]); } else { typed = typed.slice(0, -1); $('.typed').textContent = typed; } }
+      else if (k === 'mic') {
+        listening = true;
+        $('.mode-name').textContent = '🎤 正在聽…（模擬）';
+        api.later(() => { listening = false; put('我喜歡小貓'); $('.mode-name').textContent = modes[mode]; check('voice'); }, 1300);
+      }
+    });
+    drawKbd();
+  },
+
+  // A settings screen: text size, brightness, volume, Do Not Disturb, per-app notifications.
+  settings(host, _, api) {
+    const tasks = [
+      { id: 'big', zh: '把字調大', en: 'text size' },
+      { id: 'dnd', zh: '打開勿擾模式', en: 'Do Not Disturb' },
+      { id: 'mute', zh: '關掉遊戲 App 的通知', en: 'notifications' },
+    ];
+    const apps = [['msg', '💬', '訊息', '媽媽：晚餐吃咖哩喔'], ['game', '🎮', '遊戲', '快回來領每日獎勵！'], ['school', '📚', '學校', '明天記得帶水壺']];
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="set-wrap">
+          <div class="set-phone">
+            <div class="set-status"><span>09:41</span><span class="moon" hidden>🌙</span><span class="badge" hidden></span></div>
+            <div class="banner" hidden></div>
+            <p class="sample">今天天氣很好，我們去公園散步，看到一隻小貓在睡覺。</p>
+          </div>
+          <div class="set-panel">
+            <label class="srow">🔠 文字大小 <input type="range" min="1" max="5" value="2" data-s="size"></label>
+            <label class="srow">☀️ 螢幕亮度 <input type="range" min="2" max="10" value="8" data-s="bright"></label>
+            <label class="srow">🔊 音量 <input type="range" min="0" max="10" value="5" data-s="vol"></label>
+            <div class="srow">🌙 勿擾模式 <button class="sw" data-sw="dnd" aria-pressed="false"></button></div>
+            <p class="set-sub">通知 ${en('notifications')}</p>
+            ${apps.map(([k, i, n]) => `<div class="srow">${i} ${n} <button class="sw on" data-sw="${k}" aria-pressed="true"></button></div>`).join('')}
+          </div>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    const on = { dnd: false, msg: true, game: true, school: true };
+    let missed = 0, k = 0;
+    const sizes = [0, .85, 1, 1.25, 1.55, 1.9];
+    host.querySelector('.set-panel').addEventListener('input', e => {
+      const r = e.target.closest('[data-s]');
+      if (!r) return;
+      if (r.dataset.s === 'size') { $('.sample').style.fontSize = sizes[r.value] + 'rem'; if (+r.value >= 4) check('big'); }
+      if (r.dataset.s === 'bright') $('.set-phone').style.filter = `brightness(${0.35 + r.value / 15})`;
+    });
+    host.querySelector('.set-panel').addEventListener('click', e => {
+      const b = e.target.closest('[data-sw]');
+      if (!b) return;
+      const key = b.dataset.sw;
+      on[key] = !on[key];
+      b.classList.toggle('on', on[key]);
+      b.setAttribute('aria-pressed', on[key]);
+      $('.moon').hidden = !on.dnd;
+      if (on.dnd) check('dnd');
+      if (key === 'game' && !on.game) check('mute');
+    });
+    const ping = () => {
+      const live = apps.filter(([key]) => on[key]);
+      if (live.length) {
+        const [, icon, name, text] = live[k++ % live.length];
+        if (on.dnd) {
+          missed++;
+          const bd = $('.badge');
+          bd.hidden = false;
+          bd.textContent = `🔕 ${missed} 則通知（沒有響）`;
+        } else {
+          const bn = $('.banner');
+          bn.innerHTML = `<b>${icon} ${name}</b> ${text} 🔔`;
+          bn.hidden = false;
+          pop(bn);
+          api.later(() => { bn.hidden = true; }, 1600);
+        }
+      }
+      api.later(ping, 2600);
+    };
+    api.later(ping, 900);
+  },
+
+  // Press the top button and volume-up together to take a screenshot.
+  screenshot(host, _, api) {
+    host.innerHTML = `
+      <div class="w-shot">
+        <div class="shot-dev">
+          <button class="hw top" data-b="top" aria-label="頂端按鈕">頂端</button>
+          <button class="hw volup" data-b="up" aria-label="調高音量">＋</button>
+          <button class="hw voldn" data-b="dn" aria-label="調低音量">－</button>
+          <div class="shot-screen"><span>🦖</span><b>恐龍報告</b><div class="flash"></div><div class="shot-thumb" hidden>🦖</div></div>
+        </div>
+        <p class="readout">同時按「頂端按鈕」和「＋ 調高音量」</p>
+        <ul class="keys-list">
+          <li>有主畫面按鈕的 iPad：頂端按鈕 ＋ 主畫面按鈕</li>
+          <li>Mac：⇧ Shift ＋ ⌘ Command ＋ 3（整個螢幕）或 4（選一塊）</li>
+          <li>Windows：⊞ Windows ＋ Shift ＋ S</li>
+        </ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const held = {};
+    let lastTap = { b: null, t: 0 }, taken = false;
+    const shoot = () => {
+      const f = $('.flash');
+      f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+      $('.shot-thumb').hidden = false;
+      pop($('.shot-thumb'));
+      $('.readout').textContent = '📸 截圖成功！左下角的小圖點一下，可以畫重點、裁切，再存到照片。';
+      api.good();
+      if (!taken) { taken = true; api.done(); }
+    };
+    host.querySelectorAll('.hw').forEach(b => {
+      b.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        const k = b.dataset.b;
+        held[k] = true;
+        b.classList.add('down');
+        const now = performance.now();
+        const pair = k === 'top' ? 'up' : k === 'up' ? 'top' : null;
+        // both held at once (two fingers), or tapped one right after the other (mouse)
+        if (pair && (held[pair] || (lastTap.b === pair && now - lastTap.t < 600))) shoot();
+        else if (k === 'dn') $('.readout').textContent = '這是調低音量，要按「＋」那一顆';
+        lastTap = { b: k, t: now };
+      });
+      const up = () => { held[b.dataset.b] = false; b.classList.remove('down'); };
+      b.addEventListener('pointerup', up);
+      b.addEventListener('pointerleave', up);
+      b.addEventListener('pointercancel', up);
+    });
+  },
+
+  // Scan two QR codes: one on a poster, one on a sticker stuck to a parking meter.
+  qr(host, _, api) {
+    const codes = [
+      { id: 'good', where: '學校海報：「掃我看科技小探險」', img: 'img/qr-good.svg', url: 'https://kids.scsnake.xyz/', safe: true, yes: '✅ 這是學校給的網站，網址也正常，可以打開。', no: '這張是學校海報上的，網址也正常，其實可以打開喔。' },
+      { id: 'fake', where: '停車繳費機上歪歪的貼紙：「掃碼繳停車費」', img: 'img/qr-fake.svg', url: 'http://parking-pay-tw.xyz/pay?id=8812', safe: false, yes: '⚠️ 小心！這可能是有人貼上去的假 QR Code，網址很奇怪，也沒有 https。', no: '✅ 對！繳費要用官方 App 或現場機器。被貼上去的 QR Code 可能是詐騙。' },
+    ];
+    host.innerHTML = `
+      <div class="w-qr">
+        <div class="qr-row">${codes.map(c => `
+          <figure class="qr-card ${c.id}" data-id="${c.id}">
+            <img src="${c.img}" alt="QR Code" draggable="false">
+            <figcaption>${c.where}</figcaption>
+            <button class="option" data-scan="${c.id}">📷 掃描</button>
+            <div class="qr-pop" hidden>
+              <p>偵測到網址：<code>${c.url}</code></p>
+              <div><button class="option" data-ans="open">打開</button><button class="option" data-ans="skip">不要打開</button></div>
+              <p class="qr-res"></p>
+            </div>
+          </figure>`).join('')}</div>
+      </div>`;
+    const solved = new Set();
+    host.addEventListener('click', e => {
+      const sc = e.target.closest('[data-scan]');
+      if (sc) { const card = sc.closest('.qr-card'); card.querySelector('.qr-pop').hidden = false; pop(card); return; }
+      const a = e.target.closest('[data-ans]');
+      if (!a) return;
+      const card = a.closest('.qr-card');
+      const c = codes.find(x => x.id === card.dataset.id);
+      const open = a.dataset.ans === 'open';
+      const right = open === c.safe;
+      card.querySelector('.qr-res').textContent = open ? c.yes : c.no;
+      if (!right) { shake(card); api.bad(); return; }
+      card.classList.add('done');
+      api.good();
+      solved.add(c.id);
+      if (solved.size === codes.length) api.done();
+    });
+  },
+
+  // Find a lost tablet: play a sound, or lock it with Lost Mode.
+  findmy(host, _, api) {
+    const tasks = [
+      { id: 'sound', zh: '播放聲音找出來', en: 'play sound' },
+      { id: 'lost', zh: '打開遺失模式', en: 'Lost Mode' },
+    ];
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="fm-map-box">
+          <div class="fm-map"><span class="fm-home">🏠</span><span class="fm-pin">📲</span><span class="fm-park">🌳</span></div>
+          <p class="fm-name"><b>小明的 iPad</b>：在家裡，2 分鐘前</p>
+          <div class="fm-acts">
+            <button class="option" data-a="sound">🔊 播放聲音</button>
+            <button class="option" data-a="lost">🔒 標示為遺失</button>
+            <button class="option danger" data-a="erase">🧹 清除這台裝置</button>
+          </div>
+          <div class="fm-lock" hidden>🔒 這台 iPad 遺失了<br>撿到請打 0912-345-678</div>
+          <p class="readout"></p>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    host.querySelector('.fm-acts').addEventListener('click', e => {
+      const b = e.target.closest('[data-a]');
+      if (!b) return;
+      const a = b.dataset.a;
+      if (a === 'sound') {
+        shake($('.fm-pin'));
+        $('.readout').textContent = '🔊 嗶——嗶——！順著聲音找，原來在沙發下面 🛋️';
+        check('sound');
+      } else if (a === 'lost') {
+        $('.fm-lock').hidden = false;
+        pop($('.fm-lock'));
+        $('.readout').textContent = '遺失模式會鎖住平板，畫面上顯示你的電話，別人打不開。';
+        check('lost');
+      } else {
+        $('.readout').textContent = '⚠️ 清除會把裡面的東西全部刪掉，只有確定找不回來時才用。這裡先不要按！';
+        shake(b);
+      }
+    });
+  },
+
+  // A pretend AI chat: ask questions, and catch the answer that is wrong.
+  chatbot(host, _, api) {
+    const tasks = [
+      { id: 'ask', zh: '問 AI 三個問題', en: 'ask' },
+      { id: 'catch', zh: '找出 AI 說錯的地方', en: 'fact-check' },
+      { id: 'private', zh: '知道不要告訴 AI 個人資料', en: 'privacy' },
+    ];
+    const qs = [
+      { q: '為什麼天空是藍色的？', a: '陽光裡有很多顏色，藍色的光比較容易被空氣散開，所以天空看起來是藍色的。', ok: true },
+      { q: '台灣最高的山是哪一座？', a: '台灣最高的山是阿里山，大約 3952 公尺高。', ok: false, fix: '錯了！台灣最高的山是玉山，大約 3952 公尺。AI 可能說得很有自信，但還是會說錯。' },
+      { q: '幫我想三個小狗的名字', a: '可以叫「小餅乾」、「豆花」或「阿布」！', ok: true },
+      { q: '我家住在……我告訴你地址', a: '請不要把地址、電話、密碼或學校這些個人資料告訴 AI 或任何網站喔！', ok: true, priv: true },
+    ];
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="chat">
+          <div class="chat-log"><p class="bot-msg">🤖 你好！我是 AI 聊天機器人，想問什麼？</p></div>
+          <div class="chat-qs">${qs.map((x, i) => `<button class="option" data-q="${i}">${x.q}</button>`).join('')}</div>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    const log = $('.chat-log');
+    let asked = 0, busy = false;
+    const add = html => { const el = h(html); log.append(el); log.scrollTop = log.scrollHeight; return el; };
+    host.querySelector('.chat-qs').addEventListener('click', e => {
+      const b = e.target.closest('[data-q]');
+      if (!b || busy || b.disabled) return;
+      const x = qs[b.dataset.q];
+      b.disabled = true;
+      busy = true;
+      add(`<p class="me-msg">${x.q}</p>`);
+      const msg = add('<div class="bot-msg">🤖 <span></span></div>');
+      const span = msg.querySelector('span');
+      let n = 0;
+      const type = () => {
+        span.textContent = x.a.slice(0, ++n);
+        log.scrollTop = log.scrollHeight;
+        if (n < x.a.length) { api.later(type, 35); return; }
+        busy = false;
+        if (++asked >= 3) check('ask');
+        if (x.priv) { check('private'); return; }
+        const judge = h('<div class="judge"><button class="option" data-j="ok">👍 合理</button><button class="option" data-j="odd">🤔 怪怪的</button></div>');
+        msg.append(judge);
+        judge.addEventListener('click', ev => {
+          const j = ev.target.closest('[data-j]');
+          if (!j) return;
+          const sayOdd = j.dataset.j === 'odd';
+          judge.remove();
+          if (!x.ok && sayOdd) { add(`<p class="fix-msg">✅ ${x.fix}</p>`); check('catch'); api.good(); }
+          else if (!x.ok) { add('<p class="fix-msg">再想想：台灣最高的山真的是阿里山嗎？</p>'); api.bad(); msg.append(judge); }
+          else if (sayOdd) add('<p class="fix-msg">這個答案是對的。不過會懷疑、會查證，是很好的習慣！</p>');
+          else add('<p class="fix-msg">👍 這個答案沒問題。</p>');
+        });
+      };
+      api.later(type, 300);
+    });
+  },
+
+  // The operating system takes turns between apps so fast they look simultaneous.
+  multitask(host, _, api) {
+    const apps = [['🎵', '播放音樂'], ['⬇️', '下載遊戲'], ['🎨', '畫畫']];
+    host.innerHTML = `
+      <div class="w-multi">
+        <div class="mt-rows">${apps.map(([i, n], k) => `<div class="mt-row" data-k="${k}"><span class="mt-name">${i} ${n}</span><div class="mt-bar"><i></i></div></div>`).join('')}</div>
+        <div class="controls"><button class="option" data-speed="520">🐢 慢動作</button><button class="option" data-speed="40">⚡ 正常速度</button></div>
+        <p class="readout">選一種速度，看作業系統怎麼安排</p>
+      </div>`;
+    const rows = [...host.querySelectorAll('.mt-row')];
+    let running = false;
+    host.querySelector('.controls').addEventListener('click', e => {
+      const b = e.target.closest('[data-speed]');
+      if (!b || running) return;
+      running = true;
+      const ms = +b.dataset.speed;
+      const prog = [0, 0, 0];
+      let cur = -1;
+      const tick = () => {
+        cur = (cur + 1) % 3;
+        prog[cur] = Math.min(100, prog[cur] + 5);
+        rows.forEach((r, k) => { r.classList.toggle('on', k === cur); r.querySelector('i').style.width = prog[k] + '%'; });
+        host.querySelector('.readout').textContent = ms > 100 ? `輪到「${apps[cur][1]}」用 CPU` : '快速輪流中……看起來像三個同時在做！';
+        if (prog.every(p => p >= 100)) {
+          running = false;
+          rows.forEach(r => r.classList.remove('on'));
+          host.querySelector('.readout').textContent = ms > 100 ? '慢慢看就知道：其實是一個一個輪流的。再試試正常速度！' : '🎉 全部完成！正常速度下輪流得超快，所以感覺是同時進行。';
+          api.good();
+          api.done();
+          return;
+        }
+        api.later(tick, ms);
+      };
+      tick();
+    });
+  },
+
+  // The computer guesses your number by always halving the range (binary search).
+  guess(host, { max }, api) {
+    host.innerHTML = `
+      <div class="w-guess">
+        <p class="g-step">① 選一個 1 到 ${max} 的數字（電腦看不到）</p>
+        <div class="g-grid">${Array.from({ length: max }, (_, i) => `<button class="g-n" data-n="${i + 1}">${i + 1}</button>`).join('')}</div>
+        <div class="g-play" hidden>
+          <p class="g-say"></p>
+          <div class="controls"><button class="option" data-a="up">⬆️ 要再大一點</button><button class="option" data-a="down">⬇️ 要再小一點</button><button class="go" data-a="hit">🎯 猜對了</button></div>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let secret = null, lo = 1, hi = max, g = 0, tries = 0, finished = false;
+    const next = () => {
+      g = Math.floor((lo + hi) / 2);
+      tries++;
+      $('.g-say').innerHTML = `電腦第 ${tries} 次猜：<b>${g}</b>`;
+      host.querySelectorAll('.g-n').forEach(b => {
+        const n = +b.dataset.n;
+        b.classList.toggle('out', n < lo || n > hi);
+        b.classList.toggle('guess', n === g);
+      });
+    };
+    host.querySelector('.g-grid').addEventListener('click', e => {
+      const b = e.target.closest('[data-n]');
+      if (!b || secret !== null) return;
+      secret = +b.dataset.n;
+      b.classList.add('mine');
+      $('.g-step').innerHTML = `② 你選了 <b>${secret}</b>。告訴電腦要大一點、小一點，還是猜對了`;
+      $('.g-play').hidden = false;
+      next();
+    });
+    host.querySelector('.g-play').addEventListener('click', e => {
+      const b = e.target.closest('[data-a]');
+      if (!b || finished) return;
+      const truth = secret > g ? 'up' : secret < g ? 'down' : 'hit';
+      if (b.dataset.a !== truth) { shake(b); api.bad(); $('.g-say').innerHTML += `<br>咦？你選的是 ${secret}，再看一次`; return; }
+      if (truth === 'hit') {
+        finished = true;
+        $('.g-say').innerHTML = `🎉 電腦只猜了 <b>${tries}</b> 次！每次刪掉一半，1 到 ${max} 最多 ${Math.ceil(Math.log2(max + 1))} 次一定猜到。`;
+        api.good();
+        api.done();
+        return;
+      }
+      if (truth === 'up') lo = g + 1; else hi = g - 1;
+      next();
+    });
+  },
+
+  // Sort the cards by swapping neighbors, like a bubble sort.
+  swapsort(host, { nums }, api) {
+    const a = shuffle(nums, true);
+    host.innerHTML = `
+      <div class="w-swap">
+        <div class="cards-row"></div>
+        <p class="readout">按 ⇄ 交換兩張相鄰的卡片，從小排到大</p>
+      </div>`;
+    let swaps = 0, solved = false;
+    const draw = () => {
+      host.querySelector('.cards-row').innerHTML = a.map((n, i) => `<span class="ncard">${n}</span>${i < a.length - 1 ? `<button class="swapbtn" data-i="${i}" aria-label="交換">⇄</button>` : ''}`).join('');
+    };
+    host.querySelector('.cards-row').addEventListener('click', e => {
+      const b = e.target.closest('[data-i]');
+      if (!b || solved) return;
+      const i = +b.dataset.i;
+      [a[i], a[i + 1]] = [a[i + 1], a[i]];
+      swaps++;
+      draw();
+      const ok = a.every((v, k) => !k || a[k - 1] <= v);
+      host.querySelector('.readout').textContent = ok ? `🎉 排好了！你交換了 ${swaps} 次。電腦也是這樣一次比兩個、交換，只是快得多。` : `交換了 ${swaps} 次`;
+      if (ok) { solved = true; api.good(); api.done(); }
+    });
+    draw();
+  },
+
+  // Run-length codes ("2白3紅2白"): paint the picture they describe.
+  rle(host, { pattern, color, colorName }, api) {
+    const rows = pattern.length, cols = pattern[0].length;
+    const code = row => row.match(/(.)\1*/g).map(run => `${run.length}${run[0] === '1' ? colorName : '白'}`).join('');
+    host.innerHTML = `
+      <div class="w-rle" style="--px:${color}">
+        <ol class="codes">${pattern.map(r => `<li>${code(r)}</li>`).join('')}</ol>
+        ${gridHTML(rows, cols, 'canvas')}
+        <p class="hint">每一行照暗號塗色：數字是幾格，後面是顏色</p>
+      </div>`;
+    const want = pattern.join('').split('').map(c => c === '1');
+    const canvas = host.querySelector('.canvas');
+    const cells = [...canvas.querySelectorAll('.px')];
+    let solved = false;
+    paintable(canvas, () => {
+      if (solved || !cells.every((c, i) => c.classList.contains('on') === want[i])) return;
+      solved = true;
+      canvas.classList.add('locked');
+      const short = pattern.map(code).join('').length;
+      host.querySelector('.hint').textContent = `🎉 解壓縮成功！原本要記 ${rows * cols} 格，暗號只要 ${short} 個字。`;
+      api.good();
+      api.done();
+    });
+  },
+
+  // A tiny "AI" that only looks at color learns from examples, and gets fixed with one more.
+  train(host, _, api) {
+    const train = [
+      { e: '🍎', hue: 0, label: '蘋果' }, { e: '🍎', hue: 8, label: '蘋果' },
+      { e: '🍌', hue: 55, label: '香蕉' }, { e: '🍌', hue: 50, label: '香蕉' },
+    ];
+    const tests = [{ e: '🍎', hue: 4, truth: '蘋果' }, { e: '🍌', hue: 52, truth: '香蕉' }, { e: '🍏', hue: 110, truth: '蘋果' }];
+    host.innerHTML = `
+      <div class="w-train">
+        <div class="tr-box"><p>📚 AI 看過的例子（它只看顏色）</p><div class="tr-ex"></div></div>
+        <div class="tr-test"><span class="tr-item">❔</span><p class="tr-say">按下面的按鈕，讓 AI 猜</p></div>
+        <div class="controls"><button class="go" data-a="next">🤖 讓 AI 猜下一個</button><button class="option" data-a="teach" hidden>🧑‍🏫 教 AI：這也是蘋果</button></div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let k = 0, fixed = false;
+    const drawEx = () => {
+      $('.tr-ex').innerHTML = train.map(t => `<span class="tr-chip">${t.e}<small>${t.label}</small></span>`).join('');
+    };
+    const predict = hue => train.reduce((best, t) => (Math.abs(t.hue - hue) < Math.abs(best.hue - hue) ? t : best)).label;
+    const run = () => {
+      const t = tests[k];
+      const p = predict(t.hue);
+      $('.tr-item').textContent = t.e;
+      pop($('.tr-item'));
+      const right = p === t.truth;
+      $('.tr-say').innerHTML = `AI 猜：<b>${p}</b> ${right ? '✅' : '❌ 猜錯了！它只看過紅色的蘋果，綠色看起來比較像黃色的香蕉。'}`;
+      if (!right) { $('[data-a="teach"]').hidden = false; $('[data-a="next"]').hidden = true; api.bad(); return; }
+      api.good();
+      if (k === tests.length - 1) {
+        $('.tr-say').innerHTML += fixed ? '<br>🎉 多教一個例子，AI 就學會了。例子越多、越多樣，AI 學得越好。' : '';
+        $('[data-a="next"]').hidden = true;
+        if (fixed) api.done();
+        return;
+      }
+      k++;
+    };
+    host.querySelector('.controls').addEventListener('click', e => {
+      const b = e.target.closest('[data-a]');
+      if (!b) return;
+      if (b.dataset.a === 'next') run();
+      else {
+        train.push({ e: '🍏', hue: 110, label: '蘋果' });
+        fixed = true;
+        drawEx();
+        b.hidden = true;
+        $('[data-a="next"]').hidden = false;
+        $('[data-a="next"]').textContent = '🤖 再猜一次';
+        $('.tr-say').textContent = 'AI 多看了一個綠蘋果的例子，再猜一次看看！';
+      }
+    });
+    drawEx();
+  },
+};
