@@ -296,7 +296,7 @@ let slideToken = 0;
 
 function lesson(unit, index) {
   hush();
-  const token = ++slideToken;
+  let token = ++slideToken;
   const slide = unit.slides[index];
   here = { unit, index };
   onFinish = null;
@@ -318,7 +318,8 @@ function lesson(unit, index) {
         <div class="words">
           <h2>${slide.title}</h2>
           ${slide.text ? `<p class="text">${slide.text}</p>` : ''}
-          ${slide.widget ? `<p class="star-note${isDone(slide) ? ' got' : ''}">${isDone(slide) ? '★ 已完成' : '☆ 完成任務得到一顆星'}</p>` : ''}
+          ${slide.widget ? `<div class="star-row"><p class="star-note${isDone(slide) ? ' got' : ''}">${isDone(slide) ? '★ 已完成' : '☆ 完成任務得到一顆星'}</p>
+            <button class="redo" aria-label="這一頁重新來一次">↺ 重新玩</button></div>` : ''}
         </div>
         <div class="stage">${slide.art ? `<div class="art">${slide.art}</div>` : ''}</div>
       </section>
@@ -352,7 +353,20 @@ function lesson(unit, index) {
         app.querySelector('.nav .next').classList.add('glow');
       },
     };
-    WIDGETS[slide.widget](app.querySelector('.stage'), slide.params || {}, api);
+    // Start the task again from the beginning; the star already earned stays.
+    // A fresh stage element drops listeners the last run put on it.
+    const start = () => {
+      const old = app.querySelector('.stage'), stage = old.cloneNode(false);
+      old.replaceWith(stage);
+      WIDGETS[slide.widget](stage, slide.params || {}, api);
+      return stage;
+    };
+    app.querySelector('.redo').onclick = () => {
+      hush();
+      token = ++slideToken; // ends the old run's timers and window listeners
+      start().animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250, easing: 'ease-out' });
+    };
+    start();
   }
 }
 

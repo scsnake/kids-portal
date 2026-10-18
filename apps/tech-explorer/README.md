@@ -60,6 +60,8 @@ survive slides being added or moved. The home screen shows the total stars and a
 
 On a computer, ← → (also PageUp/PageDown, Space/Shift+Space, Home/End) switch slides that have no task; on a task slide the keys stay with the task.
 
+Each task slide has a ↺ 重新玩 button. It starts the task again from the beginning. A star already earned stays.
+
 The 📖 button (home screen and lesson bar) opens a side panel with the contents
 by chapter and an index of every new term, each linked to its slide.
 

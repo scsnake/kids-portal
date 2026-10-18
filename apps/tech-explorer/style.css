@@ -240,6 +240,10 @@ a.unit-card:active { transform: scale(.98); }
 .words .text { margin: .6rem 0 0; font-size: clamp(1.15rem, 2.6vw, 1.4rem); line-height: 1.8; }
 .star-note { margin: .6rem 0 0; color: var(--ink-3); font-weight: 700; }
 .star-note.got { color: var(--star); }
+.star-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; margin-top: .6rem; }
+.star-row .star-note { margin: 0; }
+.redo { min-height: 44px; padding: 0 16px; border: 2px solid var(--line); border-radius: 99px; background: var(--card); color: var(--ink-2); font-weight: 800; }
+.redo:active { background: rgba(0, 0, 0, .06); }
 .stage { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: flex-start; padding-top: .4rem; }
 
 @media (min-width: 900px) and (orientation: landscape) {
