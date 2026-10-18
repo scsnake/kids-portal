@@ -379,6 +379,7 @@ function finished(unit) {
 // ---------- routing: #/  #/u/<unit>/<slide>  #/done/<unit> ----------
 
 function route() {
+  closeIndex(); // e.g. the browser's back button while the panel is open
   const [, kind, id, n] = location.hash.split('/');
   const unit = UNITS.find(u => u.id === id);
   if (kind === 'u' && unit) {
