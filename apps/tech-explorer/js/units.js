@@ -1051,7 +1051,7 @@ export const UNITS = [
             { icon: '📶', label: '網路', en: 'Internet', bin: 'need' },
             { icon: '🔊', label: '喇叭或耳機', en: 'speaker', bin: 'need' },
             { icon: '🖨️', label: '印表機', en: 'printer', bin: 'no' },
-            { icon: '🔑', label: '隨身碟', en: 'USB drive', bin: 'no' },
+            { icon: USB, label: '隨身碟', en: 'USB drive', bin: 'no' },
           ],
         },
       },
@@ -1567,7 +1567,7 @@ export const UNITS = [
           items: [
             { icon: '☁️', label: '雲端相簿', en: 'cloud photos', bin: 'net' },
             { icon: '📝', label: '線上共用文件', bin: 'net' },
-            { icon: '🔑', label: '隨身碟', en: 'USB flash drive', bin: 'local' },
+            { icon: USB, label: '隨身碟', en: 'USB flash drive', bin: 'local' },
             { icon: '💽', label: '電腦裡的硬碟', en: 'hard drive', bin: 'local' },
           ],
         },
@@ -1578,7 +1578,7 @@ export const UNITS = [
         params: {
           question: '沒有網路，想把電腦裡的作業帶回家，可以存在哪裡？',
           options: [
-            { text: '🔑 隨身碟', correct: true },
+            { text: `${USB} 隨身碟`, correct: true },
             { text: '🗒️ 記憶體' },
             { text: '🖨️ 印表機' },
           ],
