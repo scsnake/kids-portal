@@ -383,12 +383,20 @@ function finished(unit) {
       <div class="confetti" aria-hidden="true">${Array.from({ length: 24 }, (_, k) =>
         `<i style="left:${(k * 37) % 100}%;animation-delay:${((k * 0.29) % 3).toFixed(2)}s"></i>`).join('')}</div>
       <p class="big-icon">${unit.icon}</p>
+      <p class="fin-ch">第 ${i + 1} 章完成</p>
       <h2>「${unit.title}」完成了！</h2>
       <p class="unit-stars big">${'★'.repeat(got)}<span class="dim">${'★'.repeat(total - got)}</span></p>
       <p>${got === total ? '全部的任務都完成了，太厲害了！' : '還有星星沒拿到，可以回去再玩一次喔。'}</p>
+      ${next ? `
+      <div class="fin-next" style="--c:${next.color}">
+        ${next.part !== unit.part ? `<p class="fin-part">🎉「${PARTS.find(p => p.id === unit.part).title}」全部完成！接下來是「${PARTS.find(p => p.id === next.part).title}」</p>` : ''}
+        <small>下一章</small>
+        <b>第 ${i + 2} 章．${next.icon} ${next.title}</b>
+        <span>${next.desc}</span>
+      </div>` : `<p class="fin-part">🏆 這是最後一章，全部 ${UNITS.length} 章都看完了！</p>`}
       <div class="finish-btns">
         <a class="nav-btn" href="#/">回單元列表</a>
-        ${next ? `<a class="nav-btn next glow" href="#/u/${next.id}/0">下一個：${next.title} ▶</a>` : ''}
+        ${next ? `<a class="nav-btn next glow" href="#/u/${next.id}/0">開始第 ${i + 2} 章 ▶</a>` : ''}
       </div>
     </main>`;
   sfx.star();

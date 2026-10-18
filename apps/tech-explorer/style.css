@@ -668,9 +668,15 @@ a.unit-card:active { transform: scale(.98); }
 }
 .finish h2 { margin: .4rem 0; font-size: clamp(1.8rem, 5vw, 2.6rem); color: var(--c); }
 .finish p { font-size: 1.2rem; }
-.big-icon { margin: 0; font-size: 5rem; }
+.finish .big-icon { margin: 0; font-size: 5rem; line-height: 1.1; }
 .unit-stars.big { font-size: 2.4rem; }
 .finish-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 1rem; }
+.finish .fin-ch { margin: .6rem 0 0; font-size: 1.05rem; font-weight: 800; color: var(--ink-2); }
+.fin-next { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; width: min(100%, 440px); margin-top: .4rem; padding: 14px 18px; border-radius: var(--radius); background: var(--card); border: 2px solid var(--line); border-left: 8px solid var(--c); box-shadow: var(--shadow); }
+.fin-next small { color: var(--ink-3); font-weight: 800; }
+.fin-next b { font-size: 1.3rem; color: color-mix(in srgb, var(--c) 80%, black); }
+.fin-next span { color: var(--ink-2); font-weight: 600; }
+.finish .fin-part { margin: 0 0 6px; font-size: 1.05rem; font-weight: 800; color: var(--star); }
 .confetti i {
   position: absolute; top: -20px;
   width: 10px; height: 16px; border-radius: 3px;
