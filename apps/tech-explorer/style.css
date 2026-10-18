@@ -1641,7 +1641,13 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 /* ---------- run-length decoding ---------- */
 
 .w-rle { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 16px; }
-.codes { margin: 0; padding-left: 1.6rem; font-weight: 800; font-size: 1.15rem; line-height: 2.05; }
+.rle-pair { display: flex; align-items: stretch; gap: 8px; }
+.rle-codes { list-style: none; margin: 0; padding: 6px 0; display: grid; grid-template-rows: repeat(var(--rows), 1fr); gap: 3px; font-weight: 800; font-size: 1.15rem; }
+.rle-codes li { display: flex; align-items: center; justify-content: flex-end; gap: 6px; white-space: nowrap; }
+.rle-arrow { color: var(--c); font-weight: 900; }
+.w-rle .canvas { background: #adb5bd; }
+.w-rle .canvas .px { background: white; }
+.w-rle .canvas .px.on { background: var(--px); }
 .w-rle .canvas { width: min(300px, 60vw); }
 .w-rle .hint { flex-basis: 100%; }
 

@@ -4388,8 +4388,10 @@ export const WIDGETS = {
     const code = row => row.match(/(.)\1*/g).map(run => `${run.length}${run[0] === '1' ? colorName : '白'}`).join('');
     host.innerHTML = `
       <div class="w-rle" style="--px:${color}">
-        <ol class="codes">${pattern.map(r => `<li>${code(r)}</li>`).join('')}</ol>
-        ${gridHTML(rows, cols, 'canvas')}
+        <div class="rle-pair">
+          <ul class="rle-codes" style="--rows:${rows}">${pattern.map(r => `<li>${code(r)}<span class="rle-arrow" aria-hidden="true">→</span></li>`).join('')}</ul>
+          ${gridHTML(rows, cols, 'canvas')}
+        </div>
         <p class="hint">每一行照暗號塗色：數字是幾格，後面是顏色</p>
       </div>`;
     const want = pattern.join('').split('').map(c => c === '1');
