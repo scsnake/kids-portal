@@ -304,9 +304,7 @@ function lesson(unit, index) {
   app.innerHTML = `
     <main class="lesson" style="--c:${unit.color}">
       <header class="bar">
-        <a class="icon-btn" href="#/" aria-label="回到單元列表">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-        </a>
+        <a class="back-units" href="#/" aria-label="回到單元列表">‹ 單元</a>
         <span class="bar-title">${unit.icon} ${unit.title}</span>
         <span class="dots">${unit.slides.map((s, i) =>
           `<a href="#/u/${unit.id}/${i}" class="dot${i === index ? ' here' : ''}${s.widget ? ' play' : ''}${isDone(s) ? ' got' : seen.has(slideKey(s)) ? ' seen' : ''}" aria-label="第 ${i + 1} 頁"></a>`).join('')}</span>

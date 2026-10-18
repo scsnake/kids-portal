@@ -203,6 +203,15 @@ a.unit-card:active { transform: scale(.98); }
   font-size: 1.4rem;
 }
 .icon-btn svg { width: 26px; height: 26px; }
+.back-units {
+  display: inline-flex; align-items: center; flex: none;
+  min-height: 44px; padding: 0 .9rem;
+  border: 2px solid var(--line); border-radius: 99px;
+  background: var(--card); color: var(--ink-2);
+  font-weight: 800; text-decoration: none; white-space: nowrap;
+  -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;
+}
+.back-units:active { background: rgba(0, 0, 0, .06); }
 .icon-btn:active { background: rgba(0, 0, 0, .06); }
 .say.talking { background: color-mix(in srgb, var(--c) 15%, white); }
 .bar-title { font-weight: 800; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
