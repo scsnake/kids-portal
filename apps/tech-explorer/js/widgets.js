@@ -1575,7 +1575,7 @@ export const WIDGETS = {
       <div class="w-url">
         <div class="addr"><span class="lock">🔒</span>${parts.map((p, i) => `<button class="part ${p.cls}" data-i="${i}">${p.text}</button>`).join('')}</div>
         <div class="explain-box"><p>點上面網址的每一段</p></div>
-        <div class="seen">${parts.map(p => `<span class="${p.cls}">${p.zh}${en(p.en)}</span>`).join('')}</div>
+        <div class="url-seen">${parts.map(p => `<span class="${p.cls}">${p.zh}${en(p.en)}</span>`).join('')}</div>
       </div>`;
     const seen = new Set();
     host.querySelectorAll('.part').forEach(b => {
@@ -1583,7 +1583,7 @@ export const WIDGETS = {
         const p = parts[b.dataset.i];
         host.querySelectorAll('.part').forEach(x => x.classList.toggle('on', x === b));
         host.querySelector('.explain-box').innerHTML = `<p class="${p.cls}"><b>${p.zh}</b>${en(p.en)}</p><p>${p.say}</p>`;
-        host.querySelector(`.seen .${p.cls}`).classList.add('got');
+        host.querySelector(`.url-seen .${p.cls}`).classList.add('got');
         if (seen.has(b.dataset.i)) return;
         seen.add(b.dataset.i);
         api.good();
@@ -2702,7 +2702,7 @@ export const WIDGETS = {
         <div class="sky2">
           <svg viewBox="0 0 400 260" aria-hidden="true">${sats.map((p, i) => `<circle class="orbit r${i}" cx="${p[0]}" cy="${p[1]}" r="${dist(p)}"/>`).join('')}</svg>
           ${sats.map((p, i) => `<button class="sat" data-i="${i}" style="left:${p[0] / 4}%;top:${(p[1] / 260) * 100}%">🛰️</button>`).join('')}
-          <span class="here" style="left:${me[0] / 4}%;top:${(me[1] / 260) * 100}%">❓</span>
+          <span class="gps-me" style="left:${me[0] / 4}%;top:${(me[1] / 260) * 100}%">❓</span>
         </div>
         <p class="readout">點衛星，接收它的訊號</p>
       </div>`;
@@ -2719,7 +2719,7 @@ export const WIDGETS = {
         if (got.size === 1) r.textContent = '收到 1 顆：你在這個圓圈上的某個地方';
         else if (got.size === 2) r.textContent = '收到 2 顆：兩個圓圈交叉的地方，還有兩個可能';
         else {
-          const m = host.querySelector('.here');
+          const m = host.querySelector('.gps-me');
           m.textContent = '📍';
           pop(m);
           r.textContent = '🎉 收到 3 顆：三個圓圈只交在一點，就是你在的地方！';

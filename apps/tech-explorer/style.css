@@ -875,9 +875,9 @@ a.unit-card:active { transform: scale(.98); }
 .explain-box { min-height: 110px; padding: .8rem 1rem; border-radius: var(--radius); background: var(--card); border: 2px solid var(--line); font-size: 1.15rem; line-height: 1.7; }
 .explain-box p { margin: 0; }
 .explain-box p.proto, .explain-box p.domain, .explain-box p.path { color: var(--tone); font-size: 1.3rem; }
-.seen { display: flex; flex-wrap: wrap; gap: 8px; }
-.seen span { padding: .2rem .7rem; border-radius: 99px; border: 2px dashed var(--line); color: var(--ink-3); font-weight: 700; }
-.seen span.got { border-style: solid; border-color: var(--tone); color: var(--tone); }
+.url-seen { display: flex; flex-wrap: wrap; gap: 8px; }
+.url-seen span { padding: .2rem .7rem; border-radius: 99px; border: 2px dashed var(--line); color: var(--ink-3); font-weight: 700; }
+.url-seen span.got { border-style: solid; border-color: var(--tone); color: var(--tone); }
 
 /* pass the note */
 .w-cipher { position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; }
@@ -1192,7 +1192,7 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .orbit.r1 { stroke: #ff8787; } .orbit.r2 { stroke: #8ce99a; }
 .sat { position: absolute; translate: -50% -50%; width: 56px; height: 56px; border: 0; border-radius: 50%; background: rgba(255,255,255,.15); font-size: 1.9rem; }
 .sat.on { background: rgba(255,212,59,.45); }
-.here { position: absolute; translate: -50% -100%; font-size: 2rem; }
+.gps-me { position: absolute; translate: -50% -100%; font-size: 2rem; }
 .w-gps .readout { margin: 0; font-weight: 800; font-size: 1.1rem; text-align: center; }
 
 /* ---------- control center ---------- */
