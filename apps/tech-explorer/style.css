@@ -33,6 +33,9 @@ button, .chip, .nav-btn, .icon-btn, .key, .bulb, .lamp, .way {
 }
 button { font: inherit; color: inherit; cursor: pointer; }
 button:disabled { cursor: default; }
+/* fast double taps on controls must not zoom the page on iPad; draggable parts set
+   touch-action: none on their own class, which wins over this */
+button, a, [role="button"], input, label, summary { touch-action: manipulation; }
 a { color: inherit; }
 :focus-visible { outline: 3px solid var(--c); outline-offset: 2px; }
 
