@@ -1032,6 +1032,7 @@ export const UNITS = [
         text: `${t('視訊會議', 'video meeting')}讓大家在不同地方，也能看著對方說話。它要用到好幾個裝置一起合作。把需要的東西拖到左邊！`,
         widget: 'sort',
         params: {
+          rest: 'no',
           bins: [
             { id: 'need', icon: '✅', label: '視訊會議需要' },
             { id: 'no', icon: '❌', label: '用不到' },

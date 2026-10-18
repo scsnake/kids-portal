@@ -195,8 +195,9 @@ const WAY_ICONS = {
 };
 
 export const WIDGETS = {
-  // Drag (or tap, then tap a box) each chip into the right box.
-  sort(host, { bins, items }, api) {
+  // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
+  // leftovers that can only go in that box move there by themselves.
+  sort(host, { bins, items, rest }, api) {
     host.innerHTML = `
       <div class="w-sort">
         <div class="tray"></div>
@@ -213,6 +214,23 @@ export const WIDGETS = {
         </div>`));
     }
     let left = items.length, selected = null;
+    // rest: once every chip that belongs elsewhere is placed, the ones left over can only go
+    // in this bin, so move them there by themselves.
+    const sweep = () => {
+      const chips = [...tray.querySelectorAll('.chip:not(.placed)')];
+      if (!rest || !chips.length || chips.some(c => c.bin !== rest)) return;
+      const zone = binsEl.querySelector(`[data-zone="${rest}"]`);
+      host.querySelector('.hint').textContent = `都找到了！剩下的自動放進「${bins.find(b => b.id === rest).label}」`;
+      if (selected) select(selected);
+      chips.forEach((chip, k) => api.later(() => {
+        const from = chip.getBoundingClientRect();
+        chip.classList.add('placed');
+        zone.querySelector('.bin-items').append(chip);
+        const to = chip.getBoundingClientRect();
+        chip.animate([{ transform: `translate(${from.left - to.left}px, ${from.top - to.top}px)` }, { transform: 'none' }], { duration: 450, easing: 'ease-in-out' });
+        if (--left === 0) { pop(zone); api.done(); }
+      }, 500 + k * 250));
+    };
     const select = chip => {
       selected?.classList.remove('selected');
       selected = chip === selected ? null : chip;
@@ -220,6 +238,7 @@ export const WIDGETS = {
     };
     for (const it of shuffle(items, true)) {
       const chip = h(`<button class="chip"><span class="chip-icon">${it.icon}</span><span>${it.label}${en(it.en)}</span></button>`);
+      chip.bin = it.bin;
       chip.place = zone => {
         if (!zone) return;
         if (zone.dataset.zone === it.bin) {
@@ -229,6 +248,7 @@ export const WIDGETS = {
           pop(zone);
           api.good();
           if (--left === 0) api.done();
+          else sweep();
         } else {
           api.bad();
           shake(chip);
