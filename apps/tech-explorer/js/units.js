@@ -1715,8 +1715,8 @@ export const UNITS = [
       },
       {
         title: '路由器：網路的交通警察',
-        text: `${t('路由器', 'router')}會看封包上的 IP 位址，決定下一步往哪條路送。封包經過一台又一台路由器，最後才到達目的地。家裡的 Wi-Fi 分享器裡面，也有一台小路由器。`,
-        art: '<div class="art-row"><span>📦</span><span class="art-arrow">→</span><span>📡</span><span class="art-arrow">→</span><span>📡</span><span class="art-arrow">→</span><span>💻</span></div>',
+        text: `${t('路由器', 'router')}會看封包上的 IP 位址，查自己的路線表，決定下一站往哪裡送，這叫做${t('路由', 'routing')}。網路上有好多路由器連來連去，封包一站一站傳過去。家裡的 Wi-Fi 分享器裡面，也有一台小路由器。換你當路由器：看地址的第三段，點下一站！`,
+        widget: 'routing',
       },
       {
         title: '看一部影片發生了什麼？',

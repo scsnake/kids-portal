@@ -901,6 +901,125 @@ export const WIDGETS = {
     };
   },
 
+  // A network of six routers: you are each router in turn. Read the packet's address, check
+  // this router's table, and tap the next stop. Three packets to three addresses.
+  routing(host, _, api) {
+    // Positions on a 640 × 300 board.
+    const nodes = {
+      S: { x: 46, y: 150, icon: '📱', ip: '10.0.1.5' },
+      R1: { x: 150, y: 150 }, R2: { x: 270, y: 70 }, R3: { x: 270, y: 230 },
+      R4: { x: 400, y: 50 }, R5: { x: 400, y: 150 }, R6: { x: 400, y: 250 },
+      D2: { x: 560, y: 50, icon: '💻', ip: '10.0.2.8' },
+      D3: { x: 560, y: 150, icon: '🖨️', ip: '10.0.3.4' },
+      D4: { x: 560, y: 250, icon: '🎮', ip: '10.0.4.6' },
+    };
+    const links = ['S-R1', 'R1-R2', 'R1-R3', 'R2-R4', 'R2-R5', 'R3-R5', 'R3-R6', 'R4-R5', 'R5-R6', 'R4-D2', 'R5-D3', 'R6-D4'];
+    // Each router's table: the third number of the address → the next stop.
+    const tables = {
+      R1: { 2: 'R2', 3: 'R3', 4: 'R3' },
+      R2: { 2: 'R4', 3: 'R5', 4: 'R5' },
+      R3: { 2: 'R5', 3: 'R5', 4: 'R6' },
+      R4: { 2: 'D2', 3: 'R5', 4: 'R5' },
+      R5: { 2: 'R4', 3: 'D3', 4: 'R6' },
+      R6: { 2: 'R5', 3: 'R5', 4: 'D4' },
+    };
+    const trips = ['D3', 'D4', 'D2'];
+    const pct = n => `left:${(n.x / 640) * 100}%;top:${(n.y / 300) * 100}%`;
+    const name = k => (k[0] === 'D' ? `${nodes[k].icon} ${nodes[k].ip}` : k);
+    host.innerHTML = `
+      <div class="w-route">
+        <p class="rt-pkt"></p>
+        <div class="rt-net">
+          <svg viewBox="0 0 640 300" aria-hidden="true">${links.map(l => {
+            const [a, b] = l.split('-').map(k => nodes[k]);
+            return `<line data-l="${l}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"/>`;
+          }).join('')}</svg>
+          ${Object.entries(nodes).map(([k, n]) => `
+            <button class="rt-node${k[0] === 'R' ? ' rt-router' : ' rt-dev'}" data-k="${k}" style="${pct(n)}" aria-label="${k[0] === 'R' ? '路由器 ' + k : n.ip}">
+              ${n.icon || ROUTER}<small>${k[0] === 'R' ? k : n.ip}</small></button>`).join('')}
+          <span class="rt-box" aria-hidden="true">📦</span>
+        </div>
+        <div class="rt-table"></div>
+        <p class="rt-msg"></p>
+      </div>`;
+    const $ = s => host.querySelector(s);
+    const box = $('.rt-box');
+    let trip = 0, at = 'R1', busy = false;
+    const third = k => +nodes[k].ip.split('.')[2];
+    const neighbors = k => links.map(l => l.split('-')).filter(p => p.includes(k)).map(p => (p[0] === k ? p[1] : p[0]));
+    const moveBox = (k, ms = 0) => {
+      const n = nodes[k];
+      const to = { left: (n.x / 640) * 100 + '%', top: (n.y / 300) * 100 + '%' };
+      if (!ms) { Object.assign(box.style, to); return Promise.resolve(); }
+      const from = { left: box.style.left, top: box.style.top };
+      return box.animate([from, to], { duration: ms, easing: 'ease-in-out' }).finished.then(() => Object.assign(box.style, to));
+    };
+    const lineOf = (a, b) => host.querySelector(`[data-l="${a}-${b}"], [data-l="${b}-${a}"]`);
+    function drawTable() {
+      const dest = trips[trip], d = third(dest);
+      const t = tables[at];
+      $('.rt-table').innerHTML = `<b>${at} 的路線表</b>` + [2, 3, 4].map(n =>
+        `<span class="${n === d ? 'rt-hit' : ''}">10.0.<u>${n}</u>.x → ${name(t[n])}</span>`).join('');
+      host.querySelectorAll('.rt-node').forEach(b => {
+        b.classList.toggle('rt-here', b.dataset.k === at);
+        b.classList.toggle('rt-can', neighbors(at).includes(b.dataset.k) && b.dataset.k !== 'S');
+      });
+    }
+    function start() {
+      const dest = trips[trip], ip = nodes[dest].ip.split('.');
+      $('.rt-pkt').innerHTML = `📦 第 ${trip + 1} 個封包，收件地址：${ip.slice(0, 2).join('.')}.<mark>${ip[2]}</mark>.${ip[3]}`;
+      host.querySelectorAll('.rt-net line').forEach(l => l.classList.remove('rt-used'));
+      moveBox('S');
+      busy = true;
+      lineOf('S', 'R1').classList.add('rt-used');
+      moveBox('R1', 500).then(() => {
+        if (!api.alive()) return;
+        at = 'R1';
+        busy = false;
+        drawTable();
+        $('.rt-msg').textContent = `你是 ${at}：看地址的第三段，再點下一站`;
+      });
+    }
+    host.querySelector('.rt-net').addEventListener('click', e => {
+      const b = e.target.closest('.rt-node');
+      if (!b || busy || !at.startsWith('R')) return;
+      const k = b.dataset.k, want = tables[at][third(trips[trip])];
+      if (!neighbors(at).includes(k) || k === 'S') return;
+      if (k !== want) {
+        shake(b);
+        api.bad();
+        pop($('.rt-hit'));
+        $('.rt-msg').textContent = `${at} 的路線表說：第三段是 ${third(trips[trip])}，要往 ${name(want)}`;
+        return;
+      }
+      busy = true;
+      lineOf(at, k).classList.add('rt-used');
+      moveBox(k, 500).then(() => {
+        if (!api.alive()) return;
+        busy = false;
+        if (k[0] === 'D') {
+          at = k;
+          api.good();
+          host.querySelectorAll('.rt-node').forEach(x => x.classList.remove('rt-here', 'rt-can'));
+          pop(b);
+          if (++trip === trips.length) {
+            $('.rt-table').innerHTML = '';
+            $('.rt-msg').textContent = '🎉 三個封包都送到了！每台路由器只要知道「下一站」，一站一站就能送到。';
+            api.done();
+          } else {
+            $('.rt-msg').textContent = `✅ 送到 ${name(k)} 了！`;
+            api.later(start, 1200);
+          }
+          return;
+        }
+        at = k;
+        drawTable();
+        $('.rt-msg').textContent = `到 ${at} 了：再看它的路線表`;
+      });
+    });
+    start();
+  },
+
   // 4 cooks paint 4 cells at a time; 64 helpers paint every cell at once, but each is slower.
   race(host, _, api) {
     const pic = [
