@@ -60,6 +60,7 @@ kids-portal/
    (thanks to per-application **Watch Paths**; see deploy notes below).
 
 `subject` becomes a filter chip in the portal automatically.
+Add `"private": true` for an app that still needs a login (it shows a 🔒 家人限定 tag).
 
 ## The "?" button (changelog)
 

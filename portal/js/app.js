@@ -46,6 +46,7 @@ const app = createApp({
                         <div class="app-title-row">
                             <h2 class="app-title">{{ app.title }}</h2>
                             <span class="app-subject">{{ app.subject }}</span>
+                            <span v-if="app.private" class="app-private" title="需要登入">🔒 家人限定</span>
                         </div>
                         <p class="app-desc">{{ app.desc }}</p>
                         <div class="app-levels">

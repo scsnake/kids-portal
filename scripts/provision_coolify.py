@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Provision 4 Coolify static applications for the kids-portal monorepo.
+"""Provision the Coolify static applications for the kids-portal monorepo.
 
 Usage:
     # 1. In Coolify UI: Profile → Keys & Tokens → Create API token (write scope)
@@ -7,6 +7,7 @@ Usage:
     #    SSH-tunnel: `ssh -L 8000:localhost:8000 cthgpu` and use localhost:8000)
     export COOLIFY_URL=http://localhost:8000
     export COOLIFY_TOKEN=$(grep '^COOLIFY_TOKEN=' ~/.env | cut -d= -f2-)
+    export GITHUB_WEBHOOK_SECRET=...   # optional: the secret the other kids-portal apps use
     # 3. Run — creates any app that doesn't already exist, then triggers a deploy
     python3 scripts/provision_coolify.py
 
@@ -79,6 +80,14 @@ APPS = [
         "watch_paths": "apps/little-writer/**",
         "build_pack": "static",
         # bundle is committed to dist/, no build step needed
+    },
+    {
+        "name": "kids-tech",
+        "domain": f"https://kids-tech.{DOMAIN_ROOT}",
+        "base_directory": "/apps/tech-explorer",
+        "publish_directory": "/",
+        "watch_paths": "apps/tech-explorer/**",
+        "build_pack": "static",
     },
 ]
 
@@ -183,6 +192,14 @@ def create_app(server_uuid, project_uuid, spec):
     resp = api("POST", "/applications/public", body)
     uuid = resp.get("uuid")
     print(f"   ✓ created {spec['name']} ({uuid}) → {spec['domain']}")
+    # A push only redeploys an app whose webhook secret matches the GitHub hook's
+    # (all kids-portal apps share one). Copy it from an existing app's Webhooks tab.
+    secret = os.environ.get("GITHUB_WEBHOOK_SECRET")
+    if secret and uuid:
+        api("PATCH", f"/applications/{uuid}", {"manual_webhook_secret_github": secret})
+        print("   ✓ set the GitHub webhook secret")
+    elif uuid:
+        print("   ! no GITHUB_WEBHOOK_SECRET set: pushes will not redeploy this app until you set it")
     return uuid
 
 

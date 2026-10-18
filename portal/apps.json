@@ -7,7 +7,8 @@
       "url": "https://kids-chinese-writing.scsnake.xyz",
       "icon": "✍️",
       "subject": "語文",
-      "level": ["國小 1-6"]
+      "level": ["國小 1-6"],
+      "private": true
     },
     {
       "id": "little-writer",
