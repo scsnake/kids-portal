@@ -260,6 +260,7 @@ function resumeHTML() {
 
 function home() {
   hush();
+  slideToken++; // ends the last slide's widget, so its key and sensor listeners stop
   here = null;
   document.title = '科技原理小探險';
   app.innerHTML = `
@@ -355,6 +356,7 @@ function lesson(unit, index) {
 
 function finished(unit) {
   hush();
+  slideToken++;
   const i = UNITS.indexOf(unit);
   const next = UNITS[i + 1];
   const { got, total } = starsOf(unit);
