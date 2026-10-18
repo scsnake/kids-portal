@@ -449,7 +449,7 @@ export const UNITS = [
     slides: [
       {
         title: '用相機拍照和錄影',
-        text: `相機 App 有${t('拍照', 'photo')}和${t('錄影', 'video')}兩種模式。按大大的${t('快門', 'shutter')}按鈕就拍一張；錄影時按紅色按鈕開始，再按一次停止。還可以切換${t('前鏡頭', 'front camera')}和${t('後鏡頭', 'back camera')}。完成右邊四個任務！`,
+        text: `相機 App 有${t('拍照', 'photo')}和${t('錄影', 'video')}兩種模式。按大大的${t('快門', 'shutter')}按鈕就拍一張，拍到的是按下去那一刻的畫面。拍照時按住快門不放，會直接錄影，放開就停。在錄影模式，按紅色按鈕開始，再按一次停止。還可以切換${t('前鏡頭', 'front camera')}和${t('後鏡頭', 'back camera')}。完成五個任務！`,
         widget: 'camera',
       },
       {

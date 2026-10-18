@@ -1794,15 +1794,31 @@ export const WIDGETS = {
     });
   },
 
-  // A pretend camera app: take a photo, switch to video, record, flip to the front camera.
+  // A pretend camera app with a live view: tap for a photo of that moment, hold for a video,
+  // switch to video mode and record, flip to the front camera.
   camera(host, _, api) {
     const tasks = [
-      { id: 'photo', zh: '拍一張照片', en: 'take a photo' },
+      { id: 'photo', zh: '拍一張照片', en: 'take a photo', alt: '拍到的是按下去那一刻' },
+      { id: 'quick', zh: '拍照時按住快門，直接錄影', en: 'hold to record', alt: '放開手指就停止' },
       { id: 'mode', zh: '切換到錄影', en: 'video mode' },
       { id: 'record', zh: '錄一段影片', en: 'record', alt: '按一下開始，再按一下停止' },
       { id: 'flip', zh: '換成前鏡頭自拍', en: 'selfie' },
     ];
-    const scenes = { back: '<span>🌳</span><span>🏠</span><span>🌳</span><span class="dog">🐕</span>', front: '<span class="me">🧒</span><span class="peace">✌️</span>' };
+    // Each live thing is placed at left/top in percent, so a copy of the scene scales into the thumbnail.
+    const scenes = {
+      back: `
+        <span class="cm-o cm-cloud" data-k="cloud">☁️</span>
+        <span class="cm-o cm-bird" data-k="bird">🐦</span>
+        <span class="cm-o cm-tree" style="left:12%;top:58%">🌳</span>
+        <span class="cm-o cm-house" style="left:45%;top:56%">🏠</span>
+        <span class="cm-o cm-tree" style="left:80%;top:58%">🌳</span>
+        <span class="cm-o cm-fly" data-k="fly">🦋</span>
+        <span class="cm-o cm-dog" data-k="dog">🐕</span>`,
+      front: `
+        <span class="cm-o cm-balloon" data-k="balloon">🎈</span>
+        <div class="cm-face" data-k="face"><i class="cm-hair"></i><i class="cm-eye cm-l"></i><i class="cm-eye cm-r"></i><i class="cm-cheek cm-l"></i><i class="cm-cheek cm-r"></i><i class="cm-mouth"></i></div>
+        <span class="cm-o cm-ya" data-k="ya">✌️</span>`,
+    };
     host.innerHTML = `
       <div class="w-lab">
         <div class="cam">
@@ -1810,7 +1826,7 @@ export const WIDGETS = {
           <div class="modes"><button data-mode="video">錄影</button><button data-mode="photo" class="on">拍照</button></div>
           <div class="cam-bar">
             <div class="thumb" aria-label="相簿"></div>
-            <button class="shutter" aria-label="快門"><i></i></button>
+            <button class="shutter" aria-label="快門（按住可以錄影）"><i></i></button>
             <button class="flip" aria-label="切換前後鏡頭">🔄</button>
           </div>
         </div>
@@ -1818,53 +1834,153 @@ export const WIDGETS = {
       </div>`;
     const $ = sel => host.querySelector(sel);
     const check = checklist($('.tasks'), tasks, api);
-    let mode = 'photo', front = false, recording = false, secs = 0;
-    const scene = $('.shot'), shutter = $('.shutter'), rec = $('.rec');
+    const vf = $('.viewfinder'), scene = $('.shot'), shutter = $('.shutter'), rec = $('.rec');
+    let mode = 'photo', front = false, rec0 = 0, recSnap = null, recKind = '';
+    const recording = () => rec0 > 0;
     const drawScene = () => { scene.innerHTML = front ? scenes.front : scenes.back; scene.classList.toggle('front', front); };
-    const thumb = (html, video) => { $('.thumb').innerHTML = `<span>${html}</span>${video ? '<b>▶</b>' : ''}`; pop($('.thumb')); };
+
+    // The live view: where everything is at time s (seconds).
+    const at = (k, s) => {
+      const loop = (period, a, b) => a + ((s / period) % 1) * (b - a);
+      switch (k) {
+        case 'cloud': return [loop(40, -15, 115), 14];
+        case 'bird': return [loop(11, 112, -12), 28 + 4 * Math.sin(s * 2.2)];
+        case 'fly': return [68 + 14 * Math.sin(s * 0.7), 48 + 9 * Math.sin(s * 1.3)];
+        case 'dog': {
+          const p = (s / 18) % 1, right = p < 0.5;
+          return [right ? 8 + 168 * p : 176 - 168 * p, 84 - Math.abs(Math.sin(s * 5)) * 2, right];
+        }
+        case 'balloon': return [86, loop(14, 112, -14)];
+        case 'face': return [56 + 2 * Math.sin(s * 0.8), 52 + 1.5 * Math.sin(s * 1.1)];
+        case 'ya': return [27 + 2 * Math.sin(s * 0.8), 56 + 1.5 * Math.sin(s * 1.1)];
+      }
+      return [50, 50];
+    };
+    function frame(now) {
+      if (!api.alive()) return;
+      requestAnimationFrame(frame);
+      const s = now / 1000;
+      scene.querySelectorAll('[data-k]').forEach(el => {
+        const [x, y, flip] = at(el.dataset.k, s);
+        el.style.left = x + '%';
+        el.style.top = y + '%';
+        if (el.dataset.k === 'dog') el.classList.toggle('cm-right', flip);
+      });
+      // a wink of one eye every few seconds
+      scene.querySelector('.cm-eye.cm-l')?.classList.toggle('cm-shut', s % 3.4 < 0.22);
+      if (recording()) {
+        const secs = Math.floor((now - rec0) / 1000);
+        rec.querySelector('b').textContent = `00:${String(secs).padStart(2, '0')}`;
+      }
+    }
+
+    // A copy of the scene as it is right now: that is the photo.
+    const snap = () => {
+      const pic = document.createElement('div');
+      pic.className = 'cm-pic' + (front ? ' cm-front' : '');
+      pic.append(scene.cloneNode(true));
+      pic.style.width = vf.clientWidth + 'px';
+      pic.style.height = vf.clientHeight + 'px';
+      return pic;
+    };
+    // Hold the photo on the screen for a moment, then shrink it into the album thumbnail.
+    async function keep(pic, video) {
+      const th = $('.thumb');
+      vf.append(pic);
+      await new Promise(r => setTimeout(r, 380));
+      if (!api.alive()) return;
+      const a = vf.getBoundingClientRect(), b = th.getBoundingClientRect();
+      const k = b.width / a.width;
+      await pic.animate(
+        [{ transform: 'none' }, { transform: `translate(${b.left - a.left}px, ${b.top - a.top}px) scale(${k})` }],
+        { duration: 420, easing: 'ease-in' }
+      ).finished;
+      if (!api.alive()) return;
+      pic.style.transform = `scale(${k})`;
+      th.replaceChildren(pic);
+      if (video) th.insertAdjacentHTML('beforeend', '<b>▶</b>');
+      pop(th);
+    }
+    const flash = () => {
+      const f = $('.flash');
+      f.classList.remove('go');
+      void f.offsetWidth;
+      f.classList.add('go');
+    };
+    function photo(pic) {
+      flash();
+      keep(pic, false);
+      check('photo');
+    }
+    function startRec(kind, pic) {
+      rec0 = performance.now();
+      recSnap = pic;
+      recKind = kind;
+      rec.querySelector('b').textContent = '00:00';
+      rec.hidden = false;
+      shutter.classList.add(kind === 'quick' ? 'cm-quick' : 'recording');
+    }
+    function stopRec() {
+      const secs = Math.max(1, Math.round((performance.now() - rec0) / 1000));
+      rec0 = 0;
+      rec.hidden = true;
+      shutter.classList.remove('cm-quick', 'recording');
+      keep(recSnap, true);
+      check(recKind, `錄了 ${secs} 秒`);
+    }
+
     host.querySelector('.modes').addEventListener('click', e => {
       const b = e.target.closest('[data-mode]');
-      if (!b || recording) return;
+      if (!b || recording()) return;
       mode = b.dataset.mode;
       host.querySelectorAll('[data-mode]').forEach(x => x.classList.toggle('on', x === b));
       shutter.classList.toggle('video', mode === 'video');
       if (mode === 'video') check('mode');
     });
-    const tickRec = () => {
-      if (!recording) return;
-      secs++;
-      rec.querySelector('b').textContent = `00:${String(secs).padStart(2, '0')}`;
-      api.later(tickRec, 1000);
-    };
-    shutter.onclick = () => {
+
+    // The photo is taken when the shutter goes down; holding it in photo mode turns into a video.
+    let press = null;
+    shutter.addEventListener('pointerdown', e => {
+      if (e.button > 0 || press) return;
+      e.preventDefault();
+      shutter.setPointerCapture(e.pointerId);
+      press = { pic: snap(), timer: 0, quick: false };
       if (mode === 'photo') {
-        const f = $('.flash');
-        f.classList.remove('go');
-        void f.offsetWidth;
-        f.classList.add('go');
-        thumb(front ? '🧒' : '🏠');
-        check('photo');
-        return;
+        press.timer = setTimeout(() => {
+          if (!api.alive() || !press) return;
+          press.quick = true;
+          startRec('quick', press.pic);
+        }, 500);
       }
-      recording = !recording;
-      shutter.classList.toggle('recording', recording);
-      rec.hidden = !recording;
-      if (recording) {
-        secs = 0;
-        rec.querySelector('b').textContent = '00:00';
-        api.later(tickRec, 1000);
-      } else {
-        thumb(front ? '🧒' : '🐕', true);
-        check('record', `錄了 ${secs} 秒`);
-      }
+    });
+    const release = e => {
+      if (!press) return;
+      const p = press;
+      press = null;
+      clearTimeout(p.timer);
+      if (p.quick) { stopRec(); return; }
+      if (e.type === 'pointercancel') return;
+      if (mode === 'photo') photo(p.pic);
+      else if (recording()) stopRec();
+      else startRec('record', p.pic);
     };
+    shutter.addEventListener('pointerup', release);
+    shutter.addEventListener('pointercancel', release);
+    shutter.addEventListener('click', e => {
+      if (e.detail !== 0) return; // a keyboard press; finger and mouse presses are handled above
+      if (mode === 'photo') photo(snap());
+      else if (recording()) stopRec();
+      else startRec('record', snap());
+    });
     $('.flip').onclick = () => {
+      if (recording()) return;
       front = !front;
       scene.animate([{ transform: 'rotateY(90deg)' }, { transform: 'rotateY(0)' }], { duration: 300 });
       drawScene();
       if (front) check('flip');
     };
     drawScene();
+    requestAnimationFrame(frame);
   },
 
   // Find the camera on a laptop, a tablet and the back of a phone.
