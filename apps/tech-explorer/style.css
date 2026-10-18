@@ -222,6 +222,7 @@ a.unit-card:active { transform: scale(.98); }
 .dots .dot.play::after { border-radius: 4px; }
 .dots .dot.got::after { background: var(--star); }
 .dots .dot.here::after { outline: 3px solid var(--c); outline-offset: 2px; }
+@media (max-width: 600px) { .dots { display: none; } .bar-title { flex: 1; } }
 
 .slide {
   flex: 1;
