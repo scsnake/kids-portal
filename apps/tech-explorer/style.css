@@ -631,10 +631,11 @@ a.unit-card:active { transform: scale(.98); }
 .w-packets { display: flex; flex-direction: column; gap: 12px; }
 .w-packets .msg { margin: 0; font-size: 1.2rem; }
 .net { position: relative; width: 100%; aspect-ratio: 600 / 220; border-radius: 18px; background: var(--card); border: 2px solid var(--line); }
-.net svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.net > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .net line { stroke: #ced4da; stroke-width: 4; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .node { position: absolute; translate: -50% -50%; font-size: clamp(1.4rem, 4vw, 2rem); }
 .node.end { font-size: clamp(2rem, 6vw, 3rem); }
+.router-ico { display: block; width: 1.3em; height: 1.1em; }
 .packet, .packet-card { display: inline-flex; align-items: center; gap: .3rem; font-weight: 800; }
 .packet { position: absolute; translate: -50% -50%; padding: .15rem .5rem; border-radius: 10px; background: #fff3bf; border: 2px solid var(--star); font-size: .95rem; white-space: nowrap; }
 .packet i, .packet-card i { display: grid; place-items: center; width: 1.5em; height: 1.5em; border-radius: 50%; background: var(--c); color: white; font-style: normal; font-size: .85em; }

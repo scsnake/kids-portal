@@ -171,6 +171,9 @@ function toaster(el, api) {
 
 const byWhat = { mouse: '用滑鼠完成 🖱️', touch: '用手指完成 👆', pen: '用觸控筆完成 ✏️' };
 
+// A home or network router: a box with lights and two antennas (📡 read as a satellite dish).
+const ROUTER = '<svg class="router-ico" viewBox="0 0 48 40" aria-hidden="true"><path d="M14 17 10 4M34 17l4-13" stroke="#495057" stroke-width="3" stroke-linecap="round"/><rect x="4" y="16" width="40" height="18" rx="5" fill="#4dabf7" stroke="#1c7ed6" stroke-width="2"/><circle cx="12" cy="25" r="2.2" fill="#b2f2bb"/><circle cx="19" cy="25" r="2.2" fill="#b2f2bb"/><circle cx="26" cy="25" r="2.2" fill="#ffe066"/><rect x="32" y="23" width="7" height="4" rx="1" fill="#1864ab"/></svg>';
+
 // Drawn icons: an Ethernet plug (not a power plug), Wi-Fi waves, a cell tower and a satellite.
 const WAY_ICONS = {
   cable: `<svg class="way-svg" viewBox="0 0 48 48" aria-hidden="true">
@@ -823,7 +826,7 @@ export const WIDGETS = {
           </svg>
           ${Object.entries(nodes).map(([k, p]) => {
             const s = pct(p);
-            const icon = k === 'S' ? '📱' : k === 'R' ? '💻' : '📡';
+            const icon = k === 'S' ? '📱' : k === 'R' ? '💻' : ROUTER;
             return `<span class="node${k === 'S' || k === 'R' ? ' end' : ''}" style="left:${s.left};top:${s.top}">${icon}</span>`;
           }).join('')}
         </div>
