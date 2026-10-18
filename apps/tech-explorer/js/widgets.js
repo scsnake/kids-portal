@@ -3279,9 +3279,27 @@ export const WIDGETS = {
     const me = [210, 175];
     const sats = [[60, 40], [345, 55], [215, 22]];
     const dist = ([x, y]) => Math.hypot(x - me[0], y - me[1]);
+    // A map-app view that fades in once the position is known.
+    const mapView = `
+      <svg class="gps-map" viewBox="0 0 400 260" aria-hidden="true">
+        <rect width="400" height="260" fill="#f2efe6"/>
+        <rect x="18" y="18" width="110" height="80" rx="8" fill="#c3e8c8"/>
+        <path d="M-10 214C70 196 120 236 200 222S330 190 410 204" fill="none" stroke="#a5d8ff" stroke-width="16"/>
+        <g fill="#e6e0d2"><rect x="150" y="20" width="80" height="56" rx="4"/><rect x="250" y="20" width="130" height="56" rx="4"/>
+          <rect x="18" y="122" width="110" height="60" rx="4"/><rect x="250" y="100" width="130" height="80" rx="4"/></g>
+        <g fill="none" stroke-linecap="round"><path d="M0 110H400M140 0V260M240 0V260" stroke="#d6cfbd" stroke-width="16"/>
+          <path d="M0 110H400M140 0V260M240 0V260" stroke="#fff" stroke-width="12"/>
+        <text x="72" y="62" font-size="26" text-anchor="middle">🌳</text><text x="190" y="56" font-size="24" text-anchor="middle">🏫</text>
+        <text x="315" y="56" font-size="24" text-anchor="middle">🏪</text><text x="73" y="160" font-size="24" text-anchor="middle">🏠</text>
+        <text x="315" y="148" font-size="24" text-anchor="middle">🏥</text>
+        <g font-size="11" font-weight="700" fill="#5c5f66" text-anchor="middle"><text x="190" y="72">學校</text><text x="315" y="72">商店</text><text x="72" y="92">公園</text></g>
+        <circle class="gps-acc" cx="${me[0]}" cy="${me[1]}" r="22"/>
+        <circle cx="${me[0]}" cy="${me[1]}" r="8" fill="#1c7ed6" stroke="#fff" stroke-width="3"/>
+      </svg>`;
     host.innerHTML = `
       <div class="w-gps">
         <div class="sky2">
+          ${mapView}
           <svg viewBox="0 0 400 260" aria-hidden="true">${sats.map((p, i) => `<circle class="orbit r${i}" cx="${p[0]}" cy="${p[1]}" r="${dist(p)}"/>`).join('')}</svg>
           ${sats.map((p, i) => `<button class="sat" data-i="${i}" style="left:${p[0] / 4}%;top:${(p[1] / 260) * 100}%">🛰️</button>`).join('')}
           <span class="gps-me" style="left:${me[0] / 4}%;top:${(me[1] / 260) * 100}%">❓</span>
@@ -3304,7 +3322,8 @@ export const WIDGETS = {
           const m = host.querySelector('.gps-me');
           m.textContent = '📍';
           pop(m);
-          r.textContent = '🎉 收到 3 顆：三個圓圈只交在一點，就是你在的地方！';
+          host.querySelector('.sky2').classList.add('located');
+          r.textContent = '🎉 收到 3 顆：三個圓圈只交在一點，就是你在的地方！地圖 App 就把你標在地圖上。';
           api.done();
         }
       };
