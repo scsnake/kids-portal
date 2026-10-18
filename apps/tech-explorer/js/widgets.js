@@ -171,6 +171,22 @@ function toaster(el, api) {
 
 const byWhat = { mouse: '用滑鼠完成 🖱️', touch: '用手指完成 👆', pen: '用觸控筆完成 ✏️' };
 
+// Drawn icons: an Ethernet plug (not a power plug), Wi-Fi waves, and a cell tower.
+const WAY_ICONS = {
+  cable: `<svg class="way-svg" viewBox="0 0 48 48" aria-hidden="true">
+    <path d="M24 35v11" stroke="#1971c2" stroke-width="6" stroke-linecap="round"/>
+    <path d="M17 29h14l-2 7h-10z" fill="#1971c2"/>
+    <rect x="12" y="5" width="24" height="25" rx="3" fill="#e7f5ff" stroke="#1d2738" stroke-width="2.5"/>
+    <path d="M16.5 7v7M19.5 7v7M22.5 7v7M25.5 7v7M28.5 7v7M31.5 7v7" stroke="#f08c00" stroke-width="1.8"/>
+    <path d="M18 30v-9h12v9" fill="none" stroke="#1d2738" stroke-width="2.2"/></svg>`,
+  wifi: `<svg class="way-svg" viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#1d2738" stroke-width="4.5" stroke-linecap="round">
+    <path d="M5 19a27 27 0 0 1 38 0"/><path d="M11.5 26a18 18 0 0 1 25 0"/><path d="M18 33a9 9 0 0 1 12 0"/>
+    <circle cx="24" cy="39.5" r="3.4" fill="#1d2738" stroke="none"/></svg>`,
+  cell: `<svg class="way-svg" viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#1d2738" stroke-width="4" stroke-linecap="round">
+    <circle cx="24" cy="19" r="5.5" fill="#1d2738" stroke="none"/><path d="M24 24v20"/>
+    <path d="M15.5 10.5a12 12 0 0 0 0 17M32.5 10.5a12 12 0 0 1 0 17"/><path d="M9 5a21 21 0 0 0 0 28M39 5a21 21 0 0 1 0 28"/></svg>`,
+};
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box.
   sort(host, { bins, items }, api) {
@@ -858,9 +874,9 @@ export const WIDGETS = {
   // For each person, pick the way to get online: cable, Wi-Fi or cellular.
   connect(host, { rounds }, api) {
     const ways = {
-      cable: { icon: '🔌', zh: '網路線', en: 'cable', no: '這裡沒有網路線可以插喔' },
-      wifi: { icon: '📶', zh: 'Wi-Fi', en: 'wireless', no: '這裡沒有 Wi-Fi 喔' },
-      cell: { icon: '🗼', zh: '行動網路', en: 'cellular', no: '有更方便、更穩定的方法喔' },
+      cable: { icon: WAY_ICONS.cable, zh: '網路線', en: 'cable', no: '這裡沒有網路線可以插喔' },
+      wifi: { icon: WAY_ICONS.wifi, zh: 'Wi-Fi', en: 'wireless', no: '這裡沒有 Wi-Fi 喔' },
+      cell: { icon: WAY_ICONS.cell, zh: '行動網路', en: 'cellular', no: '有更方便、更穩定的方法喔' },
     };
     host.innerHTML = `
       <div class="w-connect">

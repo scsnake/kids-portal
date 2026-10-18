@@ -650,6 +650,7 @@ a.unit-card:active { transform: scale(.98); }
 .way { display: inline-flex; align-items: center; gap: .4rem; text-align: left; }
 .way.right { border-color: var(--good); background: #ebfbee; }
 .way.wrong { border-color: var(--bad); opacity: .5; }
+.way-svg { display: block; width: 1.9em; height: 1.9em; flex: none; }
 
 /* ---------- finish ---------- */
 
