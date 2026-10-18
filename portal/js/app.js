@@ -55,6 +55,9 @@ const app = createApp({
                     </div>
                     <div class="app-arrow" aria-hidden="true">→</div>
                 </a>
+                <p v-if="app.private" class="app-note">
+                    🔒 點進去要先用 Google 帳號登入，只有已經加入名單的帳號能用。想使用的話，請寫信到<a :href="'mailto:scsnake@gmail.com?subject=' + encodeURIComponent('申請使用「' + app.title + '」')">scsnake@gmail.com</a>，告訴我你的 Gmail 帳號。
+                </p>
             </li>
         </ul>
 
