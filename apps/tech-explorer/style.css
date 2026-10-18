@@ -323,6 +323,13 @@ a.unit-card:active { transform: scale(.98); }
   background: color-mix(in srgb, var(--c) 6%, var(--paper));
   border: 2px dashed var(--line);
 }
+.sort-intro { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.ip-parts { display: flex; align-items: flex-end; gap: 4px; font-family: ui-monospace, Menlo, monospace; }
+.ip-parts span { display: flex; flex-direction: column; align-items: center; padding: 4px 10px; border-radius: 10px; background: var(--card); border: 2px solid var(--line); }
+.ip-parts b { font-size: 1.5rem; color: var(--c); }
+.ip-parts small { font-family: -apple-system, sans-serif; font-weight: 700; color: var(--ink-3); font-size: .75rem; }
+.ip-parts i { font-style: normal; font-size: 1.6rem; font-weight: 900; padding-bottom: 14px; }
+.sort-intro p { margin: 0; font-weight: 700; color: var(--ink-2); }
 .bins { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 10px; }
 @media (max-width: 560px) { .bins { grid-template-columns: repeat(min(var(--n), 2), 1fr); } }
 .bin {

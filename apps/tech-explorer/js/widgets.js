@@ -196,10 +196,11 @@ const WAY_ICONS = {
 
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
-  // leftovers that can only go in that box move there by themselves.
-  sort(host, { bins, items, rest }, api) {
+  // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
+  sort(host, { bins, items, rest, intro }, api) {
     host.innerHTML = `
       <div class="w-sort">
+        ${intro ? `<div class="sort-intro">${intro}</div>` : ''}
         <div class="tray"></div>
         <div class="bins" style="--n:${bins.length}"></div>
         <p class="hint">拖到框框裡，或先點一下，再點框框</p>
