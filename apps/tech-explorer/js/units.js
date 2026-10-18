@@ -15,6 +15,9 @@ const PLUGS = {
 const plug = k => `<svg class="conn" viewBox="0 0 56 36" fill="#495057">${PLUGS[k]}</svg>`;
 const port = k => `<svg class="conn port" viewBox="0 0 56 36" fill="none" stroke="#212529" stroke-width="2.5">${PLUGS[k].replace(/ fill="[^"]*"/g, ' fill="none"')}</svg>`;
 
+// A USB flash drive; no emoji draws one (🔑 read as a key).
+const USB = '<svg class="usb-ico" viewBox="0 0 32 32" aria-hidden="true"><g transform="rotate(-40 16 16)"><rect x="2" y="10.5" width="19" height="11" rx="3" fill="#1c7ed6"/><rect x="21" y="12" width="9" height="8" rx="1" fill="#dee2e6" stroke="#868e96" stroke-width="1.2"/><rect x="24.5" y="13.8" width="2.4" height="1.8" fill="#495057"/><rect x="24.5" y="16.4" width="2.4" height="1.8" fill="#495057"/><circle cx="6.5" cy="16" r="1.8" fill="#fff"/></g></svg>';
+
 // The picture on '網路是什麼？': a dotted world map, devices joined by curved lines with data
 // dots running both ways, and satellites in the corners.
 // Land on a 5° grid: for each latitude, the longitude ranges that are land (rough, by eye).
@@ -1250,7 +1253,7 @@ export const UNITS = [
       },
       {
         title: '病毒和惡意程式',
-        text: `${t('惡意程式', 'malware')}，像是${t('電腦病毒', 'computer virus')}，會偷資料，或把檔案鎖起來跟你要錢。分分看，哪些做法比較安全？`,
+        text: `${t('惡意程式', 'malware')}，像是${t('電腦病毒', 'computer virus')}，會偷資料，或把檔案鎖起來跟你要錢。病毒也會躲在${t('隨身碟', 'USB drive')}裡，一插進電腦就跑進去。分分看，哪些做法比較安全？`,
         widget: 'sort',
         params: {
           rest: 'ok',
@@ -1265,6 +1268,7 @@ export const UNITS = [
             { icon: '📎', label: '打開陌生人寄來的附件', bin: 'no' },
             { icon: '🆓', label: '從奇怪網站下載「免費」遊戲', bin: 'no' },
             { icon: '🚨', label: '點「你的手機中毒了！按這裡」', bin: 'no' },
+            { icon: USB, label: '把撿到的隨身碟插進電腦', bin: 'no' },
           ],
         },
       },

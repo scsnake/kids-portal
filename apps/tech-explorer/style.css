@@ -353,6 +353,7 @@ a.unit-card:active { transform: scale(.98); }
   transition: transform .2s, box-shadow .2s;
 }
 .chip-icon { font-size: 1.6rem; }
+.usb-ico { display: inline-block; width: 1.2em; height: 1.2em; vertical-align: -.2em; }
 .chip .en { display: block; margin: .1rem 0 0; width: fit-content; }
 .chip.dragging { transition: none; z-index: 10; position: relative; box-shadow: 0 12px 24px rgba(0, 0, 0, .18); cursor: grabbing; }
 .chip.selected { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, white); }
