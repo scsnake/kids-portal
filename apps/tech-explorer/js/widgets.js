@@ -4229,30 +4229,35 @@ export const WIDGETS = {
         <p class="readout">選一種速度，看作業系統怎麼安排</p>
       </div>`;
     const rows = [...host.querySelectorAll('.mt-row')];
-    let running = false;
+    // Speed can change mid-run: the bars keep their progress and only the pace changes.
+    let running = false, ms = 0, gen = 0, prog = [0, 0, 0], cur = -1;
+    const mark = () => host.querySelectorAll('[data-speed]').forEach(x => x.classList.toggle('on', running && +x.dataset.speed === ms));
+    const tick = g => {
+      if (g !== gen) return; // a newer speed took over
+      cur = (cur + 1) % 3;
+      prog[cur] = Math.min(100, prog[cur] + 5);
+      rows.forEach((r, k) => { r.classList.toggle('on', k === cur); r.querySelector('i').style.width = prog[k] + '%'; });
+      host.querySelector('.readout').textContent = ms > 100 ? `輪到「${apps[cur][1]}」用 CPU` : '快速輪流中……看起來像三個同時在做！';
+      if (prog.every(p => p >= 100)) {
+        running = false;
+        mark();
+        rows.forEach(r => r.classList.remove('on'));
+        host.querySelector('.readout').textContent = ms > 100 ? '慢慢看就知道：其實是一個一個輪流的。再試試正常速度！' : '🎉 全部完成！正常速度下輪流得超快，所以感覺是同時進行。';
+        api.good();
+        api.done();
+        return;
+      }
+      api.later(() => tick(g), ms);
+    };
     host.querySelector('.controls').addEventListener('click', e => {
       const b = e.target.closest('[data-speed]');
-      if (!b || running) return;
+      if (!b) return;
+      if (running && +b.dataset.speed === ms) return;
+      if (!running) { prog = [0, 0, 0]; cur = -1; }
       running = true;
-      const ms = +b.dataset.speed;
-      const prog = [0, 0, 0];
-      let cur = -1;
-      const tick = () => {
-        cur = (cur + 1) % 3;
-        prog[cur] = Math.min(100, prog[cur] + 5);
-        rows.forEach((r, k) => { r.classList.toggle('on', k === cur); r.querySelector('i').style.width = prog[k] + '%'; });
-        host.querySelector('.readout').textContent = ms > 100 ? `輪到「${apps[cur][1]}」用 CPU` : '快速輪流中……看起來像三個同時在做！';
-        if (prog.every(p => p >= 100)) {
-          running = false;
-          rows.forEach(r => r.classList.remove('on'));
-          host.querySelector('.readout').textContent = ms > 100 ? '慢慢看就知道：其實是一個一個輪流的。再試試正常速度！' : '🎉 全部完成！正常速度下輪流得超快，所以感覺是同時進行。';
-          api.good();
-          api.done();
-          return;
-        }
-        api.later(tick, ms);
-      };
-      tick();
+      ms = +b.dataset.speed;
+      mark();
+      tick(++gen);
     });
   },
 

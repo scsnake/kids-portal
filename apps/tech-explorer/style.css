@@ -1608,6 +1608,7 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .mt-bar { height: 16px; border-radius: 8px; background: var(--line); overflow: hidden; }
 .mt-bar i { display: block; height: 100%; width: 0; background: var(--c); }
 .w-multi .readout { margin: 0; font-weight: 800; text-align: center; }
+.w-multi .controls .option.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 12%, white); }
 
 /* ---------- number guess ---------- */
 
