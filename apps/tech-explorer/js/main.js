@@ -260,6 +260,7 @@ function resumeHTML() {
 
 function home() {
   hush();
+  onFinish = null;
   slideToken++; // ends the last slide's widget, so its key and sensor listeners stop
   here = null;
   document.title = '科技原理小探險';
@@ -298,6 +299,7 @@ function lesson(unit, index) {
   const token = ++slideToken;
   const slide = unit.slides[index];
   here = { unit, index };
+  onFinish = null;
   markSeen(unit, index);
   const last = index === unit.slides.length - 1;
   document.title = `${unit.title}・科技原理小探險`;
@@ -322,7 +324,7 @@ function lesson(unit, index) {
       </section>
       <nav class="nav">
         <a class="nav-btn prev${index === 0 ? ' hidden' : ''}" href="#/u/${unit.id}/${index - 1}">◀ 上一頁</a>
-        <span class="page-no">${index + 1} / ${unit.slides.length}</span>
+        <span class="page-no">${index + 1} / ${unit.slides.length}${!slide.widget && keyboardLikely ? '<small class="key-hint">← → 換頁</small>' : ''}</span>
         <a class="nav-btn next" href="${last ? `#/done/${unit.id}` : `#/u/${unit.id}/${index + 1}`}">${last ? '完成 🎉' : '下一頁 ▶'}</a>
       </nav>
     </main>`;
@@ -356,6 +358,8 @@ function lesson(unit, index) {
 
 function finished(unit) {
   hush();
+  onFinish = unit;
+  here = null;
   slideToken++;
   const i = UNITS.indexOf(unit);
   const next = UNITS[i + 1];
@@ -392,6 +396,40 @@ function route() {
   }
   window.scrollTo(0, 0);
 }
+
+// ---------- keyboard: switch slides with the usual presentation keys ----------
+// ← → PageUp PageDown Space Shift+Space Home End. Only on slides without a task:
+// on a task slide the keys belong to the task (typing, the robot's arrows, sliders).
+
+let onFinish = null; // the unit whose finish screen is showing
+const keyboardLikely = matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+document.addEventListener('keydown', e => {
+  if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+  const t = e.target;
+  if (t.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+  if (e.key === ' ' && t.closest?.('button, [role="button"], summary')) return; // Space presses a focused button
+  if (document.getElementById('book-index')?.hidden === false) return;
+  const fwd = e.key === 'ArrowRight' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey);
+  const back = e.key === 'ArrowLeft' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey);
+  if (!fwd && !back && e.key !== 'Home' && e.key !== 'End') return;
+  let to = null;
+  if (onFinish) {
+    const next = UNITS[UNITS.indexOf(onFinish) + 1];
+    if (fwd && next) to = `#/u/${next.id}/0`;
+    if (back) to = `#/u/${onFinish.id}/${onFinish.slides.length - 1}`;
+  } else if (here && !here.unit.slides[here.index].widget) {
+    const { unit, index } = here;
+    const n = unit.slides.length;
+    if (fwd) to = index + 1 < n ? `#/u/${unit.id}/${index + 1}` : `#/done/${unit.id}`;
+    else if (back) to = index > 0 ? `#/u/${unit.id}/${index - 1}` : null;
+    else if (e.key === 'Home') to = `#/u/${unit.id}/0`;
+    else to = `#/u/${unit.id}/${n - 1}`;
+  }
+  if (!to) return;
+  e.preventDefault();
+  location.hash = to;
+});
 
 window.addEventListener('hashchange', route);
 synth?.getVoices(); // Safari loads the voice list lazily

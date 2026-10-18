@@ -58,6 +58,8 @@ survive slides being added or moved. The home screen shows the total stars and a
   the Home Screen is not affected, but it keeps its own storage, separate from Safari.
 - `index.html` has the meta tags for "Add to Home Screen".
 
+On a computer, ← → (also PageUp/PageDown, Space/Shift+Space, Home/End) switch slides that have no task; on a task slide the keys stay with the task.
+
 The 📖 button (home screen and lesson bar) opens a side panel with the contents
 by chapter and an index of every new term, each linked to its slide.
 
