@@ -441,6 +441,7 @@ export const UNITS = [
         text: '電池裡裝了很多能量，用錯方法可能會過熱，甚至起火。分分看哪些是安全的做法！',
         widget: 'sort',
         params: {
+          rest: 'safe',
           bins: [
             { id: 'safe', icon: '✅', label: '安全' },
             { id: 'danger', icon: '⚠️', label: '危險' },
@@ -485,6 +486,7 @@ export const UNITS = [
         text: `水和飲料會讓電路${t('短路', 'short circuit')}，食物屑會卡進鍵盤。很多手機寫著${t('防水', 'water resistant')}，其實只是「抗水」：能擋一點水，不能拿去泡水，用久了也會變差。分分看！`,
         widget: 'sort',
         params: {
+          rest: 'ok',
           bins: [
             { id: 'ok', icon: '👍', label: '好習慣' },
             { id: 'no', icon: '🙅', label: '不要這樣做' },
@@ -557,6 +559,7 @@ export const UNITS = [
         text: `鏡頭打開時，筆電旁邊的小燈會亮；iPhone 和 iPad 的螢幕上方會出現${t('綠色小點', 'camera indicator')}。拍到的東西都是${t('隱私', 'privacy')}，要小心。分分看！`,
         widget: 'sort',
         params: {
+          rest: 'ok',
           bins: [
             { id: 'ok', icon: '👍', label: '好習慣' },
             { id: 'no', icon: '🙅', label: '不可以' },
@@ -860,6 +863,7 @@ export const UNITS = [
         text: '密碼就像家裡的鑰匙。好的密碼要夠長、不好猜，而且不要告訴別人（爸爸媽媽除外）。分分看！',
         widget: 'sort',
         params: {
+          rest: 'ok',
           bins: [
             { id: 'ok', icon: '👍', label: '好習慣' },
             { id: 'no', icon: '🙅', label: '不要這樣做' },
@@ -969,6 +973,7 @@ export const UNITS = [
         text: `App 第一次要用相機、麥克風或位置時，會先問你，這叫做${t('權限', 'permission')}。想一想：這個 App 真的需要嗎？分分看！`,
         widget: 'sort',
         params: {
+          rest: 'ok',
           bins: [
             { id: 'ok', icon: '👌', label: '合理，可以允許' },
             { id: 'odd', icon: '🤨', label: '奇怪，不要允許' },
@@ -1156,6 +1161,7 @@ export const UNITS = [
         text: 'AI 可以是很好的幫手，但要用對方法。分分看！',
         widget: 'sort',
         params: {
+          rest: 'ok',
           bins: [
             { id: 'ok', icon: '👍', label: '好用法' },
             { id: 'no', icon: '🙅', label: '不要這樣用' },
@@ -1242,6 +1248,7 @@ export const UNITS = [
         text: `${t('惡意程式', 'malware')}，像是${t('電腦病毒', 'computer virus')}，會偷資料，或把檔案鎖起來跟你要錢。分分看，哪些做法比較安全？`,
         widget: 'sort',
         params: {
+          rest: 'ok',
           bins: [
             { id: 'ok', icon: '✅', label: '比較安全' },
             { id: 'no', icon: '⚠️', label: '很危險' },
@@ -1261,6 +1268,7 @@ export const UNITS = [
         text: `${t('個人資料', 'personal information')}可以用來找到你，或假裝成你，不要隨便放上網路或告訴陌生人。分分看！`,
         widget: 'sort',
         params: {
+          rest: 'ok',
           bins: [
             { id: 'ok', icon: '🙂', label: '可以分享' },
             { id: 'no', icon: '🔒', label: '要保密' },
