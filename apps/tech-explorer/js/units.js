@@ -1843,6 +1843,7 @@ export const UNITS = [
         text: `電腦只懂 0 和 1 的${t('機器語言', 'machine code')}。人類發明了比較好懂的${t('程式語言', 'programming language')}，寫好的${t('程式碼', 'code')}再翻譯成 0 和 1。分分看哪些是寫程式的語言！`,
         widget: 'sort',
         params: {
+          rest: 'talk',
           bins: [
             { id: 'code', icon: '⌨️', label: '寫程式的語言' },
             { id: 'talk', icon: '🗣️', label: '人說話的語言' },
