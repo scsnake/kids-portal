@@ -3535,7 +3535,7 @@ export const WIDGETS = {
             <button class="br-btn" data-a="back" aria-label="上一頁">←</button>
             <button class="br-btn" data-a="fwd" aria-label="下一頁">→</button>
             <button class="br-btn" data-a="reload" aria-label="重新整理">⟳</button>
-            <form class="br-url"><span>🔒</span><input type="url" inputmode="url" autocapitalize="off" spellcheck="false" aria-label="網址列"></form>
+            <form class="br-url" novalidate><span>🔒</span><input type="url" inputmode="url" autocapitalize="off" spellcheck="false" aria-label="網址列"></form>
           </div>
           <div class="br-page"></div>
           <p class="br-hint">試試在網址列輸入 <button class="br-sug" type="button">library.example.tw</button></p>
