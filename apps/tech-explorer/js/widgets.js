@@ -2865,7 +2865,12 @@ export const WIDGETS = {
 
   // Sign up with a user name and a strong password, then log in with the same ones.
   account(host, _, api) {
-    const names = ['小熊熊', '星星王', '飛天貓'];
+    const names = ['王小明0512', '小熊熊', '大安國小林小美', '星星王', '飛天貓'];
+    // Names that give away who you are: others can see a user name, so these are not allowed.
+    const risky = {
+      '王小明0512': '這個名稱有真的名字和生日（5 月 12 日）',
+      '大安國小林小美': '這個名稱有學校和真的名字',
+    };
     const tiles = ['cat', 'Moon', 'run', '7', '42', '!', '#'];
     host.innerHTML = `
       <div class="w-account">
@@ -2873,6 +2878,8 @@ export const WIDGETS = {
           <p class="form-title">📝 註冊新帳號</p>
           <p class="lbl">使用者名稱 ${en('user name')}</p>
           <div class="names">${names.map(n => `<button class="option" data-n="${n}">${n}</button>`).join('')}</div>
+          <p class="acc-warn" hidden></p>
+          <p class="acc-tip">💡 使用者名稱別人看得到，用暱稱就好</p>
           <p class="lbl">密碼 ${en('password')} <button class="eye-btn" aria-label="顯示或隱藏密碼">👁️</button></p>
           <div class="pw"><span class="pw-text"></span><button class="option" data-act="del">⌫</button></div>
           <div class="tiles">${tiles.map(t => `<button class="option" data-t="${t}">${t}</button>`).join('')}</div>
@@ -2907,7 +2914,19 @@ export const WIDGETS = {
     };
     host.querySelector('.names').addEventListener('click', e => {
       const b = e.target.closest('[data-n]');
-      if (b) { name = b.dataset.n; draw(); }
+      if (!b) return;
+      const why = risky[b.dataset.n];
+      $('.acc-warn').hidden = !why;
+      if (why) {
+        $('.acc-warn').innerHTML = `⚠️ ${why}。別人看到就知道你是誰、在哪裡上學。換一個不會透露個人資料${en('personal info')}的暱稱吧！`;
+        pop($('.acc-warn'));
+        shake(b);
+        api.bad();
+        name = null;
+      } else {
+        name = b.dataset.n;
+      }
+      draw();
     });
     host.querySelector('.tiles').addEventListener('click', e => {
       const b = e.target.closest('[data-t]');

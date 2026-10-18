@@ -1171,6 +1171,8 @@ a.unit-card:active { transform: scale(.98); }
 /* ---------- account ---------- */
 
 .w-account { display: flex; justify-content: center; }
+.acc-warn { margin: 6px 0 0; padding: 8px 12px; border-radius: 12px; background: #fff4e6; border: 2px solid #ffa94d; color: #a63e00; font-weight: 700; line-height: 1.5; }
+.acc-tip { margin: 6px 0 0; color: var(--ink-3); font-size: .9rem; font-weight: 700; }
 .form { display: flex; flex-direction: column; gap: 8px; width: min(100%, 460px); padding: 16px; border-radius: var(--radius); background: var(--card); border: 2px solid var(--line); }
 .form-title { margin: 0; font-size: 1.3rem; font-weight: 900; }
 .lbl { margin: .4rem 0 0; font-weight: 800; display: flex; align-items: center; gap: .3rem; }

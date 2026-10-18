@@ -852,7 +852,7 @@ export const UNITS = [
     slides: [
       {
         title: '帳號、註冊和登入',
-        text: `很多 App 和網站要先${t('註冊', 'sign up')}一個${t('帳號', 'account')}：取一個${t('使用者名稱', 'user name')}，再設一組${t('密碼', 'password')}。下次用一樣的名稱和密碼${t('登入', 'log in')}，它就認得你，你的資料也會跟著你。`,
+        text: `很多 App 和網站要先${t('註冊', 'sign up')}一個${t('帳號', 'account')}：取一個${t('使用者名稱', 'user name')}，再設一組${t('密碼', 'password')}。使用者名稱別人看得到，不要用真的名字、生日或學校。下次用一樣的名稱和密碼${t('登入', 'log in')}，它就認得你，你的資料也會跟著你。`,
         widget: 'account',
       },
       {
