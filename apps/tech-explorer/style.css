@@ -1300,6 +1300,13 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .w-hot.sharing .beam { background: repeating-linear-gradient(90deg, #ffc078 0 8px, transparent 8px 14px); }
 .w-hot.linked .beam { background: repeating-linear-gradient(90deg, var(--c) 0 8px, transparent 8px 14px); animation: flow .6s linear infinite; }
 .w-hot .usage { margin: 0; font-weight: 700; text-align: center; min-height: 1.6em; }
+/* the phone's battery: a bar and a percentage */
+.hbat { display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: 6px; font-weight: 800; }
+.hbat-cell { position: relative; margin-right: 6px; width: 44px; height: 20px; padding: 2px; border: 2px solid var(--ink-2); border-radius: 5px; }
+.hbat-cell::after { content: ''; position: absolute; right: -6px; top: 5px; width: 3px; height: 6px; border-radius: 0 2px 2px 0; background: var(--ink-2); }
+.hbat-cell i { display: block; height: 100%; border-radius: 2px; background: #40c057; transition: width .3s, background .3s; }
+.hbat-fast { color: #e8590c; font-style: normal; font-size: .9rem; }
+.hbat.fast .hbat-cell { border-color: #e8590c; }
 
 /* ---------- book index panel ---------- */
 

@@ -3374,6 +3374,7 @@ export const WIDGETS = {
         <div class="hot-row">
           <div class="hdev hphone">
             <span class="hicon">📱</span><b>小明的手機</b><small>📶 行動網路 4G</small>
+            <span class="hbat" aria-label="手機電量"><span class="hbat-cell"><i></i></span><b>80%</b><em class="hbat-fast" hidden>⚡ 耗電變快</em></span>
             <button class="option" data-act="on">個人熱點：關</button>
             <small class="hpw" hidden>熱點密碼：<b>${pw}</b></small>
           </div>
@@ -3388,7 +3389,21 @@ export const WIDGETS = {
         <p class="usage"></p>
       </div>`;
     const $ = sel => host.querySelector(sel);
-    let on = false, linked = false, mb = 0;
+    let on = false, linked = false, mb = 0, bat = 80, drainT = 0;
+    // The phone's battery: sharing costs a little, a tablet streaming through it costs a lot.
+    const showBat = () => {
+      const cell = $('.hbat-cell i');
+      cell.style.width = bat + '%';
+      cell.style.background = bat <= 20 ? '#e03131' : bat <= 50 ? '#f59f00' : '#40c057';
+      $('.hbat b').textContent = bat + '%';
+    };
+    const drain = () => {
+      if (!on || mb >= 700 || bat <= 15) return;
+      bat--;
+      showBat();
+      pop($('.hbat b'));
+      drainT = api.later(drain, linked ? 450 : 3000);
+    };
     const step = t => { $('.step').textContent = t; };
     $('[data-act="on"]').onclick = () => {
       if (on) return;
@@ -3399,6 +3414,7 @@ export const WIDGETS = {
       $('.nets').hidden = false;
       $('.w-hot').classList.add('sharing');
       api.good();
+      drainT = api.later(drain, 3000);
       step('② 在平板的 Wi-Fi 清單裡，點「小明的手機」');
     };
     $('[data-act="pick"]').onclick = () => {
@@ -3414,6 +3430,10 @@ export const WIDGETS = {
       $('.htab .pill').className = 'pill on';
       $('.htab .pill').textContent = '上線 online';
       $('.w-hot').classList.add('linked');
+      $('.hbat-fast').hidden = false;
+      $('.hbat').classList.add('fast');
+      clearTimeout(drainT);
+      drain();
       step('🎉 平板上網了！它借用的是手機的行動網路。');
       api.good();
       api.done();
@@ -3421,10 +3441,11 @@ export const WIDGETS = {
         mb += 7;
         $('.usage').textContent = `平板看影片中…手機已用掉 ${mb} MB 流量，電也掉得比較快`;
         if (mb < 700) api.later(tick, 120);
-        else $('.usage').textContent = '手機已用掉 700 MB 流量！行動網路通常每個月有用量限制，用完要記得關掉熱點。';
+        else $('.usage').textContent = `手機已用掉 700 MB 流量，電量也掉到 ${bat}%！行動網路通常每個月有用量限制，用完要記得關掉熱點。`;
       };
       tick();
     });
+    showBat();
   },
 
   // An inbox: mark each message as normal or suspicious; the clue shows after a right answer.
