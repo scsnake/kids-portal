@@ -180,6 +180,7 @@ html, body {
 
 .app-title-row {
     display: flex;
+    flex-wrap: wrap;
     align-items: baseline;
     gap: 8px;
     margin-bottom: 4px;
@@ -201,25 +202,54 @@ html, body {
     font-weight: 600;
 }
 
-.app-note {
-    margin: 0;
-    padding: 10px 18px 14px 88px;
-    border-top: 1px dashed var(--color-border);
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--color-text-muted);
+.app-card {
+    position: relative;
 }
 
-.app-note a {
+/* the card with an open hint sits above the cards below it */
+.app-card.note-open {
+    z-index: 30;
+}
+
+.app-note-pop {
+    position: absolute;
+    z-index: 20;
+    top: 46px;
+    left: 88px;
+    right: 18px;
+    max-width: 420px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--color-text);
+}
+
+.app-note-pop p {
+    margin: 0;
+}
+
+.app-note-pop p + p {
+    margin-top: 6px;
+}
+
+.app-note-pop a {
     color: var(--color-primary);
     font-weight: 600;
 }
 
 @media (max-width: 480px) {
-    .app-note { padding-left: 18px; }
+    .app-note-pop { left: 12px; right: 12px; }
 }
 
 .app-private {
+    cursor: help;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-size: 12px;
     color: var(--color-text-muted);
     background: #f1f3f5;
@@ -227,6 +257,24 @@ html, body {
     border-radius: 8px;
     font-weight: 600;
     white-space: nowrap;
+}
+
+.app-private:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.info-dot {
+    display: inline-grid;
+    place-items: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    font-size: 10px;
+    font-style: italic;
+    font-weight: 700;
+    line-height: 1;
 }
 
 .app-desc {

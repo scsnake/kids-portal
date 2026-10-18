@@ -39,14 +39,26 @@ const app = createApp({
         </div>
 
         <ul v-else class="app-list">
-            <li v-for="app in filteredApps" :key="app.id" class="app-card">
+            <li v-for="app in filteredApps" :key="app.id" class="app-card" :class="{ 'note-open': noteFor === app.id }">
                 <a :href="app.url" class="app-link">
                     <div class="app-icon">{{ app.icon }}</div>
                     <div class="app-body">
                         <div class="app-title-row">
                             <h2 class="app-title">{{ app.title }}</h2>
                             <span class="app-subject">{{ app.subject }}</span>
-                            <span v-if="app.private" class="app-private" title="需要登入">🔒 家人限定</span>
+                            <span
+                                v-if="app.private"
+                                class="app-private"
+                                role="button"
+                                tabindex="0"
+                                aria-haspopup="dialog"
+                                :aria-expanded="noteFor === app.id"
+                                @click.prevent.stop="clickNote(app.id)"
+                                @keydown.enter.prevent.stop="clickNote(app.id)"
+                                @keydown.space.prevent.stop="clickNote(app.id)"
+                                @mouseenter="hoverNote(app.id)"
+                                @mouseleave="leaveNote"
+                            >🔒 家人限定 <span class="info-dot" aria-hidden="true">i</span></span>
                         </div>
                         <p class="app-desc">{{ app.desc }}</p>
                         <div class="app-levels">
@@ -55,9 +67,18 @@ const app = createApp({
                     </div>
                     <div class="app-arrow" aria-hidden="true">→</div>
                 </a>
-                <p v-if="app.private" class="app-note">
-                    🔒 點進去要先用 Google 帳號登入，只有已經加入名單的帳號能用。想使用的話，請寫信到<a :href="'mailto:scsnake@gmail.com?subject=' + encodeURIComponent('申請使用「' + app.title + '」')">scsnake@gmail.com</a>，告訴我你的 Gmail 帳號。
-                </p>
+                <div
+                    v-if="app.private && noteFor === app.id"
+                    class="app-note-pop"
+                    role="dialog"
+                    aria-label="家人限定說明"
+                    @mouseenter="cancelLeave"
+                    @mouseleave="leaveNote"
+                    @click.stop
+                >
+                    <p>🔒 點進去要先用 Google 帳號登入，只有已經加入名單的帳號能用。</p>
+                    <p>想使用的話，請寫信到 <a :href="'mailto:scsnake@gmail.com?subject=' + encodeURIComponent('申請使用「' + app.title + '」')">scsnake@gmail.com</a>，告訴我你的 Gmail 帳號。</p>
+                </div>
             </li>
         </ul>
 
@@ -102,12 +123,38 @@ const app = createApp({
             });
         });
 
+        // The 🔒 tag opens a small hint: on hover where a mouse can hover, and on tap or
+        // click everywhere. A click pins it open; a click elsewhere or Esc closes it.
+        const noteFor = ref(null);
+        let pinned = false;
+        let leaveTimer = null;
+        const canHover = window.matchMedia('(hover: hover)').matches;
+        function clickNote(id) {
+            clearTimeout(leaveTimer);
+            if (noteFor.value === id && pinned) { noteFor.value = null; pinned = false; return; }
+            noteFor.value = id;
+            pinned = true;
+        }
+        function hoverNote(id) {
+            if (!canHover) return;
+            clearTimeout(leaveTimer);
+            if (noteFor.value !== id) { noteFor.value = id; pinned = false; }
+        }
+        function leaveNote() {
+            if (pinned) return;
+            leaveTimer = setTimeout(() => { noteFor.value = null; }, 250);
+        }
+        function cancelLeave() { clearTimeout(leaveTimer); }
+        const closeNote = () => { noteFor.value = null; pinned = false; };
+        document.addEventListener('click', closeNote);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNote(); });
+
         function resetFilters() {
             q.value = '';
             subjectFilter.value = '';
         }
 
-        return { apps, loading, q, subjectFilter, subjects, filteredApps, resetFilters };
+        return { apps, loading, q, subjectFilter, subjects, filteredApps, resetFilters, noteFor, clickNote, hoverNote, leaveNote, cancelLeave };
     }
 });
 

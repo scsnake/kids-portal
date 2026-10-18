@@ -7,7 +7,10 @@ Usage:
     #    SSH-tunnel: `ssh -L 8000:localhost:8000 cthgpu` and use localhost:8000)
     export COOLIFY_URL=http://localhost:8000
     export COOLIFY_TOKEN=$(grep '^COOLIFY_TOKEN=' ~/.env | cut -d= -f2-)
-    export GITHUB_WEBHOOK_SECRET=...   # optional: the secret the other kids-portal apps use
+    # the GitHub webhook secret all kids-portal apps share (so pushes redeploy the new app);
+    # Coolify's API hides it, so read it from Coolify's database on cthgpu:
+    export GITHUB_WEBHOOK_SECRET=$(ssh cthgpu "docker exec coolify-db psql -U coolify -d coolify -tAc \
+      \"select manual_webhook_secret_github from applications where uuid='ogs0wwc8c8okowk8c4kgcw08'\"")
     # 3. Run — creates any app that doesn't already exist, then triggers a deploy
     python3 scripts/provision_coolify.py
 
@@ -193,7 +196,7 @@ def create_app(server_uuid, project_uuid, spec):
     uuid = resp.get("uuid")
     print(f"   ✓ created {spec['name']} ({uuid}) → {spec['domain']}")
     # A push only redeploys an app whose webhook secret matches the GitHub hook's
-    # (all kids-portal apps share one). Copy it from an existing app's Webhooks tab.
+    # (all kids-portal apps share one). See the usage notes at the top for reading it.
     secret = os.environ.get("GITHUB_WEBHOOK_SECRET")
     if secret and uuid:
         api("PATCH", f"/applications/{uuid}", {"manual_webhook_secret_github": secret})
