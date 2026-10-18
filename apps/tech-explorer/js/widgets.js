@@ -2578,6 +2578,64 @@ export const WIDGETS = {
     };
   },
 
+  // Tap a file and it flies into the folder.
+  stash(host, _, api) {
+    const files = [['📷', '照片'], ['🎬', '影片'], ['🎵', '歌曲'], ['📝', '作業']];
+    host.innerHTML = `
+      <div class="w-stash">
+        <div class="sh-files">${files.map(([i, n]) => `<button class="sh-file"><b>${i}</b>${n}</button>`).join('')}</div>
+        <span class="sh-arrow">⬇️</span>
+        <button class="sh-folder" aria-label="資料夾"><b>📁</b><span>我的資料夾 <small class="en" lang="en">folder</small></span><em class="sh-count">0 個檔案</em></button>
+        <ul class="sh-inside" hidden></ul>
+        <p class="sh-hint">點一個檔案，把它放進資料夾</p>
+      </div>`;
+    const $ = s => host.querySelector(s);
+    const folder = $('.sh-folder'), icon = folder.querySelector('b'), inside = $('.sh-inside');
+    const kept = [];
+    host.querySelectorAll('.sh-file').forEach(btn => {
+      btn.onclick = async () => {
+        if (btn.classList.contains('sh-gone')) return;
+        btn.classList.add('sh-gone');
+        const box = host.querySelector('.w-stash').getBoundingClientRect();
+        const a = btn.getBoundingClientRect(), b = icon.getBoundingClientRect();
+        const ghost = btn.cloneNode(true);
+        ghost.classList.remove('sh-gone');
+        ghost.classList.add('sh-fly');
+        ghost.style.left = a.left - box.left + 'px';
+        ghost.style.top = a.top - box.top + 'px';
+        ghost.style.width = a.width + 'px';
+        host.querySelector('.w-stash').append(ghost);
+        const dx = b.left + b.width / 2 - (a.left + a.width / 2), dy = b.top + b.height / 2 - (a.top + a.height / 2);
+        icon.textContent = '📂';
+        await ghost.animate(
+          [
+            { transform: 'none', opacity: 1 },
+            { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 50}px) scale(.9)`, opacity: 1, offset: 0.5 },
+            { transform: `translate(${dx}px, ${dy}px) scale(.25)`, opacity: 0.2 },
+          ],
+          { duration: 650, easing: 'ease-in-out' }
+        ).finished;
+        ghost.remove();
+        if (!api.alive()) return;
+        kept.push(btn.textContent);
+        $('.sh-count').textContent = `${kept.length} 個檔案`;
+        inside.innerHTML = kept.map(n => `<li>${n}</li>`).join('');
+        pop(folder);
+        api.good();
+        api.later(() => { if (host.querySelectorAll('.sh-fly').length === 0) icon.textContent = '📁'; }, 300);
+        if (kept.length === files.length) {
+          $('.sh-hint').textContent = '全部放好了！點資料夾，看看裡面有什麼';
+          api.done();
+        }
+      };
+    });
+    folder.onclick = () => {
+      if (!kept.length) return;
+      inside.hidden = !inside.hidden;
+      icon.textContent = inside.hidden ? '📁' : '📂';
+    };
+  },
+
   // A small file manager: rename, move, delete, restore, and delete for good.
   files(host, _, api) {
     const tasks = [

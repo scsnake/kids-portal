@@ -503,8 +503,8 @@ export const UNITS = [
     slides: [
       {
         title: '資料和檔案',
-        text: `照片、影片、歌曲、作業，在電腦裡都是${t('資料', 'data')}，一份一份${t('儲存', 'save')}成${t('檔案', 'file')}。很多檔案可以放進同一個${t('資料夾', 'folder')}，就像把紙放進文件夾。`,
-        art: '<div class="art-row"><span>📷</span><span>🎬</span><span>🎵</span><span>🎮</span><span class="art-arrow">→</span><span>📦</span></div>',
+        text: `照片、影片、歌曲、作業，在電腦裡都是${t('資料', 'data')}，一份一份${t('儲存', 'save')}成${t('檔案', 'file')}。很多檔案可以放進同一個${t('資料夾', 'folder')}，就像把紙放進文件夾。點點看，把檔案放進資料夾！`,
+        widget: 'stash',
       },
       {
         title: '選取',

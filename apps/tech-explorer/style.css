@@ -1097,6 +1097,22 @@ a.unit-card:active { transform: scale(.98); }
 
 /* ---------- files ---------- */
 
+/* files go into a folder */
+.w-stash { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.sh-files { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.sh-file { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 88px; padding: 10px 8px; border: 2px solid var(--line); border-radius: 16px; background: var(--card); font-weight: 800; box-shadow: var(--shadow); }
+.sh-file b, .sh-fly b { font-size: 2.6rem; line-height: 1.1; }
+.sh-file.sh-gone { visibility: hidden; }
+.sh-fly { position: absolute; z-index: 3; margin: 0; pointer-events: none; }
+.sh-arrow { color: var(--ink-3); font-size: 1.6rem; }
+.sh-folder { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 180px; padding: 10px 18px; border: 2px dashed var(--c); border-radius: 20px; background: color-mix(in srgb, var(--c) 6%, white); font-weight: 800; }
+.sh-folder b { font-size: 4.4rem; line-height: 1.1; }
+.sh-count { color: var(--ink-2); font-style: normal; font-size: .95rem; }
+.sh-inside { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.sh-inside li { padding: 4px 10px; border-radius: 10px; background: var(--card); border: 2px solid var(--line); font-weight: 800; }
+.sh-hint { margin: 0; font-weight: 800; color: var(--ink-2); text-align: center; }
+
+
 .fm { position: relative; display: grid; grid-template-columns: 150px 1fr; min-height: 300px; border-radius: var(--radius); overflow: hidden; background: var(--card); border: 2px solid var(--line); }
 .fm-side { display: flex; flex-direction: column; gap: 4px; padding: 8px; background: var(--paper); }
 .fm-side button { min-height: 48px; padding: .4rem .6rem; border: 0; border-radius: 10px; background: none; text-align: left; font-weight: 800; }
