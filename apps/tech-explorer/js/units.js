@@ -202,6 +202,11 @@ export const UNITS = [
         },
       },
       {
+        title: '復原和重做',
+        text: `做錯了不用怕！${t('復原', 'undo')}會回到上一步，${t('重做', 'redo')}會把剛剛復原的再做回來。但是復原以後如果做了新的事，就不能重做了。電腦上按 ⌘Z（Windows 是 Ctrl+Z）；iPad 可以用三根手指往左滑，或按畫面上的 ↶。`,
+        widget: 'undo',
+      },
+      {
         title: '考考你',
         widget: 'choice',
         params: {
@@ -719,6 +724,36 @@ export const UNITS = [
             { text: '🔍 上網查資料' },
           ],
           explain: '飛航模式會關掉 Wi-Fi 和行動網路，手機就離線了，只能用已經存在手機裡的東西。',
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'browser',
+    part: 'basic',
+    icon: '🧭',
+    title: '瀏覽器和網頁',
+    en: 'Browsers & Web Pages',
+    desc: '網址列、上一頁、重新整理和連結',
+    color: '#1971c2',
+    slides: [
+      {
+        title: '用瀏覽器看網頁',
+        text: `看網頁的 App 叫做${t('瀏覽器', 'browser')}，像 Safari、Chrome。上面的${t('網址列', 'address bar')}可以輸入網址；點網頁上的${t('連結', 'link')}會到另一頁。按${t('上一頁', 'back')} ← 回去，${t('下一頁', 'forward')} → 再過去，${t('重新整理', 'reload')} ⟳ 會重新載入這一頁。`,
+        widget: 'browser',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '網頁卡住了，或內容好像沒有更新，可以先試試哪一個？',
+          options: [
+            { text: '⟳ 重新整理', correct: true },
+            { text: '← 一直按上一頁' },
+            { text: '📴 把平板關機' },
+          ],
+          explain: '重新整理會重新載入這一頁。不過正在填、還沒送出的表單，重新整理後可能會不見。',
         },
       },
     ],

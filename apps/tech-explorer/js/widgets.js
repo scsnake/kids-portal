@@ -128,22 +128,25 @@ function fly(box, text, from, to, ms = 550) {
 }
 
 // A task checklist: check(id, note) ticks one task; done() fires once every required task is ticked.
+// A task with `na: '<reason>'` is something this device cannot do: it stays listed so the
+// child still learns it, but it is greyed out, never ticked and never required.
 function checklist(ul, tasks, api) {
   ul.innerHTML = tasks.map(t => `
-    <li data-task="${t.id}"${t.optional ? ' class="optional"' : ''}>
-      <span class="tick"></span>
-      <span>${t.zh}${en(t.en)}<small class="alt">${t.alt || ''}</small></span>
+    <li data-task="${t.id}" class="${t.na ? 'na' : t.optional ? 'optional' : ''}">
+      <span class="tick">${t.na ? '🚫' : ''}</span>
+      <span>${t.zh}${en(t.en)}<small class="alt">${t.na || t.alt || ''}</small></span>
     </li>`).join('');
   const got = new Set();
   return (id, note) => {
-    if (got.has(id)) return;
+    const task = tasks.find(t => t.id === id);
+    if (got.has(id) || task?.na) return;
     got.add(id);
     const li = ul.querySelector(`[data-task="${id}"]`);
     li.classList.add('done');
     if (note) li.querySelector('.alt').textContent = note;
     pop(li);
     api.good();
-    if (tasks.every(t => t.optional || got.has(t.id))) api.done();
+    if (tasks.every(t => t.optional || t.na || got.has(t.id))) api.done();
   };
 }
 
@@ -917,7 +920,7 @@ export const WIDGETS = {
       { id: 'right', zh: '右鍵', en: 'right-click', alt: '手指：長按' },
       { id: 'wheel', zh: '滾輪捲動', en: 'scroll', alt: '手指：往上滑' },
       { id: 'drag', zh: '拖曳', en: 'drag', alt: '手指：按住再移動' },
-      { id: 'hover', zh: '移過去不按', en: 'hover', alt: canHover ? '把游標停在東西上' : '只有滑鼠做得到', optional: !canHover },
+      { id: 'hover', zh: '移過去不按', en: 'hover', alt: '把游標停在東西上，會跳出名字', na: canHover ? '' : '手指碰到螢幕就算「按」，沒辦法只移過去。用滑鼠或觸控板才做得到。' },
     ];
     host.innerHTML = `
       <div class="w-lab">
@@ -1038,14 +1041,14 @@ export const WIDGETS = {
   // A photo that answers taps, swipes and two-finger gestures.
   touchlab(host, _, api) {
     const hasTouch = navigator.maxTouchPoints > 0;
-    const two = hasTouch ? '' : '要用觸控螢幕或觸控板';
+    const noTouch = hasTouch ? '' : '這台裝置沒有觸控螢幕，看說明就好：兩根手指放在螢幕上';
     const tasks = [
       { id: 'tap', zh: '點一下', en: 'tap', alt: '顯示說明' },
       { id: 'dbl', zh: '點兩下', en: 'double-tap', alt: '放大或縮回' },
       { id: 'long', zh: '長按', en: 'long press', alt: '跳出選單' },
       { id: 'swipe', zh: '左右滑動', en: 'swipe', alt: '換下一張' },
-      { id: 'pinch', zh: '兩指縮放', en: 'pinch', alt: two || '兩根手指張開、捏起', optional: !hasTouch },
-      { id: 'rotate', zh: '兩指旋轉', en: 'rotate', alt: two || '兩根手指一起轉', optional: !hasTouch },
+      { id: 'pinch', zh: '兩指縮放', en: 'pinch', alt: '兩根手指張開、捏起', na: noTouch && noTouch + '張開、捏起。' },
+      { id: 'rotate', zh: '兩指旋轉', en: 'rotate', alt: '兩根手指一起轉', na: noTouch && noTouch + '一起轉。' },
       { id: 'pan', zh: '放大後拖移', en: 'pan', alt: '一根手指移動照片' },
     ];
     const photos = [['🦁', '獅子'], ['🐼', '貓熊'], ['🐧', '企鵝'], ['🦒', '長頸鹿']];
@@ -3432,5 +3435,141 @@ export const WIDGETS = {
       }
     });
     drawEx();
+  },
+
+  // Undo and redo: add stickers, step back, step forward; a new action clears redo.
+  undo(host, _, api) {
+    const mac = /Mac|iPhone|iPad/.test(navigator.userAgent);
+    const tasks = [
+      { id: 'add', zh: '放上 3 個貼紙', en: 'do' },
+      { id: 'undo', zh: '復原 2 次', en: 'undo', alt: mac ? '↶ 或 ⌘Z' : '↶ 或 Ctrl+Z' },
+      { id: 'redo', zh: '重做 1 次', en: 'redo', alt: mac ? '↷ 或 ⇧⌘Z' : '↷ 或 Ctrl+Y' },
+      { id: 'branch', zh: '復原後放新貼紙，看重做消失', en: 'new action' },
+    ];
+    const stickers = ['🐶', '🌳', '☀️', '🏠', '🌈', '🚗'];
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="ud-box">
+          <div class="ud-bar">
+            <button class="option" data-a="undo" aria-label="復原">↶ 復原</button>
+            <button class="option" data-a="redo" aria-label="重做">↷ 重做</button>
+          </div>
+          <div class="ud-scene"></div>
+          <div class="ud-picks">${stickers.map(e => `<button class="option" data-s="${e}">${e}</button>`).join('')}</div>
+          <div class="ud-stacks"><p>做過的事：<span class="done-list"></span></p><p>可以重做：<span class="redo-list"></span></p></div>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    const done = [], redo = [];
+    let undos = 0;
+    const draw = () => {
+      $('.ud-scene').innerHTML = done.length ? done.map(e => `<span>${e}</span>`).join('') : '<em>點下面的貼紙放上去</em>';
+      $('.done-list').textContent = done.join(' ') || '（沒有）';
+      $('.redo-list').textContent = redo.join(' ') || '（沒有）';
+      $('[data-a="undo"]').disabled = !done.length;
+      $('[data-a="redo"]').disabled = !redo.length;
+    };
+    const act = a => {
+      if (a === 'undo' && done.length) { redo.push(done.pop()); if (++undos >= 2) check('undo'); }
+      else if (a === 'redo' && redo.length) { done.push(redo.pop()); check('redo'); }
+      draw();
+    };
+    host.querySelector('.ud-picks').addEventListener('click', e => {
+      const b = e.target.closest('[data-s]');
+      if (!b) return;
+      const hadRedo = redo.length > 0;
+      done.push(b.dataset.s);
+      redo.length = 0;
+      if (hadRedo) check('branch', '做了新的事，可以重做的就清空了');
+      if (done.length >= 3) check('add');
+      draw();
+    });
+    host.querySelector('.ud-bar').addEventListener('click', e => {
+      const b = e.target.closest('[data-a]');
+      if (b && !b.disabled) act(b.dataset.a);
+    });
+    const onKey = e => {
+      if (!api.alive()) { window.removeEventListener('keydown', onKey); return; }
+      if (!(e.metaKey || e.ctrlKey)) return;
+      const k = e.key.toLowerCase();
+      if (k === 'z' && !e.shiftKey) { e.preventDefault(); act('undo'); }
+      else if ((k === 'z' && e.shiftKey) || k === 'y') { e.preventDefault(); act('redo'); }
+    };
+    window.addEventListener('keydown', onKey);
+    draw();
+  },
+
+  // A pretend browser: links, back, forward, reload, and typing an address.
+  browser(host, _, api) {
+    const tasks = [
+      { id: 'link', zh: '點一個連結', en: 'link' },
+      { id: 'back', zh: '回上一頁', en: 'back' },
+      { id: 'fwd', zh: '再到下一頁', en: 'forward' },
+      { id: 'reload', zh: '重新整理', en: 'reload' },
+      { id: 'type', zh: '在網址列輸入網址', en: 'address bar' },
+    ];
+    const pages = {
+      'zoo.example.tw': { title: '🦁 動物園', body: '歡迎來到動物園！想看哪一種動物？', links: [['zoo.example.tw/panda', '🐼 看貓熊'], ['zoo.example.tw/penguin', '🐧 看企鵝']] },
+      'zoo.example.tw/panda': { title: '🐼 貓熊館', body: '貓熊一天要吃很多竹子。', links: [['zoo.example.tw', '🏠 回動物園首頁']] },
+      'zoo.example.tw/penguin': { title: '🐧 企鵝館', body: '企鵝不會飛，但是很會游泳。', links: [['zoo.example.tw', '🏠 回動物園首頁']] },
+      'library.example.tw': { title: '📚 圖書館', body: '今天有說故事時間！', links: [] },
+    };
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="brw">
+          <div class="br-bar">
+            <button class="br-btn" data-a="back" aria-label="上一頁">←</button>
+            <button class="br-btn" data-a="fwd" aria-label="下一頁">→</button>
+            <button class="br-btn" data-a="reload" aria-label="重新整理">⟳</button>
+            <form class="br-url"><span>🔒</span><input type="url" inputmode="url" autocapitalize="off" spellcheck="false" aria-label="網址列"></form>
+          </div>
+          <div class="br-page"></div>
+          <p class="br-hint">試試在網址列輸入 <button class="br-sug" type="button">library.example.tw</button></p>
+          <div class="br-hist"></div>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const check = checklist($('.tasks'), tasks, api);
+    const hist = ['zoo.example.tw'];
+    let at = 0, visits = 0;
+    const show = (flash = false) => {
+      const url = hist[at];
+      const pg = pages[url] || { title: '😵 找不到網頁', body: '網址打錯了嗎？檢查一下拼字。', links: [] };
+      $('.br-url input').value = url;
+      $('.br-page').innerHTML = `<h4>${pg.title}</h4><p>${pg.body}</p>${pg.links.map(([u, t]) => `<button class="br-link" data-u="${u}">${t}</button>`).join('')}<small>看了 ${++visits} 次頁面</small>`;
+      if (flash) $('.br-page').animate([{ opacity: 0.2 }, { opacity: 1 }], { duration: 300 });
+      $('[data-a="back"]').disabled = at === 0;
+      $('[data-a="fwd"]').disabled = at === hist.length - 1;
+      $('.br-hist').innerHTML = '瀏覽紀錄：' + hist.map((u, i) => `<span class="${i === at ? 'hist-now' : ''}">${u.replace('.example.tw', '')}</span>`).join(' › ');
+    };
+    const go = url => {
+      hist.splice(at + 1);
+      hist.push(url);
+      at = hist.length - 1;
+      show(true);
+    };
+    $('.br-page').addEventListener('click', e => {
+      const b = e.target.closest('[data-u]');
+      if (b) { go(b.dataset.u); check('link'); }
+    });
+    $('.br-bar').addEventListener('click', e => {
+      const b = e.target.closest('[data-a]');
+      if (!b || b.disabled) return;
+      if (b.dataset.a === 'back') { at--; show(true); check('back'); }
+      else if (b.dataset.a === 'fwd') { at++; show(true); check('fwd'); }
+      else { show(true); check('reload', '頁面重新載入了一次'); }
+    });
+    const typed = url => {
+      url = url.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+      if (!url) return;
+      go(url);
+      if (pages[url]) check('type');
+    };
+    $('.br-url').addEventListener('submit', e => { e.preventDefault(); typed($('.br-url input').value); $('.br-url input').blur(); });
+    $('.br-sug').onclick = () => { $('.br-url input').value = 'library.example.tw'; typed('library.example.tw'); };
+    show();
   },
 };

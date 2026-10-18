@@ -1465,3 +1465,38 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
   .slide.has-widget .stage > * { margin-block: auto; }
 }
 .set-phone { height: 320px; }
+
+/* ---------- undo / redo ---------- */
+
+.ud-box { display: flex; flex-direction: column; gap: 10px; }
+.ud-bar { display: flex; gap: 8px; }
+.ud-bar .option { min-height: 48px; padding: .3rem 1rem; font-size: 1.05rem; }
+.ud-bar .option:disabled { opacity: .4; }
+.ud-scene { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 120px; padding: 12px; border-radius: var(--radius); background: linear-gradient(#e7f5ff 65%, #d3f9d8 65%); font-size: 2.6rem; }
+.ud-scene em { font-size: 1rem; color: var(--ink-3); font-style: normal; }
+.ud-picks { display: flex; flex-wrap: wrap; gap: 8px; }
+.ud-picks .option { min-width: 56px; min-height: 52px; font-size: 1.6rem; text-align: center; padding: .2rem .5rem; }
+.ud-stacks p { margin: 0; font-weight: 700; color: var(--ink-2); }
+
+/* ---------- pretend browser ---------- */
+
+.brw { display: flex; flex-direction: column; gap: 8px; border-radius: var(--radius); background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.br-bar { display: flex; align-items: center; gap: 6px; padding: 8px; background: #f1f3f5; }
+.br-btn { flex: none; width: 48px; height: 48px; border: 0; border-radius: 12px; background: white; font-size: 1.4rem; font-weight: 800; }
+.br-btn:disabled { opacity: .35; }
+.br-url { flex: 1; display: flex; align-items: center; gap: 4px; min-width: 0; padding: 0 10px; border-radius: 12px; background: white; }
+.br-url input { flex: 1; min-width: 0; min-height: 48px; border: 0; font: inherit; font-size: 16px; background: none; }
+.br-page { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-height: 170px; padding: 6px 16px 12px; }
+.br-page h4 { margin: 0; font-size: 1.4rem; }
+.br-page p { margin: 0; }
+.br-page small { color: var(--ink-3); }
+.br-link { min-height: 44px; padding: 0 .4rem; border: 0; background: none; color: #1971c2; text-decoration: underline; font-size: 1.1rem; font-weight: 700; }
+.br-hint { margin: 0; padding: 0 16px; color: var(--ink-2); }
+.br-sug { min-height: 40px; border: 0; background: none; color: var(--c); text-decoration: underline; font: inherit; font-weight: 800; }
+.br-hist { padding: 8px 16px 12px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: .95rem; }
+.br-hist .hist-now { color: var(--ink); font-weight: 800; }
+
+/* a task this device cannot do: still listed, as information */
+.tasks li.na { opacity: .7; }
+.tasks li.na .tick { border: 0; font-size: 18px; line-height: 24px; text-align: center; }
+.tasks li.na .alt { color: var(--ink-2); }

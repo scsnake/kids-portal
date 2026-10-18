@@ -15,7 +15,7 @@ the units before it.
 
 1. 認識 3C 裝置: computer, desktop vs laptop, phone/tablet, input and output
 2. 開始操作: passcode and Face ID, mouse actions, touch gestures, iPad system gestures, tilt, screen rotation
-3. 打字和輸入法: Zhuyin, English, handwriting, emoji, dictation, special keys
+3. 打字和輸入法: Zhuyin, English, handwriting, emoji, dictation, special keys, undo/redo
 4. 設定和通知: text size, brightness, volume, notifications, Do Not Disturb, Accessibility
 5. 線材和接頭: what each cable does, USB-A/C, Lightning, adapters
 6. 電池和充電: chargers and watts, wireless charging, power banks (mAh), what drains the battery, charging safety
@@ -25,25 +25,26 @@ the units before it.
 10. 刪除和容量: rename, delete, Recently Deleted vs delete permanently, KB/MB/GB/TB
 11. 連上網路: online vs offline, cable / Wi-Fi / cellular, personal hotspot, Mbps
 12. 藍牙、GPS 和飛航模式: Bluetooth pairing, how GPS finds you, airplane mode in Control Center
-13. 帳號和雲端: sign up, user name, password, log in, good passwords, cloud sync, https and the lock icon
-14. App 和更新: hardware vs software, installing from the App Store, permissions, updates
-15. 常用的 App: messenger vs email, video meetings, social media, search engines, office apps
-16. 實用小技巧: screenshots, QR codes (and fake ones), backup, Find My
-17. AI 聊天機器人: what a chatbot is, catching a wrong answer, good and bad uses
-18. 上網安全: scam messages, verification codes, two-factor authentication, malware, personal information, 165
+13. 瀏覽器和網頁: address bar, links, back / forward / reload, browsing history
+14. 帳號和雲端: sign up, user name, password, log in, good passwords, cloud sync, https and the lock icon
+15. App 和更新: hardware vs software, installing from the App Store, permissions, updates
+16. 常用的 App: messenger vs email, video meetings, social media, search engines, office apps
+17. 實用小技巧: screenshots, QR codes (and fake ones), backup, Find My
+18. AI 聊天機器人: what a chatbot is, catching a wrong answer, good and bad uses
+19. 上網安全: scam messages, verification codes, two-factor authentication, malware, personal information, 165
 
 **Part 2: 原理探索 (how it works)**
 
-19. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
-20. 作業系統: what an OS does, time sharing (multitasking)
-21. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
-22. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
-23. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
-24. AI 怎麼學？: learning from examples, why data matters (bias)
-25. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
-26. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
-27. 演算法: steps, binary search (number guessing), sorting by swaps
-28. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+20. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
+21. 作業系統: what an OS does, time sharing (multitasking)
+22. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
+23. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
+24. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
+25. AI 怎麼學？: learning from examples, why data matters (bias)
+26. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
+27. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
+28. 演算法: steps, binary search (number guessing), sorting by swaps
+29. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
 
 ## Saved progress
 
@@ -87,7 +88,7 @@ When you change a file, bump its `?v=`: `style.css` and `js/main.js` in
 
 - The tilt game can use the real gyroscope, but iPadOS allows it only on an
   `https://` page. On `http://` (local preview) it falls back to the joystick.
-- Two-finger tasks (pinch, rotate) are optional on a device without touch.
+- An action the device cannot do (pinch and rotate without a touchscreen, hover without a mouse) stays listed as a 🚫 row that explains it, but is not interactive and does not count toward the star.
 - Class names: widget styles share one stylesheet, so give each widget's inner
   parts names that no other widget or `main.js` uses (a clash once moved the
   touch-grid tablet off screen).
