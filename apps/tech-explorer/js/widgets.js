@@ -400,6 +400,79 @@ export const WIDGETS = {
     draw();
   },
 
+  // Type letters and see each one stored as one byte (8 bits), a Chinese character as 3
+  // bytes; then flip 8 bits to make the letter A.
+  bytes(host, _, api) {
+    const tasks = [
+      { id: 'type', zh: '打 3 個字', en: 'bytes', alt: '每個英文字母存成 1 個位元組' },
+      { id: 'han', zh: '打一個中文字', en: 'Chinese', alt: '看看它要幾個位元組' },
+      { id: 'make', zh: '撥 8 個開關，做出字母 A', en: 'bits', alt: '01000001' },
+    ];
+    const keys = ['A', 'B', 'C', 'H', 'I', '1', '!', '貓'];
+    const bin = n => n.toString(2).padStart(8, '0');
+    const bytesOf = ch => [...new TextEncoder().encode(ch)];
+    host.innerHTML = `
+      <div class="w-lab">
+        <div class="by-box">
+          <p class="by-h">① 打字：每個字都變成 0 和 1 存起來</p>
+          <div class="by-keys">${keys.map(k => `<button class="option" data-k="${k}">${k}</button>`).join('')}<button class="option" data-k="del" aria-label="刪掉一個字">⌫</button></div>
+          <div class="by-strip"><span class="by-empty">點上面的字</span></div>
+          <p class="by-count"></p>
+          <p class="by-h">② 自己做一個位元組：讓它變成字母 <b>A</b></p>
+          <div class="by-sw">${[128, 64, 32, 16, 8, 4, 2, 1].map((v, i) => `<button class="by-bit" data-i="${i}" aria-label="第 ${i + 1} 個位元"><b>0</b><small>${v}</small></button>`).join('')}</div>
+          <p class="by-read"></p>
+        </div>
+        <ul class="tasks"></ul>
+      </div>`;
+    const $ = s => host.querySelector(s);
+    const check = checklist($('.tasks'), tasks, api);
+    const typed = [];
+    const drawStrip = () => {
+      const strip = $('.by-strip');
+      strip.innerHTML = typed.length ? typed.map(ch => `
+        <div class="by-char"><b>${ch}</b>${bytesOf(ch).map(n => `<span class="by-byte">${bin(n).slice(0, 4)} ${bin(n).slice(4)}</span>`).join('')}
+          <small>${bytesOf(ch).length} 個位元組</small></div>`).join('') : '<span class="by-empty">點上面的字</span>';
+      const nB = typed.reduce((s, ch) => s + bytesOf(ch).length, 0);
+      $('.by-count').innerHTML = typed.length
+        ? `${typed.length} 個字 → <b>${nB}</b> 個位元組（B）→ <b>${nB * 8}</b> 個位元（b）`
+        : '1 個位元組 = 8 個位元';
+      strip.scrollLeft = strip.scrollWidth;
+    };
+    host.querySelector('.by-keys').addEventListener('click', e => {
+      const b = e.target.closest('[data-k]');
+      if (!b) return;
+      if (b.dataset.k === 'del') { typed.pop(); drawStrip(); return; }
+      if (typed.length >= 6) typed.shift();
+      typed.push(b.dataset.k);
+      drawStrip();
+      pop($('.by-strip').lastElementChild);
+      if (b.dataset.k === '貓') check('han', '「貓」要 3 個位元組，比英文字母多');
+      if (typed.filter(ch => ch !== '貓').length >= 3) check('type');
+    });
+    const bits = Array(8).fill(0);
+    const drawBits = () => {
+      const n = bits.reduce((s, v) => s * 2 + v, 0);
+      host.querySelectorAll('.by-bit').forEach((b, i) => {
+        b.classList.toggle('on', !!bits[i]);
+        b.querySelector('b').textContent = bits[i];
+      });
+      const ch = n >= 33 && n <= 126 ? String.fromCharCode(n) : '';
+      $('.by-read').innerHTML = `${bits.join('')} → 數字 ${n} → ${ch ? `字母「<b>${ch}</b>」` : '（這個數字沒有對應的字）'}`;
+      if (n === 65) {
+        $('.by-read').innerHTML += ' 🎉';
+        check('make', '8 個位元 01000001 就是 A');
+      }
+    };
+    host.querySelector('.by-sw').addEventListener('click', e => {
+      const b = e.target.closest('.by-bit');
+      if (!b) return;
+      bits[+b.dataset.i] ^= 1;
+      drawBits();
+    });
+    drawStrip();
+    drawBits();
+  },
+
   // Copy a small picture by painting cells.
   pixels(host, { pattern, color }, api) {
     const rows = pattern.length, cols = pattern[0].length;

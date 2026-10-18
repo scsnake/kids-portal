@@ -423,6 +423,28 @@ a.unit-card:active { transform: scale(.98); }
 .w-binary .sum { margin: 0; font-size: 1.4rem; }
 .w-binary .code { font-family: ui-monospace, Menlo, monospace; font-weight: 800; color: var(--c); letter-spacing: .1em; }
 
+/* bits and bytes: typed letters stored as bytes, and 8 switches that make one byte */
+.by-box { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.by-h { margin: 4px 0 0; font-weight: 800; }
+.by-keys { display: flex; flex-wrap: wrap; gap: 6px; }
+.by-keys .option { min-width: 48px; min-height: 48px; padding: 0 10px; font-size: 1.2rem; }
+.by-strip { display: flex; gap: 8px; min-height: 92px; padding: 8px; overflow-x: auto; border-radius: 14px; background: var(--card); border: 2px dashed var(--line); }
+.by-empty { margin: auto; color: var(--ink-3); font-weight: 700; }
+.by-char { flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 8px; border-radius: 10px; background: color-mix(in srgb, var(--c) 8%, white); }
+.by-char b { font-size: 1.4rem; }
+.by-byte { padding: 1px 6px; border-radius: 6px; background: white; border: 1px solid var(--line); font-family: ui-monospace, Menlo, monospace; font-size: .85rem; }
+.by-char small { color: var(--ink-3); font-weight: 700; font-size: .75rem; }
+.by-count { margin: 0; font-weight: 700; color: var(--ink-2); }
+.by-count b { color: var(--c); font-size: 1.15rem; }
+.by-sw { display: flex; gap: 4px; flex-wrap: wrap; padding: 8px; border-radius: 14px; border: 3px solid var(--c); width: fit-content; }
+.by-bit { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; height: 56px; border: 2px solid var(--line); border-radius: 10px; background: var(--card); font-family: ui-monospace, Menlo, monospace; }
+.by-bit b { font-size: 1.4rem; }
+.by-bit small { color: var(--ink-3); font-size: .7rem; font-family: inherit; }
+.by-bit.on { border-color: var(--c); background: var(--c); color: white; }
+.by-bit.on small { color: rgba(255, 255, 255, .8); }
+.by-read { margin: 0; font-family: ui-monospace, Menlo, monospace; font-weight: 700; }
+.by-read b { color: var(--c); font-size: 1.3rem; }
+
 /* ---------- pixel grids (pixels, race, printer) ---------- */
 
 .pxgrid {
