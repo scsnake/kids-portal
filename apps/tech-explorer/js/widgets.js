@@ -2386,12 +2386,16 @@ export const WIDGETS = {
           <div class="table"></div>
           <div class="dphone"><div class="dscreen"></div></div>
           <div class="floor"></div>
+          <div class="dr-zoom" hidden>
+            <p class="dr-say"></p>
+            <div class="dr-phone"><div class="dr-screen"><span class="dr-ok">✨</span></div><div class="dr-film"></div><div class="dr-new"></div></div>
+          </div>
         </div>
         <button class="go glow" data-act="drop">⬇️ 從桌上掉下去</button>
         <p class="result">選好保護裝備，再讓手機掉下去</p>
       </div>`;
     const $ = sel => host.querySelector(sel);
-    const phone = $('.dphone');
+    const phone = $('.dphone'), zoom = $('.dr-zoom'), say = $('.dr-say');
     const on = { case: false, film: false };
     const tried = new Set();
     let busy = false;
@@ -2404,6 +2408,30 @@ export const WIDGETS = {
         phone.className = 'dphone' + (on.case ? ' has-case' : '') + (on.film ? ' has-film' : '');
       };
     });
+    const pause = ms => new Promise(r => setTimeout(r, ms));
+    // Close-up: peel off the cracked film, show the screen is fine, put on a new film.
+    async function swapFilm() {
+      const film = $('.dr-film'), fresh = $('.dr-new'), ok = $('.dr-ok');
+      [film, fresh, ok].forEach(el => el.getAnimations().forEach(a => a.cancel()));
+      zoom.hidden = false;
+      say.textContent = '🔍 放大看看';
+      await zoom.animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1 }], { duration: 300, easing: 'ease-out' }).finished;
+      await pause(700);
+      if (!api.alive()) return;
+      say.textContent = '撕掉破掉的保護貼…';
+      await film.animate(
+        [{ transform: 'none', opacity: 1 }, { transform: 'translate(10%, -6%) rotate(6deg)', opacity: 1, offset: 0.3 }, { transform: 'translate(85%, -40%) rotate(28deg)', opacity: 0 }],
+        { duration: 1000, easing: 'ease-in', fill: 'forwards' }
+      ).finished;
+      if (!api.alive()) return;
+      say.textContent = '螢幕本身沒事！';
+      await ok.animate([{ opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1.3, offset: 0.6 }, { opacity: 1, scale: 1 }], { duration: 600, fill: 'forwards' }).finished;
+      await pause(600);
+      if (!api.alive()) return;
+      say.textContent = '貼上新的保護貼 ✅';
+      await fresh.animate([{ transform: 'translateY(-115%)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 600, easing: 'ease-out', fill: 'forwards' }).finished;
+      await pause(1200);
+    }
     $('[data-act="drop"]').onclick = async () => {
       if (busy) return;
       busy = true;
@@ -2421,14 +2449,16 @@ export const WIDGETS = {
       key === 'case film' ? api.good() : api.bad();
       $('.result').textContent = o.text;
       tried.add(key);
+      if (o.crack === 'film') await swapFilm();
       api.later(() => {
         phone.getAnimations().forEach(a => a.cancel());
         phone.className = 'dphone' + (on.case ? ' has-case' : '') + (on.film ? ' has-film' : '');
+        zoom.hidden = true;
         busy = false;
         if (tried.has('case film') && tried.size >= 2) api.done();
         else if (!tried.has('case film')) $('.result').textContent += ' 換別的保護裝備再試一次！';
         else $('.result').textContent += ' 也試試沒有保護的時候會怎樣。';
-      }, 1600);
+      }, o.crack === 'film' ? 400 : 1600);
     };
   },
 

@@ -1052,6 +1052,19 @@ a.unit-card:active { transform: scale(.98); }
 .dphone.crack-film .dscreen::after { opacity: .35; }
 .dphone.dent { border-radius: 8px 2px 8px 8px; box-shadow: 4px -4px 0 -2px #fa5252; }
 .w-drop .result { margin: 0; font-size: 1.15rem; font-weight: 800; text-align: center; line-height: 1.6; }
+/* the close-up that swaps a cracked screen protector */
+.dr-zoom { position: absolute; right: 0; top: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px; width: 46%; padding: 8px 6px 10px; border-radius: 16px; background: var(--card); border: 2px solid var(--line); box-shadow: var(--shadow); }
+.dr-say { margin: 0; min-height: 2.6em; font-weight: 800; font-size: .95rem; line-height: 1.3; text-align: center; }
+.dr-phone { position: relative; width: 96px; height: 160px; padding: 7px; border-radius: 16px; background: #212529; overflow: hidden; }
+.dr-screen { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 9px; background: #a5d8ff; }
+.dr-ok { font-size: 2.2rem; opacity: 0; }
+.dr-film, .dr-new { position: absolute; inset: 5px; border-radius: 11px; border: 2px solid rgba(255, 255, 255, .9); background: rgba(255, 255, 255, .28); }
+.dr-film { background:
+  linear-gradient(35deg, transparent 45%, rgba(33, 37, 41, .8) 46%, transparent 48%),
+  linear-gradient(-50deg, transparent 52%, rgba(33, 37, 41, .8) 53%, transparent 55%),
+  linear-gradient(80deg, transparent 30%, rgba(33, 37, 41, .8) 31%, transparent 33%),
+  rgba(255, 255, 255, .28); }
+.dr-new { opacity: 0; }
 
 /* ---------- files ---------- */
 
