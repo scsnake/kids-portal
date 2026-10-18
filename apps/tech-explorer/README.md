@@ -31,7 +31,7 @@ the units before it.
 16. 常用的 App: messenger vs email, video meetings, social media, search engines, office apps
 17. 實用小技巧: screenshots, QR codes (and fake ones), backup, Find My
 18. AI 聊天機器人: what a chatbot is, catching a wrong answer, good and bad uses
-19. 上網安全: scam messages, verification codes, two-factor authentication, malware, personal information, 165
+19. 上網安全: scam messages, traps on web pages (fake ads, pop-ups, fake virus alerts, redirects, phishing), verification codes, two-factor authentication, malware, personal information, 165
 
 **Part 2: 原理探索 (how it works)**
 

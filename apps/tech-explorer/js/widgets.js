@@ -3592,6 +3592,193 @@ export const WIDGETS = {
     count();
   },
 
+  // Traps on web pages, one case at a time in a drawn iPad browser: tap 正常 or 可疑, then
+  // the clue lights up. One ad has a tiny ×; a touch anywhere else on it leaves the page.
+  webtrap(host, _, api) {
+    // Each case: the address, whether it has the lock, the page, an optional pop-up on top,
+    // an optional page it jumps to by itself, and why. Parts marked .wt-c are the clues.
+    const cases = [
+      {
+        ask: '想去「大象購物」買東西，搜尋結果最上面這個可以點嗎？',
+        url: 'search.example.com/?q=大象購物', lock: true, scam: true,
+        page: `<p class="wt-q">🔍 大象購物</p>
+          <div class="wt-res wt-c"><small>贊助</small><b>大象購物 全面一折！今天限定</b><em>elephant-shop-sale.xyz</em></div>
+          <div class="wt-res"><b>大象購物｜官方網站</b><em>www.elephant.com.tw</em></div>`,
+        why: '最上面寫著「贊助」的是花錢買的廣告，壞人也買得到。網址 elephant-shop-sale.xyz 不是官方的，「一折」也太好康了。要點下面官方的網址。',
+      },
+      {
+        ask: '點了官方網址，來到這一頁。正常嗎？',
+        url: 'www.elephant.com.tw', lock: true, scam: false,
+        page: `<p class="wt-site">🐘 大象購物</p><div class="wt-grid"><span>📚<br>書</span><span>🧸<br>玩具</span><span>✏️<br>文具</span></div>`,
+        why: '網址拼得對，前面有小鎖頭 🔒，內容也很普通。這是正常的網站。',
+      },
+      {
+        ask: '在看企鵝的文章，突然跳出這個視窗：',
+        url: 'kids-animals.example.org/penguin', lock: true, scam: true,
+        page: `<p class="wt-site">🐧 企鵝小百科</p><p>企鵝不會飛，可是很會游泳……</p>`,
+        pop: `<div class="wt-pop wt-c"><b>🎉 恭喜你中獎了！</b><p>你是第 1,000,000 位訪客，<br>免費送你一支 iPhone！</p><span class="wt-btn">立即領取</span></div>`,
+        why: '這叫彈出式視窗（pop-up）。沒有人會隨便送你 iPhone，「中獎」是騙你點下去、留下資料。把它關掉，不要點。',
+      },
+      {
+        ask: '這個網頁旁邊有一個廣告。正常嗎？',
+        url: 'kids-animals.example.org/panda', lock: true, scam: false,
+        page: `<p class="wt-site">🐼 貓熊小百科</p><p>貓熊一天要吃很多竹子。</p><div class="wt-ad"><small>廣告</small>📖 週末兒童書展，在市立圖書館</div>`,
+        why: '很多網頁都有廣告。這個有標「廣告」，不嚇你、不要你給資料，是一般的廣告，不想看就不要理它。',
+      },
+      {
+        ask: '看卡通的時候，畫面跳出這個警告：',
+        url: 'free-cartoon.example.net', lock: true, scam: true,
+        page: `<p class="wt-site">📺 免費卡通</p><p>第 12 集……</p>`,
+        pop: `<div class="wt-alert wt-c"><b>⚠️ 警告！你的 iPad 中毒了！</b><p>偵測到 3 個病毒，請在 60 秒內處理，<br>不然照片會全部不見！</p><span class="wt-btn">下載「清除大師」</span></div>`,
+        why: '這是假的警告。網頁看不到你 iPad 裡面有什麼，不可能知道有沒有病毒。它故意嚇你、催你，好讓你下載壞 App。關掉這個分頁就好。',
+      },
+      {
+        ask: '網頁中間出現一個好大的廣告：',
+        url: 'game-tips.example.com', lock: true, scam: true,
+        page: `<p class="wt-site">🎮 遊戲攻略</p>
+          <div class="wt-big wt-c wt-adbox"><button class="wt-x" aria-label="關閉廣告">×</button><b>💰 你有 NT$5,000 回饋金還沒領！</b><p>輸入信用卡號碼，馬上匯給你</p><span class="wt-btn">領取回饋金</span></div>`,
+        // Touching the ad anywhere but its tiny × takes the browser to the ad's page.
+        adJump: {
+          url: 'bonus-card.example.top', lock: false,
+          page: `<p class="wt-site">💳 回饋金領取中心</p><div class="wt-login"><span class="wt-in">信用卡號碼</span><span class="wt-in">背面三碼</span><span class="wt-btn">送出</span></div>`,
+        },
+        why: '要「領錢」卻叫你輸入信用卡號碼，這是騙錢的手法。真的退款不會在廣告裡叫你填卡號。廣告的 × 故意做得很小，點歪了就會被帶走，要小心。',
+      },
+      {
+        ask: '想看一部影片，網頁說要先裝 App：',
+        url: 'movie-fast.example.top', lock: true, scam: true,
+        page: `<p class="wt-site">🎬 影片</p><div class="wt-big wt-c"><b>看完整影片，要先安裝「影片加速器」</b><span class="wt-btn">⬇️ 立刻安裝</span></div>`,
+        why: '看影片不用裝奇怪的 App。App 只從官方的 App Store 下載，網頁叫你裝的不要裝。',
+      },
+      {
+        ask: '點進一個故事網站，等一下看看……',
+        url: 'story-house.example.org', lock: true, scam: true,
+        page: `<p class="wt-site">📚 兒童故事屋</p><p>從前從前，有一隻小兔子……</p>`,
+        jump: {
+          url: 'you-win-gift.example.top', lock: false,
+          page: `<p class="wt-site">🎁 你被選中了！</p><div class="wt-big wt-c"><b>填寫姓名、地址、電話</b><p>就能領取神秘禮物</p></div>`,
+        },
+        why: '你什麼都沒點，網頁卻自己跳到別的網站，這叫可疑的轉址（redirect）。新網址很奇怪，還要你填個人資料。按「上一頁」離開。',
+      },
+      {
+        ask: '收到連結，打開是「小鳥社群」的登入頁：',
+        url: 'birdb00k-login.example.xyz', lock: false, urlClue: true, scam: true,
+        page: `<div class="wt-login"><p class="wt-site">🐦 小鳥社群</p><span class="wt-in">帳號</span><span class="wt-in">密碼</span><span class="wt-btn">登入</span></div>`,
+        why: '這是網路釣魚（phishing）：做一個跟真的很像的假網站，騙你輸入帳號和密碼。看網址：birdb<b>00</b>k 是數字 0 不是字母 o，前面也沒有小鎖頭，寫著「不安全」。',
+      },
+      {
+        ask: '自己在網址列打 birdbook.com，來到登入頁：',
+        url: 'www.birdbook.com', lock: true, scam: false,
+        page: `<div class="wt-login"><p class="wt-site">🐦 小鳥社群</p><span class="wt-in">帳號</span><span class="wt-in">密碼</span><span class="wt-btn">登入</span></div>`,
+        why: '網址拼得對、有小鎖頭，而且是你自己打的網址。長得一樣的頁面，差別就在網址。登入前一定先看網址。',
+      },
+    ];
+
+    host.innerHTML = `
+      <div class="w-webtrap">
+        <p class="wt-ask"></p>
+        <div class="wt-ipad"><div class="wt-screen">
+          <div class="wt-bar"><span class="wt-lock"></span><span class="wt-url"></span></div>
+          <div class="wt-page"></div>
+          <div class="wt-layer"></div>
+        </div></div>
+        <div class="wt-btns"><button class="option" data-v="ok">👍 正常</button><button class="option" data-v="scam">🚩 可疑</button></div>
+        <p class="wt-why" hidden></p>
+        <div class="wt-foot"><span class="wt-count"></span><button class="go" data-act="next" hidden>下一個 ▶</button></div>
+      </div>`;
+    const $ = s => host.querySelector(s);
+    const screen = $('.wt-screen'), why = $('.wt-why'), next = $('[data-act="next"]');
+    const btns = [...host.querySelectorAll('[data-v]')];
+    let k = 0, ready = false;
+
+    const bar = (url, lock) => {
+      $('.wt-lock').textContent = lock ? '🔒' : '⚠️ 不安全';
+      $('.wt-lock').classList.toggle('wt-bad', !lock);
+      $('.wt-lock').classList.toggle('wt-c', !lock);
+      $('.wt-url').textContent = url;
+    };
+    function show() {
+      const c = cases[k];
+      ready = false;
+      screen.classList.remove('wt-show');
+      $('.wt-ask').textContent = c.ask;
+      $('.wt-count').textContent = `第 ${k + 1} 個，共 ${cases.length} 個`;
+      bar(c.url, c.lock);
+      $('.wt-url').classList.toggle('wt-c', !!c.urlClue);
+      $('.wt-page').innerHTML = c.page;
+      $('.wt-layer').innerHTML = '';
+      why.hidden = true;
+      next.hidden = true;
+      btns.forEach(b => { b.disabled = true; b.classList.remove('right'); });
+      const arm = () => { ready = true; btns.forEach(b => { b.disabled = false; }); };
+      if (c.pop) {
+        api.later(() => { $('.wt-layer').innerHTML = c.pop; pop($('.wt-layer').firstElementChild); arm(); }, 900);
+      } else if (c.jump) {
+        api.later(() => {
+          $('.wt-page').innerHTML = '<p class="wt-going">↪ 自動跳轉中……</p>';
+          api.later(() => {
+            bar(c.jump.url, c.jump.lock);
+            $('.wt-url').classList.add('wt-c');
+            $('.wt-page').innerHTML = c.jump.page;
+            pop($('.wt-url'));
+            arm();
+          }, 700);
+        }, 1800);
+      } else {
+        arm();
+      }
+    }
+
+    host.querySelector('.wt-btns').addEventListener('click', e => {
+      const b = e.target.closest('[data-v]');
+      if (!b || !ready) return;
+      const c = cases[k];
+      if ((b.dataset.v === 'scam') !== c.scam) {
+        shake(b);
+        api.bad();
+        why.hidden = false;
+        why.className = 'wt-why wt-try';
+        why.textContent = c.scam ? '再看仔細一點：網址、小鎖頭，還有它要你做什麼？' : '這個其實沒問題，看看網址和小鎖頭。';
+        return;
+      }
+      ready = false;
+      b.classList.add('right');
+      btns.forEach(x => { x.disabled = true; });
+      screen.classList.add('wt-show');
+      why.hidden = false;
+      why.className = 'wt-why ' + (c.scam ? 'wt-is-scam' : 'wt-is-ok');
+      why.innerHTML = (c.scam ? '🚩 ' : '✅ ') + c.why;
+      api.good();
+      if (k === cases.length - 1) {
+        $('.wt-count').textContent = '🎉 全部看完了！看網址、看小鎖頭、不被嚇到、不給資料。';
+        api.done();
+      } else {
+        next.hidden = false;
+      }
+    });
+    // The ad with a tiny ×: closing it works, but a touch anywhere else on it leaves the page.
+    $('.wt-page').addEventListener('click', e => {
+      const c = cases[k];
+      if (!c.adJump) return;
+      if (e.target.closest('.wt-x')) {
+        e.target.closest('.wt-adbox').remove();
+        $('.wt-page').insertAdjacentHTML('beforeend', '<p class="wt-note">✅ 廣告關掉了。× 好小，要對準才點得到。</p>');
+        return;
+      }
+      if (e.target.closest('[data-act="back"]')) {
+        bar(c.url, c.lock);
+        $('.wt-page').innerHTML = c.page;
+        return;
+      }
+      if (!e.target.closest('.wt-adbox')) return;
+      bar(c.adJump.url, c.adJump.lock);
+      $('.wt-page').innerHTML = `<p class="wt-oops">😱 點到廣告，被帶到奇怪的網站了！<button class="wt-back" data-act="back">← 上一頁</button></p>` + c.adJump.page;
+      pop($('.wt-url'));
+    });
+    next.onclick = () => { k++; show(); };
+    show();
+  },
+
   // An iPad keyboard: Zhuyin, English, handwriting, emoji, and dictation.
   ime(host, _, api) {
     const tasks = [

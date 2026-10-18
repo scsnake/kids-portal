@@ -1429,6 +1429,55 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .msg-card.is-ok { border-color: #8ce99a; background: #ebfbee; }
 .msg-card .why { margin: 0; font-weight: 700; line-height: 1.5; font-size: .95rem; }
 
+/* web traps: one case at a time in a drawn iPad browser */
+.w-webtrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.wt-ask { margin: 0; min-height: 1.6em; font-weight: 800; font-size: 1.1rem; text-align: center; }
+.wt-ipad { width: min(100%, 540px); padding: 12px; border-radius: 26px; background: #1f232b; box-shadow: var(--shadow); }
+.wt-screen { position: relative; aspect-ratio: 4 / 2.7; overflow: hidden; border-radius: 12px; background: white; font-size: .95rem; }
+.wt-bar { display: flex; align-items: center; gap: 6px; margin: 8px; padding: 6px 10px; border-radius: 10px; background: #f1f3f5; font-size: .9rem; }
+.wt-lock { flex: none; font-weight: 800; }
+.wt-lock.wt-bad { color: #c92a2a; }
+.wt-url { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: ui-monospace, Menlo, monospace; }
+.wt-page { padding: 4px 16px; line-height: 1.6; }
+.wt-page p { margin: 0 0 6px; }
+.wt-site { font-weight: 900; font-size: 1.15rem; }
+.wt-q { padding: 4px 10px; border-radius: 99px; border: 1px solid #dee2e6; width: fit-content; }
+.wt-res { display: flex; flex-direction: column; margin: 8px 0; padding: 6px 8px; border-radius: 8px; }
+.wt-res small { width: fit-content; padding: 0 6px; border-radius: 4px; background: #fff3bf; font-weight: 800; }
+.wt-res b { color: #1971c2; }
+.wt-res em { font-style: normal; color: #2b8a3e; font-size: .85rem; }
+.wt-grid { display: flex; gap: 10px; }
+.wt-grid span { flex: 1; padding: 8px; border-radius: 10px; background: #f8f9fa; text-align: center; font-size: 1.4rem; line-height: 1.2; }
+.wt-ad { display: flex; flex-direction: column; margin-top: 8px; padding: 6px 10px; border-radius: 8px; border: 1px solid #dee2e6; color: var(--ink-2); font-size: .85rem; }
+.wt-ad small { color: var(--ink-3); }
+.wt-btn { display: inline-block; margin-top: 6px; padding: 4px 14px; border-radius: 8px; background: #e03131; color: white; font-weight: 800; }
+.wt-layer { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.wt-layer:empty { display: none; }
+.wt-pop, .wt-alert { width: 78%; padding: 12px; border-radius: 14px; background: #fff9db; box-shadow: 0 10px 30px rgba(0, 0, 0, .35); text-align: center; }
+.wt-alert { background: #fff5f5; border: 3px solid #e03131; }
+.wt-pop b, .wt-alert b, .wt-big b { display: block; font-size: 1.05rem; }
+.wt-pop p, .wt-alert p, .wt-big p { margin: 4px 0; }
+.wt-big { margin-top: 6px; padding: 12px; border-radius: 12px; background: #fff3bf; text-align: center; }
+.wt-login { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.wt-in { width: 60%; padding: 4px 10px; border-radius: 8px; border: 1px solid #ced4da; color: var(--ink-3); }
+.wt-login .wt-btn { background: #1971c2; }
+.wt-going { color: var(--ink-3); font-weight: 800; text-align: center; margin-top: 30px !important; }
+/* after a right answer, the clue lights up */
+.wt-show .wt-c { outline: 3px solid #e03131; outline-offset: 2px; border-radius: 6px; animation: wt-blink 1s ease-in-out 2; }
+@keyframes wt-blink { 50% { outline-color: transparent; } }
+.wt-btns { display: flex; gap: 12px; }
+.wt-btns .option.right { border-color: var(--good); background: #ebfbee; }
+.wt-why { margin: 0; width: min(100%, 540px); padding: 8px 12px; border-radius: 12px; line-height: 1.6; font-weight: 700; }
+.wt-why.wt-try { background: #f1f3f5; color: var(--ink-2); }
+.wt-why.wt-is-scam { background: #fff5f5; color: #a61e1e; }
+.wt-why.wt-is-ok { background: #ebfbee; color: #1b5e20; }
+.wt-foot { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; font-weight: 800; color: var(--ink-2); }
+.wt-adbox { position: relative; }
+.wt-x { position: absolute; top: 3px; right: 4px; width: 16px; height: 16px; padding: 0; border: 0; border-radius: 50%; background: rgba(0, 0, 0, .25); color: white; font-size: 11px; line-height: 16px; touch-action: manipulation; }
+.wt-oops { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 8px; border-radius: 8px; background: #fff5f5; color: #a61e1e; font-weight: 800; }
+.wt-back { min-height: 36px; padding: 0 10px; border: 2px solid var(--line); border-radius: 10px; background: white; font-weight: 800; }
+.wt-note { color: var(--good); font-weight: 800; }
+
 /* ---------- input methods ---------- */
 
 .ime { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: var(--radius); background: #d5d9de; }
