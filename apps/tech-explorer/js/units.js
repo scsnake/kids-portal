@@ -15,6 +15,101 @@ const PLUGS = {
 const plug = k => `<svg class="conn" viewBox="0 0 56 36" fill="#495057">${PLUGS[k]}</svg>`;
 const port = k => `<svg class="conn port" viewBox="0 0 56 36" fill="none" stroke="#212529" stroke-width="2.5">${PLUGS[k].replace(/ fill="[^"]*"/g, ' fill="none"')}</svg>`;
 
+// The picture on '網路是什麼？': a dotted world map, devices joined by curved lines with data
+// dots running both ways, and satellites in the corners.
+// Land on a 5° grid: for each latitude, the longitude ranges that are land (rough, by eye).
+const LAND = {
+  80: [[-92, -62], [-70, -20], [12, 28], [95, 105]],
+  75: [[-120, -75], [-70, -20], [55, 60], [90, 115], [135, 145]],
+  70: [[-165, -85], [-80, -65], [-55, -22], [18, 180]],
+  65: [[-165, -85], [-75, -62], [-52, -38], [-24, -14], [10, 180]],
+  60: [[-165, -95], [-78, -62], [-48, -42], [5, 18], [22, 165]],
+  55: [[-130, -90], [-80, -60], [-6, 0], [8, 12], [20, 162]],
+  50: [[-125, -55], [-5, -3], [-1, 140], [142, 144]],
+  45: [[-124, -65], [-1, 28], [41, 47], [54, 135], [140, 145]],
+  40: [[-124, -74], [-9, 3], [9, 18], [20, 23], [26, 50], [54, 122], [125, 129], [139, 142]],
+  35: [[-120, -76], [-6, 11], [35, 120], [127, 129], [132, 140]],
+  30: [[-115, -81], [-10, 33], [35, 48], [50, 122], [130, 131]],
+  25: [[-114, -110], [-108, -97], [-81, -80], [-15, 35], [38, 57], [60, 120], [121, 122]],
+  20: [[-105, -87], [-77, -70], [-17, 37], [40, 57], [70, 87], [93, 110], [120, 122]],
+  15: [[-92, -84], [-17, 40], [43, 52], [74, 80], [98, 109], [120, 125]],
+  10: [[-85, -62], [-15, 50], [76, 80], [98, 107], [122, 126]],
+  5: [[-77, -52], [-8, 48], [95, 104], [114, 119]],
+  0: [[-80, -50], [9, 42], [98, 104], [109, 118], [120, 125]],
+  '-5': [[-81, -35], [12, 40], [102, 106], [110, 116], [120, 123], [132, 150]],
+  '-10': [[-78, -36], [13, 40], [118, 126], [141, 150]],
+  '-15': [[-75, -39], [12, 40], [44, 50], [125, 145]],
+  '-20': [[-70, -40], [13, 35], [44, 48], [115, 150]],
+  '-25': [[-70, -47], [15, 33], [45, 47], [113, 153]],
+  '-30': [[-72, -51], [17, 31], [115, 153]],
+  '-35': [[-72, -57], [18, 24], [115, 120], [135, 150], [173, 178]],
+  '-40': [[-73, -62], [145, 148], [172, 178]],
+  '-45': [[-75, -66], [167, 172]],
+  '-50': [[-75, -68]],
+  '-55': [[-72, -65]],
+};
+const X = lon => (lon + 180) * 2, Y = lat => (80 - lat) * 2 + 20;
+
+// Dots every 2.5°; a row between two listed rows keeps only land that both of them have.
+function worldDots() {
+  const land = (lat, lon) => (LAND[lat] || []).some(([a, b]) => lon >= a - 1 && lon <= b + 1);
+  let d = '';
+  for (let lat = 80; lat >= -55; lat -= 2.5) {
+    for (let lon = -178.75; lon < 180; lon += 2.5) {
+      const on = lat % 5 === 0 ? land(lat, lon) : land(lat + 2.5, lon) && land(lat - 2.5, lon);
+      if (on) d += `M${X(lon)} ${Y(lat)}h0`;
+    }
+  }
+  return d;
+}
+
+function netArt() {
+  const spots = {
+    na: [165, 95, '💻'], eu: [385, 82, '🖥️'], as: [585, 115, '📱'],
+    af: [400, 185, '🗄️'], sa: [245, 215, '📺'], au: [630, 245, '🎮'],
+  };
+  const sats = { s1: [668, 34, '🛰️', 30], s2: [48, 34, '🛰️', 22] };
+  // A curve from a to b that bows by `bend`; it stops at the edge of each badge.
+  const curve = (a, b, bend, ra = 26, rb = 26) => {
+    const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+    const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
+    const cx = mx - (dy / len) * bend, cy = my + (dx / len) * bend;
+    const cut = (p, r) => { const ux = cx - p[0], uy = cy - p[1], l = Math.hypot(ux, uy); return [p[0] + (ux / l) * r, p[1] + (uy / l) * r]; };
+    const [sx, sy] = cut(a, ra), [ex, ey] = cut(b, rb);
+    return `M${sx.toFixed(1)} ${sy.toFixed(1)}Q${cx.toFixed(1)} ${cy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`;
+  };
+  const S = spots;
+  const links = [
+    [curve(S.na, S.eu, -40), 3.2], [curve(S.eu, S.as, -35), 3.6], [curve(S.eu, S.af, 25), 2.4],
+    [curve(S.na, S.sa, 30), 3], [curve(S.af, S.as, 30), 3.4], [curve(S.as, S.au, -25), 2.6],
+    [curve(S.sa, S.af, 25), 3.8],
+  ];
+  const beams = [[curve(sats.s1, S.as, -20, 18), 2.2], [curve(sats.s2, S.na, 20, 14), 2.6]];
+  // Lines that run off the edge: the network goes on beyond the picture.
+  const strays = ['M640 245Q700 200 735 160', 'M165 95Q90 70 -15 90', 'M245 215Q170 280 120 335', 'M585 115Q660 95 735 70'];
+  // Two data dots per line, one each way, at different speeds.
+  const flow = ([d, s], i) => `
+    <path d="${d}" class="nm-line"/>
+    <circle r="3.6" class="nm-bit"><animateMotion dur="${s}s" begin="-${(i * 0.7) % s}s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear" path="${d}"/></circle>
+    <circle r="3" class="nm-bit nm-back"><animateMotion dur="${(s * 1.3).toFixed(1)}s" begin="-${(i * 1.1) % s}s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear" path="${d}"/></circle>`;
+  const badge = ([x, y, icon], r = 26, size = 26) => `
+    <circle cx="${x}" cy="${y}" r="${r}" class="nm-badge"/><circle cx="${x}" cy="${y}" r="${r + 7}" class="nm-ring"/>
+    <text x="${x}" y="${y}" font-size="${size}" text-anchor="middle" dominant-baseline="central">${icon}</text>`;
+  return `
+    <svg class="net-map" viewBox="0 0 720 320" role="img" aria-label="世界地圖上，很多裝置用線連在一起，資料在線上跑來跑去">
+      <defs>
+        <radialGradient id="nm-sky" cx="55%" cy="40%" r="75%"><stop offset="0" stop-color="#3d5a73"/><stop offset="1" stop-color="#14212e"/></radialGradient>
+      </defs>
+      <rect width="720" height="320" rx="18" fill="url(#nm-sky)"/>
+      <path d="${worldDots()}" class="nm-land"/>
+      ${strays.map(d => `<path d="${d}" class="nm-line nm-stray"/>`).join('')}
+      ${beams.map(([d, s], i) => flow([d, s], i).replace('class="nm-line"', 'class="nm-line nm-beam"')).join('')}
+      ${links.map(flow).join('')}
+      ${Object.values(spots).map(p => badge(p)).join('')}
+      ${Object.values(sats).map(([x, y, icon, size]) => `<text x="${x}" y="${y}" font-size="${size}" text-anchor="middle" dominant-baseline="central">${icon}</text>`).join('')}
+    </svg>`;
+}
+
 export const UNITS = [
   {
     id: 'devices',
@@ -614,7 +709,7 @@ export const UNITS = [
       {
         title: '網路是什麼？',
         text: `${t('網路', 'network')}就是很多電腦連在一起，可以互相傳東西。全世界的網路連起來，就叫做${t('網際網路', 'Internet')}。`,
-        art: '<div class="art-row"><span>💻</span><span class="art-dash">—</span><span>📱</span><span class="art-dash">—</span><span>🖥️</span><span class="art-dash">—</span><span>🌏</span></div>',
+        art: netArt(),
       },
       {
         title: '上線還是離線？',

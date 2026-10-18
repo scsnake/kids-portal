@@ -1666,3 +1666,16 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .w-gs .toast { white-space: normal; width: max-content; max-width: 90%; text-align: center; }
 @media (orientation: portrait) { .gs-stage { aspect-ratio: 1.7; } }
 @media (orientation: landscape) and (max-height: 740px) { .gs-tasks .alt { display: none; } }
+
+/* ---------- the network picture: dotted world map, devices, and data dots on the lines ---------- */
+
+.net-map { width: min(100%, 900px, calc((100dvh - 300px) * 2.25)); height: auto; display: block; border-radius: 18px; box-shadow: var(--shadow); }
+.nm-land { stroke: #a9c1d6; stroke-width: 2.6; stroke-linecap: round; opacity: .45; }
+.nm-line { fill: none; stroke: #74c0fc; stroke-width: 2; opacity: .75; }
+.nm-stray { opacity: .3; }
+.nm-beam { stroke-dasharray: 5 6; }
+.nm-bit { fill: #ffe066; filter: drop-shadow(0 0 3px #ffe066); }
+.nm-back { fill: #ffffff; filter: drop-shadow(0 0 3px #a5d8ff); }
+.nm-badge { fill: rgba(255, 255, 255, .14); stroke: #74c0fc; stroke-width: 2; }
+.nm-ring { fill: none; stroke: #74c0fc; stroke-width: 1; opacity: .35; }
+@media (prefers-reduced-motion: reduce) { .nm-bit { display: none; } }
