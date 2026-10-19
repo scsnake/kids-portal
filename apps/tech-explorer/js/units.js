@@ -1309,6 +1309,86 @@ export const UNITS = [
   },
 
   {
+    id: 'fakes',
+    part: 'basic',
+    icon: '🕵️',
+    title: '假訊息和 AI 假圖',
+    en: 'Fake News & AI Fakes',
+    desc: '看來源、看日期，找出假圖和假聲音',
+    color: '#5f3dc4',
+    slides: [
+      {
+        title: '網路上的消息，不一定是真的',
+        text: `${t('假訊息', 'misinformation')}常常寫得很嚇人，要你「快轉傳」。先看${t('來源', 'source')}：是誰說的、什麼時候說的，再決定信不信。看看每一則，可信還是可疑？`,
+        widget: 'inbox',
+        params: {
+          labels: ['👍 可信', '🚩 可疑'],
+          messages: [
+            { from: '📲 群組轉傳', text: '<mark>轉傳給所有人！</mark>每天喝檸檬水，<mark>可以殺死癌細胞</mark>，醫生都不說！', scam: true, why: '不知道是誰寫的，又說得太神奇。要你「轉傳給所有人」，是假訊息常見的樣子。' },
+            { from: '🌦️ 中央氣象署 官方網站', text: '明天白天高溫 33 度，出門記得多喝水、注意防曬。', scam: false, why: '來源是負責天氣的單位，內容平常，沒有要你轉傳。' },
+            { from: '📲 群組轉傳', text: '緊急通知：LINE 明天開始收費！<mark>轉傳給 10 個人就可以免費</mark>。', scam: true, why: '這是流傳很多年的假消息。轉傳幾個人就免費，根本不合理。' },
+            { from: '📲 群組轉傳的截圖', text: '<mark>2019 年 8 月 9 日</mark>：颱風要來了，明天全台停班停課！', scam: true, why: '看日期，這是很多年前的舊消息，不是明天。舊新聞常被拿出來再傳一次。' },
+            { from: '📚 市立圖書館 官方網站', text: '這個星期六下午 2 點，兒童室有說故事時間，歡迎參加。', scam: false, why: '來源清楚，日期和地點都寫得很明白，是一般的活動通知。' },
+          ],
+        },
+      },
+      {
+        title: 'AI 也會做假圖',
+        text: `現在 AI 能做出看起來很真的照片，叫 ${t('AI 生成圖', 'AI-generated image')}。以前的 AI 圖常有破綻，像手指數目不對、字歪七扭八。點點看，這張圖哪裡怪怪的？`,
+        widget: 'spotfake',
+      },
+      {
+        title: '聲音和影片也能假造',
+        text: `AI 還能模仿一個人的臉和聲音，做出假的影片或電話，叫${t('深偽', 'deepfake')}。壞人會假裝成家人，說「很急」，要你開門、出門，或給錢、驗證碼。`,
+        widget: 'choice',
+        params: {
+          question: '你一個人在家，電話裡是媽媽的聲音：「媽媽手機快沒電了，你快下樓到門口，有個叔叔會載你來找我！」你會怎麼做？',
+          options: [
+            { text: '🏠 不出門，掛掉後打媽媽原本的電話', correct: true },
+            { text: '🏃 是媽媽的聲音，馬上下樓' },
+            { text: '🚪 先開門，看看叔叔在不在' },
+          ],
+          explain: '聲音可以用 AI 假造。要你開門、出門，或跟不認識的人走，就算聲音很像家人，也不要去。待在家裡，打家人原本的電話，或告訴其他大人。也可以和家人約好一個只有你們知道的「通關密語」。',
+        },
+      },
+      {
+        title: '轉傳之前，先停一下',
+        text: `看到很驚人的消息，先停一下，不要急著轉傳。可以搜尋看看別的新聞有沒有報，或查${t('事實查核', 'fact-check')}網站。分分看，哪些是好習慣？`,
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '👍', label: '好習慣' },
+            { id: 'no', icon: '🙅', label: '不要這樣做' },
+          ],
+          items: [
+            { icon: '🔍', label: '先看是誰說的', bin: 'ok' },
+            { icon: '📅', label: '看日期，是不是舊消息', bin: 'ok' },
+            { icon: '📰', label: '搜尋看看別的新聞有沒有報', bin: 'ok' },
+            { icon: '🙋', label: '不確定時問大人', bin: 'ok' },
+            { icon: '😱', label: '標題很嚇人，馬上轉傳', bin: 'no' },
+            { icon: '🔁', label: '說「轉傳 10 個人」就照做', bin: 'no' },
+            { icon: '👀', label: '只看標題，不看內容', bin: 'no' },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '群組裡有人傳了一張很驚人的照片，說是昨天發生的。最好怎麼做？',
+          options: [
+            { text: '🔍 先查來源和日期，不確定就不轉傳', correct: true },
+            { text: '🔁 很多人都在傳，應該是真的' },
+            { text: '📲 先轉傳給家人，提醒大家' },
+          ],
+          explain: '很多人傳，不代表是真的。查不到可靠的來源，就先不要轉傳。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'inside',
     part: 'adv',
     icon: '🧠',
@@ -1913,7 +1993,7 @@ export const STAGES = [
   { id: 'media', part: 'basic', icon: '📷', title: '拍照和檔案', en: 'Photos and Files', units: ['camera', 'files', 'space'] },
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account'] },
   { id: 'apps', part: 'basic', icon: '📲', title: 'App 和 AI', en: 'Apps and AI', units: ['appbasics', 'apps', 'handy', 'aichat'] },
-  { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety'] },
+  { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'os', 'screens', 'storage'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'web'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '寫程式', en: 'Coding', units: ['algo', 'coding'] },

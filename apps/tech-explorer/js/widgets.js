@@ -197,6 +197,67 @@ const WAY_ICONS = {
     <path d="M30 34a8 8 0 0 0 8 8M27 37a13 13 0 0 0 13 6" fill="none" stroke-linecap="round"/></svg>`,
 };
 
+// The drawn "AI picture" for spotfake: a bakery, a girl waving, a cat and a tree.
+// Its flaws: six fingers, a garbled sign, two tails, a shadow toward the sun.
+const SPOT_SKIN = '#f1c9a5';
+const spotFingers = (cx, cy) => [-172, -142, -112, -82, -52, -22].map(a => {
+  const r = a * Math.PI / 180;
+  return `<path d="M${cx} ${cy} l${(Math.cos(r) * 27).toFixed(1)} ${(Math.sin(r) * 27).toFixed(1)}"/>`;
+}).join('');
+const SPOT_SCENE = `
+  <defs>
+    <linearGradient id="sp-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a5d8ff"/><stop offset="1" stop-color="#e7f5ff"/></linearGradient>
+    <clipPath id="sp-clip"><rect width="480" height="360" rx="18"/></clipPath>
+  </defs>
+  <g clip-path="url(#sp-clip)">
+    <rect width="480" height="360" fill="url(#sp-sky)"/>
+    <g stroke="#fab005" stroke-width="4" stroke-linecap="round">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => {
+      const r = a * Math.PI / 180;
+      return `<path d="M${(52 + Math.cos(r) * 31).toFixed(1)} ${(52 + Math.sin(r) * 31).toFixed(1)} L${(52 + Math.cos(r) * 41).toFixed(1)} ${(52 + Math.sin(r) * 41).toFixed(1)}"/>`;
+    }).join('')}</g>
+    <circle cx="52" cy="52" r="24" fill="#ffd43b"/>
+    <rect y="280" width="480" height="80" fill="#dee2e6"/>
+    <path d="M0 280 H480" stroke="#adb5bd" stroke-width="3"/>
+
+    <rect x="30" y="100" width="200" height="180" fill="#fff4e6" stroke="#d9480f" stroke-width="3"/>
+    <rect x="48" y="112" width="164" height="50" rx="8" fill="#fff" stroke="#862e9c" stroke-width="3"/>
+    <g fill="#862e9c" font-size="32" font-weight="900" text-anchor="middle">
+      <text x="82" y="149">麵</text>
+      <text transform="translate(130 149) scale(-1 1)">包</text>
+    </g>
+    <path d="M166 124 q10 7 1 13 t4 15 M181 124 h18 M190 124 v18 q-1 9 -11 8" stroke="#862e9c" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <path d="M24 170 H236 L226 192 H34 Z" fill="#fa5252"/>
+    <path d="M64 170 l-4 22 M106 170 l-2 22 M148 170 v22 M190 170 l2 22" stroke="#fff" stroke-width="10"/>
+    <rect x="48" y="204" width="70" height="56" rx="6" fill="#d0ebff" stroke="#d9480f" stroke-width="3"/>
+    <text x="83" y="242" font-size="28" text-anchor="middle">🥐</text>
+    <rect x="150" y="204" width="58" height="76" rx="6" fill="#e8590c"/>
+    <circle cx="160" cy="244" r="3" fill="#ffd43b"/>
+
+    <path d="M201 272 q24 -4 19 -32 M169 272 q-24 -4 -19 -32" stroke="#495057" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <ellipse cx="185" cy="266" rx="17" ry="14" fill="#495057"/>
+    <circle cx="185" cy="244" r="11" fill="#495057"/>
+    <path d="M176 238 l2 -12 l7 8 Z M194 238 l-2 -12 l-7 8 Z" fill="#495057"/>
+    <circle cx="181" cy="243" r="2" fill="#ffd43b"/><circle cx="189" cy="243" r="2" fill="#ffd43b"/>
+
+    <ellipse cx="258" cy="285" rx="42" ry="7" fill="rgba(0,0,0,.22)"/>
+    <rect x="291" y="238" width="7" height="42" fill="${SPOT_SKIN}"/>
+    <rect x="303" y="238" width="7" height="42" fill="${SPOT_SKIN}"/>
+    <path d="M300 186 L276 246 H324 Z" fill="#4dabf7"/>
+    <path d="M291 196 l-15 34 M310 196 l38 -54" stroke="${SPOT_SKIN}" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="300" cy="168" r="20" fill="${SPOT_SKIN}"/>
+    <path d="M280 168 a20 20 0 0 1 40 0 q-8 -9 -20 -9 q-12 0 -20 9 Z" fill="#5c3d2e"/>
+    <path d="M319 160 q12 4 8 22" stroke="#5c3d2e" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <circle cx="293" cy="170" r="2.2" fill="#1d2738"/><circle cx="307" cy="170" r="2.2" fill="#1d2738"/>
+    <path d="M294 178 q6 5 12 0" stroke="#1d2738" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <g stroke="${SPOT_SKIN}" stroke-width="7" stroke-linecap="round">${spotFingers(352, 134)}</g>
+    <circle cx="352" cy="134" r="13" fill="${SPOT_SKIN}"/>
+
+    <ellipse cx="450" cy="286" rx="30" ry="7" fill="rgba(0,0,0,.22)"/>
+    <rect x="412" y="218" width="16" height="64" fill="#8d6e63"/>
+    <circle cx="398" cy="214" r="22" fill="#40c057"/><circle cx="442" cy="214" r="22" fill="#40c057"/>
+    <circle cx="420" cy="196" r="32" fill="#51cf66"/>
+  </g>`;
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -3870,7 +3931,8 @@ export const WIDGETS = {
   },
 
   // An inbox: mark each message as normal or suspicious; the clue shows after a right answer.
-  inbox(host, { messages }, api) {
+  // A <mark> in a message is a clue: plain at first, highlighted once the card is judged.
+  inbox(host, { messages, labels = ['👍 正常', '🚩 可疑'] }, api) {
     host.innerHTML = `
       <div class="w-inbox">
         <p class="ib-left"></p>
@@ -3878,7 +3940,7 @@ export const WIDGETS = {
           <div class="msg-card" data-i="${i}">
             <p class="from">${m.from}</p>
             <p class="body">${m.text}</p>
-            <div class="ib-btns"><button class="option" data-v="ok">👍 正常</button><button class="option" data-v="scam">🚩 可疑</button></div>
+            <div class="ib-btns"><button class="option" data-v="ok">${labels[0]}</button><button class="option" data-v="scam">${labels[1]}</button></div>
             <p class="why" hidden>${m.why}</p>
           </div>`).join('')}</div>
       </div>`;
@@ -3899,6 +3961,54 @@ export const WIDGETS = {
       if (!left) api.done();
     });
     count();
+  },
+
+  // Tap each flaw in a drawn AI picture. A found flaw gets a red ring and fills its
+  // chip below; a tap anywhere else only says to look again.
+  spotfake(host, _, api) {
+    const clues = [
+      { x: 352, y: 124, r: 40, icon: '✋', label: '手有 6 根手指' },
+      { x: 48, y: 112, w: 164, h: 50, icon: '🔤', label: '招牌的字怪怪的，「包」還是反的' },
+      { x: 185, y: 256, r: 38, icon: '🐈', label: '貓有兩條尾巴' },
+      { x: 258, y: 284, r: 34, icon: '☀️', label: '太陽在左邊，影子卻也在左邊' },
+    ];
+    host.innerHTML = `
+      <div class="w-spot">
+        <p class="sp-hint">點一點，找出 4 個破綻</p>
+        <svg class="sp-pic" viewBox="0 0 480 360" role="img" aria-label="一張 AI 做的圖：麵包店前面，一個小女孩在揮手，旁邊有一隻貓和一棵樹">
+          ${SPOT_SCENE}
+          <g class="sp-rings"></g>
+        </svg>
+        <ul class="sp-list">${clues.map(() => '<li>❓ 還沒找到</li>').join('')}</ul>
+      </div>`;
+    const svg = host.querySelector('svg'), hint = host.querySelector('.sp-hint');
+    const found = [];
+    const hit = (c, p) => c.w ? p.x >= c.x - 8 && p.x <= c.x + c.w + 8 && p.y >= c.y - 8 && p.y <= c.y + c.h + 8
+      : Math.hypot(p.x - c.x, p.y - c.y) <= c.r;
+    svg.addEventListener('click', e => {
+      if (found.length === clues.length) return;
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+      const c = clues.find(c => hit(c, p));
+      if (!c) { hint.textContent = '這裡看起來沒問題，再找找看'; shake(hint); return; }
+      if (found.includes(c)) return;
+      found.push(c);
+      api.good();
+      const n = found.length;
+      const [cx, cy] = c.w ? [c.x + c.w / 2, c.y + c.h / 2] : [c.x, c.y];
+      host.querySelector('.sp-rings').insertAdjacentHTML('beforeend', c.w
+        ? `<rect class="sp-ring" x="${c.x - 6}" y="${c.y - 6}" width="${c.w + 12}" height="${c.h + 12}" rx="14"/>`
+        : `<circle class="sp-ring" cx="${cx}" cy="${cy}" r="${c.r - 4}"/>`);
+      const li = host.querySelectorAll('.sp-list li')[n - 1];
+      li.textContent = `${c.icon} ${c.label}`;
+      li.classList.add('got');
+      if (n < clues.length) { hint.textContent = `找到 ${n} 個了，還有 ${clues.length - n} 個`; return; }
+      hint.textContent = '🎉 4 個都找到了！不過新的 AI 圖越來越像真的，找不到破綻，也不代表是真的。';
+      hint.classList.add('done');
+      api.done();
+    });
   },
 
   // Traps on web pages, one case at a time in a drawn iPad browser: tap 正常 or 可疑, then
@@ -3991,7 +4101,7 @@ export const WIDGETS = {
           <div class="wt-page"></div>
           <div class="wt-layer"></div>
         </div></div>
-        <div class="wt-btns"><button class="option" data-v="ok">👍 正常</button><button class="option" data-v="scam">🚩 可疑</button></div>
+        <div class="wt-btns"><button class="option" data-v="ok">${labels[0]}</button><button class="option" data-v="scam">${labels[1]}</button></div>
         <p class="wt-why" hidden></p>
         <div class="wt-foot"><span class="wt-count"></span><button class="go" data-act="next" hidden>下一個 ▶</button></div>
       </div>`;

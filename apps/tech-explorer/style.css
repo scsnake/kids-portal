@@ -1559,6 +1559,21 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .msg-card.is-scam { border-color: #ffa8a8; background: #fff5f5; }
 .msg-card.is-ok { border-color: #8ce99a; background: #ebfbee; }
 .msg-card .why { margin: 0; font-weight: 700; line-height: 1.5; font-size: .95rem; }
+.msg-card mark { background: none; color: inherit; }
+.msg-card.judged mark { background: #ffe066; border-radius: 4px; padding: 0 2px; }
+
+/* ---------- spot the flaws in an AI picture ---------- */
+
+.w-spot { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.sp-hint { margin: 0; font-weight: 800; font-size: 1.1rem; text-align: center; }
+.sp-hint.done { color: var(--good); }
+.sp-pic { display: block; width: 100%; max-width: 640px; height: auto; max-height: min(52vh, 480px); cursor: pointer; touch-action: manipulation; }
+.sp-ring { fill: none; stroke: var(--bad); stroke-width: 5; }
+.sp-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 8px; width: 100%; max-width: 640px; }
+.sp-list li { padding: .45rem .7rem; border-radius: 12px; border: 2px dashed var(--line); color: var(--ink-3); font-weight: 700; }
+.sp-list li.got { border-style: solid; border-color: #ffa8a8; background: #fff5f5; color: var(--ink); }
+@media (prefers-reduced-motion: no-preference) { .sp-ring { animation: sp-in .25s ease-out; transform-box: fill-box; transform-origin: center; } }
+@keyframes sp-in { from { transform: scale(1.4); opacity: 0; } }
 
 /* web traps: one case at a time in a drawn iPad browser */
 .w-webtrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
