@@ -54,6 +54,15 @@
       "icon": "🖥️",
       "subject": "科技",
       "level": ["國小 2-6", "長輩入門"]
+    },
+    {
+      "id": "driver-view-sim",
+      "title": "駕駛視角模擬",
+      "desc": "從駕駛座看車頭、輪胎和車位；室內停車場倒車入庫練習，iPad 可傾斜轉向",
+      "url": "https://drive.scsnake.xyz",
+      "icon": "🚗",
+      "subject": "駕駛",
+      "level": ["大人"]
     }
   ]
 }
