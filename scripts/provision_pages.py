@@ -117,7 +117,7 @@ def point_dns(host, target):
     body = {"type": "CNAME", "name": host, "content": target, "proxied": True, "ttl": 1}
     if recs:
         rec = recs[0]
-        if rec["type"] == "CNAME" and rec["content"] == target:
+        if rec["type"] == "CNAME" and rec["content"] == target and rec.get("proxied"):
             print(f"• {host} already → {target}")
             return
         must(call("PUT", f"/zones/{ZONE_ID}/dns_records/{rec['id']}", body), f"update {host}")
@@ -132,8 +132,12 @@ def main():
         sys.exit("CF_API_TOKEN is not set")
     args = sys.argv[1:]
     names = [a for a in args if not a.startswith("--")]
+    flags = {a for a in args if a.startswith("--")}
+    usage = f"usage: provision_pages.py <{'|'.join(APPS)}> [--cutover|--rollback]"
     if not names or any(n not in APPS for n in names):
-        sys.exit(f"usage: provision_pages.py <{'|'.join(APPS)}> [--cutover|--rollback]")
+        sys.exit(usage)
+    if flags - {"--cutover", "--rollback"} or len(flags) > 1:
+        sys.exit(usage)
     for name in names:
         app = APPS[name]
         if "--rollback" in args:
