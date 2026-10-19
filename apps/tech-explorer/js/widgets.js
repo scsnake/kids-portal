@@ -531,6 +531,65 @@ const PC_CASES = [
   },
 ];
 
+// A face drawn in a 200×220 box, used by `dotface`.
+const DF_FACE = `
+  <ellipse cx="100" cy="112" rx="62" ry="80" fill="#f3c9a5"/>
+  <path d="M38 100 Q40 30 100 28 Q160 30 162 100 Q150 58 100 56 Q50 58 38 100Z" fill="#5c3d2e"/>
+  <path d="M62 92 q12 -8 24 0 M114 92 q12 -8 24 0" stroke="#5c3d2e" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <circle cx="74" cy="106" r="6" fill="#343a40"/><circle cx="126" cy="106" r="6" fill="#343a40"/>
+  <path d="M100 108 L92 140 Q100 146 108 140" stroke="#c98b67" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M80 160 Q100 174 120 160" stroke="#c0504d" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+// How near each part of a real face is to the camera, 0 (far) to 1 (near): a dome, plus the nose,
+// minus the eyes. The dots are rescaled to use the whole color range.
+const dfDepth = (x, y) => {
+  const dx = (x - 100) / 62, dy = (y - 112) / 80;
+  const nose = Math.exp(-(((x - 100) / 13) ** 2 + ((y - 128) / 22) ** 2));
+  const eyes = Math.exp(-(((Math.abs(x - 100) - 26) / 12) ** 2 + ((y - 104) / 10) ** 2));
+  return 1 - dx * dx * 0.7 - dy * dy * 0.35 + nose * 0.6 - eyes * 0.3;
+};
+// Near is orange, middle is green, far is blue.
+const dfColor = z => `hsl(${Math.round(220 - z * 195)} 85% ${Math.round(56 - z * 6)}%)`;
+
+// Face numbers for `facematch`. A try opens the lock when the total gap is 2 or less.
+const FM_PARTS = ['👁️ 眼距', '👃 鼻高', '🙂 臉寬', '👄 嘴寬', '🔻 下巴'];
+const FM_SAVED = [7, 4, 8, 5, 6];
+const FM_PEOPLE = [
+  { icon: '🤓', name: '戴眼鏡的你', nums: [7, 4, 8, 5, 7], say: '戴眼鏡，臉的形狀沒變，打開了。' },
+  { icon: '🧑', name: '哥哥', nums: [6, 5, 7, 5, 4], say: '哥哥有點像你，可是數字差太多，打不開。' },
+  { icon: '👧', name: '同學', nums: [4, 6, 9, 3, 7], say: '同學的臉差很多，打不開。' },
+  { icon: '👦', name: '雙胞胎弟弟', nums: [7, 4, 8, 4, 6], say: '只差 1，打開了！雙胞胎長得太像，Face ID 也會認錯。' },
+];
+
+// Fingerprints for `fpmatch`, drawn in a 120×150 box. A whorl is rings with breaks; each break
+// is a feature point, given as [ring, angle in degrees].
+const FP_SAVED = [[2, 30], [4, 200], [6, 320]];
+const FP_FINGERS = [
+  { name: '拇指', kind: 'loop', gaps: [] },
+  { name: '食指', kind: 'whorl', gaps: FP_SAVED },
+  { name: '中指', kind: 'whorl', gaps: [[3, 120], [5, 250], [6, 20]] },
+];
+const fpRing = i => ({ rx: 6 + i * 6.5, ry: 8 + i * 8.5 });
+const fpPoint = ([i, deg]) => {
+  const { rx, ry } = fpRing(i), a = deg * Math.PI / 180;
+  return [60 + rx * Math.cos(a), 76 + ry * Math.sin(a)];
+};
+function fpSVG(f, id) {
+  let lines = '';
+  if (f.kind === 'whorl') {
+    for (let i = 1; i <= 8; i++) {
+      const { rx, ry } = fpRing(i), gaps = f.gaps.filter(g => g[0] === i).map(g => g[1] * Math.PI / 180);
+      if (!gaps.length) { lines += `<ellipse cx="60" cy="76" rx="${rx}" ry="${ry}"/>`; continue; }
+      const half = 7 / Math.min(rx, ry), a0 = gaps[0] + half, a1 = gaps[0] + 2 * Math.PI - half;
+      const p = a => `${(60 + rx * Math.cos(a)).toFixed(1)} ${(76 + ry * Math.sin(a)).toFixed(1)}`;
+      lines += `<path d="M${p(a0)} A${rx} ${ry} 0 1 1 ${p(a1)}"/>`;
+    }
+  } else {
+    for (let w = 6; w <= 58; w += 6.5) lines += `<path d="M${60 - w} 150 L${60 - w} ${70 - w * 0.2} A${w} ${w * 0.9} 0 0 1 ${60 + w} ${70 - w * 0.2} L${60 + w} 150"/>`;
+  }
+  return `<svg viewBox="0 0 120 150" aria-hidden="true"><defs><clipPath id="tid-${id}"><ellipse cx="60" cy="76" rx="48" ry="64"/></clipPath></defs>
+    <ellipse cx="60" cy="76" rx="48" ry="64" class="tid-skin"/><g clip-path="url(#tid-${id})" class="tid-lines">${lines}</g><g class="tid-marks"></g></svg>`;
+}
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -6614,6 +6673,169 @@ export const WIDGETS = {
     });
     showRate();
     requestAnimationFrame(loop);
+  },
+
+  // Face ID shines dots on what is in front of it and measures how near each dot is.
+  // A real face has depth (the nose is near, the eyes are far); a photo is flat.
+  dotface(host, _, api) {
+    host.innerHTML = `
+      <div class="w-df">
+        <p class="df-hint">選一個，讓 Face ID 量量看</p>
+        <div class="df-pick"><button class="option" data-k="face">🙂 你的臉</button><button class="option" data-k="photo">🖼️ 你的照片</button></div>
+        <div class="df-views">
+          <figure class="df-fig"><svg class="df-front" viewBox="0 0 200 220" aria-hidden="true"></svg><figcaption>正面：紅外線小點</figcaption>
+            <div class="df-lock"><svg viewBox="0 0 40 46" aria-hidden="true"><path class="df-shackle" d="M11 22V14a9 9 0 0 1 18 0v8"/><rect x="5" y="20" width="30" height="24" rx="6"/></svg><span class="df-tag">鎖住了</span></div>
+            <div class="df-home" aria-hidden="true">${['📷', '💬', '🗺️', '🎵', '📚', '⚙️'].map(a => `<span>${a}</span>`).join('')}</div></figure>
+          <figure><svg class="df-side" viewBox="0 0 200 220" aria-hidden="true"></svg><figcaption>從旁邊看</figcaption></figure>
+        </div>
+        <p class="df-legend">近 <i></i> 遠</p>
+        <p class="df-result" aria-live="polite"></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const tried = new Set();
+    let busy = false;
+    const show = k => {
+      const photo = k === 'photo';
+      const pts = [];
+      for (let y = 40; y <= 190; y += 10) for (let x = 42; x <= 158; x += 10) {
+        if (((x - 100) / 62) ** 2 + ((y - 112) / 80) ** 2 <= 0.92) pts.push([x, y, dfDepth(x, y)]);
+      }
+      const lo = Math.min(...pts.map(p => p[2])), hi = Math.max(...pts.map(p => p[2]));
+      const dots = pts.map(([x, y, z]) => `<circle cx="${x}" cy="${y}" r="2.6" fill="${dfColor(photo ? 0.5 : (z - lo) / (hi - lo))}" style="animation-delay:${(y - 40) * 4}ms"/>`).join('');
+      $('.df-front').innerHTML = photo
+        ? `<g transform="rotate(-4 100 112)"><rect x="24" y="14" width="152" height="196" rx="4" fill="white" stroke="#ced4da" stroke-width="2"/><rect x="34" y="24" width="132" height="176" fill="#d0ebff"/><g transform="translate(100 112) scale(.82) translate(-100 -112)">${DF_FACE}</g></g><g class="df-dots">${dots}</g>`
+        : `${DF_FACE}<g class="df-dots">${dots}</g>`;
+      // Side view: the phone on the left shines rays; where they land shows how near each part is.
+      const hits = photo
+        ? [40, 70, 100, 130, 160, 190].map(y => [118, y, 0.5])
+        : [[104, 52, 0.35], [98, 84, 0.55], [105, 100, 0.15], [77, 131, 1], [94, 151, 0.7], [96, 192, 0.45]];
+      $('.df-side').innerHTML = `
+        <rect x="6" y="80" width="16" height="64" rx="4" fill="#343a40"/><circle cx="14" cy="88" r="2.5" fill="#74c0fc"/>
+        ${photo
+          ? '<rect x="118" y="24" width="6" height="184" fill="white" stroke="#adb5bd" stroke-width="2"/><path d="M124 150 q24 4 30 30 l10 34 h-30z" fill="#f3c9a5"/>'
+          : '<path d="M200 18 Q130 14 110 36 Q102 46 104 60 Q100 74 98 84 Q106 92 105 100 Q96 112 77 131 Q80 138 96 140 L95 147 Q90 150 94 152 L100 157 Q93 160 95 165 Q104 172 102 180 Q94 186 96 194 Q102 206 132 210 L138 220 H200Z" fill="#f3c9a5"/><path d="M200 18 Q130 14 110 36 Q102 46 104 60 Q124 40 170 56 Q176 92 200 104Z" fill="#5c3d2e"/><circle cx="112" cy="98" r="3" fill="#343a40"/>'}
+        ${hits.map(([x, y, z], i) => `<line x1="22" y1="96" x2="${x}" y2="${y}" class="df-ray" style="animation-delay:${i * 60}ms"/><circle cx="${x}" cy="${y}" r="4.5" fill="${dfColor(z)}" stroke="white" stroke-width="1.5"/>`).join('')}`;
+      host.querySelectorAll('.df-pick .option').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+      $('.df-result').textContent = '量量看……';
+      $('.df-result').className = 'df-result';
+      // The lock screen: the lock pulses while it scans, then opens to the home screen or shakes.
+      const fig = $('.df-fig');
+      fig.className = 'df-fig scan';
+      $('.df-tag').textContent = 'Face ID 掃描中';
+      busy = true;
+      api.later(() => {
+        busy = false;
+        tried.add(k);
+        fig.className = `df-fig ${photo ? 'fail' : 'open'}`;
+        $('.df-tag').textContent = photo ? '認不出來，還是鎖住' : '解鎖了';
+        if (photo) {
+          $('.df-result').textContent = '🔒 打不開：每個點都一樣遠，是平平的照片';
+          $('.df-result').className = 'df-result no';
+        } else {
+          $('.df-result').textContent = '🔓 解鎖了！鼻子比較近，眼睛比較遠，是立體的臉';
+          $('.df-result').className = 'df-result yes';
+        }
+        api.good();
+        if (tried.size === 2) {
+          $('.df-hint').textContent = '🎉 Face ID 量的是臉的高低，所以照片騙不了它';
+          $('.df-hint').classList.add('done');
+          api.done();
+        } else $('.df-hint').textContent = photo ? '再試試「你的臉」' : '再試試「你的照片」';
+      }, 1100);
+    };
+    $('.df-pick').addEventListener('click', e => {
+      const b = e.target.closest('.option');
+      if (b && !busy) show(b.dataset.k);
+    });
+  },
+
+  // The phone keeps numbers, not a photo. Each try is measured again and compared with the saved
+  // numbers; a small total gap opens the lock.
+  facematch(host, _, api) {
+    host.innerHTML = `
+      <div class="w-fm">
+        <p class="fnum-hint">點一個人，讓 iPad 量量看</p>
+        <div class="fnum-people">${FM_PEOPLE.map((p, i) => `<button class="option fnum-who" data-i="${i}"><span>${p.icon}</span>${p.name}</button>`).join('')}</div>
+        <div class="fnum-table" role="table">
+          <span class="fnum-h"></span>${FM_PARTS.map(p => `<span class="fnum-h">${p}</span>`).join('')}
+          <span class="fnum-r">登記的臉</span>${FM_SAVED.map(n => `<span class="fnum-n">${n}</span>`).join('')}
+          <span class="fnum-r">這次量到</span>${FM_SAVED.map(() => '<span class="fnum-n fnum-now">?</span>').join('')}
+          <span class="fnum-r">差多少</span>${FM_SAVED.map(() => '<span class="fnum-n fnum-gap"></span>').join('')}
+        </div>
+        <p class="fnum-sum">一共差 <b>?</b>　<small>差 2 以內才打開</small></p>
+        <p class="fnum-result" aria-live="polite"></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const tried = new Set();
+    $('.fnum-people').addEventListener('click', e => {
+      const b = e.target.closest('.fnum-who');
+      if (!b) return;
+      const p = FM_PEOPLE[b.dataset.i];
+      host.querySelectorAll('.fnum-who').forEach(x => x.classList.toggle('on', x === b));
+      const now = host.querySelectorAll('.fnum-now'), gaps = host.querySelectorAll('.fnum-gap');
+      let sum = 0;
+      p.nums.forEach((n, i) => {
+        const g = Math.abs(n - FM_SAVED[i]);
+        sum += g;
+        now[i].textContent = n;
+        gaps[i].textContent = g;
+        gaps[i].classList.toggle('big', g > 0);
+      });
+      const open = sum <= 2;
+      $('.fnum-sum b').textContent = sum;
+      $('.fnum-result').textContent = `${open ? '🔓' : '🔒'} ${p.say}`;
+      $('.fnum-result').className = `fnum-result ${open ? 'yes' : 'no'}`;
+      pop($('.fnum-sum'));
+      api.good();
+      tried.add(p);
+      b.classList.add('tried');
+      if (tried.size === FM_PEOPLE.length) {
+        $('.fnum-hint').textContent = '🎉 數字很接近才打開。雙胞胎太像了，重要的東西要再加上密碼';
+        $('.fnum-hint').classList.add('done');
+        api.done();
+      } else $('.fnum-hint').textContent = `還有 ${FM_PEOPLE.length - tried.size} 個人可以試`;
+    });
+  },
+
+  // Which finger opens the lock? Tap a print: the saved feature points are laid on it and
+  // checked one by one. Only the same finger has a break at every point.
+  fpmatch(host, _, api) {
+    host.innerHTML = `
+      <div class="w-fp">
+        <p class="tid-hint">你登記了右手食指。點點看，哪一根手指打得開？</p>
+        <div class="tid-row">
+          <figure class="tid-saved">${fpSVG({ kind: 'whorl', gaps: FP_SAVED }, 's')}<figcaption>登記的指紋</figcaption></figure>
+          <div class="tid-cands">${FP_FINGERS.map((f, i) => `<button class="option tid-cand" data-i="${i}">${fpSVG(f, i)}<b>${f.name}</b></button>`).join('')}</div>
+        </div>
+        <p class="tid-result" aria-live="polite"></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const ring = ([x, y], cls) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="8" class="${cls}"/>`;
+    $('.tid-saved .tid-marks').innerHTML = FP_SAVED.map(g => ring(fpPoint(g), 'tid-mark')).join('');
+    let found = false;
+    $('.tid-cands').addEventListener('click', e => {
+      const b = e.target.closest('.tid-cand');
+      if (!b || found) return;
+      const f = FP_FINGERS[b.dataset.i];
+      const hit = FP_SAVED.map(g => f.gaps.some(h => h[0] === g[0] && h[1] === g[1]));
+      b.querySelector('.tid-marks').innerHTML = FP_SAVED.map((g, i) => ring(fpPoint(g), hit[i] ? 'tid-hit' : 'tid-miss')).join('');
+      const n = hit.filter(Boolean).length;
+      if (n < FP_SAVED.length) {
+        shake(b);
+        api.bad();
+        $('.tid-result').textContent = `🔒 ${f.name}：${n} 個特徵點對上，打不開${f.kind === 'whorl' ? '。紋路看起來很像，可是斷掉的地方不一樣' : ''}`;
+        $('.tid-result').className = 'tid-result no';
+        return;
+      }
+      found = true;
+      b.classList.add('right');
+      api.good();
+      $('.tid-result').textContent = '🔓 食指：3 個特徵點都對上，打開了！';
+      $('.tid-result').className = 'tid-result yes';
+      $('.tid-hint').textContent = '🎉 Touch ID 不看整張圖，只比對特徵點在哪裡';
+      $('.tid-hint').classList.add('done');
+      api.done();
+    });
   },
 
   // A tiny "AI" that only looks at color learns from examples, and gets fixed with one more.

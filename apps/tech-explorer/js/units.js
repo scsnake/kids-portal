@@ -2631,6 +2631,61 @@ export const UNITS = [
   },
 
   {
+    id: 'biometric',
+    part: 'adv',
+    icon: '👤',
+    title: '人臉和指紋辨識',
+    en: 'Face and Fingerprint ID',
+    desc: '紅外線小點、臉變成數字、指紋的特徵點',
+    color: '#364fc7',
+    added: '2026-10-19',
+    slides: [
+      {
+        title: '量臉的高低',
+        text: `Face ID 會把 3 萬多個看不見的${t('紅外線', 'infrared')}小點照在臉上，量出哪裡近、哪裡遠。照片是平的，量不出高低。試試看！`,
+        widget: 'dotface',
+      },
+      {
+        title: '臉變成一串數字',
+        text: '手機不存你的照片，而是把臉的形狀變成一串數字，只存在手機裡。解鎖時再量一次，數字很接近，就打開。誰打得開？',
+        widget: 'facematch',
+      },
+      {
+        title: '指紋的特徵點',
+        text: `Touch ID 像觸控螢幕一樣，用很小的格子摸出指紋。它記住紋路在哪裡斷掉、在哪裡分岔，這些叫${t('特徵點', 'minutiae')}。找找看！`,
+        widget: 'fpmatch',
+      },
+      {
+        title: '密碼還是要記得',
+        text: '臉和指紋很方便，可是受傷、戴口罩，都可能認不出來，也不能換一個新的。密碼才是最後一把鑰匙。',
+        widget: 'choice',
+        params: {
+          question: '手指受傷包了 OK 繃，Touch ID 打不開。怎麼辦？',
+          options: [
+            { text: '🔢 用密碼解鎖', correct: true },
+            { text: '🔄 把 iPad 重新開機' },
+            { text: '🆕 換一台 iPad' },
+          ],
+          explain: '臉和指紋打不開時，都可以改用密碼。重新開機以後，iPad 也一定要你先打密碼。',
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '為什麼拿你的照片，打不開 Face ID？',
+          options: [
+            { text: '📏 照片是平的，量不出臉的高低', correct: true },
+            { text: '🎨 照片的顏色不對' },
+            { text: '📐 照片太小了' },
+          ],
+          explain: '紅外線小點照在照片上，每個點都一樣遠。真的臉有高有低，Face ID 量的就是這個。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'gpu',
     part: 'adv',
     icon: '🎮',
@@ -3164,7 +3219,7 @@ export const STAGES = [
   { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel', 'copyright'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os'] },
-  { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo'] },
+  { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'networld', 'web'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'freeapps', 'coding'] },
 ];

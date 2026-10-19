@@ -2349,6 +2349,92 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .fp-rates .option { font-size: 1.05rem; padding: .5rem .9rem; }
 .fp-rates .option.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 12%, white); }
 
+/* ---------- Face ID dots ---------- */
+
+.w-df { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.df-hint { margin: 0; font-weight: 800; font-size: 1.1rem; text-align: center; }
+.df-hint.done { color: var(--good); }
+.df-pick { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.df-pick .on { border-color: #1c7ed6; background: #e7f5ff; }
+.df-views { display: flex; justify-content: center; gap: 12px; width: min(100%, 520px); }
+.df-views figure { flex: 1; margin: 0; padding: 8px; border-radius: var(--radius); background: #1f232b; text-align: center; }
+.df-views svg { display: block; width: 100%; max-height: 32vh; }
+.df-views figure:not(.df-fig) { padding-top: 58px; }
+.df-views figcaption { margin-top: 4px; color: #dee2e6; font-weight: 700; font-size: .9rem; }
+.df-fig { position: relative; overflow: hidden; padding-top: 58px !important; }
+.df-lock { position: absolute; top: 6px; left: 50%; translate: -50% 0; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 2px; color: #f8f9fa; }
+.df-lock svg { width: 26px; overflow: visible; }
+.df-lock rect { fill: currentColor; }
+.df-shackle { fill: none; stroke: currentColor; stroke-width: 4.5; stroke-linecap: round; transform-box: view-box; transform-origin: 11px 22px; transition: transform .35s ease-out; }
+.df-tag { padding: 1px 8px; border-radius: 8px; background: rgba(0, 0, 0, .55); font-size: .75rem; font-weight: 800; white-space: nowrap; }
+.df-fig.open .df-lock { color: #69db7c; }
+.df-fig.open .df-shackle { transform: translateY(-5px) rotate(-28deg); }
+.df-fig.open { box-shadow: 0 0 0 4px #69db7c; }
+.df-home { position: absolute; inset: 0; z-index: 1; display: grid; grid-template-columns: repeat(3, 1fr); align-content: center; justify-items: center; gap: 14px; padding: 48px 16px 16px; border-radius: var(--radius); background: linear-gradient(160deg, #4dabf7, #9775fa); font-size: 2rem; translate: 0 100%; transition: translate .5s ease-out .45s; }
+.df-fig.open .df-home { translate: 0 0; }
+.df-fig.fail .df-dots { opacity: .35; }
+@media (prefers-reduced-motion: no-preference) {
+  .df-fig.scan .df-lock svg { animation: df-pulse .55s ease-in-out infinite alternate; }
+  .df-fig.fail .df-lock { animation: df-shake .5s ease-in-out; }
+}
+@media (prefers-reduced-motion: reduce) { .df-shackle, .df-home { transition: none; } }
+@keyframes df-pulse { to { scale: 1.15; filter: drop-shadow(0 0 6px #e599f7); } }
+@keyframes df-shake { 20%, 60% { translate: calc(-50% - 10px) 0; } 40%, 80% { translate: calc(-50% + 10px) 0; } }
+.df-ray { stroke: #e599f7; stroke-width: 1.2; stroke-dasharray: 3 3; opacity: .8; }
+@media (prefers-reduced-motion: no-preference) {
+  .df-dots circle, .df-ray { animation: df-in .5s ease-out both; }
+}
+@keyframes df-in { from { opacity: 0; } }
+.df-legend { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--ink-2); font-weight: 700; font-size: .9rem; }
+.df-legend i { display: inline-block; width: 120px; height: 12px; border-radius: 6px; background: linear-gradient(90deg, hsl(25 85% 50%), hsl(122 85% 53%), hsl(220 85% 56%)); }
+.df-result { margin: 0; min-height: 1.6em; font-weight: 800; font-size: 1.05rem; text-align: center; }
+.df-result.yes { color: var(--good); }
+.df-result.no { color: var(--ink-2); }
+
+/* ---------- face numbers ---------- */
+
+.w-fm { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.fnum-hint { margin: 0; font-weight: 800; font-size: 1.1rem; text-align: center; }
+.fnum-hint.done { color: var(--good); }
+.fnum-people { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: min(100%, 460px); }
+.fnum-who { display: flex; align-items: center; gap: 6px; font-size: 1.05rem; }
+.fnum-who span { font-size: 1.6rem; }
+.fnum-who.tried::after { content: '✓'; margin-left: auto; color: var(--good); font-weight: 900; }
+.fnum-who.on { border-color: #1c7ed6; background: #e7f5ff; }
+.fnum-table { display: grid; grid-template-columns: auto repeat(5, minmax(0, 1fr)); gap: 4px; width: min(100%, 520px); padding: 10px; border-radius: var(--radius); background: var(--card); border: 2px solid var(--line); }
+.fnum-h { color: var(--ink-2); font-weight: 700; font-size: .85rem; text-align: center; }
+.fnum-r { padding-right: 6px; font-weight: 800; font-size: .9rem; white-space: nowrap; align-self: center; }
+.fnum-n { padding: 4px 0; border-radius: 8px; background: var(--paper); font-family: ui-monospace, Menlo, monospace; font-weight: 800; font-size: 1.2rem; text-align: center; }
+.fnum-gap.big { background: #fff3bf; }
+.fnum-sum { margin: 0; font-weight: 800; font-size: 1.15rem; }
+.fnum-sum b { font-family: ui-monospace, Menlo, monospace; font-size: 1.5rem; color: var(--c); }
+.fnum-sum small { color: var(--ink-3); font-size: .9rem; }
+.fnum-result { margin: 0; min-height: 3em; width: min(100%, 520px); font-weight: 800; line-height: 1.5; text-align: center; }
+.fnum-result.yes { color: var(--good); }
+.fnum-result.no { color: var(--ink-2); }
+
+/* ---------- fingerprint feature points ---------- */
+
+.w-fp { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.tid-hint { margin: 0; font-weight: 800; font-size: 1.1rem; text-align: center; }
+.tid-hint.done { color: var(--good); }
+.tid-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px; }
+.tid-saved { margin: 0; padding: 10px; border-radius: var(--radius); background: var(--card); border: 2px solid var(--c); text-align: center; font-weight: 800; }
+.tid-saved svg { width: 150px; }
+.tid-cands { display: flex; gap: 8px; }
+.tid-cand { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; text-align: center; }
+.tid-cand svg { width: 112px; }
+.tid-skin { fill: #fbe3cf; }
+.tid-lines { fill: none; stroke: #8d6e63; stroke-width: 2.6; }
+.tid-mark, .tid-hit, .tid-miss { fill: none; stroke-width: 3.5; }
+.tid-mark { stroke: var(--c); }
+.tid-hit { stroke: var(--good); }
+.tid-miss { stroke: #495057; stroke-dasharray: 4 3; }
+.tid-cand.right { border-color: var(--good); background: #ebfbee; }
+.tid-result { margin: 0; min-height: 3em; width: min(100%, 520px); font-weight: 800; line-height: 1.5; text-align: center; }
+.tid-result.yes { color: var(--good); }
+.tid-result.no { color: var(--ink-2); }
+
 /* ---------- AI training ---------- */
 
 .w-train { display: flex; flex-direction: column; gap: 12px; align-items: center; }
