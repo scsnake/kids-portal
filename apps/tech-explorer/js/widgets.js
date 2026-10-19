@@ -4060,6 +4060,110 @@ export const WIDGETS = {
   },
 
   // An inbox: mark each message as normal or suspicious; the clue shows after a right answer.
+  // Watch a tablet on a fast clock: at 30 minutes the eyes are tired; resting means looking
+  // far away for 10 minutes (3010). 「再看一下下」 only says to rest first.
+  eyerest(host, _, api) {
+    host.innerHTML = `
+      <div class="w-eyerest">
+        <p class="er-hint">按「開始看平板」，看看眼睛會怎樣</p>
+        <div class="er-scene">
+          <span class="er-face" aria-hidden="true">🙂</span>
+          <div class="er-view"><span class="er-tab">🎬</span><span class="er-far" hidden>🌳<i>🐦</i>⛰️</span></div>
+        </div>
+        <div class="er-clock"><span class="er-label">用眼</span><span class="er-bar"><i></i></span><b class="er-min">0 分鐘</b></div>
+        <div class="er-btns"><button class="option" data-act="start">▶ 開始看平板</button></div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = $('.er-hint'), btns = $('.er-btns');
+    const show = (label, min, of) => {
+      $('.er-label').textContent = label;
+      $('.er-min').textContent = `${min} 分鐘`;
+      $('.er-bar i').style.width = `${(min / of) * 100}%`;
+    };
+    const watch = min => {
+      show('用眼', min, 30);
+      $('.er-face').textContent = min < 15 ? '🙂' : min < 25 ? '😐' : min < 30 ? '😣' : '😵‍💫';
+      if (min < 30) { api.later(() => watch(min + 1), 100); return; }
+      $('.er-tab').classList.add('dim');
+      hint.textContent = '看了 30 分鐘，眼睛好累！要怎麼做？';
+      btns.innerHTML = '<button class="option" data-act="rest">🌳 休息，看看遠方</button><button class="option" data-act="more">📱 再看一下下</button>';
+    };
+    const rest = min => {
+      show('休息', min, 10);
+      $('.er-face').textContent = min < 10 ? '😌' : '😊';
+      if (min < 10) { api.later(() => rest(min + 1), 200); return; }
+      hint.textContent = '🎉 用眼 30 分鐘，休息 10 分鐘，這就是「3010」！';
+      btns.innerHTML = '<button class="option" data-act="start">🔁 再來一次</button>';
+      api.done();
+    };
+    btns.addEventListener('click', e => {
+      const b = e.target.closest('[data-act]');
+      if (!b) return;
+      const act = b.dataset.act;
+      if (act === 'start') {
+        btns.innerHTML = '';
+        $('.er-tab').hidden = false;
+        $('.er-tab').classList.remove('dim');
+        $('.er-far').hidden = true;
+        hint.textContent = '專心看影片中……';
+        watch(0);
+      }
+      if (act === 'more') { shake(b); api.bad(); hint.textContent = '眼睛已經很累了，先休息吧！'; }
+      if (act === 'rest') {
+        api.good();
+        btns.innerHTML = '';
+        $('.er-tab').hidden = true;
+        $('.er-far').hidden = false;
+        hint.textContent = '看看窗外遠遠的樹和山……';
+        rest(0);
+      }
+    });
+  },
+
+  // One day of Screen Time: lower 影片 and 遊戲 with − and ＋ until together they fit the goal;
+  // then the "time limit reached" notice shows.
+  screentime(host, { apps, goal }, api) {
+    const fmt = m => m >= 60 ? `${Math.floor(m / 60)} 小時${m % 60 ? ` ${m % 60} 分` : ''}` : `${m} 分鐘`;
+    const mins = apps.map(a => a.min);
+    host.innerHTML = `
+      <div class="w-screentime">
+        <p class="st-goal">和爸媽約好：🎬 影片加 🎮 遊戲，一天最多 ${fmt(goal)}</p>
+        <ul class="st-rows">${apps.map((a, i) => `
+          <li class="st-row${a.fun ? ' fun' : ''}" data-i="${i}">
+            <span class="st-name">${a.icon} ${a.name}</span>
+            <span class="st-bar"><i></i></span>
+            <b class="st-val"></b>
+            <span class="st-pm"><button class="st-b" data-d="-15" aria-label="${a.name}少 15 分鐘">−</button><button class="st-b" data-d="15" aria-label="${a.name}多 15 分鐘">＋</button></span>
+          </li>`).join('')}</ul>
+        <p class="st-sum"></p>
+        <p class="st-note" hidden><b>⏰ 已達到時間限制</b><small>今天的影片時間用完了，休息一下吧！</small></p>
+      </div>`;
+    let met = false;
+    const draw = () => {
+      host.querySelectorAll('.st-row').forEach((li, i) => {
+        li.querySelector('.st-bar i').style.width = `${(mins[i] / 240) * 100}%`;
+        li.querySelector('.st-val').textContent = fmt(mins[i]);
+      });
+      const fun = apps.reduce((s, a, i) => s + (a.fun ? mins[i] : 0), 0);
+      const sum = host.querySelector('.st-sum');
+      sum.textContent = fun <= goal ? `✅ 影片加遊戲：${fmt(fun)}，做到了！` : `影片加遊戲：${fmt(fun)}，還要少 ${fmt(fun - goal)}`;
+      sum.classList.toggle('ok', fun <= goal);
+      if (fun <= goal && !met) {
+        met = true;
+        host.querySelector('.st-note').hidden = false;
+        api.done();
+      }
+    };
+    host.querySelector('.st-rows').addEventListener('click', e => {
+      const b = e.target.closest('[data-d]');
+      if (!b) return;
+      const i = +b.closest('.st-row').dataset.i;
+      mins[i] = Math.min(240, Math.max(0, mins[i] + +b.dataset.d));
+      draw();
+    });
+    draw();
+  },
+
   // A <mark> in a message is a clue: plain at first, highlighted once the card is judged.
   inbox(host, { messages, labels = ['👍 正常', '🚩 可疑'] }, api) {
     host.innerHTML = `

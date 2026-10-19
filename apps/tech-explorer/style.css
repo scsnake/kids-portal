@@ -1262,6 +1262,45 @@ a.unit-card:active { transform: scale(.98); }
 .scan span { padding: 12px; border-radius: 24px; border: 3px dashed #69db7c; animation: wave .5s infinite; }
 .lockwrap .hint { margin: 0; }
 
+/* ---------- 3010: watch, then rest the eyes ---------- */
+
+.w-eyerest { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.er-hint { margin: 0; font-weight: 800; font-size: 1.1rem; text-align: center; min-height: 1.5em; }
+.er-scene { display: flex; align-items: center; justify-content: center; gap: 18px; }
+.er-face { font-size: 4rem; line-height: 1; }
+.er-view { display: grid; place-items: center; width: min(52vw, 260px); aspect-ratio: 4 / 3; border-radius: 18px; border: 8px solid #343a40; background: #e7f5ff; }
+.er-tab { font-size: 4rem; transition: opacity .2s; }
+.er-tab.dim { opacity: .35; }
+.er-far { font-size: 3rem; }
+.er-far i { font-style: normal; font-size: 1.6rem; vertical-align: top; }
+.er-clock { display: flex; align-items: center; gap: 10px; width: min(100%, 360px); font-weight: 800; }
+.er-bar { flex: 1; height: 12px; border-radius: 6px; background: var(--line); overflow: hidden; }
+.er-bar i { display: block; height: 100%; background: var(--c); }
+.er-min { min-width: 4.5em; text-align: right; }
+.er-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; min-height: 56px; }
+@media (prefers-reduced-motion: reduce) { .er-tab { transition: none; } }
+
+/* ---------- Screen Time: set the daily minutes ---------- */
+
+.w-screentime { display: flex; flex-direction: column; gap: 10px; width: min(100%, 560px); margin: 0 auto; }
+.st-goal { margin: 0; font-weight: 800; font-size: 1.1rem; }
+.st-rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.st-row { display: grid; grid-template-columns: 5.5em 1fr 6.5em auto; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 14px; background: var(--card); border: 2px solid var(--line); }
+.st-row.fun { border-color: color-mix(in srgb, var(--c) 45%, white); }
+.st-name { font-weight: 800; }
+.st-bar { height: 14px; border-radius: 7px; background: var(--line); overflow: hidden; }
+.st-bar i { display: block; height: 100%; background: #adb5bd; }
+.st-row.fun .st-bar i { background: var(--c); }
+.st-val { text-align: right; white-space: nowrap; }
+.st-pm { display: flex; gap: 6px; }
+.st-b { width: 44px; height: 44px; border-radius: 12px; border: 2px solid var(--line); background: var(--card); font: inherit; font-size: 1.4rem; font-weight: 800; }
+.st-b:active { transform: translateY(1px); background: var(--line); }
+.st-sum { margin: 0; font-weight: 800; color: var(--bad); }
+.st-sum.ok { color: var(--good); }
+.st-note { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 10px 14px; border-radius: 14px; background: rgba(29, 39, 56, .88); color: white; }
+.st-note small { opacity: .85; font-size: .95rem; }
+@media (max-width: 480px) { .st-row { grid-template-columns: 1fr auto auto; } .st-bar { grid-column: 1 / -1; grid-row: 2; } }
+
 /* ---------- emergency call from a locked phone ---------- */
 
 .sos-phone { display: flex; flex-direction: column; min-height: 430px; }

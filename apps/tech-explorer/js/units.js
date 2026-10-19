@@ -539,6 +539,84 @@ export const UNITS = [
   },
 
   {
+    id: 'health',
+    part: 'basic',
+    icon: '🧘',
+    title: '健康使用 3C',
+    en: 'Healthy Screen Use',
+    desc: '3010 護眼、姿勢、睡前和螢幕使用時間',
+    color: '#099268',
+    slides: [
+      {
+        title: '護眼口訣 3010',
+        text: '眼睛一直看近的東西，會很累。台灣的護眼口訣「3010」：用眼 30 分鐘，就休息 10 分鐘，看看遠方，或到戶外走走。試試看！',
+        widget: 'eyerest',
+      },
+      {
+        title: '看螢幕的姿勢',
+        text: '看螢幕的姿勢也很重要。低頭太久，脖子會痠；離太近、光線太暗，眼睛會累。分分看，哪些是好習慣？',
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '👍', label: '好習慣' },
+            { id: 'no', icon: '🙅', label: '不要這樣做' },
+          ],
+          items: [
+            { icon: '🪑', label: '坐好，背靠著椅背', bin: 'ok' },
+            { icon: '📏', label: '眼睛離平板 30 公分以上', bin: 'ok' },
+            { icon: '💡', label: '在明亮的地方看', bin: 'ok' },
+            { icon: '🛌', label: '躺著滑手機', bin: 'no' },
+            { icon: '🌑', label: '關了燈，在黑暗中看', bin: 'no' },
+            { icon: '🚶', label: '邊走路邊看手機', bin: 'no' },
+          ],
+        },
+      },
+      {
+        title: '睡前放下螢幕',
+        text: '睡前看螢幕，亮亮的光和好看的影片會讓大腦太興奮，比較難睡著。睡前一小時就放下 3C，放在房間外面充電。',
+        widget: 'choice',
+        params: {
+          question: '晚上 9 點要睡覺，什麼時候放下平板最好？',
+          options: [
+            { text: '🕗 8 點就放下', correct: true },
+            { text: '🕘 8 點 55 分再放下' },
+            { text: '🛏️ 帶進被窩，看到睡著' },
+          ],
+          explain: '睡前留一小時不看螢幕，比較好睡。平板放在房間外面充電，就不會想偷看。',
+        },
+      },
+      {
+        title: '螢幕使用時間',
+        text: `iPad 的${t('螢幕使用時間', 'Screen Time')}會記錄每天用了多久，也能設定每種 App 一天可以用多久。爸媽也可以用它幫忙管理。把影片和遊戲調到 2 小時以內！`,
+        widget: 'screentime',
+        params: {
+          goal: 120,
+          apps: [
+            { icon: '🎬', name: '影片', min: 150, fun: true },
+            { icon: '🎮', name: '遊戲', min: 90, fun: true },
+            { icon: '📚', name: '學習', min: 30 },
+            { icon: '💬', name: '傳訊息', min: 15 },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '已經看平板 30 分鐘了，最好怎麼做？',
+          options: [
+            { text: '🌳 休息 10 分鐘，看看遠方或到外面走走', correct: true },
+            { text: '🔆 把螢幕調亮一點，繼續看' },
+            { text: '📱 換成手機繼續看' },
+          ],
+          explain: '換一個螢幕，眼睛還是在看近的東西。休息時看遠方，眼睛才會放鬆。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'camera',
     part: 'basic',
     icon: '📷',
@@ -2236,7 +2314,7 @@ export const PARTS = [
 // in no stage does not show on the home screen).
 export const STAGES = [
   { id: 'hello', part: 'basic', icon: '👋', title: '上手', en: 'First Steps', units: ['devices', 'start', 'typing', 'settings'] },
-  { id: 'care', part: 'basic', icon: '🔋', title: '照顧裝置', en: 'Power and Care', units: ['cables', 'battery', 'care'] },
+  { id: 'care', part: 'basic', icon: '🔋', title: '照顧裝置和自己', en: 'Care for Devices and You', units: ['cables', 'battery', 'care', 'health'] },
   { id: 'media', part: 'basic', icon: '📷', title: '拍照和檔案', en: 'Photos and Files', units: ['camera', 'files', 'space'] },
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account'] },
   { id: 'apps', part: 'basic', icon: '📲', title: 'App 和 AI', en: 'Apps and AI', units: ['appbasics', 'apps', 'handy', 'aichat'] },

@@ -28,35 +28,36 @@ yet; 「直接開始」 closes it.
 5. 線材和接頭: what each cable does, USB-A/C, Lightning, adapters
 6. 電池和充電: chargers and watts, wireless charging, power banks (mAh), what drains the battery, charging safety
 7. 愛護 3C: water and food, glass screens (drop test), heat, a wet device
-8. 拍照和錄影: camera app, where the camera is, camera lights and privacy
-9. 檔案和資料夾: select / deselect / range / multi-select / select all, folders and paths, copy / cut / paste
-10. 刪除和容量: rename, delete, Recently Deleted vs delete permanently, KB/MB/GB/TB
-11. 連上網路: online vs offline, cable / Wi-Fi / cellular, personal hotspot, Mbps
-12. 藍牙、GPS 和飛航模式: Bluetooth pairing, how GPS finds you, airplane mode in Control Center
-13. 瀏覽器和網頁: address bar, links, back / forward / reload, browsing history
-14. 帳號和雲端: sign up, user name, password, log in, good passwords, cloud sync, https and the lock icon
-15. App 和更新: hardware vs software, installing from the App Store, permissions, updates
-16. 常用的 App: messenger vs email, video meetings, social media, search engines, office apps
-17. 實用小技巧: screenshots, QR codes (and fake ones), backup, Find My
-18. AI 聊天機器人: what a chatbot is, catching a wrong answer, good and bad uses
-19. 上網安全: scam messages, traps on web pages (fake ads, pop-ups, fake virus alerts, redirects, phishing), verification codes, two-factor authentication, malware, personal information, 165
-20. 假訊息和 AI 假圖: misinformation (source, date, forwarded hoaxes), spotting flaws in an AI-made picture, deepfake voices (a fake call from a parent), habits before forwarding
-21. 網路禮儀和網路霸凌: think before you post, cyberbullying in a chat (don't reply, screenshot, tell an adult, block), bystanders
-22. 緊急求救: 119 vs 110, calling from a locked phone (緊急 on the passcode screen), Medical ID, Emergency SOS
+8. 健康使用 3C: the 3010 eye rule (a fast clock), posture, screens before bed, Screen Time limits
+9. 拍照和錄影: camera app, where the camera is, camera lights and privacy
+10. 檔案和資料夾: select / deselect / range / multi-select / select all, folders and paths, copy / cut / paste
+11. 刪除和容量: rename, delete, Recently Deleted vs delete permanently, KB/MB/GB/TB
+12. 連上網路: online vs offline, cable / Wi-Fi / cellular, personal hotspot, Mbps
+13. 藍牙、GPS 和飛航模式: Bluetooth pairing, how GPS finds you, airplane mode in Control Center
+14. 瀏覽器和網頁: address bar, links, back / forward / reload, browsing history
+15. 帳號和雲端: sign up, user name, password, log in, good passwords, cloud sync, https and the lock icon
+16. App 和更新: hardware vs software, installing from the App Store, permissions, updates
+17. 常用的 App: messenger vs email, video meetings, social media, search engines, office apps
+18. 實用小技巧: screenshots, QR codes (and fake ones), backup, Find My
+19. AI 聊天機器人: what a chatbot is, catching a wrong answer, good and bad uses
+20. 上網安全: scam messages, traps on web pages (fake ads, pop-ups, fake virus alerts, redirects, phishing), verification codes, two-factor authentication, malware, personal information, 165
+21. 假訊息和 AI 假圖: misinformation (source, date, forwarded hoaxes), spotting flaws in an AI-made picture, deepfake voices (a fake call from a parent), habits before forwarding
+22. 網路禮儀和網路霸凌: think before you post, cyberbullying in a chat (don't reply, screenshot, tell an adult, block), bystanders
+23. 緊急求救: 119 vs 110, calling from a locked phone (緊急 on the passcode screen), Medical ID, Emergency SOS
 
 **Part 2: 原理探索 (how it works)**
 
-23. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
-24. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
-25. 作業系統: what an OS does, time sharing (multitasking)
-26. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
-27. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
-28. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
-29. AI 怎麼學？: learning from examples, why data matters (bias)
-30. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
-31. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
-32. 演算法: steps, binary search (number guessing), sorting by swaps
-33. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+24. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
+25. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
+26. 作業系統: what an OS does, time sharing (multitasking)
+27. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
+28. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
+29. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
+30. AI 怎麼學？: learning from examples, why data matters (bias)
+31. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
+32. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
+33. 演算法: steps, binary search (number guessing), sorting by swaps
+34. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
 
 ## Saved progress
 
