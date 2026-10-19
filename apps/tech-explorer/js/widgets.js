@@ -496,6 +496,15 @@ const AF_POSTS = [
   { who: '🍏 每日水果', img: 'apple', alt: '桌上的一顆青蘋果', text: '剛摘的青蘋果，好新鮮！', ai: true },
 ];
 
+// Search results for a report on sea animals, each with what its author allows.
+// `credit` is the source line to write; pictures without it may not be used.
+const CR_PICS = [
+  { pic: '🐋', name: '鯨魚', tag: '© 版權所有', why: '「版權所有」：作者沒有說可以用，要先問作者。' },
+  { pic: '🐢', name: '海龜', tag: '創用 CC 姓名標示', by: '海洋攝影社', credit: '海龜照片：海洋攝影社，創用 CC 姓名標示' },
+  { pic: '🐙', name: '章魚', tag: '公有領域', credit: '章魚圖片：公有領域' },
+  { pic: '🦈', name: '鯊魚', tag: '禁止轉載', why: '「禁止轉載」：作者不讓別人拿去放在別的地方。' },
+];
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -5867,6 +5876,63 @@ export const WIDGETS = {
       api.good();
       api.done();
     };
+  },
+
+  // Make a report for the class website: pick 2 pictures you may use, then write where each
+  // one came from. A picture its author has not allowed says why not.
+  credit(host, _, api) {
+    host.innerHTML = `
+      <div class="w-cr">
+        <p class="cr-hint">報告要放 2 張海洋動物的圖。點可以用的圖</p>
+        <div class="cr-row">
+          <div class="cr-search">
+            <p class="cr-q">🔍 海洋動物 圖片</p>
+            <div class="cr-pics">${CR_PICS.map((p, i) => `<button class="cr-pic" data-i="${i}"><span>${p.pic}</span><b>${p.name}</b><small>${p.tag}</small></button>`).join('')}</div>
+          </div>
+          <div class="cr-report">
+            <p class="cr-title">📄 我的報告：海洋動物</p>
+            <div class="cr-slots"><span class="cr-slot">圖 1</span><span class="cr-slot">圖 2</span></div>
+            <p class="cr-src-head">圖片來源：</p>
+            <ul class="cr-src"></ul>
+          </div>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = (text, cls = '') => { $('.cr-hint').textContent = text; $('.cr-hint').className = `cr-hint ${cls}`; };
+    const used = [], credited = new Set();
+    const check = () => {
+      if (used.length < 2) return;
+      if (credited.size < 2) { hint('圖放好了！再按「寫上來源」，寫出圖從哪裡來'); return; }
+      hint('🎉 用了可以用的圖，也寫上來源。這樣作者知道，看報告的人也找得到！', 'done');
+      api.done();
+    };
+    $('.cr-pics').addEventListener('click', e => {
+      const b = e.target.closest('.cr-pic');
+      if (!b || used.length === 2) return;
+      const p = CR_PICS[b.dataset.i];
+      if (!p.credit) { hint(p.why, 'bad'); shake(b); api.bad(); return; }
+      if (used.includes(p)) return;
+      used.push(p);
+      b.classList.add('used');
+      b.disabled = true;
+      const slot = host.querySelectorAll('.cr-slot')[used.length - 1];
+      slot.textContent = p.pic;
+      slot.classList.add('full');
+      pop(slot);
+      $('.cr-src').insertAdjacentHTML('beforeend', `<li><span>${p.pic} ？</span><button class="option cr-add" data-i="${b.dataset.i}">✏️ 寫上來源</button></li>`);
+      api.good();
+      hint(p.by ? `「姓名標示」：可以用，可是要寫出作者「${p.by}」` : '「公有領域」：大家都能自由用。寫上來源，是好習慣');
+      check();
+    });
+    $('.cr-src').addEventListener('click', e => {
+      const b = e.target.closest('.cr-add');
+      if (!b) return;
+      const p = CR_PICS[b.dataset.i];
+      credited.add(p);
+      b.parentElement.innerHTML = `<span>${p.pic} ${p.credit}</span>`;
+      api.good();
+      check();
+    });
   },
 
   // The operating system takes turns between apps so fast they look simultaneous.

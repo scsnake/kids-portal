@@ -1645,6 +1645,72 @@ export const UNITS = [
   },
 
   {
+    id: 'copyright',
+    part: 'basic',
+    icon: '©️',
+    title: '網路上的著作權',
+    en: 'Copyright Online',
+    desc: '別人的作品、創用 CC、分享連結',
+    color: '#2f6fdf',
+    added: '2026-10-19',
+    slides: [
+      {
+        title: '這是誰做的？',
+        text: `照片、圖畫、音樂、影片和文章，都是作者的心血，作者有${t('著作權', 'copyright')}。用別人的作品以前，要先看可不可以用。分分看！`,
+        widget: 'sort',
+        params: {
+          rest: 'ask',
+          bins: [
+            { id: 'mine', icon: '✅', label: '可以直接用' },
+            { id: 'ask', icon: '✋', label: '要先問作者' },
+          ],
+          items: [
+            { icon: '📷', label: '自己拍的照片', bin: 'mine' },
+            { icon: '🖍️', label: '自己畫的圖', bin: 'mine' },
+            { icon: '📖', label: '自己寫的故事', bin: 'mine' },
+            { icon: '🖼️', label: '網路上找到的漂亮照片', bin: 'ask' },
+            { icon: '🎵', label: '流行歌當影片的配樂', bin: 'ask' },
+            { icon: '🧸', label: '把卡通人物印在要賣的貼紙上', bin: 'ask' },
+            { icon: '🎨', label: '好朋友畫的圖', bin: 'ask' },
+          ],
+        },
+      },
+      {
+        title: '找可以用的圖',
+        text: `有些作者願意分享，會標上${t('創用 CC', 'Creative Commons')}，照規定就能用，通常要寫出作者。${t('公有領域', 'public domain')}的作品，大家都能自由用。幫報告找 2 張圖！`,
+        widget: 'credit',
+      },
+      {
+        title: '喜歡，就分享連結',
+        text: '把別人的影片下載下來，再上傳到自己的頻道，就是拿走作者的作品。想分享，就分享原本的連結。',
+        widget: 'choice',
+        params: {
+          question: '你很喜歡一部卡通，想讓同學也看到。怎麼做才對？',
+          options: [
+            { text: '🔗 分享官方影片的連結', correct: true },
+            { text: '⬇️ 下載下來，上傳到自己的頻道' },
+            { text: '📹 錄下螢幕，再上傳' },
+          ],
+          explain: '分享連結，作者看得到有多少人喜歡，也能繼續做新的卡通。',
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '報告用了一張「創用 CC 姓名標示」的照片，要寫上什麼？',
+          options: [
+            { text: '✍️ 作者的名字，和它的授權', correct: true },
+            { text: '🙅 什麼都不用寫' },
+            { text: '🌐 只寫「圖片來自網路」' },
+          ],
+          explain: '「姓名標示」就是要寫出作者是誰。只寫「網路」，別人找不到作者。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'safety',
     part: 'basic',
     icon: '🛡️',
@@ -3039,7 +3105,7 @@ export const STAGES = [
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account', 'passkey'] },
   { id: 'apps', part: 'basic', icon: '📲', title: '用 App', en: 'Using Apps', units: ['appbasics', 'apps', 'handy', 'maps'] },
   { id: 'helpers', part: 'basic', icon: '🤖', title: 'AI 小幫手', en: 'AI Helpers', units: ['aichat', 'voice'] },
-  { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel'] },
+  { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel', 'copyright'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os'] },
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo'] },

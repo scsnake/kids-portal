@@ -2126,6 +2126,32 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .ap-switch input:checked + i { background: #34c759; }
 .ap-switch input:checked + i::after { transform: translateX(20px); }
 .ap-switch input:focus-visible + i { outline: 3px solid var(--c); outline-offset: 2px; }
+
+/* ---------- a report: pictures you may use, and their sources ---------- */
+
+.w-cr { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.cr-hint { margin: 0; min-height: 1.5em; font-weight: 800; font-size: 1.1rem; text-align: center; line-height: 1.5; }
+.cr-hint.bad { color: #a61e1e; }
+.cr-hint.done { color: var(--good); }
+.cr-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; width: min(100%, 680px); }
+@media (max-width: 640px) { .cr-row { grid-template-columns: 1fr; } }
+.cr-search, .cr-report { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 18px; border: 2px solid var(--line); background: var(--card); }
+.cr-q { margin: 0; padding: 4px 10px; border-radius: 99px; background: #f1f3f5; font-weight: 700; }
+.cr-pics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.cr-pic { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 12px; border: 2px solid var(--line); background: #e7f5ff; font: inherit; }
+.cr-pic:active { transform: scale(.97); }
+.cr-pic span { font-size: 2.2rem; }
+.cr-pic small { padding: 0 6px; border-radius: 6px; background: white; font-weight: 700; font-size: .8rem; }
+.cr-pic.used { opacity: .5; }
+.cr-pic:disabled { color: inherit; }
+.cr-title { margin: 0; font-weight: 900; }
+.cr-slots { display: flex; gap: 8px; }
+.cr-slot { flex: 1; display: grid; place-items: center; height: 72px; border-radius: 12px; border: 2px dashed var(--line); color: var(--ink-3); font-weight: 800; }
+.cr-slot.full { border-style: solid; border-color: #8ce99a; background: #ebfbee; font-size: 2.4rem; }
+.cr-src-head { margin: 0; font-weight: 800; color: var(--ink-2); }
+.cr-src { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.cr-src li { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; font-weight: 700; font-size: .95rem; }
+.cr-add { min-height: 44px; padding: .2rem .7rem; font-size: .95rem; }
 .ap-posted { margin: 0; font-weight: 700; }
 .ap-why { margin: 0; width: min(100%, 560px); min-height: 1.5em; font-weight: 700; line-height: 1.6; text-align: center; }
 .ap-why.bad { color: #a61e1e; }
