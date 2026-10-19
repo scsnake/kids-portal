@@ -1880,6 +1880,27 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .srt-score { margin: 0; min-height: 1.5em; text-align: center; font-weight: 800; color: var(--ink-2); line-height: 1.6; }
 @media (prefers-reduced-motion: reduce) { .srt-bar { transition: none; } }
 
+/* ---------- a video feed that follows what you watch ---------- */
+
+.w-feed { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.fd-hint { margin: 0; font-weight: 800; font-size: 1.1rem; text-align: center; min-height: 1.5em; line-height: 1.5; }
+.fd-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.fd-card { display: flex; flex-direction: column; gap: 4px; padding: 6px; border-radius: 14px; border: 2px solid var(--line); background: var(--card); font: inherit; text-align: left; cursor: pointer; }
+.fd-card:active { transform: scale(.97); }
+.fd-thumb { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; border-radius: 10px; background: hsl(var(--h) 70% 88%); font-size: clamp(2.2rem, 4vw, 3.2rem); }
+.fd-thumb i { position: absolute; right: 6px; bottom: 4px; font-style: normal; font-size: .9rem; color: hsl(var(--h) 50% 35%); }
+.fd-title { font-weight: 700; font-size: .95rem; line-height: 1.35; }
+.fd-card.watched { border-color: var(--c); }
+.fd-card.watched .fd-thumb i { font-size: 1.6rem; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, .25); color: white; border-radius: 10px; }
+.fd-share { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--ink-2); }
+.fd-share-label { white-space: nowrap; }
+.fd-bar { display: flex; flex: 1; height: 26px; border-radius: 13px; overflow: hidden; background: var(--line); }
+.fd-bar i { display: grid; place-items: center; background: hsl(var(--h) 65% 75%); font-style: normal; transition: width .3s ease-out; }
+.fd-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.fd-search { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; font-weight: 800; }
+@media (max-width: 480px) { .fd-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .fd-bar i { transition: none; } }
+
 /* ---------- run-length decoding ---------- */
 
 .w-rle { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 16px; }

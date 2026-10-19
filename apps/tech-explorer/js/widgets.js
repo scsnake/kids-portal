@@ -321,6 +321,16 @@ function gateFridge(closed) {
     </g>`;
 }
 
+// Topics for feed: each has a hue for its thumbnails and a few video titles.
+const FEED_TOPICS = [
+  { id: 'cat', icon: '🐱', name: '貓咪', hue: 30, titles: ['貓咪跳進紙箱', '貓咪打翻水杯', '小貓第一次洗澡', '貓咪追雷射光', '貓咪睡成一團'] },
+  { id: 'ball', icon: '⚽', name: '足球', hue: 130, titles: ['帥氣的射門', '守門員神救援', '足球花式技巧', '比賽精華', '自由球怎麼踢'] },
+  { id: 'dino', icon: '🦖', name: '恐龍', hue: 95, titles: ['暴龍有多大？', '恐龍為什麼消失', '會飛的翼龍', '挖到恐龍化石', '最長的恐龍'] },
+  { id: 'cook', icon: '🍳', name: '做菜', hue: 10, titles: ['十分鐘做蛋餅', '自己做珍珠奶茶', '可愛的動物便當', '一起烤餅乾', '水果冰棒'] },
+  { id: 'space', icon: '🚀', name: '太空', hue: 230, titles: ['火箭發射', '太空人怎麼睡覺', '火星長什麼樣子', '黑洞是什麼', '看見土星環'] },
+  { id: 'music', icon: '🎵', name: '音樂', hue: 290, titles: ['用杯子打節奏', '一起學唱歌', '鋼琴彈小星星', '各種樂器的聲音', '跳舞小教室'] },
+];
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -5041,6 +5051,97 @@ export const WIDGETS = {
       if (truth === 'up') lo = g + 1; else hi = g - 1;
       next();
     });
+  },
+
+  // Tap videos and the feed follows: each one watched makes its topic count more. When
+  // one topic fills 5 of 6 spots (a filter bubble), 搜尋別的主題 or 清除觀看紀錄 opens it up.
+  feed(host, _, api) {
+    const w = Object.fromEntries(FEED_TOPICS.map(x => [x.id, 1]));
+    const next = Object.fromEntries(FEED_TOPICS.map(x => [x.id, 0]));
+    let bubble = false, clicks = 0, finished = false;
+    host.innerHTML = `
+      <div class="w-feed">
+        <p class="fd-hint">點一支你想看的影片</p>
+        <div class="fd-grid"></div>
+        <div class="fd-share" aria-hidden="true"></div>
+        <div class="fd-tools" hidden>
+          <button class="option" data-act="search">🔍 搜尋別的主題</button>
+          <button class="option" data-act="clear">🧹 清除觀看紀錄</button>
+        </div>
+        <div class="fd-search" hidden></div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = text => { $('.fd-hint').textContent = text; };
+    // 6 spots shared by weight (largest remainder), the biggest topic first
+    const slots = () => {
+      const total = Object.values(w).reduce((a, b) => a + b, 0);
+      const raw = FEED_TOPICS.map(x => ({ id: x.id, v: (w[x.id] / total) * 6 }));
+      raw.forEach(r => { r.n = Math.floor(r.v); });
+      let left = 6 - raw.reduce((a, r) => a + r.n, 0);
+      [...raw].sort((a, b) => (b.v - b.n) - (a.v - a.n) || w[b.id] - w[a.id]).forEach(r => { if (left > 0) { r.n++; left--; } });
+      return raw.sort((a, b) => b.n - a.n);
+    };
+    const top = () => slots()[0];
+    const draw = () => {
+      const cards = slots().flatMap(r => Array.from({ length: r.n }, () => FEED_TOPICS.find(x => x.id === r.id)));
+      $('.fd-grid').innerHTML = cards.map(x => {
+        const title = x.titles[next[x.id]++ % x.titles.length];
+        return `<button class="fd-card" data-t="${x.id}" style="--h:${x.hue}"><span class="fd-thumb">${x.icon}<i>▶</i></span><span class="fd-title">${title}</span></button>`;
+      }).join('');
+      const total = Object.values(w).reduce((a, b) => a + b, 0);
+      $('.fd-share').innerHTML = `<span class="fd-share-label">App 猜你喜歡：</span><span class="fd-bar">${FEED_TOPICS.map(x =>
+        `<i style="--h:${x.hue};width:${(w[x.id] / total) * 100}%">${w[x.id] / total > .12 ? x.icon : ''}</i>`).join('')}</span>`;
+    };
+    const opened = text => {
+      if (!bubble || finished || top().n > 3) return;
+      finished = true;
+      $('.fd-tools').hidden = true;
+      $('.fd-search').hidden = true;
+      hint(text);
+      api.done();
+    };
+    host.querySelector('.w-feed').addEventListener('click', e => {
+      const card = e.target.closest('.fd-card');
+      if (card) {
+        card.classList.add('watched');
+        w[card.dataset.t] += 5;
+        clicks++;
+        api.later(() => {
+          draw();
+          const t0 = top(), name = FEED_TOPICS.find(x => x.id === t0.id).name;
+          if (!bubble && t0.n >= 5) {
+            bubble = true;
+            api.good();
+            hint(`推薦幾乎都是「${name}」了！App 以為你只喜歡這個。怎麼讓推薦變多樣？`);
+            $('.fd-tools').hidden = false;
+          } else if (!bubble) {
+            hint(clicks >= 4 ? '試試看，一直點同一種影片，推薦會怎樣？' : '再點一支看看，推薦有沒有變？');
+          }
+        }, 350);
+        return;
+      }
+      const act = e.target.closest('[data-act]')?.dataset.act;
+      if (act === 'clear') {
+        Object.keys(w).forEach(k => { w[k] = 1; });
+        draw();
+        opened('🎉 清除紀錄以後，App 重新猜，推薦又變多樣了。');
+      }
+      if (act === 'search') {
+        const t0 = top().id;
+        $('.fd-search').hidden = false;
+        $('.fd-search').innerHTML = `<span>想搜尋什麼？</span>${FEED_TOPICS.filter(x => x.id !== t0).map(x =>
+          `<button class="chip" data-q="${x.id}">${x.icon} ${x.name}</button>`).join('')}`;
+      }
+      const q = e.target.closest('[data-q]')?.dataset.q;
+      if (q) {
+        const t0 = top().id;
+        w[q] += 6;
+        w[t0] = Math.max(1, w[t0] / 3);
+        draw();
+        opened('🎉 自己去找不一樣的東西，推薦就變多樣了！');
+      }
+    });
+    draw();
   },
 
   // Sort the cards by swapping neighbors, like a bubble sort. Below, three buttons play bubble,

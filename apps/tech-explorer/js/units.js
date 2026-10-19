@@ -2238,6 +2238,71 @@ export const UNITS = [
   },
 
   {
+    id: 'recommend',
+    part: 'adv',
+    icon: '🎯',
+    title: '推薦演算法',
+    en: 'Recommendations',
+    desc: '為什麼 App 一直推薦差不多的影片',
+    color: '#ae3ec9',
+    slides: [
+      {
+        title: '為什麼一直推薦一樣的？',
+        text: `影片 App 會記下你看了什麼、看多久，再猜你還想看什麼，這叫${t('推薦演算法', 'recommendation algorithm')}。一直點同一種影片，看看推薦會怎麼變！`,
+        widget: 'feed',
+      },
+      {
+        title: '同溫層',
+        text: `推薦的都是同一種東西，你可能會以為全世界都只有這些，這叫${t('同溫層', 'filter bubble')}。分分看，哪些做法能打破同溫層？`,
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '🌈', label: '打破同溫層' },
+            { id: 'no', icon: '🫧', label: '同溫層更厚' },
+          ],
+          items: [
+            { icon: '🔍', label: '搜尋不一樣的主題', bin: 'ok' },
+            { icon: '📰', label: '看看不同意見的文章', bin: 'ok' },
+            { icon: '🗣️', label: '問問家人朋友的想法', bin: 'ok' },
+            { icon: '🧹', label: '有時候清除觀看紀錄', bin: 'ok' },
+            { icon: '👍', label: '只按讚自己喜歡的', bin: 'no' },
+            { icon: '📺', label: '只看同一種頻道', bin: 'no' },
+            { icon: '🚫', label: '看到不同意見就封鎖', bin: 'no' },
+          ],
+        },
+      },
+      {
+        title: '停不下來？',
+        text: '很多 App 會自動播下一支，或讓你一直往下滑、滑不完。你看得越久，App 就能放越多廣告。要不要再看，要由你自己決定。',
+        widget: 'choice',
+        params: {
+          question: '影片播完了，畫面寫著「5 秒後播放下一支」。你可以怎麼做？',
+          options: [
+            { text: '⏹️ 按「取消」，想想時間到了沒', correct: true },
+            { text: '⏩ 讓它一直播下去' },
+            { text: '🔇 把聲音關掉，繼續看' },
+          ],
+          explain: '自動播放是 App 幫你做的決定。按下取消，就換你自己決定。',
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '小華最近只看恐龍影片，App 推薦的全部都是恐龍。為什麼？',
+          options: [
+            { text: '🧠 App 記得他愛看恐龍，就一直推薦差不多的', correct: true },
+            { text: '🦖 App 裡面只有恐龍影片' },
+            { text: '🏆 恐龍影片是全世界最好看的' },
+          ],
+          explain: '推薦演算法會照你看過的東西來猜。想看別的，就自己去搜尋。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'coding',
     part: 'adv',
     icon: '👩‍💻',
@@ -2321,7 +2386,7 @@ export const STAGES = [
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'kind', 'sos'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os', 'screens', 'storage'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'web'] },
-  { id: 'code', part: 'adv', icon: '🧩', title: '寫程式', en: 'Coding', units: ['algo', 'coding'] },
+  { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'coding'] },
 ];
 
 // Shown greyed out on the home screen until the unit is written.

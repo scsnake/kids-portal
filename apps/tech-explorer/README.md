@@ -57,7 +57,8 @@ yet; 「直接開始」 closes it.
 31. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
 32. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
 33. 演算法: steps, binary search (number guessing), sorting by swaps
-34. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+34. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
+35. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
 
 ## Saved progress
 
