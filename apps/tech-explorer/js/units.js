@@ -1289,6 +1289,70 @@ export const UNITS = [
   },
 
   {
+    id: 'maps',
+    part: 'basic',
+    icon: '🗺️',
+    title: '地圖和導航',
+    en: 'Maps and Navigation',
+    desc: '找地方、選路線、跟著導航走、分享位置',
+    color: '#1971c2',
+    slides: [
+      {
+        title: '用地圖 App 找路',
+        text: `手機用 GPS 知道你在哪。${t('地圖 App', 'maps app')}可以找地方、看${t('路線', 'route')}，還會一步一步告訴你怎麼走，這叫${t('導航', 'navigation')}。去圖書館看看！`,
+        widget: 'mapnav',
+      },
+      {
+        title: '位置要給誰看？',
+        text: `地圖 App 可以把你在哪裡${t('分享位置', 'share location')}給別人。家人知道你在哪，比較安心；陌生人知道，就危險了。分分看！`,
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '👨‍👩‍👧', label: '可以分享' },
+            { id: 'no', icon: '🙅', label: '不要分享' },
+          ],
+          items: [
+            { icon: '👩', label: '媽媽', bin: 'ok' },
+            { icon: '👴', label: '來接你放學的阿公', bin: 'ok' },
+            { icon: '👨‍👩‍👧', label: '一起出門的家人', bin: 'ok' },
+            { icon: '🎮', label: '遊戲裡認識的網友', bin: 'no' },
+            { icon: '📸', label: '公開貼文打卡「我在家」', bin: 'no' },
+            { icon: '❓', label: '不認識的人問「你在哪」', bin: 'no' },
+          ],
+        },
+      },
+      {
+        title: '網友要你的位置？',
+        text: '網路上的人，不一定是他說的那個人。位置、學校、家裡地址，都不要給網友。',
+        widget: 'choice',
+        params: {
+          question: '遊戲裡的網友說：「我們住很近耶！分享你的位置給我，我拿禮物給你。」你可以怎麼做？',
+          options: [
+            { text: '🙅 不分享，告訴爸媽', correct: true },
+            { text: '📍 分享一下下，拿到禮物就關掉' },
+            { text: '🏫 不給位置，改說學校的名字' },
+          ],
+          explain: '說要送禮物，是壞人常用的方法。告訴大人，一起把他封鎖。',
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '要去公園：走路要 12 分鐘；坐公車只要 4 分鐘，可是下一班公車 15 分鐘後才來。哪一個比較快到？',
+          options: [
+            { text: '🚶 走路，12 分鐘就到', correct: true },
+            { text: '🚌 坐公車，4 分鐘就到' },
+            { text: '🤝 一樣快' },
+          ],
+          explain: '坐公車要加上等車的時間：15 + 4 = 19 分鐘。地圖 App 也會把等車的時間算進去。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'aichat',
     part: 'basic',
     icon: '🤖',
@@ -2517,7 +2581,7 @@ export const STAGES = [
   { id: 'care', part: 'basic', icon: '🔋', title: '照顧裝置和自己', en: 'Care for Devices and You', units: ['cables', 'battery', 'care', 'health'] },
   { id: 'media', part: 'basic', icon: '📷', title: '拍照和檔案', en: 'Photos and Files', units: ['camera', 'files', 'space', 'formats'] },
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account'] },
-  { id: 'apps', part: 'basic', icon: '📲', title: 'App 和 AI', en: 'Apps and AI', units: ['appbasics', 'apps', 'handy', 'aichat'] },
+  { id: 'apps', part: 'basic', icon: '📲', title: 'App 和 AI', en: 'Apps and AI', units: ['appbasics', 'apps', 'handy', 'maps', 'aichat'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os', 'screens', 'storage'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'web'] },

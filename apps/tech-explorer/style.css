@@ -1912,6 +1912,41 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .fm-lock { padding: .8rem; border-radius: 16px; background: #212529; color: white; text-align: center; font-weight: 800; line-height: 1.6; }
 .fm-map-box .readout { margin: 0; font-weight: 700; }
 
+/* ---------- a map app: search, route, then follow the blue dot ---------- */
+
+.w-map { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.mn-hint { margin: 0; min-height: 1.5em; font-weight: 800; font-size: 1.1rem; text-align: center; line-height: 1.5; }
+.mn-hint.done { color: var(--good); }
+.mn-app { position: relative; display: flex; flex-direction: column; width: min(100%, 540px); border-radius: 22px; border: 2px solid var(--line); background: white; overflow: hidden; box-shadow: var(--shadow); }
+.mn-top { position: relative; padding: 8px; }
+.mn-search { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 48px; padding: 0 14px; border: 0; border-radius: 12px; background: #f1f3f5; font: inherit; font-weight: 700; color: var(--ink-2); text-align: left; }
+.mn-results { position: absolute; z-index: 2; left: 8px; right: 8px; top: 60px; display: flex; flex-direction: column; border-radius: 14px; background: white; box-shadow: 0 10px 30px rgba(0, 0, 0, .2); overflow: hidden; }
+.mn-place { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 6px 14px; border: 0; border-bottom: 1px solid #e9ecef; background: white; font: inherit; text-align: left; }
+.mn-place:last-child { border-bottom: 0; }
+.mn-place:active { background: #f1f3f5; }
+.mn-place span { font-size: 1.5rem; }
+.mn-place b, .mn-title { display: flex; flex-direction: column; }
+.mn-place small, .mn-title small { color: var(--ink-3); font-size: .85rem; font-weight: 600; }
+.mn-banner { display: flex; align-items: center; min-height: 48px; margin: 0; padding: 4px 14px; border-radius: 12px; background: #1c7ed6; color: white; font-weight: 800; font-size: 1.05rem; line-height: 1.4; }
+.mn-map { display: block; width: 100%; height: auto; }
+.mn-stops { opacity: .5; }
+.mn-map.bus .mn-stops { opacity: 1; }
+.mn-route { fill: none; stroke: #1c7ed6; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.mn-route.way-walk { stroke-width: 6; stroke-dasharray: .1 11; }
+.mn-route.way-bus { stroke: #2b8a3e; }
+.mn-me { fill: #1c7ed6; stroke: white; stroke-width: 3; }
+.mn-me.riding { fill: #2b8a3e; r: 9; }
+.mn-acc { fill: rgba(28, 126, 214, .18); }
+.mn-sheet { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); }
+.mn-title { margin: 0; font-weight: 800; font-size: 1.1rem; }
+.mn-ways { display: flex; flex: 1; gap: 6px; }
+.mn-way { flex: 1; display: flex; flex-direction: column; align-items: center; min-height: 52px; padding: 4px; border: 2px solid var(--line); border-radius: 12px; background: white; font: inherit; font-weight: 700; }
+.mn-way b { font-size: .9rem; color: var(--ink-2); }
+.mn-way.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, white); }
+@media (prefers-reduced-motion: no-preference) { .mn-acc { animation: mn-pulse 1.8s ease-out infinite; transform-box: fill-box; transform-origin: center; } }
+@keyframes mn-pulse { 0% { transform: scale(.7); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+@media (orientation: portrait) and (min-width: 700px) { .mn-app { width: min(100%, 640px); } }
+
 /* ---------- AI chat ---------- */
 
 .chat { display: flex; flex-direction: column; gap: 10px; }

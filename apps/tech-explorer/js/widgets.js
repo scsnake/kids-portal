@@ -349,6 +349,34 @@ const OW_FILES = [
   { name: '旅行照片', ext: 'zip', app: 'zip', kind: '壓縮檔', show: '<span class="ow-unzip">📁 旅行照片<small>🏖️ 海邊.jpg　🗻 爬山.jpg　🎡 樂園.jpg</small></span>' },
 ];
 
+// The ways to the library on the map (viewBox 400×260). Each has its corners and what to
+// say at each turn. Walking cuts through the park; the bus has a stop to get on and off.
+const MN_WAYS = {
+  walk: { icon: '🚶', name: '走路', min: 15, speed: 2.4, pts: [[80, 220], [80, 140], [200, 62], [342, 62]],
+    turns: ['前面路口右轉，走進公園的小路', '出了公園，右轉'] },
+  bus: { icon: '🚌', name: '公車', min: 9, speed: 4, pts: [[80, 220], [320, 220], [320, 62], [342, 62]],
+    turns: ['', '右轉，圖書館快到了'],
+    stops: [{ at: 60, name: '家樂路口', text: '🚏 到了「家樂路口」站，搭上 15 路公車' }, { at: 325, name: '圖書館站', text: '🚏 在「圖書館站」下車，再走一小段' }] },
+  car: { icon: '🚗', name: '開車', min: 5, speed: 4.5, pts: [[80, 220], [200, 220], [200, 62], [342, 62]],
+    turns: ['前面路口左轉', '前面路口右轉'] },
+};
+const MN_MAP = `
+  <rect width="400" height="260" fill="#f2efe6"/>
+  <g fill="#e6e0d2"><rect x="0" y="0" width="68" height="50" rx="4"/><rect x="92" y="0" width="96" height="50" rx="4"/><rect x="212" y="0" width="96" height="50" rx="4"/>
+    <rect x="0" y="74" width="68" height="54" rx="4"/><rect x="212" y="74" width="96" height="54" rx="4"/><rect x="332" y="74" width="68" height="54" rx="4"/>
+    <rect x="0" y="152" width="68" height="56" rx="4"/><rect x="92" y="152" width="96" height="56" rx="4"/><rect x="212" y="152" width="96" height="56" rx="4"/><rect x="332" y="152" width="68" height="56" rx="4"/>
+    <rect x="0" y="232" width="400" height="28"/></g>
+  <rect x="92" y="74" width="96" height="54" rx="6" fill="#c3e8c8"/>
+  <rect x="332" y="0" width="68" height="50" rx="4" fill="#ffe8cc"/>
+  <g fill="none" stroke-linecap="round"><path d="M0 62H400M0 140H400M0 220H400M80 0V260M200 0V260M320 0V260" stroke="#d6cfbd" stroke-width="16"/>
+    <path d="M0 62H400M0 140H400M0 220H400M80 0V260M200 0V260M320 0V260" stroke="#fff" stroke-width="12"/>
+    <path d="M86 136 194 66" stroke="#fff" stroke-width="5" stroke-dasharray="2 5"/></g>
+  <g font-size="20" text-anchor="middle"><text x="130" y="112">🌳</text><text x="166" y="100">🌳</text><text x="36" y="196">🏠</text>
+    <text x="372" y="30">📚</text><text x="260" y="34">🏫</text><text x="260" y="112">🏪</text></g>
+  <g font-size="10" font-weight="700" fill="#5c5f66" text-anchor="middle"><text x="140" y="124">公園</text><text x="36" y="160">家</text>
+    <text x="372" y="45">圖書館</text><text x="260" y="46">學校</text></g>
+  <g class="mn-stops" font-size="13" text-anchor="middle"><text x="140" y="214">🚏</text><text x="334" y="139">🚏</text></g>`;
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -5117,6 +5145,131 @@ export const WIDGETS = {
         shake(b);
       }
     });
+  },
+
+  // A map app: search 市立圖書館, pick a way to go (each way draws its own route and time),
+  // then 開始 and follow the blue dot. The banner says each turn just before it.
+  mapnav(host, _, api) {
+    const places = [
+      { name: '市立圖書館', icon: '📚', sub: '1.2 公里・開到晚上 9 點', ok: true },
+      { name: '圖書館站', icon: '🚏', sub: '公車站', why: '這是「圖書館站」公車站，不是圖書館。再找找「市立圖書館」' },
+      { name: '小書蟲書店', icon: '🏪', sub: '書店', why: '這是書店，不是圖書館。再找找「市立圖書館」' },
+    ];
+    host.innerHTML = `
+      <div class="w-map">
+        <p class="mn-hint">要去<b>市立圖書館</b>。先點上面的搜尋框</p>
+        <div class="mn-app">
+          <div class="mn-top">
+            <button class="mn-search">🔍 <span>搜尋地點或地址</span></button>
+            <div class="mn-results" hidden>${places.map((p, i) => `<button class="mn-place" data-i="${i}"><span>${p.icon}</span><b>${p.name}<small>${p.sub}</small></b></button>`).join('')}</div>
+            <p class="mn-banner" hidden></p>
+          </div>
+          <svg class="mn-map" viewBox="0 0 400 260" aria-label="地圖：你在家，市立圖書館在右上角">
+            ${MN_MAP}
+            <polyline class="mn-route" points="" />
+            <text class="mn-pin" x="342" y="64" font-size="24" text-anchor="middle" visibility="hidden">📍</text>
+            <circle class="mn-acc" cx="80" cy="220" r="14"/>
+            <circle class="mn-me" cx="80" cy="220" r="7"/>
+          </svg>
+          <div class="mn-sheet" hidden></div>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = (html, cls = '') => { $('.mn-hint').innerHTML = html; $('.mn-hint').className = `mn-hint ${cls}`; };
+    let way = 'walk', going = false;
+    $('.mn-search').onclick = () => {
+      if (going) return;
+      $('.mn-results').hidden = false;
+      hint('點「市立圖書館」');
+    };
+    $('.mn-results').addEventListener('click', e => {
+      const b = e.target.closest('[data-i]');
+      if (!b) return;
+      const p = places[b.dataset.i];
+      if (!p.ok) { hint(p.why); shake(b); api.bad(); return; }
+      api.good();
+      $('.mn-results').hidden = true;
+      $('.mn-search span').textContent = p.name;
+      $('.mn-pin').setAttribute('visibility', 'visible');
+      $('.mn-sheet').hidden = false;
+      $('.mn-sheet').innerHTML = `<p class="mn-title">📚 市立圖書館<small>${p.sub}</small></p><button class="go" data-act="route">路線</button>`;
+      hint('找到了！地圖上插了一根大頭針 📍。按「路線」');
+    });
+    const showWay = () => {
+      const w = MN_WAYS[way];
+      $('.mn-route').setAttribute('points', w.pts.map(p => p.join(',')).join(' '));
+      $('.mn-route').setAttribute('class', `mn-route way-${way}`);
+      $('.mn-map').classList.toggle('bus', way === 'bus');
+      host.querySelectorAll('[data-way]').forEach(b => b.classList.toggle('on', b.dataset.way === way));
+    };
+    $('.mn-sheet').addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b || going) return;
+      if (b.dataset.act === 'route') {
+        $('.mn-sheet').innerHTML = `
+          <div class="mn-ways">${Object.entries(MN_WAYS).map(([id, w]) => `<button class="mn-way" data-way="${id}"><span>${w.icon} ${w.name}</span><b>${w.min} 分鐘</b></button>`).join('')}</div>
+          <button class="go" data-act="start">開始</button>`;
+        showWay();
+        hint('換換看不同的方式，路線和時間都會變。選好了，按「開始」');
+        return;
+      }
+      if (b.dataset.way) { way = b.dataset.way; showWay(); return; }
+      if (b.dataset.act === 'start') start();
+    });
+    // Walk the dot along the route; the banner gives the next turn when it is close.
+    const start = () => {
+      going = true;
+      const w = MN_WAYS[way], pts = w.pts;
+      const segs = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]));
+      const total = segs.reduce((a, b) => a + b, 0);
+      const corners = segs.slice(0, -1).map((_, i) => segs.slice(0, i + 1).reduce((a, b) => a + b, 0));
+      const at = d => {
+        for (let i = 0; i < segs.length; i++) {
+          if (d <= segs[i] || i === segs.length - 1) {
+            const k = Math.min(d / segs[i], 1);
+            return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * k, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * k];
+          }
+          d -= segs[i];
+        }
+      };
+      $('.mn-search').hidden = true;
+      $('.mn-banner').hidden = false;
+      $('.mn-sheet').innerHTML = `<p class="mn-title">${w.icon} ${w.name}導航中<small>大約 ${w.min} 分鐘到</small></p>`;
+      hint('跟著藍色的點走，看上面的提示');
+      const stops = (w.stops || []).slice();
+      let d = 0, riding = false;
+      const say = text => { if ($('.mn-banner').textContent !== text) { $('.mn-banner').textContent = text; pop($('.mn-banner')); } };
+      const step = () => {
+        if (!api.alive()) return;
+        if (stops.length && d >= stops[0].at) {
+          const s = stops.shift();
+          riding = !riding;
+          $('.mn-me').classList.toggle('riding', riding);
+          say(s.text);
+          api.later(step, 1400);
+          d += 0.01;
+          return;
+        }
+        d = Math.min(d + (riding || way === 'car' ? w.speed : 2.4), total);
+        const [x, y] = at(d);
+        $('.mn-me').setAttribute('cx', x); $('.mn-me').setAttribute('cy', y);
+        $('.mn-acc').setAttribute('cx', x); $('.mn-acc').setAttribute('cy', y);
+        if (d >= total) {
+          say('🏁 到了！市立圖書館就在這裡');
+          $('.mn-sheet').innerHTML = `<p class="mn-title">🎉 抵達市立圖書館<small>${w.icon} ${w.name}・${w.min} 分鐘</small></p>`;
+          hint('🎉 到了！地圖 App 用 GPS 知道你在哪，一步一步告訴你怎麼走。', 'done');
+          api.good();
+          api.done();
+          return;
+        }
+        const next = corners.findIndex(c => c > d);
+        if (total - d < 40) say('🏁 目的地就在前面');
+        else if (next >= 0 && corners[next] - d < 50 && w.turns[next]) say(`${w.turns[next].includes('左') ? '⬅️' : '➡️'} ${w.turns[next]}`);
+        else if (!riding || !stops.length) say(`⬆️ 直走 ${Math.round(((next >= 0 ? corners[next] : total) - d) * 3 / 10) * 10} 公尺`);
+        api.later(step, 40);
+      };
+      step();
+    };
   },
 
   // A pretend AI chat: ask questions, and catch the answer that is wrong.
