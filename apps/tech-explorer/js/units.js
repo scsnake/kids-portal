@@ -1537,6 +1537,69 @@ export const UNITS = [
   },
 
   {
+    id: 'logic',
+    part: 'adv',
+    icon: '💡',
+    title: '邏輯閘',
+    en: 'Logic Gates',
+    desc: '用開關和燈泡做判斷：AND、OR、NOT',
+    color: '#f76707',
+    slides: [
+      {
+        title: 'AND：而且',
+        text: `電腦裡有幾十億個小開關。把開關接在一起，就能做出會判斷的電路，叫${t('邏輯閘', 'logic gate')}。兩個開關排成一排，A 而且 B 都打開，燈才會亮，這叫 ${t('AND 閘', 'AND gate')}。`,
+        widget: 'gate',
+        params: { gate: 'and' },
+      },
+      {
+        title: 'OR：或',
+        text: `兩個開關並排接，A 或 B 只要有一個打開，電就有路可以走，燈就會亮，這叫 ${t('OR 閘', 'OR gate')}。四種開法都試試看！`,
+        widget: 'gate',
+        params: { gate: 'or' },
+      },
+      {
+        title: 'NOT：相反',
+        text: `冰箱的燈很特別：門關上時會壓住一個按鈕，燈就熄了；門一打開，按鈕彈起來，燈就亮。按鈕和燈剛好相反，這叫 ${t('NOT 閘', 'NOT gate')}。`,
+        widget: 'gate',
+        params: { gate: 'not' },
+      },
+      {
+        title: '生活裡的邏輯閘',
+        text: '電腦把好多好多 AND、OR、NOT 組合起來，就能做加法、比大小。生活裡也有一樣的規則。分分看，每一個是哪一種？',
+        widget: 'sort',
+        params: {
+          bins: [
+            { id: 'and', icon: '🔗', label: 'AND 而且' },
+            { id: 'or', icon: '🔀', label: 'OR 或' },
+            { id: 'not', icon: '🔄', label: 'NOT 相反' },
+          ],
+          items: [
+            { icon: '🔐', label: '有鑰匙，而且知道密碼，保險箱才打得開', bin: 'and' },
+            { icon: '🎢', label: '夠高，而且有大人陪，才能坐雲霄飛車', bin: 'and' },
+            { icon: '🔔', label: '前門或後門有人按，門鈴都會響', bin: 'or' },
+            { icon: '💳', label: '用悠遊卡或手機，都可以進捷運站', bin: 'or' },
+            { icon: '🌞', label: '外面亮的時候，路燈就不亮', bin: 'not' },
+            { icon: '🔇', label: '按下靜音，就沒有聲音', bin: 'not' },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '走廊的燈要「有人走過」而且「天黑了」才會自動亮。這是哪一種邏輯閘？',
+          options: [
+            { text: '🔗 AND（而且）', correct: true },
+            { text: '🔀 OR（或）' },
+            { text: '🔄 NOT（相反）' },
+          ],
+          explain: '兩件事都要成立才亮，就是 AND。如果只要一件事成立就亮，就是 OR。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'os',
     part: 'adv',
     icon: '🗂️',
@@ -2078,7 +2141,7 @@ export const STAGES = [
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account'] },
   { id: 'apps', part: 'basic', icon: '📲', title: 'App 和 AI', en: 'Apps and AI', units: ['appbasics', 'apps', 'handy', 'aichat'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'sos'] },
-  { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'os', 'screens', 'storage'] },
+  { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os', 'screens', 'storage'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'web'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '寫程式', en: 'Coding', units: ['algo', 'coding'] },
 ];

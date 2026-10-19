@@ -258,6 +258,69 @@ const SPOT_SCENE = `
     <circle cx="420" cy="196" r="32" fill="#51cf66"/>
   </g>`;
 
+// Drawings for gate: a battery, switches and a bulb ('and' in a row, 'or' side by side),
+// and a fridge whose door presses a button that turns its light off ('not').
+const GATE_ON = '#fab005';
+const gateSwitch = (x, y, id, closed, live) => `
+  <g class="gt-sw" data-in="${id}">
+    <rect x="${x - 10}" y="${y - 40}" width="70" height="66" fill="transparent"/>
+    <line x1="${x}" y1="${y}" x2="${x + 50}" y2="${y}" transform="rotate(${closed ? 0 : -32} ${x} ${y})" class="gt-lever${live ? ' live' : ''}"/>
+    <circle cx="${x}" cy="${y}" r="6" class="gt-dot"/><circle cx="${x + 50}" cy="${y}" r="6" class="gt-dot"/>
+    <text x="${x + 25}" y="${y + 24}" class="gt-name">${id.toUpperCase()}</text>
+  </g>`;
+const gateBulb = on => `
+  ${on ? `<g stroke="${GATE_ON}" stroke-width="4" stroke-linecap="round">${[-90, -45, 0, 180, 225].map(a => {
+    const r = a * Math.PI / 180;
+    return `<path d="M${(320 + Math.cos(r) * 25).toFixed(1)} ${(108 + Math.sin(r) * 25).toFixed(1)} L${(320 + Math.cos(r) * 35).toFixed(1)} ${(108 + Math.sin(r) * 35).toFixed(1)}"/>`;
+  }).join('')}</g>` : ''}
+  <circle cx="320" cy="108" r="18" class="gt-bulb${on ? ' on' : ''}"/>
+  <rect x="311" y="124" width="18" height="10" rx="2" fill="#868e96"/>`;
+const gateBattery = `
+  <path d="M22 102 H58" stroke="#495057" stroke-width="4"/>
+  <path d="M31 114 H49" stroke="#495057" stroke-width="8"/>
+  <text x="66" y="113" class="gt-batt">電池</text>`;
+const gateWire = (d, live) => `<path d="${d}" class="gt-w${live ? ' live' : ''}"/>`;
+
+function gateCircuit(kind, s, on) {
+  if (kind === 'and') {
+    return gateBattery
+      + gateWire('M40 102 V40 H110', on) + gateSwitch(110, 40, 'a', s.a, on)
+      + gateWire('M160 40 H200', on) + gateSwitch(200, 40, 'b', s.b, on)
+      + gateWire('M250 40 H320 V90', on) + gateBulb(on) + gateWire('M320 134 V190 H40 V114', on);
+  }
+  return gateBattery
+    + gateWire('M40 102 V45 H104', on) + gateWire('M104 45 V115', on)
+    + gateWire('M104 45 H130', s.a) + gateSwitch(130, 45, 'a', s.a, s.a) + gateWire('M180 45 H250', s.a)
+    + gateWire('M104 115 H130', s.b) + gateSwitch(130, 115, 'b', s.b, s.b) + gateWire('M180 115 H250', s.b)
+    + gateWire('M250 45 V115', on) + gateWire('M250 45 H320 V90', on) + gateBulb(on) + gateWire('M320 134 V190 H40 V114', on);
+}
+
+function gateFridge(closed) {
+  const on = !closed;
+  return `
+    <g class="gt-sw" data-in="a">
+      <rect x="110" y="16" width="140" height="190" rx="12" fill="#f1f3f5" stroke="#868e96" stroke-width="3"/>
+      <rect x="118" y="24" width="124" height="174" rx="6" fill="${on ? '#fff9db' : '#495057'}"/>
+      <path d="M118 92 H242 M118 146 H242" stroke="${on ? '#e9ecef' : '#343a40'}" stroke-width="4"/>
+      <text x="150" y="86" font-size="26" text-anchor="middle">🥛</text>
+      <text x="200" y="86" font-size="26" text-anchor="middle">🧃</text>
+      <text x="160" y="140" font-size="26" text-anchor="middle">🍎</text>
+      <text x="205" y="140" font-size="26" text-anchor="middle">🧀</text>
+      ${on ? `<g stroke="${GATE_ON}" stroke-width="3" stroke-linecap="round"><path d="M180 52 V60 M164 46 l-7 5 M196 46 l7 5"/></g>` : ''}
+      <rect x="174" y="24" width="12" height="7" fill="#868e96"/>
+      <circle cx="180" cy="38" r="8" class="gt-bulb${on ? ' on' : ''}"/>
+      ${closed
+        ? `<rect x="110" y="16" width="140" height="190" rx="12" fill="#dee2e6" stroke="#868e96" stroke-width="3"/>
+           <rect x="124" y="70" width="9" height="60" rx="4" fill="#adb5bd"/>
+           <text x="180" y="226" class="gt-cap">門壓住按鈕</text>`
+        : `<rect x="108" y="100" width="14" height="18" rx="3" fill="#fff" stroke="#e03131" stroke-width="3"/>
+           <path d="M250 16 L306 4 V218 L250 206 Z" fill="#dee2e6" stroke="#868e96" stroke-width="3"/>
+           <path d="M98 109 H76" stroke="#e03131" stroke-width="3" marker-end="url(#gt-arrow)"/>
+           <text x="56" y="100" class="gt-cap gt-red">按鈕</text>
+           <text x="56" y="122" class="gt-cap gt-red">彈起來</text>`}
+    </g>`;
+}
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -408,6 +471,72 @@ export const WIDGETS = {
       });
       host.querySelector('.pool').append(card);
     }
+  },
+
+  // Flip the switches (or the fridge door) and watch the bulb. Every input combination
+  // tried fills a row of the table; all rows earn the star.
+  gate(host, { gate: kind }, api) {
+    const not = kind === 'not';
+    const ins = not ? ['a'] : ['a', 'b'];
+    const out = s => kind === 'and' ? s.a && s.b : kind === 'or' ? s.a || s.b : !s.a;
+    const state = not ? { a: 1 } : { a: 0, b: 0 };
+    const rows = not ? [[0], [1]] : [[0, 0], [0, 1], [1, 0], [1, 1]];
+    const done = {
+      and: '🎉 四種都試過了！A 和 B 都打開，燈才會亮。',
+      or: '🎉 四種都試過了！A 或 B 只要有一個打開，燈就會亮。',
+      not: '🎉 兩種都試過了！按鈕壓住（1），燈就不亮（0）。剛好相反。',
+    }[kind];
+    const val = (i, v) => not ? (v ? '是 1' : '否 0') : (v ? '開 1' : '關 0');
+    host.innerHTML = `
+      <div class="w-gate">
+        <p class="gt-hint">${not ? '開關冰箱門，看燈有什麼變化' : '點開關，四種開法都試試看'}</p>
+        <svg class="gt-pic" viewBox="0 0 360 ${not ? 232 : 205}" role="img" aria-label="${not ? '冰箱和裡面的燈' : '電池、開關和燈泡接成的電路'}">
+          <defs><marker id="gt-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#e03131"/></marker></defs>
+          <g class="gt-draw"></g>
+        </svg>
+        <div class="gt-btns">${ins.map(i => `<button class="option gt-btn" data-in="${i}"></button>`).join('')}</div>
+        <table class="gt-table">
+          <tr>${not ? '<th>門壓住按鈕</th>' : '<th>開關 A</th><th>開關 B</th>'}<th>燈</th></tr>
+          ${rows.map(r => `<tr data-k="${r.join('')}">${r.map((v, i) => `<td>${val(ins[i], v)}</td>`).join('')}<td class="gt-out">？</td></tr>`).join('')}
+        </table>
+      </div>`;
+    const tried = new Set();
+    const key = () => ins.map(i => state[i]).join('');
+    const draw = () => {
+      const on = out(state);
+      host.querySelector('.gt-draw').innerHTML = not ? gateFridge(state.a) : gateCircuit(kind, state, on);
+      host.querySelectorAll('.gt-btn').forEach(b => {
+        const v = state[b.dataset.in];
+        b.textContent = not ? (v ? '🚪 打開冰箱門' : '🚪 關上冰箱門') : `開關 ${b.dataset.in.toUpperCase()}：${v ? '開' : '關'}`;
+        b.classList.toggle('on', !not && !!v);
+      });
+      host.querySelectorAll('.gt-table tr[data-k]').forEach(tr => {
+        const k = tr.dataset.k;
+        tr.classList.toggle('cur', k === key());
+        if (tried.has(k)) {
+          const lit = out(Object.fromEntries(ins.map((i, n) => [i, +k[n]])));
+          tr.querySelector('.gt-out').textContent = lit ? '💡 亮 1' : '⚫ 不亮 0';
+        }
+      });
+    };
+    const visit = () => {
+      const k = key();
+      if (tried.has(k)) return;
+      tried.add(k);
+      if (tried.size > 1) api.good();
+      const left = rows.length - tried.size;
+      host.querySelector('.gt-hint').textContent = left ? `還有 ${left} 種開法沒試` : done;
+      if (!left) api.done();
+    };
+    host.querySelector('.w-gate').addEventListener('click', e => {
+      const i = e.target.closest('[data-in]')?.dataset.in;
+      if (!i) return;
+      state[i] = 1 - state[i];
+      visit();
+      draw();
+    });
+    visit();
+    draw();
   },
 
   // Light bulbs worth 8, 4, 2, 1 add up to the target number.

@@ -404,6 +404,32 @@ a.unit-card:active { transform: scale(.98); }
 .seq li.ord-slot:not(.ord-done)::before { background: var(--line); color: var(--ink-2); }
 .ord-hint { margin: 0; text-align: center; color: var(--ink-2); font-weight: 700; }
 
+/* ---------- logic gates: switches and a bulb ---------- */
+
+.w-gate { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.gt-hint { margin: 0; font-weight: 800; font-size: 1.1rem; text-align: center; }
+.gt-pic { display: block; width: 100%; max-width: 460px; height: auto; max-height: min(40vh, 300px); }
+.gt-sw { cursor: pointer; }
+.gt-w { fill: none; stroke: #adb5bd; stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; }
+.gt-w.live { stroke: #fab005; }
+.gt-lever { stroke: #495057; stroke-width: 6; stroke-linecap: round; }
+.gt-lever.live { stroke: #f08c00; }
+.gt-dot { fill: #fff; stroke: #495057; stroke-width: 3; }
+.gt-name { font-size: 18px; font-weight: 900; text-anchor: middle; fill: var(--ink); }
+.gt-batt { font-size: 14px; font-weight: 800; fill: var(--ink-2); }
+.gt-cap { font-size: 15px; font-weight: 800; text-anchor: middle; fill: var(--ink-2); }
+.gt-red { fill: #e03131; }
+.gt-bulb { fill: #e9ecef; stroke: #868e96; stroke-width: 3; transition: fill .15s; }
+.gt-bulb.on { fill: #ffe066; stroke: #f08c00; }
+.gt-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.gt-btn { min-width: 9rem; min-height: 52px; text-align: center; }
+.gt-btn.on { border-color: #f08c00; background: #fff4e6; }
+.gt-table { border-collapse: collapse; font-weight: 700; text-align: center; }
+.gt-table th, .gt-table td { padding: .3rem .8rem; border: 2px solid var(--line); }
+.gt-table th { background: var(--card); color: var(--ink-2); }
+.gt-table tr.cur td { background: #fff4e6; }
+@media (prefers-reduced-motion: reduce) { .gt-bulb { transition: none; } }
+
 /* ---------- binary ---------- */
 
 .w-binary { display: flex; flex-direction: column; align-items: center; gap: 18px; }
