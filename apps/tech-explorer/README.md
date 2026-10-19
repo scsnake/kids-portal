@@ -13,7 +13,7 @@ Two parts. Part 1 teaches how to use a device, with rough ideas only. Part 2
 explains how things work inside. Inside each part, a unit only uses ideas from
 the units before it.
 
-The home screen groups the units into 11 stages of 2 to 5 units (`STAGES` in
+The home screen groups the units into 12 stages of 2 to 5 units (`STAGES` in
 `js/units.js`). The next stage not read through is marked 「下一站」 and opens by
 itself; a stage read through gets 🏅. No unit is locked. The
 first time a Part 2 unit opens, a card suggests an earlier stage not read through
@@ -45,29 +45,30 @@ yet; 「直接開始」 closes it.
 22. 地圖和導航: search a place, walk / bus / car routes, follow the turn-by-turn banner; who may see your location; a stranger asking for it; bus time includes the wait
 23. AI 聊天機器人: what a chatbot is, catching a wrong answer, good and bad uses
 24. 語音助理: clear commands for four jobs (vague ones ask back, no wake word gets no answer), the wake word, good and careful uses
-25. 上網安全: scam messages, traps on web pages (fake ads, pop-ups, fake virus alerts, redirects, phishing), verification codes, two-factor authentication, malware, personal information, 165
-26. 假訊息和 AI 假圖: misinformation (source, date, forwarded hoaxes), spotting flaws in an AI-made picture, deepfake voices (a fake call from a parent), creepy videos dressed as cartoons (Elsagate), habits before forwarding
-27. 公共 Wi-Fi 和網購: pick the Wi-Fi on the library poster (look-alike and open networks), what to leave for home, a fake shop with 4 warning signs, in-app purchases (Ask to Buy), paying outside the shop
-28. 網路禮儀和網路霸凌: think before you post, cyberbullying in a chat (don't reply, screenshot, tell an adult, block), bystanders
-29. 緊急求救: 119 vs 110, calling from a locked phone (緊急 on the passcode screen), Medical ID, Emergency SOS
+25. AI 生成內容的標示: find the AI labels in a feed of real photos and real AI images (public domain, see img/ailabel/CREDITS.md), share your own AI picture honestly, AI and homework
+26. 上網安全: scam messages, traps on web pages (fake ads, pop-ups, fake virus alerts, redirects, phishing), verification codes, two-factor authentication, malware, personal information, 165
+27. 假訊息和 AI 假圖: misinformation (source, date, forwarded hoaxes), spotting flaws in an AI-made picture, deepfake voices (a fake call from a parent), creepy videos dressed as cartoons (Elsagate), habits before forwarding
+28. 公共 Wi-Fi 和網購: pick the Wi-Fi on the library poster (look-alike and open networks), what to leave for home, a fake shop with 4 warning signs, in-app purchases (Ask to Buy), paying outside the shop
+29. 網路禮儀和網路霸凌: think before you post, cyberbullying in a chat (don't reply, screenshot, tell an adult, block), bystanders
+30. 緊急求救: 119 vs 110, calling from a locked phone (緊急 on the passcode screen), Medical ID, Emergency SOS
 
 **Part 2: 原理探索 (how it works)**
 
-30. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
-31. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
-32. 作業系統: what an OS does, time sharing (multitasking)
-33. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
-34. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
-35. 聲音和影片怎麼變成數字: sampling a sound wave (and hearing it), frames per second with a bouncing ball, why video needs compression
-36. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
-37. AI 怎麼學？: learning from examples, why data matters (bias)
-38. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
-39. 網路的實體: follow a message from Taiwan to the US (cell tower, machine room, submarine cable, data center) on a map with Taiwan's real outline, submarine cables, data centers and their power
-40. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
-41. 演算法: steps, binary search (number guessing), sorting by swaps
-42. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
-43. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
-44. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+31. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
+32. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
+33. 作業系統: what an OS does, time sharing (multitasking)
+34. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
+35. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
+36. 聲音和影片怎麼變成數字: sampling a sound wave (and hearing it), frames per second with a bouncing ball, why video needs compression
+37. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
+38. AI 怎麼學？: learning from examples, why data matters (bias)
+39. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
+40. 網路的實體: follow a message from Taiwan to the US (cell tower, machine room, submarine cable, data center) on a map with Taiwan's real outline, submarine cables, data centers and their power
+41. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
+42. 演算法: steps, binary search (number guessing), sorting by swaps
+43. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
+44. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
+45. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
 
 ## Saved progress
 

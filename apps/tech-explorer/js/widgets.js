@@ -482,6 +482,20 @@ const RU_SITES = [
   { icon: '📺', name: '影片網站', strong: 'Zm8%cT1u' },
 ];
 
+// Posts in a feed, with real pictures from Wikimedia Commons (img/ailabel/CREDITS.md): real
+// photos and AI-made images. `label` is where the post says it was made by AI (on the
+// picture, under the name, or in the text); `ai` without a label is an AI image that does
+// not say so.
+const AF_DIR = 'img/ailabel/';
+const AF_POSTS = [
+  { who: '🐱 小貓日記', img: 'cat', alt: '一隻貓在陽光下睡覺', text: '午睡時間，曬太陽好舒服。' },
+  { who: '🦔 動物小知識', img: 'hedgehog', alt: '一隻刺蝟趴在樹枝上', text: '刺蝟的小鼻子好可愛！', label: 'pic' },
+  { who: '🎨 畫畫社', img: 'turtle', alt: '一隻在花叢裡笑的烏龜', text: '愛笑的烏龜。', label: 'name' },
+  { who: '🍰 好吃小廚房', img: 'cake', alt: '一塊草莓奶油蛋糕', text: '咖啡店的草莓蛋糕，好好吃。' },
+  { who: '🏔️ 旅行的阿明', img: 'lake', alt: '高山、湖和兩間小木屋', text: '夢想中的湖邊小屋 #AI生成', label: 'text' },
+  { who: '🍏 每日水果', img: 'apple', alt: '桌上的一顆青蘋果', text: '剛摘的青蘋果，好新鮮！', ai: true },
+];
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -5765,6 +5779,94 @@ export const WIDGETS = {
       }, 900);
     });
     ask();
+  },
+
+  // Find the posts that say they were made by AI. At the end the one AI picture without a
+  // label is shown too: no label does not mean it is a real photo.
+  aifeed(host, _, api) {
+    const need = AF_POSTS.filter(p => p.label).length;
+    host.innerHTML = `
+      <div class="w-af">
+        <p class="af-hint">找出 ${need} 則有寫「AI 做的」的貼文，點一下</p>
+        <div class="af-feed">${AF_POSTS.map((p, i) => `
+          <button class="af-post" data-i="${i}">
+            <span class="af-who">${p.who}${p.label === 'name' ? '<small class="af-tag">🤖 由 AI 製作</small>' : ''}</span>
+            <span class="af-pic"><img src="${AF_DIR}${p.img}.jpg" alt="${p.alt}" loading="lazy" draggable="false">${p.label === 'pic' ? '<small class="af-tag af-on-pic">AI 生成</small>' : ''}</span>
+            <span class="af-text">${p.text.replace('#AI生成', '<mark class="af-hash">#AI生成</mark>')}</span>
+          </button>`).join('')}
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const found = new Set();
+    $('.af-feed').addEventListener('click', e => {
+      const b = e.target.closest('.af-post');
+      if (!b || found.size === need) return;
+      const p = AF_POSTS[b.dataset.i];
+      if (!p.label) {
+        $('.af-hint').textContent = '這則沒有寫是 AI 做的，再找找看';
+        shake(b);
+        return;
+      }
+      if (found.has(p)) return;
+      found.add(p);
+      b.classList.add('found');
+      pop(b);
+      api.good();
+      if (found.size < need) { $('.af-hint').textContent = `找到 ${found.size} 則了，還有 ${need - found.size} 則。標示可能在圖上、名字下面或文字裡`; return; }
+      const hidden = host.querySelector(`[data-i="${AF_POSTS.findIndex(x => x.ai)}"]`);
+      hidden.classList.add('secret');
+      hidden.querySelector('.af-pic').insertAdjacentHTML('beforeend', '<small class="af-tag af-on-pic af-late">其實也是 AI 做的</small>');
+      $('.af-hint').textContent = '🎉 3 則都找到了！可是青蘋果那張也是 AI 做的，只是沒標示。看起來像真的照片，也不一定是真的。';
+      $('.af-hint').classList.add('done');
+      api.done();
+    });
+  },
+
+  // Share a picture you made with AI: pick the words and switch on the AI label. A misleading
+  // caption or a missing label gets a warning; an honest post appears with its label.
+  aipost(host, _, api) {
+    const caps = [
+      { text: '哇！今天學校操場真的有恐龍！', why: '大家可能會以為操場真的有恐龍，還會轉傳出去。' },
+      { text: '看我畫的恐龍，畫了好久！', why: '這是 AI 做的，不是你畫的。說是自己畫的，對別人不公平。' },
+      { text: '我用 AI 做了一張「恐龍來學校」的圖 🦖', ok: true },
+    ];
+    host.innerHTML = `
+      <div class="w-ap">
+        <div class="ap-compose">
+          <p class="ap-head">新貼文</p>
+          <span class="ap-pic">🦖🏫</span>
+          <p class="ap-q">要寫什麼？</p>
+          <div class="ap-caps">${caps.map((c, i) => `<button class="option ap-cap" data-c="${i}">${c.text}</button>`).join('')}</div>
+          <label class="ap-switch"><span>加上「AI 生成」標示</span><input type="checkbox"><i aria-hidden="true"></i></label>
+          <button class="go" data-act="share">分享</button>
+        </div>
+        <p class="ap-why" aria-live="polite">這張圖是你用 AI App 做的。選好文字，再按「分享」</p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let cap = -1, posted = false;
+    $('.ap-caps').addEventListener('click', e => {
+      const b = e.target.closest('[data-c]');
+      if (!b || posted) return;
+      cap = +b.dataset.c;
+      host.querySelectorAll('.ap-cap').forEach(x => x.classList.toggle('on', x === b));
+    });
+    const why = (text, cls = '') => { $('.ap-why').textContent = text; $('.ap-why').className = `ap-why ${cls}`; };
+    $('[data-act="share"]').onclick = () => {
+      if (posted) return;
+      const label = $('.ap-switch input').checked;
+      if (cap < 0) { why('先選一句要寫的話'); shake($('.ap-caps')); return; }
+      if (!caps[cap].ok) { why(`⚠️ ${caps[cap].why}`, 'bad'); shake($('.ap-cap.on')); api.bad(); return; }
+      if (!label) { why('話說得很好！再打開「AI 生成」標示，別人轉傳時也看得到。', 'tip'); shake($('.ap-switch')); return; }
+      posted = true;
+      $('.ap-compose').innerHTML = `
+        <p class="ap-head">已分享</p>
+        <span class="ap-pic">🦖🏫<small class="af-tag af-on-pic">AI 生成</small></span>
+        <p class="ap-posted">${caps[cap].text}</p>`;
+      pop($('.ap-compose'));
+      why('🎉 分享了！大家一看就知道是 AI 做的，不會當真，也知道是你用 AI 做的。', 'done');
+      api.good();
+      api.done();
+    };
   },
 
   // The operating system takes turns between apps so fast they look simultaneous.

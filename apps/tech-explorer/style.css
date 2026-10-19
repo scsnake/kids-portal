@@ -2088,6 +2088,51 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 @media (prefers-reduced-motion: no-preference) { .vc-phone.listening .vc-orb { animation: vc-spin 1s linear infinite; } }
 @keyframes vc-spin { to { rotate: 1turn; } }
 
+/* ---------- find the AI labels in a feed ---------- */
+
+.w-af { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.af-hint { margin: 0; min-height: 1.5em; font-weight: 800; font-size: 1.1rem; text-align: center; line-height: 1.5; }
+.af-hint.done { color: var(--good); }
+.af-feed { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: min(100%, 660px); }
+@media (max-width: 560px) { .af-feed { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.af-post { display: flex; flex-direction: column; gap: 4px; padding: 8px; border-radius: 14px; border: 2px solid var(--line); background: var(--card); font: inherit; text-align: left; }
+.af-post:active { transform: scale(.98); }
+.af-who { display: flex; flex-direction: column; font-weight: 800; font-size: .9rem; }
+.af-pic { position: relative; display: block; aspect-ratio: 4 / 3; border-radius: 10px; overflow: hidden; background: #e9ecef; }
+.af-pic img { display: block; width: 100%; height: 100%; object-fit: cover; -webkit-user-drag: none; }
+.af-text { font-weight: 600; font-size: .9rem; line-height: 1.4; }
+.af-tag { width: fit-content; padding: 0 6px; border-radius: 6px; background: #343a40; color: white; font-size: .72rem; font-weight: 800; }
+.af-on-pic { position: absolute; left: 6px; bottom: 6px; }
+.af-hash { background: none; color: #1971c2; font-weight: 700; }
+.af-post.found { border-color: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 30%, transparent); }
+.af-post.found .af-tag, .af-post.found .af-hash { background: #ffe066; color: var(--ink); }
+.af-post.secret { border-color: #f59f00; border-style: dashed; }
+.af-late { background: #f59f00; }
+
+/* ---------- share your own AI picture honestly ---------- */
+
+.w-ap { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.ap-compose { display: flex; flex-direction: column; align-items: center; gap: 8px; width: min(100%, 460px); padding: 12px 14px 14px; border-radius: 22px; border: 2px solid var(--line); background: var(--card); box-shadow: var(--shadow); }
+.ap-head { margin: 0; align-self: stretch; padding-bottom: 6px; border-bottom: 1px solid var(--line); font-weight: 900; text-align: center; }
+.ap-pic { position: relative; display: grid; place-items: center; width: 160px; aspect-ratio: 4 / 3; border-radius: 12px; background: #d3f9d8; font-size: 2.6rem; }
+.ap-q { margin: 0; align-self: flex-start; font-weight: 800; color: var(--ink-2); }
+.ap-caps { display: flex; flex-direction: column; gap: 6px; align-self: stretch; }
+.ap-cap { font-size: 1rem; min-height: 48px; padding: .4rem .8rem; }
+.ap-cap.on { border-color: #1c7ed6; background: #e7f5ff; color: var(--ink); }
+.ap-switch { display: flex; align-items: center; justify-content: space-between; gap: 10px; align-self: stretch; min-height: 48px; padding: 0 4px; font-weight: 800; cursor: pointer; }
+.ap-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.ap-switch i { position: relative; flex: none; width: 52px; height: 32px; border-radius: 16px; background: #ced4da; transition: background .2s; }
+.ap-switch i::after { content: ''; position: absolute; left: 3px; top: 3px; width: 26px; height: 26px; border-radius: 50%; background: white; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: transform .2s; }
+.ap-switch input:checked + i { background: #34c759; }
+.ap-switch input:checked + i::after { transform: translateX(20px); }
+.ap-switch input:focus-visible + i { outline: 3px solid var(--c); outline-offset: 2px; }
+.ap-posted { margin: 0; font-weight: 700; }
+.ap-why { margin: 0; width: min(100%, 560px); min-height: 1.5em; font-weight: 700; line-height: 1.6; text-align: center; }
+.ap-why.bad { color: #a61e1e; }
+.ap-why.tip { color: var(--ink-2); }
+.ap-why.done { color: var(--good); }
+@media (prefers-reduced-motion: reduce) { .ap-switch i, .ap-switch i::after { transition: none; } }
+
 /* ---------- multitasking ---------- */
 
 .w-multi { display: flex; flex-direction: column; gap: 12px; align-items: center; }

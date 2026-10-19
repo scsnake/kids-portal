@@ -1595,6 +1595,56 @@ export const UNITS = [
   },
 
   {
+    id: 'ailabel',
+    part: 'basic',
+    icon: '🏷️',
+    title: 'AI 生成內容的標示',
+    en: 'Labels on AI Content',
+    desc: '找 AI 標示、自己做的要標示、作業和 AI',
+    color: '#9c36b5',
+    added: '2026-10-19',
+    slides: [
+      {
+        title: '找找 AI 標示',
+        text: `有些 App 會在 AI 做的圖片、影片旁邊寫「AI 生成」，這叫${t('AI 標示', 'AI label')}。標示可能在圖上、名字下面，或在文字裡。找找看！`,
+        widget: 'aifeed',
+      },
+      {
+        title: '自己做的，也要標示',
+        text: '用 AI 做了圖或影片要分享時，老實說是 AI 做的，別人才不會當真。很多 App 分享時有「AI 標示」的開關。發一則貼文看看！',
+        widget: 'aipost',
+      },
+      {
+        title: '作業可以用 AI 嗎？',
+        text: `作業是要讓你自己練習。用 AI 寫，卻說是自己寫的，就是${t('抄襲', 'plagiarism')}。`,
+        widget: 'choice',
+        params: {
+          question: '老師出了作文作業，你想用 AI 幫忙。怎麼做最好？',
+          options: [
+            { text: '🙋 先問老師可不可以用；用了，就老實說哪裡是 AI 寫的', correct: true },
+            { text: '📋 請 AI 寫好，直接交，老師看不出來' },
+            { text: '✏️ 把 AI 的句子改幾個字，就說是自己寫的' },
+          ],
+          explain: '有的老師允許用 AI 找點子，有的不行。先問清楚，用了就說，這樣最誠實。',
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '一張很驚人的照片，旁邊沒有「AI 生成」的標示。它一定是真的嗎？',
+          options: [
+            { text: '🔍 不一定，有些人不標示，還是要查來源', correct: true },
+            { text: '✅ 一定是真的，沒標示就是真的' },
+            { text: '❌ 一定是假的' },
+          ],
+          explain: '標示要靠做的人或 App 加上去，有人會忘記，也有人故意不寫。看不出來時，就查是誰發的。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'safety',
     part: 'basic',
     icon: '🛡️',
@@ -2989,6 +3039,7 @@ export const STAGES = [
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account', 'passkey'] },
   { id: 'apps', part: 'basic', icon: '📲', title: '用 App', en: 'Using Apps', units: ['appbasics', 'apps', 'handy', 'maps'] },
   { id: 'helpers', part: 'basic', icon: '🤖', title: 'AI 小幫手', en: 'AI Helpers', units: ['aichat', 'voice'] },
+  { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os'] },
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo'] },
