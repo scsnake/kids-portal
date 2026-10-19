@@ -651,6 +651,9 @@ const PQ_SCENE = `
   <rect x="278" y="206" width="80" height="20" rx="3" fill="#fff3bf" stroke="#f08c00" stroke-width="1.5"/>
   <text x="318" y="220" class="pq-t pq-s" fill="#212529">0900-000-000</text>`;
 
+// Place values of the four bits, left to right.
+const BK_PLACES = [8, 4, 2, 1];
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -867,6 +870,190 @@ export const WIDGETS = {
     });
     visit();
     draw();
+  },
+
+  // Count up in binary with +1. A 1 that gets +1 turns into 0 and carries to the left,
+  // one bit at a time, so the carry can be watched. The star comes at 8 (1000).
+  bincount(host, _, api) {
+    host.innerHTML = `
+      <div class="w-bk">
+        <p class="bk-hint">按「+1」，一直加到 8</p>
+        <div class="bk-row">${BK_PLACES.map(p => `<div class="bk-cell"><b class="bk-bit">0</b><small>${p}</small><span class="bk-carry" hidden>進位 ↰</span></div>`).join('')}</div>
+        <p class="bk-dec">十進位：<b>0</b></p>
+        <button class="go bk-add">+1</button>
+        <p class="bk-log" aria-live="polite"></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const bits = [0, 0, 0, 0], cells = host.querySelectorAll('.bk-cell');
+    let n = 0, busy = false;
+    const draw = () => {
+      cells.forEach((c, i) => { c.querySelector('.bk-bit').textContent = bits[i]; c.classList.toggle('one', !!bits[i]); });
+      $('.bk-dec b').textContent = n;
+    };
+    $('.bk-add').addEventListener('click', () => {
+      if (busy || n >= 15) return;
+      busy = true;
+      const before = bits.join('');
+      let i = 3, carries = 0;
+      const step = () => {
+        if (!api.alive()) return;
+        cells.forEach(c => c.querySelector('.bk-carry').hidden = true);
+        cells.forEach(c => c.classList.remove('now'));
+        cells[i].classList.add('now');
+        if (bits[i] === 1) {
+          bits[i] = 0;
+          carries++;
+          draw();
+          if (i > 0) cells[i - 1].querySelector('.bk-carry').hidden = false;
+          i--;
+          api.later(step, 450);
+          return;
+        }
+        bits[i] = 1;
+        n++;
+        draw();
+        pop(cells[i]);
+        api.later(() => { cells.forEach(c => c.classList.remove('now')); cells.forEach(c => c.querySelector('.bk-carry').hidden = true); }, 450);
+        $('.bk-log').textContent = `${before} + 1 = ${bits.join('')}${carries ? `：1 + 1 = 10，進位了 ${carries} 次` : ''}`;
+        busy = false;
+        api.good();
+        if (n === 8) {
+          $('.bk-hint').textContent = '🎉 0111 + 1：進位一路傳到最左邊，變成 1000，就是 8！';
+          $('.bk-hint').classList.add('done');
+          api.done();
+        } else if (n < 8) $('.bk-hint').textContent = n === 2 ? '1 + 1 = 10！滿 2 就進位，像十進位的 9 + 1 = 10' : `再按 ${8 - n} 次，到 8`;
+        if (n === 15) $('.bk-add').disabled = true;
+      };
+      step();
+    });
+    draw();
+  },
+
+  // Two bits in, two lamps out: XOR gives the sum bit, AND gives the carry.
+  halfadder(host, _, api) {
+    host.innerHTML = `
+      <div class="w-ha">
+        <p class="ha-hint">點 A 和 B，四種都試試看</p>
+        <svg class="ha-pic" viewBox="0 0 360 200" aria-hidden="true"></svg>
+        <div class="ha-btns"><button class="option ha-in" data-in="0"></button><button class="option ha-in" data-in="1"></button></div>
+        <p class="ha-sum"></p>
+        <table class="ha-table"><tr><th>A</th><th>B</th><th>A + B</th></tr>
+          ${['00', '01', '10', '11'].map(k => `<tr data-k="${k}"><td>${k[0]}</td><td>${k[1]}</td><td class="ha-out">？</td></tr>`).join('')}</table>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const ab = [0, 0], tried = new Set();
+    const draw = () => {
+      const [a, b] = ab, s = a ^ b, c = a & b;
+      const w = (on, d) => `<path d="${d}" class="ha-w${on ? ' live' : ''}"/>`;
+      $('.ha-pic').innerHTML = `
+        ${w(a, 'M40 60 H90 V50 H150 M90 60 V140 H150')}
+        ${w(b, 'M40 150 H70 V70 H150 M70 150 V160 H150')}
+        <text x="8" y="67" class="ha-name">A</text><text x="8" y="157" class="ha-name">B</text>
+        <circle cx="40" cy="60" r="8" class="ha-dot${a ? ' live' : ''}"/><circle cx="40" cy="150" r="8" class="ha-dot${b ? ' live' : ''}"/>
+        <rect x="150" y="30" width="80" height="60" rx="12" class="ha-box"/><text x="190" y="58" class="ha-gate">XOR</text><text x="190" y="78" class="ha-sub">只有一個是 1</text>
+        <rect x="150" y="120" width="80" height="60" rx="12" class="ha-box"/><text x="190" y="148" class="ha-gate">AND</text><text x="190" y="168" class="ha-sub">兩個都是 1</text>
+        ${w(s, 'M230 60 H290')}${w(c, 'M230 150 H290')}
+        <circle cx="310" cy="60" r="20" class="ha-lamp${s ? ' on' : ''}"/><circle cx="310" cy="150" r="20" class="ha-lamp${c ? ' on' : ''}"/>
+        <text x="310" y="67" class="ha-lv">${s}</text><text x="310" y="157" class="ha-lv">${c}</text>
+        <text x="310" y="30" class="ha-sub">和</text><text x="310" y="194" class="ha-sub">進位</text>`;
+      host.querySelectorAll('.ha-in').forEach(btn => {
+        const v = ab[btn.dataset.in];
+        btn.textContent = `${btn.dataset.in === '0' ? 'A' : 'B'}：${v}`;
+        btn.classList.toggle('on', !!v);
+      });
+      $('.ha-sum').innerHTML = `${a} + ${b} = <b>${c}${s}</b>　<small>（進位 ${c}，和 ${s}）</small>`;
+      const k = `${a}${b}`;
+      host.querySelectorAll('.ha-table tr[data-k]').forEach(tr => tr.classList.toggle('cur', tr.dataset.k === k));
+      if (!tried.has(k)) {
+        tried.add(k);
+        host.querySelector(`.ha-table tr[data-k="${k}"] .ha-out`).textContent = `${c}${s}`;
+        if (tried.size > 1) api.good();
+        const left = 4 - tried.size;
+        $('.ha-hint').textContent = left ? `還有 ${left} 種沒試` : '🎉 XOR 算出「和」，AND 算出「進位」：1 + 1 = 10！';
+        $('.ha-hint').classList.toggle('done', !left);
+        if (!left) api.done();
+      }
+    };
+    host.querySelector('.ha-btns').addEventListener('click', e => {
+      const b = e.target.closest('.ha-in');
+      if (!b) return;
+      ab[b.dataset.in] ^= 1;
+      draw();
+    });
+    draw();
+  },
+
+  // Add two 4-bit numbers one column at a time, right to left, with the carry moving left.
+  // Tap a bit to change a number; 下一位 ▶ steps through.
+  ripple(host, _, api) {
+    const A = [0, 1, 0, 1], B = [0, 0, 1, 1];
+    host.innerHTML = `
+      <div class="w-rc">
+        <p class="rc-hint">算 5 + 3：按「下一位」，從最右邊開始加</p>
+        <div class="rc-grid">
+          <span class="rc-lab">進位</span>${[0, 1, 2, 3, 4].map(i => `<span class="rc-c" data-c="${i}"></span>`).join('')}<span></span>
+          <span class="rc-lab">A</span><span></span>${A.map((_, i) => `<button class="rc-bit" data-r="a" data-i="${i}"></button>`).join('')}<b class="rc-dec" data-r="a"></b>
+          <span class="rc-lab">+ B</span><span></span>${B.map((_, i) => `<button class="rc-bit" data-r="b" data-i="${i}"></button>`).join('')}<b class="rc-dec" data-r="b"></b>
+          <span class="rc-line"></span>
+          <span class="rc-lab">和</span>${[0, 1, 2, 3, 4].map(i => `<span class="rc-s" data-s="${i}"></span>`).join('')}<b class="rc-dec rc-total"></b>
+        </div>
+        <button class="go rc-next">下一位 ▶</button>
+        <p class="rc-log" aria-live="polite"></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const val = bits => bits.reduce((v, b) => v * 2 + b, 0);
+    let col = 4, carry = 0, sum = [];
+    const reset = () => {
+      col = 4; carry = 0; sum = [];
+      host.querySelectorAll('.rc-c, .rc-s').forEach(x => { x.textContent = ''; x.classList.remove('now', 'got'); });
+      host.querySelectorAll('.rc-bit').forEach(b => { b.textContent = (b.dataset.r === 'a' ? A : B)[b.dataset.i]; b.classList.remove('now'); });
+      $('.rc-dec[data-r="a"]').textContent = `= ${val(A)}`;
+      $('.rc-dec[data-r="b"]').textContent = `= ${val(B)}`;
+      $('.rc-total').textContent = '';
+      $('.rc-next').textContent = '下一位 ▶';
+      $('.rc-log').textContent = '';
+    };
+    host.querySelector('.rc-grid').addEventListener('click', e => {
+      const b = e.target.closest('.rc-bit');
+      if (!b) return;
+      const row = b.dataset.r === 'a' ? A : B;
+      row[b.dataset.i] ^= 1;
+      reset();
+      $('.rc-hint').textContent = `算 ${val(A)} + ${val(B)}：按「下一位」，從最右邊開始加`;
+    });
+    $('.rc-next').addEventListener('click', () => {
+      if (col === -1) { reset(); return; }
+      host.querySelectorAll('.now').forEach(x => x.classList.remove('now'));
+      if (col === 0) {
+        // Only the last carry is left: it becomes the fifth bit.
+        const s = host.querySelector('.rc-s[data-s="0"]');
+        s.textContent = carry;
+        s.classList.add('got', 'now');
+        $('.rc-log').textContent = carry ? '最後的進位 1，寫在最左邊' : '沒有進位了';
+      } else {
+        const i = col - 1, a = A[i], b = B[i], total = a + b + carry;
+        host.querySelectorAll(`.rc-bit[data-i="${i}"]`).forEach(x => x.classList.add('now'));
+        host.querySelector(`.rc-c[data-c="${col}"]`).classList.add('now');
+        const s = host.querySelector(`.rc-s[data-s="${col}"]`);
+        s.textContent = total % 2;
+        s.classList.add('got', 'now');
+        pop(s);
+        $('.rc-log').textContent = `${a} + ${b}${carry ? ' + 進位 1' : ''} = ${total.toString(2).padStart(total > 1 ? 2 : 1, '0')}：寫 ${total % 2}${total > 1 ? '，進位 1' : ''}`;
+        carry = total > 1 ? 1 : 0;
+        if (carry) { const c = host.querySelector(`.rc-c[data-c="${col - 1}"]`); c.textContent = '1'; c.classList.add('got'); pop(c); }
+        api.good();
+      }
+      col--;
+      if (col === -1) {
+        const bits = [...host.querySelectorAll('.rc-s')].map(x => +x.textContent);
+        $('.rc-total').textContent = `= ${val(bits)}`;
+        $('.rc-hint').textContent = `🎉 ${val(A)} + ${val(B)} = ${val(bits)}！每一位都是一個全加器，把進位交給左邊`;
+        $('.rc-hint').classList.add('done');
+        $('.rc-next').textContent = '🔁 再算一次';
+        api.done();
+      }
+    });
+    reset();
   },
 
   // Light bulbs worth 8, 4, 2, 1 add up to the target number.

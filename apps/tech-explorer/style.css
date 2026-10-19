@@ -428,6 +428,70 @@ a.unit-card:active { transform: scale(.98); }
 .gt-table th, .gt-table td { padding: .3rem .8rem; border: 2px solid var(--line); }
 .gt-table th { background: var(--card); color: var(--ink-2); }
 .gt-table tr.cur td { background: #fff4e6; }
+
+/* ---------- binary counter with carries ---------- */
+
+.w-bk { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.bk-hint { margin: 0; min-height: 3em; width: min(100%, 520px); font-weight: 800; font-size: 1.1rem; line-height: 1.5; text-align: center; }
+.bk-hint.done { color: var(--good); }
+.bk-row { display: flex; gap: 10px; }
+.bk-cell { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 72px; padding: 10px 0 6px; border-radius: 14px; background: var(--card); border: 3px solid var(--line); transition: border-color .15s, background .15s; }
+.bk-cell.one { background: #fff9db; }
+.bk-cell.now { border-color: var(--c); }
+.bk-bit { font-family: ui-monospace, Menlo, monospace; font-size: 2.6rem; line-height: 1.1; }
+.bk-cell small { color: var(--ink-3); font-weight: 800; }
+.bk-carry { position: absolute; top: -26px; left: 50%; translate: -50% 0; padding: 0 6px; border-radius: 8px; background: var(--c); color: white; font-weight: 800; font-size: .8rem; white-space: nowrap; }
+.bk-dec { margin: 0; font-weight: 800; font-size: 1.15rem; }
+.bk-dec b { font-family: ui-monospace, Menlo, monospace; font-size: 1.5rem; color: var(--c); }
+.bk-add { min-width: 140px; font-size: 1.5rem; }
+.bk-log { margin: 0; min-height: 1.6em; font-family: ui-monospace, Menlo, monospace; font-weight: 700; color: var(--ink-2); text-align: center; }
+
+/* ---------- half adder ---------- */
+
+.w-ha { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+.ha-hint { margin: 0; font-weight: 800; font-size: 1.1rem; text-align: center; }
+.ha-hint.done { color: var(--good); }
+.ha-pic { display: block; width: 100%; max-width: 440px; max-height: 34vh; }
+.ha-w { fill: none; stroke: #adb5bd; stroke-width: 5; stroke-linejoin: round; }
+.ha-w.live { stroke: #fab005; }
+.ha-dot { fill: white; stroke: #495057; stroke-width: 3; }
+.ha-dot.live { fill: #fab005; }
+.ha-name { font-size: 20px; font-weight: 900; fill: var(--ink); }
+.ha-box { fill: var(--card); stroke: var(--c); stroke-width: 3; }
+.ha-gate { font-size: 18px; font-weight: 900; text-anchor: middle; fill: var(--c); }
+.ha-sub { font-size: 11px; font-weight: 800; text-anchor: middle; fill: var(--ink-2); }
+.ha-lamp { fill: #e9ecef; stroke: #868e96; stroke-width: 3; transition: fill .15s; }
+.ha-lamp.on { fill: #ffe066; stroke: #f08c00; }
+.ha-lv { font-size: 20px; font-weight: 900; text-anchor: middle; font-family: ui-monospace, Menlo, monospace; fill: var(--ink); }
+.ha-btns { display: flex; gap: 10px; }
+.ha-in { min-width: 7rem; text-align: center; font-family: ui-monospace, Menlo, monospace; }
+.ha-in.on { border-color: #f08c00; background: #fff4e6; }
+.ha-sum { margin: 0; font-weight: 800; font-size: 1.2rem; }
+.ha-sum b { font-family: ui-monospace, Menlo, monospace; font-size: 1.5rem; color: var(--c); }
+.ha-sum small { color: var(--ink-2); font-size: .9rem; }
+.ha-table { border-collapse: collapse; font-weight: 700; text-align: center; font-family: ui-monospace, Menlo, monospace; }
+.ha-table th, .ha-table td { padding: .2rem .9rem; border: 2px solid var(--line); }
+.ha-table th { background: var(--card); color: var(--ink-2); font-family: inherit; }
+.ha-table tr.cur td { background: #fff4e6; }
+
+/* ---------- ripple-carry adder ---------- */
+
+.w-rc { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.rc-hint { margin: 0; min-height: 3em; width: min(100%, 520px); font-weight: 800; font-size: 1.1rem; line-height: 1.5; text-align: center; }
+.rc-hint.done { color: var(--good); }
+.rc-grid { display: grid; grid-template-columns: auto repeat(5, 52px) 64px; align-items: center; gap: 6px; padding: 12px 14px; border-radius: var(--radius); background: var(--card); border: 2px solid var(--line); font-family: ui-monospace, Menlo, monospace; }
+.rc-lab { padding-right: 6px; font-family: system-ui, sans-serif; font-weight: 800; color: var(--ink-2); text-align: right; white-space: nowrap; }
+.rc-c { height: 26px; display: grid; place-items: center; border-radius: 8px; color: var(--c); font-weight: 900; font-size: 1.1rem; }
+.rc-c.got { background: color-mix(in srgb, var(--c) 14%, white); }
+.rc-bit, .rc-s { height: 52px; display: grid; place-items: center; border-radius: 12px; font: inherit; font-weight: 800; font-size: 1.6rem; }
+.rc-bit { border: 2px solid var(--line); background: var(--paper); color: var(--ink); }
+.rc-s { border: 2px dashed var(--line); }
+.rc-s.got { border-style: solid; border-color: var(--c); }
+.rc-bit.now, .rc-s.now, .rc-c.now { box-shadow: 0 0 0 3px #fab005; }
+.rc-dec { padding-left: 6px; color: var(--ink-2); font-size: 1.05rem; white-space: nowrap; }
+.rc-total { color: var(--c); }
+.rc-line { grid-column: 1 / -1; height: 3px; border-radius: 2px; background: var(--ink); }
+.rc-log { margin: 0; min-height: 1.6em; font-weight: 800; color: var(--ink-2); text-align: center; }
 @media (prefers-reduced-motion: reduce) { .gt-bulb { transition: none; } }
 
 /* ---------- binary ---------- */

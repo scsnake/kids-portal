@@ -2472,6 +2472,47 @@ export const UNITS = [
   },
 
   {
+    id: 'adder',
+    part: 'adv',
+    icon: '➕',
+    title: '電腦怎麼做加法？',
+    en: 'How Computers Add',
+    desc: '二進位進位、半加器、全加器',
+    color: '#087f5b',
+    added: '2026-10-19',
+    slides: [
+      {
+        title: '二進位也會進位',
+        text: `十進位的 9 + 1，滿十就${t('進位', 'carry')}，變成 10。二進位只有 0 和 1，所以 1 + 1 就要進位，寫成 10，就是 2。試試看！`,
+        widget: 'bincount',
+      },
+      {
+        title: '半加器：兩個邏輯閘',
+        text: `${t('XOR 閘', 'XOR gate')}在兩個輸入只有一個是 1 時，才輸出 1。XOR 算出「和」，AND 算出「進位」，合起來叫${t('半加器', 'half adder')}。四種都試試看！`,
+        widget: 'halfadder',
+      },
+      {
+        title: '一位一位加上去',
+        text: `再多接一條進位的線，就是${t('全加器', 'full adder')}。4 個全加器排成一排，從右邊開始加，進位一位一位傳到左邊。試試看！`,
+        widget: 'ripple',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '用二進位算：1 + 1 = ？',
+          options: [
+            { text: '10', correct: true },
+            { text: '11' },
+            { text: '0' },
+          ],
+          explain: '二進位沒有 2。1 + 1 滿 2 就進位，寫成 10，意思就是十進位的 2。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'os',
     part: 'adv',
     icon: '🗂️',
@@ -3401,7 +3442,7 @@ export const STAGES = [
   { id: 'helpers', part: 'basic', icon: '🤖', title: 'AI 小幫手', en: 'AI Helpers', units: ['aichat', 'voice'] },
   { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel', 'copyright', 'shareddoc', 'photoshare'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
-  { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os'] },
+  { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'adder', 'os'] },
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },
   { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: '網路怎麼運作', en: 'How Networks Work', units: ['internet', 'networld', 'web', 'iot'] },
