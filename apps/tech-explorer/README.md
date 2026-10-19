@@ -41,19 +41,20 @@ yet; 「直接開始」 closes it.
 18. AI 聊天機器人: what a chatbot is, catching a wrong answer, good and bad uses
 19. 上網安全: scam messages, traps on web pages (fake ads, pop-ups, fake virus alerts, redirects, phishing), verification codes, two-factor authentication, malware, personal information, 165
 20. 假訊息和 AI 假圖: misinformation (source, date, forwarded hoaxes), spotting flaws in an AI-made picture, deepfake voices (a fake call from a parent), habits before forwarding
+21. 緊急求救: 119 vs 110, calling from a locked phone (緊急 on the passcode screen), Medical ID, Emergency SOS
 
 **Part 2: 原理探索 (how it works)**
 
-21. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
-22. 作業系統: what an OS does, time sharing (multitasking)
-23. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
-24. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
-25. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
-26. AI 怎麼學？: learning from examples, why data matters (bias)
-27. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
-28. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
-29. 演算法: steps, binary search (number guessing), sorting by swaps
-30. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+22. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
+23. 作業系統: what an OS does, time sharing (multitasking)
+24. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
+25. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
+26. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
+27. AI 怎麼學？: learning from examples, why data matters (bias)
+28. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
+29. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
+30. 演算法: steps, binary search (number guessing), sorting by swaps
+31. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
 
 ## Saved progress
 

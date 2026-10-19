@@ -1389,6 +1389,90 @@ export const UNITS = [
   },
 
   {
+    id: 'sos',
+    part: 'basic',
+    icon: '🆘',
+    title: '緊急求救',
+    en: 'Emergency Help',
+    desc: '119 和 110、鎖住也能打、醫療卡',
+    color: '#c92a2a',
+    slides: [
+      {
+        title: '緊急電話',
+        text: `遇到危險時，可以打免費的${t('緊急電話', 'emergency number')}。失火、有人受傷或昏倒，打 119；遇到壞人或小偷，打 110 找警察。分分看！`,
+        widget: 'sort',
+        params: {
+          bins: [
+            { id: 'fire', icon: '🚑', label: '119 消防和救護' },
+            { id: 'police', icon: '🚓', label: '110 警察' },
+          ],
+          items: [
+            { icon: '🔥', label: '家裡失火了', bin: 'fire' },
+            { icon: '😵', label: '有人昏倒叫不醒', bin: 'fire' },
+            { icon: '🩹', label: '有人受傷流很多血', bin: 'fire' },
+            { icon: '🛗', label: '被困在電梯裡', bin: 'fire' },
+            { icon: '🦹', label: '看到小偷闖進鄰居家', bin: 'police' },
+            { icon: '👣', label: '有陌生人一直跟著你', bin: 'police' },
+          ],
+        },
+      },
+      {
+        title: '手機鎖住也能打',
+        text: '家人昏倒了，手機卻鎖著，怎麼辦？在輸入密碼的畫面，點左下角的「緊急」，不用密碼也能打緊急電話。試試看撥 119（只是練習）。',
+        widget: 'sosphone',
+      },
+      {
+        title: '醫療卡',
+        text: `${t('醫療卡', 'Medical ID')}可以寫上過敏、吃的藥和${t('緊急聯絡人', 'emergency contact')}。手機鎖著，救護人員也看得到，能更快幫忙。也因為誰都看得到，祕密不要寫進去。分分看！`,
+        widget: 'sort',
+        params: {
+          rest: 'in',
+          bins: [
+            { id: 'in', icon: '✱', label: '寫進醫療卡' },
+            { id: 'out', icon: '🙅', label: '不要寫' },
+          ],
+          items: [
+            { icon: '🥜', label: '對什麼東西過敏', bin: 'in' },
+            { icon: '💊', label: '平常吃的藥', bin: 'in' },
+            { icon: '🩸', label: '血型', bin: 'in' },
+            { icon: '👩', label: '緊急聯絡人', bin: 'in' },
+            { icon: '🔢', label: '手機的密碼', bin: 'out' },
+            { icon: '💳', label: '信用卡號碼', bin: 'out' },
+            { icon: '🚪', label: '家裡大門的密碼', bin: 'out' },
+          ],
+        },
+      },
+      {
+        title: '緊急 SOS',
+        text: `很多手機有${t('緊急 SOS', 'Emergency SOS')}：iPhone 同時按住側邊按鈕和音量鍵，就會出現求救的滑桿。打完電話，手機還會把你的位置傳給緊急聯絡人。依順序點一點。`,
+        widget: 'order',
+        params: {
+          items: [
+            { icon: '🔘', label: '同時按住側邊按鈕和音量鍵' },
+            { icon: '🆘', label: '畫面出現「緊急 SOS」滑桿' },
+            { icon: '👉', label: '把滑桿往右滑' },
+            { icon: '📞', label: '手機打給緊急電話' },
+            { icon: '📍', label: '把位置傳給緊急聯絡人' },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '你和爺爺在公園，爺爺突然昏倒叫不醒，他的手機鎖著。最好怎麼做？',
+          options: [
+            { text: '📞 用鎖定畫面的「緊急」打 119，也大聲請旁邊的大人幫忙', correct: true },
+            { text: '⏳ 先等一下，看爺爺會不會自己醒來' },
+            { text: '🔢 先試著猜爺爺的手機密碼' },
+          ],
+          explain: '有人昏倒要馬上求救。不用密碼也能打 119，電話裡說清楚發生什麼事、在哪裡。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'inside',
     part: 'adv',
     icon: '🧠',
@@ -1993,7 +2077,7 @@ export const STAGES = [
   { id: 'media', part: 'basic', icon: '📷', title: '拍照和檔案', en: 'Photos and Files', units: ['camera', 'files', 'space'] },
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account'] },
   { id: 'apps', part: 'basic', icon: '📲', title: 'App 和 AI', en: 'Apps and AI', units: ['appbasics', 'apps', 'handy', 'aichat'] },
-  { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes'] },
+  { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'sos'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'os', 'screens', 'storage'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'web'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '寫程式', en: 'Coding', units: ['algo', 'coding'] },

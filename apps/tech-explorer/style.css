@@ -1236,6 +1236,31 @@ a.unit-card:active { transform: scale(.98); }
 .scan span { padding: 12px; border-radius: 24px; border: 3px dashed #69db7c; animation: wave .5s infinite; }
 .lockwrap .hint { margin: 0; }
 
+/* ---------- emergency call from a locked phone ---------- */
+
+.sos-phone { display: flex; flex-direction: column; min-height: 430px; }
+.sos-scr { display: flex; flex-direction: column; flex: 1; }
+.sos-bottom { display: flex; justify-content: space-between; margin-top: auto; padding-top: 10px; }
+.sos-link { min-width: 64px; min-height: 44px; padding: 0 6px; border: 0; background: none; color: white; font: inherit; font-size: 1.05rem; font-weight: 700; }
+.sos-link:active { opacity: .6; }
+.sos-red { color: #ffa8a8; }
+.sos-title { margin: 6px 0 0; text-align: center; font-weight: 800; }
+.sos-num { min-height: 2.6rem; margin: 6px 0 10px; text-align: center; font-size: 2rem; font-weight: 300; letter-spacing: .1em; }
+.sos-call, .sos-end { align-self: center; width: 60px; height: 60px; margin-top: 10px; border: 0; border-radius: 50%; background: #2b8a3e; color: white; font-size: 1.6rem; }
+.sos-call.ready { box-shadow: 0 0 0 6px rgba(140, 233, 154, .55); }
+.sos-end { margin-top: auto; background: #e03131; transform: rotate(135deg); }
+.sos-calling { align-items: center; justify-content: center; text-align: center; }
+.sos-calling p { margin: 4px 0; }
+.sos-big { font-size: 3rem; font-weight: 300; }
+.sos-note { padding: .3rem .7rem; border-radius: 99px; background: rgba(255, 255, 255, .2); font-size: .9rem; }
+.sos-med { background: white; color: var(--ink); margin: -16px; padding: 16px; }
+.sos-med .sos-red { color: #e03131; }
+.sos-med dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; margin: 14px 0; }
+.sos-med dt { color: var(--ink-3); font-weight: 700; }
+.sos-med dd { margin: 0; font-weight: 800; }
+.sos-med .sos-link { color: #1c7ed6; align-self: flex-end; margin-top: auto; }
+.sos-hint { color: var(--ink); font-weight: 800; font-size: 1.05rem; text-align: center; }
+
 /* ---------- account ---------- */
 
 .w-account { display: flex; justify-content: center; }

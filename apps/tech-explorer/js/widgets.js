@@ -4011,6 +4011,103 @@ export const WIDGETS = {
     });
   },
 
+  // A locked phone: the passcode is unknown, so the child finds 「緊急」 at the bottom left,
+  // dials 119 and presses call (a pretend call). 醫療卡 on the dialer shows a sample card.
+  sosphone(host, _, api) {
+    const pad = [1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, '⌫'].map(k => k === '' ? '<span></span>' : `<button data-k="${k}">${k}</button>`).join('');
+    host.innerHTML = `
+      <div class="lockwrap">
+        <p class="hint sos-hint">手機鎖住了，又不知道密碼。找找看，哪裡可以打緊急電話？</p>
+        <div class="lockphone sos-phone">
+          <div class="sos-scr" data-scr="lock">
+            <div class="lock-top"><span class="padlock">🔒</span><b>09:41</b></div>
+            <p class="lock-msg">輸入密碼</p>
+            <div class="pdots">${'<i></i>'.repeat(6)}</div>
+            <div class="keypad">${pad}</div>
+            <div class="sos-bottom"><button class="sos-link" data-act="sos">緊急</button><button class="sos-link" data-act="cancel">取消</button></div>
+          </div>
+          <div class="sos-scr" data-scr="dial" hidden>
+            <p class="sos-title">緊急電話</p>
+            <p class="sos-num"></p>
+            <div class="keypad">${pad}</div>
+            <button class="sos-call" data-act="call" aria-label="撥號">📞</button>
+            <div class="sos-bottom"><button class="sos-link sos-red" data-act="med">✱ 醫療卡</button><button class="sos-link" data-act="back">返回</button></div>
+          </div>
+          <div class="sos-scr sos-calling" data-scr="call" hidden>
+            <p class="sos-big">119</p>
+            <p>撥號中……</p>
+            <p class="sos-note">練習而已，沒有真的打出去</p>
+            <button class="sos-end" data-act="end" aria-label="結束通話">📞</button>
+          </div>
+          <div class="sos-scr sos-med" data-scr="med" hidden>
+            <p class="sos-title sos-red">✱ 醫療卡</p>
+            <dl>
+              <dt>名字</dt><dd>王小明</dd>
+              <dt>過敏</dt><dd>花生</dd>
+              <dt>血型</dt><dd>O 型</dd>
+              <dt>緊急聯絡人</dt><dd>媽媽（手機）</dd>
+            </dl>
+            <button class="sos-link" data-act="medback">完成</button>
+          </div>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = $('.sos-hint');
+    const say = (text, bad) => { hint.textContent = text; if (bad) shake(hint); };
+    const show = name => host.querySelectorAll('.sos-scr').forEach(s => { s.hidden = s.dataset.scr !== name; });
+    let typed = '', num = '';
+    const dots = () => host.querySelectorAll('.pdots i').forEach((d, i) => d.classList.toggle('on', i < typed.length));
+    host.querySelector('[data-scr="lock"] .keypad').addEventListener('click', e => {
+      const k = e.target.closest('[data-k]')?.dataset.k;
+      if (k == null) return;
+      typed = k === '⌫' ? typed.slice(0, -1) : (typed + k).slice(0, 6);
+      dots();
+      if (typed.length === 6) {
+        shake($('.pdots'));
+        api.bad();
+        typed = '';
+        api.later(dots, 300);
+      }
+      say('不知道密碼也沒關係，看看下面還有什麼按鈕？');
+    });
+    host.querySelector('[data-scr="dial"] .keypad').addEventListener('click', e => {
+      const k = e.target.closest('[data-k]')?.dataset.k;
+      if (k == null) return;
+      num = k === '⌫' ? num.slice(0, -1) : num + k;
+      if (!'119'.startsWith(num)) {
+        shake($('.sos-num'));
+        api.bad();
+        num = '';
+        say('要撥的是 1、1、9 喔', true);
+      }
+      $('.sos-num').textContent = num;
+      $('.sos-call').classList.toggle('ready', num === '119');
+    });
+    host.querySelector('.sos-phone').addEventListener('click', e => {
+      const act = e.target.closest('[data-act]')?.dataset.act;
+      if (act === 'cancel') say('「取消」會回到鎖定畫面。找找另一個按鈕！', true);
+      if (act === 'sos') {
+        show('dial');
+        api.good();
+        say('找到了！這個畫面不用密碼。撥 119，再按綠色的 📞');
+      }
+      if (act === 'back') { show('lock'); say('手機鎖住了，又不知道密碼。找找看，哪裡可以打緊急電話？'); }
+      if (act === 'call') {
+        if (num !== '119') { say('先撥 119，再按 📞', true); return; }
+        show('call');
+        api.good();
+        say('撥出去了！');
+        api.later(() => {
+          say('🎉 不用密碼也能打緊急電話！真的打的時候，要說清楚發生什麼事、在哪裡。');
+          api.done();
+        }, 1500);
+      }
+      if (act === 'end') { num = ''; $('.sos-num').textContent = ''; $('.sos-call').classList.remove('ready'); show('dial'); }
+      if (act === 'med') { show('med'); say('醫療卡寫著過敏和緊急聯絡人。手機鎖著，救護人員也看得到。'); }
+      if (act === 'medback') show('dial');
+    });
+  },
+
   // Traps on web pages, one case at a time in a drawn iPad browser: tap 正常 or 可疑, then
   // the clue lights up. One ad has a tiny ×; a touch anywhere else on it leaves the page.
   webtrap(host, _, api) {
