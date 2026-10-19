@@ -1522,6 +1522,25 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 
 /* contents panel */
 .ix-stage { margin: .8rem 0 .3rem; font-size: .95rem; color: var(--ink-3); }
+
+/* reminder before a Part 2 unit */
+.tip-veil {
+  position: fixed; inset: 0; z-index: 40;
+  display: grid; place-items: center;
+  padding: 16px;
+  background: rgba(29, 39, 56, .4);
+}
+.tip-card {
+  width: min(100%, 460px); padding: 20px 24px 24px;
+  border-radius: var(--radius); border-top: 8px solid var(--c);
+  background: var(--card); box-shadow: var(--shadow);
+  text-align: center;
+}
+.tip-card .tip-icon { margin: 0; font-size: 2.6rem; }
+.tip-card h3 { margin: .3rem 0; font-size: 1.35rem; }
+.tip-card p { margin: .4rem 0; color: var(--ink-2); font-size: 1.1rem; line-height: 1.5; }
+.tip-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 1rem; }
+.tip-btns .nav-btn { font-family: inherit; cursor: pointer; }
 .dots .dot.seen::after { background: color-mix(in srgb, var(--c) 35%, white); }
 .store-note { max-width: 520px; margin: 0 auto .4rem !important; line-height: 1.6; }
 .link-btn { border: 0; background: none; color: var(--ink-2); text-decoration: underline; text-underline-offset: 2px; font-size: .9rem; min-height: 44px; padding: 0 .6rem; }

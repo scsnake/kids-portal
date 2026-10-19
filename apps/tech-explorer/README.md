@@ -15,7 +15,9 @@ the units before it.
 
 The home screen groups the units into 9 stages of 1 to 4 units (`STAGES` in
 `js/units.js`). The next stage not read through is marked 「下一站」 and opens by
-itself; a stage read through gets 🏅. No unit is locked.
+itself; a stage read through gets 🏅. No unit is locked. The
+first time a Part 2 unit opens, a card suggests an earlier stage not read through
+yet; 「直接開始」 closes it.
 
 **Part 1: 認識和使用 (using devices)**
 

@@ -59,6 +59,14 @@ const stageNo = s => STAGES.indexOf(s) + 1;
 const stageSeen = s => stageUnits(s).reduce((a, u) => [a[0] + seenOf(u), a[1] + u.slides.length], [0, 0]);
 const stageRead = s => { const [got, all] = stageSeen(s); return got === all; };
 const nextStage = () => STAGES.find(s => !stageRead(s));
+// The first slide of a stage not opened yet, as a link.
+const firstUnread = s => {
+  for (const u of stageUnits(s)) {
+    const i = u.slides.findIndex(sl => !seen.has(slideKey(sl)));
+    if (i >= 0) return `#/u/${u.id}/${i}`;
+  }
+  return `#/u/${s.units[0]}/0`;
+};
 // A unit card opens where the child stopped, unless the unit was read to the end.
 const resumeAt = u => {
   const i = progress.lastIn?.[u.id] ?? 0;
@@ -345,6 +353,10 @@ function lesson(unit, index) {
   const slide = unit.slides[index];
   here = { unit, index };
   onFinish = null;
+  // First visit to a Part 2 unit: point to an earlier stage that was not read through.
+  const stage = stageOf(unit);
+  const gap = unit.part === 'adv' && !seenOf(unit)
+    ? STAGES.slice(0, STAGES.indexOf(stage)).find(s => !stageRead(s)) : null;
   markSeen(unit, index);
   const last = index === unit.slides.length - 1;
   document.title = `${unit.title}・科技原理小探險`;
@@ -374,6 +386,25 @@ function lesson(unit, index) {
         <a class="nav-btn next" href="${last ? `#/done/${unit.id}` : `#/u/${unit.id}/${index + 1}`}">${last ? '完成 🎉' : '下一頁 ▶'}</a>
       </nav>
     </main>`;
+
+  if (gap) {
+    const [got, all] = stageSeen(gap);
+    const tip = document.createElement('div');
+    tip.className = 'tip-veil';
+    tip.innerHTML = `
+      <div class="tip-card" role="dialog" aria-modal="true" aria-labelledby="tip-h" style="--c:${unitById(gap.units[0]).color}">
+        <p class="tip-icon" aria-hidden="true">🧭</p>
+        <h3 id="tip-h">建議先看第 ${stageNo(gap)} 站「${gap.title}」</h3>
+        <p>這一章會用到前面學過的東西。第 ${stageNo(gap)} 站還有 ${all - got} 頁沒看過。</p>
+        <div class="tip-btns">
+          <a class="nav-btn" href="${firstUnread(gap)}">先去第 ${stageNo(gap)} 站</a>
+          <button class="nav-btn next" data-go>直接開始 ▶</button>
+        </div>
+      </div>`;
+    app.querySelector('.lesson').append(tip);
+    tip.querySelector('[data-go]').onclick = () => tip.remove();
+    tip.querySelector('[data-go]').focus();
+  }
 
   const sayBtn = app.querySelector('.say');
   sayBtn.onclick = () => {
@@ -479,6 +510,10 @@ document.addEventListener('keydown', e => {
   if (t.closest?.('input, textarea, select, [contenteditable="true"]')) return;
   if (e.key === ' ' && t.closest?.('button, [role="button"], summary')) return; // Space presses a focused button
   if (document.getElementById('book-index')?.hidden === false) return;
+  if (app.querySelector('.tip-veil')) {
+    if (e.key === 'Escape') app.querySelector('.tip-veil').remove();
+    return;
+  }
   const fwd = e.key === 'ArrowRight' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey);
   const back = e.key === 'ArrowLeft' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey);
   if (!fwd && !back && e.key !== 'Home' && e.key !== 'End') return;
