@@ -1242,6 +1242,48 @@ a.unit-card:active { transform: scale(.98); }
 .dialog .danger { background: var(--bad); color: white; border-color: var(--bad); }
 @media (max-width: 560px) { .fm { grid-template-columns: 1fr; } .fm-side { flex-direction: row; flex-wrap: wrap; } }
 
+/* ---------- file types: open each file with the right App ---------- */
+
+.w-ow { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.ow-hint { margin: 0; min-height: 1.5em; font-weight: 800; font-size: 1.1rem; text-align: center; line-height: 1.5; }
+.ow-hint.done { color: var(--good); }
+.ow-view { display: grid; place-items: center; width: min(100%, 560px); height: 120px; border-radius: 16px; background: #1f232b; color: white; overflow: hidden; }
+.ow-empty { color: #adb5bd; font-weight: 700; }
+.ow-cant { padding: 0 12px; color: #ffc9c9; font-weight: 800; text-align: center; }
+.ow-open { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.ow-open small { color: #ced4da; font-weight: 700; }
+.ow-pic { display: grid; place-items: center; min-width: 120px; height: 62px; padding: 0 12px; border-radius: 10px; background: #fff3bf; font-size: 2.4rem; }
+.ow-pic.ow-dark { background: #343a40; }
+.ow-play { width: 160px; height: 6px; border-radius: 3px; background: #495057; overflow: hidden; }
+.ow-play i { display: block; width: 30%; height: 100%; background: #ff6b6b; }
+.ow-page { display: flex; flex-direction: column; gap: 5px; width: 140px; padding: 8px 10px; border-radius: 6px; background: white; color: var(--ink); }
+.ow-page b { font-size: .85rem; }
+.ow-page i { height: 5px; border-radius: 3px; background: #dee2e6; }
+.ow-page i:last-child { width: 60%; }
+.ow-unzip { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 1.3rem; font-weight: 800; }
+.ow-unzip small { font-size: .95rem; font-weight: 700; color: #ced4da; }
+.ow-files { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: min(100%, 560px); }
+.ow-file { display: flex; align-items: center; gap: 8px; min-height: 60px; padding: 6px 8px; border: 2px solid var(--line); border-radius: 14px; background: var(--card); box-shadow: 0 3px 0 var(--line); font: inherit; text-align: left; touch-action: none; transition: transform .2s, box-shadow .2s; }
+.ow-file.selected { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, white); }
+.ow-file.dragging { transition: none; z-index: 10; position: relative; box-shadow: 0 12px 24px rgba(0, 0, 0, .18); }
+.ow-file.opened { border-color: color-mix(in srgb, var(--good) 40%, white); background: #ebfbee; box-shadow: none; }
+.ow-doc { flex: none; display: grid; place-items: end center; width: 34px; height: 42px; padding-bottom: 4px; border-radius: 4px 12px 4px 4px; background: var(--k, #868e96); color: white; font-size: .62rem; font-weight: 900; letter-spacing: .02em; }
+.ow-doc.ext-jpg { --k: #2f9e44; } .ow-doc.ext-mp4 { --k: #e03131; } .ow-doc.ext-docx { --k: #1971c2; }
+.ow-doc.ext-pdf { --k: #c92a2a; } .ow-doc.ext-mp3 { --k: #9c36b5; } .ow-doc.ext-zip { --k: #495057; }
+.ow-doc.ow-folder { place-items: center; padding: 0; background: none; font-size: 1.8rem; }
+.ow-name { min-width: 0; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+.ow-name b { color: var(--c); }
+.ow-apps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; width: min(100%, 560px); padding: 8px; border-radius: 20px; background: color-mix(in srgb, var(--c) 8%, var(--paper)); }
+.ow-app { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 64px; padding: 4px; border: 2px solid transparent; border-radius: 14px; background: var(--card); font: inherit; font-weight: 800; font-size: .95rem; }
+.ow-app span { font-size: 1.7rem; line-height: 1.2; }
+.ow-app.over { border-color: var(--c); }
+.ow-app:active { transform: translateY(2px); }
+@media (max-width: 560px) { .ow-files { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ow-app { font-size: .8rem; } }
+@media (prefers-reduced-motion: no-preference) { .ow-play i { animation: ow-play 3s linear infinite; } }
+@keyframes ow-play { from { width: 0; } to { width: 100%; } }
+.ow-file:disabled { color: inherit; opacity: 1; }
+@media (orientation: portrait) and (min-width: 700px) { .ow-view, .ow-files, .ow-apps { width: min(100%, 640px); } }
+
 /* ---------- passcode ---------- */
 
 .lockwrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }

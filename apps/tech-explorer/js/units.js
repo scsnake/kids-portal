@@ -782,6 +782,71 @@ export const UNITS = [
   },
 
   {
+    id: 'formats',
+    part: 'basic',
+    icon: '📄',
+    title: '檔案格式',
+    en: 'File Types',
+    desc: '副檔名、用對的 App 打開、壓縮檔',
+    color: '#3b5bdb',
+    slides: [
+      {
+        title: '檔名的尾巴',
+        text: `檔名最後的「.jpg」「.mp4」叫做${t('副檔名', 'file extension')}，它告訴裝置這是什麼檔案、要用哪個 App 打開。幫每個檔案找到對的 App！`,
+        widget: 'openwith',
+      },
+      {
+        title: '改名字，不會變格式',
+        text: `把「小星星.mp3」改名成「小星星.mp4」，裡面還是聲音，不會變成影片。要換格式，要用 App ${t('轉檔', 'convert')}。`,
+        widget: 'choice',
+        params: {
+          question: '阿公的舊電腦打不開孫子傳來的「全家福.heic」照片。怎麼做比較好？',
+          options: [
+            { text: '📤 請孫子改傳 .jpg，或用 App 轉成 .jpg', correct: true },
+            { text: '✏️ 把檔名改成「全家福.jpg」' },
+            { text: '🗑️ 照片壞掉了，刪掉吧' },
+          ],
+          explain: '.heic 是 iPhone 常用的照片格式，有些舊電腦看不懂。改名字不會改裡面的內容，要真的轉檔才行。',
+        },
+      },
+      {
+        title: '看最後一個點',
+        text: '壞人會把程式取名成「發票.pdf.exe」，看起來像文件。副檔名要看<b>最後一個點</b>後面。.exe、.apk 是程式，陌生人傳來的不要打開。分分看！',
+        widget: 'sort',
+        params: {
+          bins: [
+            { id: 'pic', icon: '🖼️', label: '照片' },
+            { id: 'doc', icon: '📄', label: '文件' },
+            { id: 'app', icon: '⚠️', label: '程式，先別打開' },
+          ],
+          items: [
+            { icon: '📎', label: '海邊.jpg', bin: 'pic' },
+            { icon: '📎', label: '貓咪.png', bin: 'pic' },
+            { icon: '📎', label: '報告.docx', bin: 'doc' },
+            { icon: '📎', label: '通知單.pdf', bin: 'doc' },
+            { icon: '📎', label: '發票.pdf.exe', bin: 'app' },
+            { icon: '📎', label: '可愛照片.jpg.apk', bin: 'app' },
+            { icon: '📎', label: '免費遊戲.exe', bin: 'app' },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '老師寄來「學習單.zip」，點開以後變成一個資料夾，裡面有 3 個 .pdf。這是怎麼回事？',
+          options: [
+            { text: '🗜️ .zip 是壓縮檔，打開時把裡面的檔案拿出來了', correct: true },
+            { text: '🦠 檔案中毒，自己變多了' },
+            { text: '📮 老師寄錯了' },
+          ],
+          explain: '.zip 把好幾個檔案包成一個，比較小，也比較好傳。iPad 的「檔案」App 點一下就能解壓縮。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'online',
     part: 'basic',
     icon: '📶',
@@ -2380,7 +2445,7 @@ export const PARTS = [
 export const STAGES = [
   { id: 'hello', part: 'basic', icon: '👋', title: '上手', en: 'First Steps', units: ['devices', 'start', 'typing', 'settings'] },
   { id: 'care', part: 'basic', icon: '🔋', title: '照顧裝置和自己', en: 'Care for Devices and You', units: ['cables', 'battery', 'care', 'health'] },
-  { id: 'media', part: 'basic', icon: '📷', title: '拍照和檔案', en: 'Photos and Files', units: ['camera', 'files', 'space'] },
+  { id: 'media', part: 'basic', icon: '📷', title: '拍照和檔案', en: 'Photos and Files', units: ['camera', 'files', 'space', 'formats'] },
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account'] },
   { id: 'apps', part: 'basic', icon: '📲', title: 'App 和 AI', en: 'Apps and AI', units: ['appbasics', 'apps', 'handy', 'aichat'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'kind', 'sos'] },

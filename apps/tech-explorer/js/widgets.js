@@ -331,6 +331,24 @@ const FEED_TOPICS = [
   { id: 'music', icon: '🎵', name: '音樂', hue: 290, titles: ['用杯子打節奏', '一起學唱歌', '鋼琴彈小星星', '各種樂器的聲音', '跳舞小教室'] },
 ];
 
+// The Apps on the dock, and the files to open: each file says which App opens it,
+// what kind of thing it is, and what the App shows once it is open.
+const OW_APPS = [
+  { id: 'photo', icon: '🖼️', name: '照片' },
+  { id: 'video', icon: '🎬', name: '影片' },
+  { id: 'doc', icon: '📄', name: '文件' },
+  { id: 'music', icon: '🎵', name: '音樂' },
+  { id: 'zip', icon: '🗜️', name: '解壓縮' },
+];
+const OW_FILES = [
+  { name: '生日派對', ext: 'jpg', app: 'photo', kind: '照片', show: '<span class="ow-pic">🎂🎈</span>' },
+  { name: '畢業典禮', ext: 'mp4', app: 'video', kind: '影片', show: '<span class="ow-pic ow-dark">🎓</span><span class="ow-play"><i></i></span>' },
+  { name: '暑假作業', ext: 'docx', app: 'doc', kind: '文件', show: '<span class="ow-page"><b>暑假作業</b><i></i><i></i><i></i></span>' },
+  { name: '校外教學通知', ext: 'pdf', app: 'doc', kind: '文件', show: '<span class="ow-page"><b>校外教學通知</b><i></i><i></i><i></i></span>' },
+  { name: '小星星', ext: 'mp3', app: 'music', kind: '聲音', show: '<span class="ow-pic">🎵</span><span class="ow-play"><i></i></span>' },
+  { name: '旅行照片', ext: 'zip', app: 'zip', kind: '壓縮檔', show: '<span class="ow-unzip">📁 旅行照片<small>🏖️ 海邊.jpg　🗻 爬山.jpg　🎡 樂園.jpg</small></span>' },
+];
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -3362,6 +3380,63 @@ export const WIDGETS = {
       draw();
     });
     draw();
+  },
+
+  // Tap a file, then the App that opens it (or drag the file onto the App). The right App
+  // shows the file; a wrong one says it can't read that type. The .zip opens into a folder.
+  openwith(host, _, api) {
+    host.innerHTML = `
+      <div class="w-ow">
+        <p class="ow-hint">點一個檔案，再點要用哪個 App 打開</p>
+        <div class="ow-view"><span class="ow-empty">還沒打開檔案</span></div>
+        <div class="ow-files">${OW_FILES.map((f, i) => `
+          <button class="ow-file" data-i="${i}"><span class="ow-doc ext-${f.ext}">${f.ext.toUpperCase()}</span><span class="ow-name">${f.name}<b>.${f.ext}</b></span></button>`).join('')}
+        </div>
+        <div class="ow-apps">${OW_APPS.map(a => `<button class="ow-app" data-zone="${a.id}"><span>${a.icon}</span>${a.name}</button>`).join('')}</div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = text => { $('.ow-hint').textContent = text; };
+    let selected = null, left = OW_FILES.length;
+    const select = btn => {
+      selected?.classList.remove('selected');
+      selected = btn === selected ? null : btn;
+      selected?.classList.add('selected');
+      if (selected) hint(`要用哪個 App 打開「${OW_FILES[selected.dataset.i].name}.${OW_FILES[selected.dataset.i].ext}」？`);
+    };
+    const open = (btn, appId) => {
+      const f = OW_FILES[btn.dataset.i], app = OW_APPS.find(a => a.id === appId);
+      if (!app) return;
+      const view = $('.ow-view');
+      if (f.app !== app.id) {
+        view.innerHTML = `<span class="ow-cant">${app.icon} ${app.name}：「${f.name}.${f.ext}」打不開！</span>`;
+        hint(`.${f.ext} 是${f.kind}，${app.name} App 看不懂。換一個 App 試試`);
+        shake(btn);
+        api.bad();
+        return;
+      }
+      if (selected === btn) select(btn);
+      btn.classList.add('placed', 'opened');
+      btn.disabled = true;
+      view.innerHTML = `<span class="ow-open">${f.show}<small>${app.icon} ${app.name}：${f.name}.${f.ext}</small></span>`;
+      pop(btn);
+      api.good();
+      if (f.ext === 'zip') {
+        btn.querySelector('.ow-doc').textContent = '📁';
+        btn.querySelector('.ow-doc').className = 'ow-doc ow-folder';
+        btn.querySelector('.ow-name').innerHTML = '旅行照片<b>（3 張）</b>';
+      }
+      if (--left) { hint(f.ext === 'zip' ? '.zip 把好幾個檔案包成一個，解壓縮就拿出來了！再開下一個' : `打開了！.${f.ext} 是${f.kind}。再開下一個`); return; }
+      hint('🎉 每個檔案都打開了！看副檔名，就知道要用哪個 App。');
+      $('.ow-hint').classList.add('done');
+      api.done();
+    };
+    host.querySelectorAll('.ow-file').forEach(btn => drag(btn, { onDrop: zone => zone && open(btn, zone.dataset.zone), onTap: () => select(btn) }));
+    $('.ow-apps').addEventListener('click', e => {
+      const app = e.target.closest('[data-zone]');
+      if (!app) return;
+      if (!selected) { hint('先點一個檔案，再點 App'); shake($('.ow-hint')); return; }
+      open(selected, app.dataset.zone);
+    });
   },
 
   // A lock screen: unlock with a passcode or a face, then lock again.
