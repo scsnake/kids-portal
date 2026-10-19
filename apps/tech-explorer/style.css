@@ -1730,6 +1730,27 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .msg-card mark { background: none; color: inherit; }
 .msg-card.judged mark { background: #ffe066; border-radius: 4px; padding: 0 2px; }
 
+/* ---------- a kids' video list to judge ---------- */
+
+.w-vid { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.vk-left { margin: 0; font-weight: 800; }
+.vk-left.done { color: var(--good); }
+.vk-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 8px; }
+.vk-card { display: flex; gap: 10px; padding: 8px; border-radius: 16px; background: var(--card); border: 2px solid var(--line); }
+.vk-thumb { position: relative; flex: none; align-self: flex-start; display: grid; place-items: center; width: 104px; aspect-ratio: 16 / 9; border-radius: 10px; background: hsl(var(--h) 70% 86%); font-size: 1.5rem; letter-spacing: -.1em; }
+.vk-thumb i { position: absolute; right: 4px; bottom: 3px; padding: 0 4px; border-radius: 4px; background: rgba(0, 0, 0, .7); color: white; font-style: normal; font-size: .7rem; font-weight: 700; letter-spacing: 0; }
+.vk-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+.vk-title { margin: 0; font-weight: 800; line-height: 1.35; overflow-wrap: anywhere; }
+.vk-ch { margin: 0; color: var(--ink-2); font-size: .9rem; font-weight: 600; }
+.vk-btns { display: flex; gap: 6px; }
+.vk-btns .option { flex: 1; min-height: 44px; padding: .2rem .4rem; font-size: .95rem; }
+.vk-card.judged .vk-btns { display: none; }
+.vk-card.is-bad { border-color: #ffa8a8; background: #fff5f5; }
+.vk-card.is-ok { border-color: #8ce99a; background: #ebfbee; }
+.vk-why { margin: 0; font-weight: 700; font-size: .9rem; line-height: 1.5; }
+.vk-card mark { background: none; color: inherit; }
+.vk-card.judged mark { background: #ffe066; border-radius: 4px; padding: 0 2px; }
+
 /* ---------- public Wi-Fi: pick the network on the poster ---------- */
 
 .w-wifi { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }

@@ -4476,6 +4476,42 @@ export const WIDGETS = {
     draw();
   },
 
+  // A list of videos to judge, like the kids' feed of a video App. Each has a thumbnail
+  // (emoji on a colored tile), a title and a channel; a <mark> is a clue shown once judged.
+  vidcheck(host, { videos }, api) {
+    host.innerHTML = `
+      <div class="w-vid">
+        <p class="vk-left"></p>
+        <div class="vk-list">${videos.map((v, i) => `
+          <div class="vk-card" data-i="${i}">
+            <span class="vk-thumb" style="--h:${v.hue}">${v.thumb}<i>${v.time}</i></span>
+            <div class="vk-info">
+              <p class="vk-title">${v.title}</p>
+              <p class="vk-ch">${v.channel}</p>
+              <div class="vk-btns"><button class="option" data-v="ok">👍 可以看</button><button class="option" data-v="bad">🚩 不對勁</button></div>
+              <p class="vk-why" hidden>${v.why}</p>
+            </div>
+          </div>`).join('')}</div>
+      </div>`;
+    let left = videos.length;
+    const count = () => { host.querySelector('.vk-left').textContent = left ? `還有 ${left} 支影片要判斷` : '🎉 全部判斷完了！不對勁的影片：關掉、告訴大人。'; };
+    host.querySelector('.vk-list').addEventListener('click', e => {
+      const b = e.target.closest('[data-v]');
+      if (!b) return;
+      const card = b.closest('.vk-card');
+      if (card.classList.contains('judged')) return;
+      const v = videos[card.dataset.i];
+      if ((b.dataset.v === 'bad') !== !!v.bad) { shake(card); api.bad(); return; }
+      card.classList.add('judged', v.bad ? 'is-bad' : 'is-ok');
+      card.querySelector('.vk-why').hidden = false;
+      api.good();
+      left--;
+      count();
+      if (!left) { host.querySelector('.vk-left').classList.add('done'); api.done(); }
+    });
+    count();
+  },
+
   // A <mark> in a message is a clue: plain at first, highlighted once the card is judged.
   inbox(host, { messages, labels = ['👍 正常', '🚩 可疑'] }, api) {
     host.innerHTML = `
