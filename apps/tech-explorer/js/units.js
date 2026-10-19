@@ -1532,6 +1532,76 @@ export const UNITS = [
   },
 
   {
+    id: 'wifishop',
+    part: 'basic',
+    icon: '🛒',
+    title: '公共 Wi-Fi 和網購',
+    en: 'Public Wi-Fi and Shopping',
+    desc: '選對的 Wi-Fi、認出假商店、付錢要小心',
+    color: '#2b8a3e',
+    slides: [
+      {
+        title: '哪個 Wi-Fi 可以連？',
+        text: `圖書館、車站、餐廳的免費 Wi-Fi 叫${t('公共 Wi-Fi', 'public Wi-Fi')}。名字很像的、沒有密碼又寫「免費」的，可能是壞人開的。連店家貼出來的那一個！`,
+        widget: 'wifipick',
+      },
+      {
+        title: '公共 Wi-Fi 上做什麼？',
+        text: '公共 Wi-Fi 很多人一起用。查資料、看影片沒關係；要輸入密碼、付錢的事，回家再做，或改用自己的行動網路。分分看！',
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '👍', label: '可以做' },
+            { id: 'home', icon: '🏠', label: '回家再做' },
+          ],
+          items: [
+            { icon: '🚌', label: '查公車什麼時候來', bin: 'ok' },
+            { icon: '📰', label: '看新聞', bin: 'ok' },
+            { icon: '🗺️', label: '查地圖', bin: 'ok' },
+            { icon: '📺', label: '看卡通', bin: 'ok' },
+            { icon: '🏦', label: '登入網路銀行', bin: 'home' },
+            { icon: '💳', label: '輸入信用卡號碼', bin: 'home' },
+            { icon: '🔑', label: '輸入重要的密碼', bin: 'home' },
+          ],
+        },
+      },
+      {
+        title: '這家網路商店可信嗎？',
+        text: `在網路上買東西叫${t('網購', 'online shopping')}。有些假商店只想騙錢：便宜得不像話、一直催你、只能轉帳。找找看！`,
+        widget: 'shopcheck',
+      },
+      {
+        title: '遊戲裡的錢是真的錢',
+        text: `遊戲裡的寶石、造型要花錢買，這叫${t('App 內購買', 'in-app purchase')}，用的是爸媽的信用卡，是<b>真的錢</b>。`,
+        widget: 'choice',
+        params: {
+          question: '玩遊戲時跳出：「🎁 超值寶石包 NT$90，按一下就買！」你可以怎麼做？',
+          options: [
+            { text: '🙋 先問爸媽，因為這是真的錢', correct: true },
+            { text: '👆 按下去，反正是遊戲幣' },
+            { text: '🤫 用爸媽的密碼偷偷買' },
+          ],
+          explain: '按下去就會從信用卡扣錢。爸媽可以在 iPad 打開「購買前詢問」，你按購買時，要先經過爸媽同意。',
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '在購物網站上買東西，賣家說：「加我 LINE，私下用 ATM 轉帳，可以便宜 500 元。」怎麼辦？',
+          options: [
+            { text: '🙅 不要，留在購物網站裡付款', correct: true },
+            { text: '👍 好啊，便宜就好' },
+            { text: '💰 先轉一半的錢試試看' },
+          ],
+          explain: '離開購物網站私下轉帳，被騙了網站也幫不了你。覺得怪怪的，打 165 反詐騙專線問問看。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'kind',
     part: 'basic',
     icon: '🤝',
@@ -2448,7 +2518,7 @@ export const STAGES = [
   { id: 'media', part: 'basic', icon: '📷', title: '拍照和檔案', en: 'Photos and Files', units: ['camera', 'files', 'space', 'formats'] },
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account'] },
   { id: 'apps', part: 'basic', icon: '📲', title: 'App 和 AI', en: 'Apps and AI', units: ['appbasics', 'apps', 'handy', 'aichat'] },
-  { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'kind', 'sos'] },
+  { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os', 'screens', 'storage'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'web'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'coding'] },

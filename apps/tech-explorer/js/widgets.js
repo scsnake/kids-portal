@@ -4436,6 +4436,145 @@ export const WIDGETS = {
     });
   },
 
+  // The Wi-Fi list at the library. Only the network on the library's poster is right; the
+  // others say why not. Open networks show 「不安全的網路」 like a real iPad. The right one
+  // then asks for the poster's password.
+  wifipick(host, _, api) {
+    const nets = [
+      { name: 'Library_Free_WiFi', open: true, why: '名字很像，但不是海報上的「Library-Free」。Wi-Fi 的名字誰都能取，壞人會取很像的名字，偷看你傳的東西。' },
+      { name: 'Library-Free', ok: true },
+      { name: '免費高速上網😀', open: true, why: '不知道是誰開的。越寫「免費」「高速」，越要小心。' },
+      { name: '小美的iPhone', why: '這是別人的個人熱點，不是圖書館的。' },
+    ];
+    const pw = 'book2026';
+    host.innerHTML = `
+      <div class="w-wifi">
+        <div class="wf-row">
+          <div class="wf-poster">
+            <b>📚 市立圖書館</b>
+            <span>免費 Wi-Fi</span>
+            <span>名稱：<code>Library-Free</code></span>
+            <span>密碼：<code>${pw}</code></span>
+          </div>
+          <div class="wf-list">
+            <p class="wf-head">Wi-Fi <span class="wf-toggle" aria-hidden="true"></span></p>
+            <p class="wf-sub">選擇網路…</p>
+            ${nets.map((n, i) => `
+              <button class="wf-net" data-i="${i}">
+                <span class="wf-check" aria-hidden="true"></span>
+                <span class="wf-name">${n.name}${n.open ? '<small>不安全的網路</small>' : ''}</span>
+                <span class="wf-icons">${n.open ? '' : '🔒'}<i class="wf-fan" aria-hidden="true"></i></span>
+              </button>`).join('')}
+          </div>
+        </div>
+        <p class="wf-msg">在圖書館想上網。看看海報，點對的 Wi-Fi</p>
+        <div class="wf-pw" hidden><span>輸入「Library-Free」的密碼：</span>${['book2025', pw, 'library'].map(p => `<button class="option" data-pw="${p}">${p}</button>`).join('')}</div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const msg = (text, cls = '') => { $('.wf-msg').textContent = text; $('.wf-msg').className = `wf-msg ${cls}`; };
+    let linked = false;
+    $('.wf-list').addEventListener('click', e => {
+      const b = e.target.closest('.wf-net');
+      if (!b || linked) return;
+      const n = nets[b.dataset.i];
+      host.querySelectorAll('.wf-net').forEach(x => x.classList.toggle('picked', x === b));
+      if (!n.ok) {
+        $('.wf-pw').hidden = true;
+        msg(`🚫 ${n.why}`, 'bad');
+        shake(b);
+        api.bad();
+        return;
+      }
+      msg('對，就是海報上的這個。輸入海報上的密碼');
+      $('.wf-pw').hidden = false;
+    });
+    $('.wf-pw').addEventListener('click', e => {
+      const b = e.target.closest('[data-pw]');
+      if (!b || linked) return;
+      if (b.dataset.pw !== pw) { shake(b); api.bad(); msg('密碼不對，看看海報上寫的密碼', 'bad'); return; }
+      linked = true;
+      $('.wf-pw').hidden = true;
+      const row = host.querySelector('.wf-net.picked');
+      row.classList.add('on');
+      row.querySelector('.wf-check').textContent = '✓';
+      pop(row);
+      msg('🎉 連上了！公共 Wi-Fi 很多人一起用，要輸入密碼、付錢的事，回家再做。', 'good');
+      api.good();
+      api.done();
+    });
+  },
+
+  // A shop page with 4 warning signs to tap: a price too good, a countdown that starts over,
+  // pay only by ATM transfer, and no phone or address, only a LINE ID. Other taps: 再找找看.
+  shopcheck(host, _, api) {
+    const clues = {
+      price: '💸 便宜得不像話：1 折！',
+      timer: '⏰ 一直倒數催你，數完又重來',
+      pay: '🏦 只能 ATM 轉帳，錢轉出去就拿不回來',
+      contact: '📞 沒有電話、地址，只叫你加 LINE',
+    };
+    host.innerHTML = `
+      <div class="w-shop">
+        <p class="sc-hint">這家網路商店可信嗎？點一點，找出 4 個怪怪的地方</p>
+        <div class="wt-ipad">
+          <div class="sc-screen">
+            <div class="wt-bar"><span class="wt-lock">🔒</span><span class="wt-url">best3c-sale.example.top/game</span></div>
+            <div class="sc-page">
+              <p class="sc-top">🛒 超值 3C 商城</p>
+              <div class="sc-prod">
+                <span class="sc-img" data-ok>🎮</span>
+                <div class="sc-main">
+                  <b class="sc-title" data-ok>最新款遊戲機（全新）</b>
+                  <span class="sc-c sc-price" data-clue="price"><s>原價 NT$9,980</s> <b>今天只要 NT$990</b></span>
+                  <span class="sc-c sc-timer" data-clue="timer">⏰ 限時搶購，倒數 <b class="sc-left">00:10</b></span>
+                  <span class="sc-buy" data-buy>立即購買</span>
+                </div>
+              </div>
+              <div class="sc-info">
+                <span class="sc-c" data-clue="pay">💳 付款方式：只能 ATM 轉帳</span>
+                <span data-ok>🚚 運送：3 天到貨</span>
+                <span class="sc-c" data-clue="contact">📞 客服：請加 LINE：best3c888</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ul class="sc-list">${Object.keys(clues).map(() => '<li>❓ 還沒找到</li>').join('')}</ul>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = (text, cls = '') => { $('.sc-hint').textContent = text; $('.sc-hint').className = `sc-hint ${cls}`; };
+    const found = [];
+    // the countdown never ends: at zero it starts again
+    let left = 10;
+    const tick = () => {
+      if (!api.alive()) return;
+      left = left > 0 ? left - 1 : 10;
+      $('.sc-left').textContent = `00:${String(left).padStart(2, '0')}`;
+      api.later(tick, 1000);
+    };
+    api.later(tick, 1000);
+    $('.sc-page').addEventListener('click', e => {
+      if (found.length === 4) return;
+      const c = e.target.closest('[data-clue]');
+      if (!c) {
+        hint(e.target.closest('[data-buy]') ? '先別急著買！找找看哪裡怪怪的' : '這裡看起來沒問題，再找找看');
+        shake($('.sc-hint'));
+        return;
+      }
+      const id = c.dataset.clue;
+      if (found.includes(id)) return;
+      found.push(id);
+      c.classList.add('sc-found');
+      api.good();
+      const li = host.querySelectorAll('.sc-list li')[found.length - 1];
+      li.textContent = clues[id];
+      li.classList.add('got');
+      pop(li);
+      if (found.length < 4) { hint(`找到 ${found.length} 個了，還有 ${4 - found.length} 個`); return; }
+      hint('🎉 4 個都找到了！有這些，就不要買。不確定就問大人，或打 165 反詐騙專線。', 'done');
+      api.done();
+    });
+  },
+
   // A chat thread, then one question at a time. A right choice adds what you did to the
   // thread and moves on; a wrong one shakes and says why, and can be tried again.
   chatpick(host, { name, messages, steps, end }, api) {

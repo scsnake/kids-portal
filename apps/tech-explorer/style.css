@@ -1697,6 +1697,60 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .msg-card mark { background: none; color: inherit; }
 .msg-card.judged mark { background: #ffe066; border-radius: 4px; padding: 0 2px; }
 
+/* ---------- public Wi-Fi: pick the network on the poster ---------- */
+
+.w-wifi { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.wf-row { display: flex; align-items: flex-start; justify-content: center; gap: 16px; width: 100%; }
+.wf-poster { flex: 0 0 auto; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 6px; background: #fff9db; border: 2px solid #ffe066; box-shadow: var(--shadow); rotate: -2deg; font-weight: 700; }
+.wf-poster b { font-size: 1.15rem; }
+.wf-poster code { font-size: 1.05rem; font-weight: 800; color: #1864ab; }
+.wf-list { flex: 0 1 380px; min-width: 0; padding: 8px 0; border-radius: 16px; background: #f2f2f7; border: 2px solid var(--line); }
+.wf-head { display: flex; align-items: center; justify-content: space-between; margin: 0 12px 4px; padding: 8px 12px; border-radius: 12px; background: white; font-weight: 800; }
+.wf-toggle { width: 44px; height: 26px; border-radius: 13px; background: #34c759; position: relative; }
+.wf-toggle::after { content: ''; position: absolute; right: 2px; top: 2px; width: 22px; height: 22px; border-radius: 50%; background: white; }
+.wf-sub { margin: 6px 24px 4px; color: var(--ink-3); font-size: .85rem; font-weight: 700; }
+.wf-net { display: flex; align-items: center; gap: 6px; width: calc(100% - 24px); min-height: 52px; margin: 0 12px; padding: 6px 12px 6px 6px; border: 0; border-bottom: 1px solid #e5e5ea; background: white; font: inherit; text-align: left; }
+.wf-net:first-of-type { border-radius: 12px 12px 0 0; }
+.wf-net:last-of-type { border-radius: 0 0 12px 12px; border-bottom: 0; }
+.wf-net:active { background: #e5e5ea; }
+.wf-net.picked:not(.on) { background: #f8f9fa; }
+.wf-check { flex: none; width: 20px; color: #0a84ff; font-weight: 900; text-align: center; }
+.wf-name { flex: 1; min-width: 0; display: flex; flex-direction: column; font-weight: 700; overflow-wrap: anywhere; }
+.wf-name small { color: var(--ink-3); font-size: .8rem; font-weight: 600; }
+.wf-icons { flex: none; display: flex; align-items: center; gap: 6px; font-size: .85rem; }
+/* a Wi-Fi fan: two arcs and a dot */
+.wf-fan { width: 18px; height: 14px; background: radial-gradient(circle at 50% 100%, #1d2738 0 2.5px, transparent 3px), radial-gradient(circle at 50% 100%, transparent 0 5px, #1d2738 5.5px 7.5px, transparent 8px), radial-gradient(circle at 50% 100%, transparent 0 10px, #1d2738 10.5px 12.5px, transparent 13px); clip-path: polygon(50% 100%, 0 0, 100% 0); }
+.wf-msg { margin: 0; width: min(100%, 600px); min-height: 1.5em; font-weight: 800; font-size: 1.1rem; line-height: 1.6; text-align: center; }
+.wf-msg.bad { color: #a61e1e; }
+.wf-msg.good { color: var(--good); }
+.wf-pw { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; font-weight: 800; }
+.wf-pw .option { font-family: ui-monospace, Menlo, monospace; }
+@media (max-width: 640px) { .wf-row { flex-direction: column; align-items: center; } .wf-list { flex-basis: auto; width: 100%; } }
+
+/* ---------- a shop page with warning signs to find ---------- */
+
+.w-shop { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.sc-hint { margin: 0; min-height: 1.5em; font-weight: 800; font-size: 1.1rem; text-align: center; line-height: 1.5; }
+.sc-hint.done { color: var(--good); }
+.sc-screen { border-radius: 12px; background: white; overflow: hidden; font-size: .95rem; }
+.sc-page { display: flex; flex-direction: column; gap: 8px; padding: 2px 14px 12px; cursor: pointer; }
+.sc-top { margin: 0; font-weight: 900; font-size: 1.1rem; color: #e8590c; }
+.sc-prod { display: flex; gap: 12px; }
+.sc-img { flex: none; display: grid; place-items: center; width: 96px; height: 96px; border-radius: 12px; background: #f1f3f5; font-size: 3rem; }
+.sc-main { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+.sc-title { font-size: 1.05rem; }
+.sc-price s { color: var(--ink-3); }
+.sc-price b { color: #e03131; font-size: 1.1rem; }
+.sc-timer { color: #c92a2a; font-weight: 700; }
+.sc-left { font-family: ui-monospace, Menlo, monospace; }
+.sc-buy { padding: 4px 16px; border-radius: 8px; background: #fd7e14; color: white; font-weight: 800; }
+.sc-info { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; border-top: 1px solid #e9ecef; }
+.sc-c, .sc-info span { width: fit-content; padding: 1px 4px; border-radius: 6px; }
+.sc-found { outline: 3px solid var(--bad); outline-offset: 1px; background: #fff5f5; }
+.sc-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 8px; width: min(100%, 540px); }
+.sc-list li { padding: .45rem .7rem; border-radius: 12px; border: 2px dashed var(--line); color: var(--ink-3); font-weight: 700; }
+.sc-list li.got { border-style: solid; border-color: #ffa8a8; background: #fff5f5; color: var(--ink); }
+
 /* ---------- chat thread with a choice at each step ---------- */
 
 .w-chatpick { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 16px; align-items: start; width: 100%; }
