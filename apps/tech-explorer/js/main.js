@@ -1,4 +1,4 @@
-import { UNITS, COMING, PARTS } from './units.js?v=8';
+import { UNITS, COMING, PARTS, STAGES } from './units.js?v=8';
 import { WIDGETS } from './widgets.js?v=8';
 
 const app = document.getElementById('app');
@@ -49,6 +49,16 @@ const starsOf = u => {
   return { got: tasks.filter(isDone).length, total: tasks.length };
 };
 const seenOf = u => u.slides.filter(sl => seen.has(slideKey(sl))).length;
+
+// ---------- stages: small groups of units, each about one sitting ----------
+// A stage is read through when every slide of its units was opened. Stars stay a bonus.
+const unitById = id => UNITS.find(u => u.id === id);
+const stageOf = u => STAGES.find(s => s.units.includes(u?.id));
+const stageUnits = s => s.units.map(unitById);
+const stageNo = s => STAGES.indexOf(s) + 1;
+const stageSeen = s => stageUnits(s).reduce((a, u) => [a[0] + seenOf(u), a[1] + u.slides.length], [0, 0]);
+const stageRead = s => { const [got, all] = stageSeen(s); return got === all; };
+const nextStage = () => STAGES.find(s => !stageRead(s));
 // A unit card opens where the child stopped, unless the unit was read to the end.
 const resumeAt = u => {
   const i = progress.lastIn?.[u.id] ?? 0;
@@ -166,7 +176,9 @@ function drawIndex(tab) {
   if (tab === 'toc') {
     body.innerHTML = PARTS.map(part => `
       <h3 class="ix-part">${part.title}</h3>
-      ${UNITS.filter(u => u.part === part.id).map(u => {
+      ${STAGES.filter(s => s.part === part.id).map(st => `
+      <h4 class="ix-stage">第 ${stageNo(st)} 站・${st.icon} ${st.title}</h4>
+      ${stageUnits(st).map(u => {
         const n = UNITS.indexOf(u) + 1;
         const open = here && here.unit === u;
         return `
@@ -178,7 +190,7 @@ function drawIndex(tab) {
               return `<li${cur ? ' class="cur"' : ''}><a href="#/u/${u.id}/${i}">${sl.widget ? '🎯 ' : ''}${sl.title === '考考你' ? '考考你：' + strip(sl.params.question).slice(0, 18) + '…' : sl.title}</a>${terms.length ? `<span class="ix-terms">${terms.join('、')}</span>` : ''}</li>`;
             }).join('')}</ol>
           </details>`;
-      }).join('')}`).join('') + COMING.map(c => `<p class="ix-soon">${c.icon} ${c.title}（即將推出）</p>`).join('');
+      }).join('')}`).join('')}`).join('') + COMING.map(c => `<p class="ix-soon">${c.icon} ${c.title}（即將推出）</p>`).join('');
     body.querySelector('.cur')?.scrollIntoView({ block: 'center' });
   } else {
     body.innerHTML = `
@@ -249,6 +261,38 @@ const soonCard = c => `
     <span class="soon-tag">即將推出</span>
   </div></li>`;
 
+// Folded stage rows; open are the next stage, the stage of the last slide opened,
+// and any stage opened by hand during this visit.
+const openStages = new Set();
+function stageBox(s) {
+  const units = stageUnits(s);
+  const [got, all] = stageSeen(s);
+  const stars = units.reduce((a, u) => { const x = starsOf(u); return [a[0] + x.got, a[1] + x.total]; }, [0, 0]);
+  const next = s === nextStage();
+  const open = next || s === stageOf(unitById(progress.last?.unit)) || openStages.has(s.id);
+  const first = UNITS.indexOf(units[0]) + 1, end = first + units.length - 1;
+  return `
+    <details class="stage-box${got === all ? ' read' : ''}" data-stage="${s.id}" style="--c:${units[0].color}"${open ? ' open' : ''}>
+      <summary>
+        <span class="stage-no">第 ${stageNo(s)} 站</span>
+        <span class="stage-icon" aria-hidden="true">${s.icon}</span>
+        <span class="stage-name"><b>${s.title}</b><small lang="en">${s.en}</small><small>${end > first ? `第 ${first}–${end} 章・${units.length} 章` : `第 ${first} 章`}</small></span>
+        ${next ? '<span class="stage-tag">下一站</span>' : got === all ? '<span class="stage-tag done">🏅 看完了</span>' : ''}
+        <span class="stage-prog">
+          <span class="stage-stars" aria-label="得到 ${stars[0]} 顆星，共 ${stars[1]} 顆">★ ${stars[0]} / ${stars[1]}</span>
+          <span class="unit-seen" aria-label="看了 ${got} 頁，共 ${all} 頁"><i style="width:${(got / all) * 100}%"></i></span>
+        </span>
+      </summary>
+      <ul class="units">${units.map(unitCard).join('')}</ul>
+    </details>`;
+}
+// A click on the summary toggles the row after this handler, so it flips the state here.
+app.addEventListener('click', e => {
+  const box = e.target.closest('summary')?.parentElement;
+  if (!box?.dataset.stage) return;
+  box.open ? openStages.delete(box.dataset.stage) : openStages.add(box.dataset.stage);
+});
+
 function resumeHTML() {
   const all = UNITS.reduce((a, u) => { const x = starsOf(u); return [a[0] + x.got, a[1] + x.total]; }, [0, 0]);
   const last = progress.last && UNITS.find(u => u.id === progress.last.unit);
@@ -274,13 +318,14 @@ function home() {
         ${resumeHTML()}
       </header>
       ${PARTS.map(part => {
-        const units = UNITS.filter(u => u.part === part.id);
+        const stages = STAGES.filter(s => s.part === part.id);
         const coming = COMING.filter(c => c.part === part.id);
-        if (!units.length && !coming.length) return '';
+        if (!stages.length && !coming.length) return '';
         return `
           <h2 class="part-title">${part.title}<span class="en" lang="en">${part.en}</span></h2>
           ${part.desc ? `<p class="part-desc">${part.desc}</p>` : ''}
-          <ul class="units">${units.map(unitCard).join('')}${coming.map(soonCard).join('')}</ul>`;
+          <div class="stages">${stages.map(stageBox).join('')}</div>
+          ${coming.length ? `<ul class="units">${coming.map(soonCard).join('')}</ul>` : ''}`;
       }).join('')}
       <footer class="foot">
         <p class="store-note">星星和進度只存在這台裝置的瀏覽器裡。在 iPad 上用 Safari 的「分享 → 加入主畫面」，以後從主畫面打開，紀錄比較不會被自動清掉（主畫面和 Safari 的紀錄是分開的）。</p>
@@ -378,6 +423,7 @@ function finished(unit) {
   const i = UNITS.indexOf(unit);
   const next = UNITS[i + 1];
   const { got, total } = starsOf(unit);
+  const stage = stageOf(unit), nextSt = stageOf(next);
   app.innerHTML = `
     <main class="finish" style="--c:${unit.color}">
       <div class="confetti" aria-hidden="true">${Array.from({ length: 24 }, (_, k) =>
@@ -387,10 +433,11 @@ function finished(unit) {
       <h2>「${unit.title}」完成了！</h2>
       <p class="unit-stars big">${'★'.repeat(got)}<span class="dim">${'★'.repeat(total - got)}</span></p>
       <p>${got === total ? '全部的任務都完成了，太厲害了！' : '還有星星沒拿到，可以回去再玩一次喔。'}</p>
+      ${stageRead(stage) ? `<p class="fin-stage">🏅 第 ${stageNo(stage)} 站「${stage.title}」全部看完了！</p>` : ''}
       ${next ? `
       <div class="fin-next" style="--c:${next.color}">
         ${next.part !== unit.part ? `<p class="fin-part">🎉「${PARTS.find(p => p.id === unit.part).title}」全部完成！接下來是「${PARTS.find(p => p.id === next.part).title}」</p>` : ''}
-        <small>下一章</small>
+        <small>${nextSt !== stage ? `下一站．第 ${stageNo(nextSt)} 站「${nextSt.title}」` : '下一章'}</small>
         <b>第 ${i + 2} 章．${next.icon} ${next.title}</b>
         <span>${next.desc}</span>
       </div>` : `<p class="fin-part">🏆 這是最後一章，全部 ${UNITS.length} 章都看完了！</p>`}

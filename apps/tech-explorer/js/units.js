@@ -1904,5 +1904,20 @@ export const PARTS = [
   { id: 'adv', title: '第二部：原理探索', en: 'Part 2 · How It Works', desc: '再看裡面：0 和 1、螢幕、儲存、網路、加密和寫程式。' },
 ];
 
+// Stages: small groups of units, each about one sitting. Units keep their UNITS order;
+// a stage lists its units by id, and every unit must be in exactly one stage (a unit
+// in no stage does not show on the home screen).
+export const STAGES = [
+  { id: 'hello', part: 'basic', icon: '👋', title: '上手', en: 'First Steps', units: ['devices', 'start', 'typing', 'settings'] },
+  { id: 'care', part: 'basic', icon: '🔋', title: '照顧裝置', en: 'Power and Care', units: ['cables', 'battery', 'care'] },
+  { id: 'media', part: 'basic', icon: '📷', title: '拍照和檔案', en: 'Photos and Files', units: ['camera', 'files', 'space'] },
+  { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account'] },
+  { id: 'apps', part: 'basic', icon: '📲', title: 'App 和 AI', en: 'Apps and AI', units: ['appbasics', 'apps', 'handy', 'aichat'] },
+  { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety'] },
+  { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'os', 'screens', 'storage'] },
+  { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'web'] },
+  { id: 'code', part: 'adv', icon: '🧩', title: '寫程式', en: 'Coding', units: ['algo', 'coding'] },
+];
+
 // Shown greyed out on the home screen until the unit is written.
 export const COMING = [];

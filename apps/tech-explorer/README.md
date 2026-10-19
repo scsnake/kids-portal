@@ -13,6 +13,10 @@ Two parts. Part 1 teaches how to use a device, with rough ideas only. Part 2
 explains how things work inside. Inside each part, a unit only uses ideas from
 the units before it.
 
+The home screen groups the units into 9 stages of 1 to 4 units (`STAGES` in
+`js/units.js`). The next stage not read through is marked 「下一站」 and opens by
+itself; a stage read through gets 🏅. No unit is locked.
+
 **Part 1: 認識和使用 (using devices)**
 
 1. 認識 3C 裝置: computer, desktop vs laptop, phone/tablet, input and output

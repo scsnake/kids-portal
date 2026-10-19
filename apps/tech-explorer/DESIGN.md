@@ -34,6 +34,12 @@ Rules:
 - A unit has 2 to 7 slides. Most units end with a 考考你 slide (`choice`).
 - A slide teaches one idea.
 - Part 1 never needs Part 2. Part 2 can refer back to Part 1.
+- Units are grouped into stages (`STAGES` in `units.js`). A stage has 2 to 5
+  units, about one sitting. The home screen shows one row for each stage.
+- Every unit must be in one stage. A unit in no stage does not show on the home
+  screen.
+- Do not lock units. Progress lives in one browser and can be lost, and adults
+  jump to the topic they need.
 
 ## 3. How a slide looks
 
@@ -147,6 +153,7 @@ Interaction rules:
 ## 7. Add a topic: checklist
 
 1. Find the unit by dependency (section 2). Make a new unit only for a new area.
+   Add a new unit's id to its stage in `STAGES`.
 2. Write the slide: title, text, and `art` or `widget` + `params` (section 4).
 3. Reuse `choice`, `sort` or `order` if they fit. Write a new widget only if needed.
 4. Add a 考考你 question if the unit has none for this idea.

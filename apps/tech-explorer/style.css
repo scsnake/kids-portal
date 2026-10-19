@@ -1468,6 +1468,60 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .resume:active { transform: translateY(2px); box-shadow: 0 1px 0 color-mix(in srgb, var(--c) 70%, black); }
 .unit-seen { display: block; height: 6px; margin-top: .5rem; border-radius: 3px; background: var(--line); overflow: hidden; }
 .unit-seen i { display: block; height: 100%; background: var(--c); opacity: .6; }
+
+/* ---------- stages on the home screen ---------- */
+
+.stages { display: flex; flex-direction: column; gap: 12px; margin-top: .8rem; }
+.stage-box { border-radius: var(--radius); }
+.stage-box[open] { padding-bottom: 16px; background: color-mix(in srgb, var(--c) 7%, var(--paper)); }
+.stage-box summary {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
+  min-height: 72px; padding: 10px 16px;
+  border-radius: var(--radius);
+  background: var(--card);
+  border-left: 8px solid var(--c);
+  box-shadow: var(--shadow);
+  cursor: pointer; list-style: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none; user-select: none;
+}
+.stage-box summary::-webkit-details-marker { display: none; }
+.stage-box summary::after { content: '▸'; color: var(--ink-3); font-size: 1.3rem; transition: transform .15s ease-out; }
+.stage-box[open] summary::after { transform: rotate(90deg); }
+.stage-box summary:active { transform: scale(.99); }
+.stage-no {
+  padding: .2rem .7rem; border-radius: 99px;
+  background: color-mix(in srgb, var(--c) 82%, black); color: white;
+  font-weight: 900; white-space: nowrap;
+}
+.stage-icon { font-size: 2rem; line-height: 1; }
+.stage-name { display: flex; flex-direction: column; min-width: 8rem; }
+.stage-name b { font-size: 1.3rem; }
+.stage-name small { color: var(--ink-3); font-weight: 700; font-size: .85rem; }
+.stage-name small[lang="en"] { color: var(--c); }
+.stage-tag {
+  padding: .2rem .7rem; border-radius: 99px;
+  background: #fff3bf; color: #a35f00; border: 2px solid var(--star);
+  font-weight: 900; white-space: nowrap;
+}
+.stage-tag.done { background: color-mix(in srgb, var(--good) 12%, white); color: var(--good); border-color: color-mix(in srgb, var(--good) 40%, white); }
+.stage-prog { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin-left: auto; min-width: 7rem; }
+.stage-stars { color: var(--star); font-weight: 900; white-space: nowrap; }
+.stage-prog .unit-seen { width: 100%; margin: 0; }
+.stage-box .units { margin: 14px 14px 0; }
+@media (max-width: 560px) {
+  .stage-prog { flex-direction: row; align-items: center; width: 100%; margin-left: 0; }
+  .stage-prog .unit-seen { flex: 1; }
+  .stage-box summary { position: relative; padding-right: 40px; }
+  .stage-box summary::after { position: absolute; top: 16px; right: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .stage-box summary::after { transition: none; } }
+
+/* finish screen */
+.finish .fin-stage { margin: 0; font-weight: 900; color: var(--good); }
+
+/* contents panel */
+.ix-stage { margin: .8rem 0 .3rem; font-size: .95rem; color: var(--ink-3); }
 .dots .dot.seen::after { background: color-mix(in srgb, var(--c) 35%, white); }
 .store-note { max-width: 520px; margin: 0 auto .4rem !important; line-height: 1.6; }
 .link-btn { border: 0; background: none; color: var(--ink-2); text-decoration: underline; text-underline-offset: 2px; font-size: .9rem; min-height: 44px; padding: 0 .6rem; }
