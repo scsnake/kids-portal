@@ -75,6 +75,9 @@ Stars, viewed pages and the last page are saved in the browser's `localStorage`
 survive slides being added or moved. The home screen shows the total stars and a
 "繼續上次" button; the footer has "清除學習紀錄". The time the page is on screen is
 saved too (`secs`); the 3010 slide shows it for this visit and in total.
+`since` is the day this browser started. A unit or slide with a later `added` date counts as
+new until it is read; the home screen can filter by 🆕 新的 or ⭕ 還沒上過 (not opened yet).
+Progress saved before `since` existed gets the first version's date, 2026-10-18.
 
 - The data stays on one device and one browser; it is not synced.
 - Safari may clear a site's storage after 7 days without a visit. A site added to

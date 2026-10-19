@@ -1,6 +1,8 @@
 // Lesson content. Each unit is a list of slides; a slide has a title, a short text and either
 // a static `art` (HTML) or a `widget` (an interaction from widgets.js) with its params.
 // Keep each text to two or three short sentences: a child reads it in one breath.
+// A unit or slide added after the first version has `added: 'YYYY-MM-DD'`; the home screen
+// shows it as new (🆕) in browsers that started before that day.
 
 // A new term, shown in zh-TW with its English name beside it.
 const t = (zh, en) => `<b class="term">${zh}<span class="en" lang="en">${en}</span></b>`;
@@ -546,6 +548,7 @@ export const UNITS = [
     en: 'E-waste',
     desc: '舊 3C 要丟哪裡、手機裡有什麼、送走前先清乾淨',
     color: '#1864ab',
+    added: '2026-10-19',
     slides: [
       {
         title: '舊 3C 要丟哪裡？',
@@ -610,6 +613,7 @@ export const UNITS = [
     en: 'Healthy Screen Use',
     desc: '3010 護眼、姿勢、睡前和螢幕使用時間',
     color: '#099268',
+    added: '2026-10-19',
     slides: [
       {
         title: '護眼口訣 3010',
@@ -853,6 +857,7 @@ export const UNITS = [
     en: 'File Types',
     desc: '副檔名、用對的 App 打開、壓縮檔',
     color: '#3b5bdb',
+    added: '2026-10-19',
     slides: [
       {
         title: '檔名的尾巴',
@@ -1360,6 +1365,7 @@ export const UNITS = [
     en: 'Maps and Navigation',
     desc: '找地方、選路線、跟著導航走、分享位置',
     color: '#1971c2',
+    added: '2026-10-19',
     slides: [
       {
         title: '用地圖 App 找路',
@@ -1474,6 +1480,7 @@ export const UNITS = [
     en: 'Voice Assistants',
     desc: '說清楚的指令、喚醒詞、好用和要小心',
     color: '#7048e8',
+    added: '2026-10-19',
     slides: [
       {
         title: '嘿 Siri！',
@@ -1652,6 +1659,7 @@ export const UNITS = [
     en: 'Fake News & AI Fakes',
     desc: '看來源、看日期，找出假圖和假聲音',
     color: '#5f3dc4',
+    added: '2026-10-19',
     slides: [
       {
         title: '網路上的消息，不一定是真的',
@@ -1760,6 +1768,7 @@ export const UNITS = [
     en: 'Public Wi-Fi and Shopping',
     desc: '選對的 Wi-Fi、認出假商店、付錢要小心',
     color: '#2b8a3e',
+    added: '2026-10-19',
     slides: [
       {
         title: '哪個 Wi-Fi 可以連？',
@@ -1830,6 +1839,7 @@ export const UNITS = [
     en: 'Kindness Online',
     desc: '發文前想一想，被欺負時怎麼做',
     color: '#e64980',
+    added: '2026-10-19',
     slides: [
       {
         title: '發文之前，先想一想',
@@ -1930,6 +1940,7 @@ export const UNITS = [
     en: 'Emergency Help',
     desc: '119 和 110、鎖住也能打、醫療卡',
     color: '#c92a2a',
+    added: '2026-10-19',
     slides: [
       {
         title: '緊急電話',
@@ -2078,6 +2089,7 @@ export const UNITS = [
     en: 'Logic Gates',
     desc: '用開關和燈泡做判斷：AND、OR、NOT',
     color: '#f76707',
+    added: '2026-10-19',
     slides: [
       {
         title: 'AND：而且',
@@ -2348,6 +2360,7 @@ export const UNITS = [
     en: 'Sound and Video as Numbers',
     desc: '取樣、影格率，還有影片為什麼要壓縮',
     color: '#0b7285',
+    added: '2026-10-19',
     slides: [
       {
         title: '聲音變成數字',
@@ -2566,6 +2579,7 @@ export const UNITS = [
     en: 'The Physical Internet',
     desc: '基地台、海底電纜和資料中心',
     color: '#1971c2',
+    added: '2026-10-19',
     slides: [
       {
         title: '訊息怎麼到美國？',
@@ -2715,6 +2729,7 @@ export const UNITS = [
     en: 'Recommendations',
     desc: '為什麼 App 一直推薦差不多的影片',
     color: '#ae3ec9',
+    added: '2026-10-19',
     slides: [
       {
         title: '為什麼一直推薦一樣的？',
@@ -2780,6 +2795,7 @@ export const UNITS = [
     en: 'How Free Apps Make Money',
     desc: '廣告、Cookie 追蹤和你的資料',
     color: '#c2410c',
+    added: '2026-10-19',
     slides: [
       {
         title: '免費的遊戲，誰付錢？',

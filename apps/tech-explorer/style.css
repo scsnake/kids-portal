@@ -1685,6 +1685,18 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 }
 @media (prefers-reduced-motion: reduce) { .stage-box summary::after { transition: none; } }
 
+/* ---------- home: filter by new or not yet started ---------- */
+
+.filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 1rem 0 0; }
+.filter { display: inline-flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 16px; border: 2px solid var(--line); border-radius: 99px; background: var(--card); color: var(--ink-2); font: inherit; font-weight: 800; -webkit-tap-highlight-color: transparent; }
+.filter b { min-width: 1.6em; padding: 0 6px; border-radius: 99px; background: var(--paper); color: var(--ink-3); font-size: .9rem; }
+.filter.on { border-color: var(--ink); background: var(--ink); color: white; }
+.filter.on b { background: rgba(255, 255, 255, .2); color: white; }
+.filter:active { transform: translateY(1px); }
+.filter-empty { margin: 2rem 0; color: var(--ink-2); font-weight: 800; font-size: 1.2rem; text-align: center; }
+.new-tag { position: absolute; top: -14px; left: 1rem; padding: .1rem .6rem; border-radius: 99px; background: #e03131; color: white; font-weight: 900; font-size: .9rem; box-shadow: 0 2px 0 #a61e1e; }
+.stage-tag.new { background: #fff5f5; color: #c92a2a; border-color: #ffa8a8; }
+
 /* finish screen */
 .finish .fin-stage { margin: 0; font-weight: 900; color: var(--good); }
 

@@ -162,3 +162,5 @@ Interaction rules:
 6. Bump the `?v=` numbers (see `README.md`).
 7. Add a line to `changelog.json` in plain words for parents.
 8. Update the unit list in `README.md` if the topic is new.
+9. Mark new content with the day it goes live: `added: 'YYYY-MM-DD'` on a new unit, or on
+   each new slide of an older unit. The home screen then shows it under 🆕 新的.

@@ -11,15 +11,22 @@ const STORE = 'tech-explorer.v2';
 //   seen: slide keys that were opened
 //   last: { unit, index } of the last slide opened, plus each unit's last index
 //   secs: seconds the app was on screen, in total (shown on the 3010 slide)
+//   since: the day this browser started (YYYY-MM-DD); content added later counts as new
 
 const slideKey = sl => (sl.title === '考考你' ? 'Q:' + sl.params.question : sl.title);
 
+const today = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+// Progress saved before `since` existed is from the first version of the course.
+const FIRST_VERSION = '2026-10-18';
 function load() {
   try {
     const p = JSON.parse(localStorage.getItem(STORE));
-    if (p && Array.isArray(p.done)) return p;
+    if (p && Array.isArray(p.done)) return { since: FIRST_VERSION, ...p };
   } catch {}
-  return { done: [], seen: [], last: null, lastIn: {} };
+  return { done: [], seen: [], last: null, lastIn: {}, since: today() };
 }
 let progress = load();
 const done = new Set(progress.done);
@@ -29,6 +36,7 @@ const save = () => {
   progress.seen = [...seen];
   try { localStorage.setItem(STORE, JSON.stringify(progress)); } catch {}
 };
+save(); // keeps `since` from the first visit
 const isDone = sl => done.has(slideKey(sl));
 const markDone = sl => {
   const k = slideKey(sl);
@@ -68,6 +76,24 @@ const firstUnread = s => {
   }
   return `#/u/${s.units[0]}/0`;
 };
+// ---------- what is new in this browser ----------
+// A unit or a slide with `added: 'YYYY-MM-DD'` (units.js) after `since` is new until it is
+// opened. A new unit gets 🆕; an older unit with new slides gets 「＋N 頁新內容」.
+const newSlides = u => u.slides.filter(sl => (sl.added || u.added || '') > progress.since && !seen.has(slideKey(sl)));
+const isNewUnit = u => (u.added || '') > progress.since && newSlides(u).length > 0;
+const FILTERS = [
+  { id: 'all', label: '全部', test: () => true },
+  { id: 'new', label: '🆕 新的', test: u => newSlides(u).length > 0, empty: '新的內容都看過了 🎉' },
+  { id: 'todo', label: '⭕ 還沒上過', test: u => seenOf(u) === 0, empty: '每一章都上過了 🎉' },
+];
+let filter = 'all';
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-filter]');
+  if (!b) return;
+  filter = b.dataset.filter;
+  home();
+});
+
 // A unit card opens where the child stopped, unless the unit was read to the end.
 const resumeAt = u => {
   const i = progress.lastIn?.[u.id] ?? 0;
@@ -77,7 +103,7 @@ function resetProgress() {
   if (!confirm('確定要清除這台裝置上的所有星星和學習紀錄嗎？清除後就找不回來了。')) return;
   done.clear();
   seen.clear();
-  progress = { done: [], seen: [], last: null, lastIn: {} };
+  progress = { done: [], seen: [], last: null, lastIn: {}, since: progress.since };
   visit = 0;
   save();
   home();
@@ -269,8 +295,10 @@ const portalLink = `
 
 function unitCard(u) {
   const { got, total } = starsOf(u);
+  const fresh = newSlides(u).length;
   return `
     <li><a class="unit-card${got === total ? ' full' : ''}" href="#/u/${u.id}/${resumeAt(u)}" style="--c:${u.color}">
+      ${isNewUnit(u) ? '<span class="new-tag">🆕 新</span>' : fresh ? `<span class="new-tag">＋${fresh} 頁新內容</span>` : ''}
       <span class="unit-no">${UNITS.indexOf(u) + 1}</span>
       <span class="unit-icon">${u.icon}</span>
       <span class="unit-title">${u.title}</span>
@@ -294,22 +322,26 @@ const soonCard = c => `
 // and any stage opened by hand during this visit.
 const openStages = new Set();
 function stageBox(s) {
-  const units = stageUnits(s);
-  const [got, all] = stageSeen(s);
-  const stars = units.reduce((a, u) => { const x = starsOf(u); return [a[0] + x.got, a[1] + x.total]; }, [0, 0]);
+  const all = stageUnits(s), test = FILTERS.find(f => f.id === filter).test;
+  const units = all.filter(test);
+  if (!units.length) return '';
+  const fresh = all.filter(u => newSlides(u).length).length;
+  const [got, allPages] = stageSeen(s);
+  const stars = all.reduce((a, u) => { const x = starsOf(u); return [a[0] + x.got, a[1] + x.total]; }, [0, 0]);
   const next = s === nextStage();
-  const open = next || s === stageOf(unitById(progress.last?.unit)) || openStages.has(s.id);
-  const first = UNITS.indexOf(units[0]) + 1, end = first + units.length - 1;
+  const open = filter !== 'all' || next || s === stageOf(unitById(progress.last?.unit)) || openStages.has(s.id);
+  const first = UNITS.indexOf(all[0]) + 1, end = first + all.length - 1;
   return `
-    <details class="stage-box${got === all ? ' read' : ''}" data-stage="${s.id}" style="--c:${units[0].color}"${open ? ' open' : ''}>
+    <details class="stage-box${got === allPages ? ' read' : ''}" data-stage="${s.id}" style="--c:${all[0].color}"${open ? ' open' : ''}>
       <summary>
         <span class="stage-no">第 ${stageNo(s)} 站</span>
         <span class="stage-icon" aria-hidden="true">${s.icon}</span>
-        <span class="stage-name"><b>${s.title}</b><small lang="en">${s.en}</small><small>${end > first ? `第 ${first}–${end} 章・${units.length} 章` : `第 ${first} 章`}</small></span>
-        ${next ? '<span class="stage-tag">下一站</span>' : got === all ? '<span class="stage-tag done">🏅 看完了</span>' : ''}
+        <span class="stage-name"><b>${s.title}</b><small lang="en">${s.en}</small><small>${end > first ? `第 ${first}–${end} 章・${all.length} 章` : `第 ${first} 章`}</small></span>
+        ${next ? '<span class="stage-tag">下一站</span>' : got === allPages ? '<span class="stage-tag done">🏅 看完了</span>' : ''}
+        ${fresh ? `<span class="stage-tag new">🆕 ${fresh} 章有新內容</span>` : ''}
         <span class="stage-prog">
           <span class="stage-stars" aria-label="得到 ${stars[0]} 顆星，共 ${stars[1]} 顆">★ ${stars[0]} / ${stars[1]}</span>
-          <span class="unit-seen" aria-label="看了 ${got} 頁，共 ${all} 頁"><i style="width:${(got / all) * 100}%"></i></span>
+          <span class="unit-seen" aria-label="看了 ${got} 頁，共 ${allPages} 頁"><i style="width:${(got / allPages) * 100}%"></i></span>
         </span>
       </summary>
       <ul class="units">${units.map(unitCard).join('')}</ul>
@@ -331,6 +363,18 @@ function resumeHTML() {
     ${last ? `<a class="resume" href="#/u/${last.id}/${i}" style="--c:${last.color}">▶ 繼續上次：第 ${UNITS.indexOf(last) + 1} 章 ${last.title}・第 ${i + 1} 頁</a>` : ''}`;
 }
 
+// 全部 / 🆕 新的 / ⭕ 還沒上過, each with its count. A filter that would show nothing, or
+// everything, is hidden unless it is the one in use (then the list says it is all done).
+function filterBar() {
+  const n = f => UNITS.filter(f.test).length;
+  const shown = FILTERS.filter(f => f.id === 'all' || f.id === filter || (n(f) && n(f) < UNITS.length));
+  if (shown.length < 2) return '';
+  return `
+    <div class="filters" role="group" aria-label="篩選章節">
+      ${shown.map(f => `<button class="filter${f.id === filter ? ' on' : ''}" data-filter="${f.id}" aria-pressed="${f.id === filter}">${f.label}<b>${n(f)}</b></button>`).join('')}
+    </div>`;
+}
+
 function home() {
   hush();
   onFinish = null;
@@ -346,16 +390,17 @@ function home() {
         <p class="sub">How Tech Works・電腦、手機和網路是怎麼運作的？</p>
         ${resumeHTML()}
       </header>
+      ${filterBar()}
       ${PARTS.map(part => {
-        const stages = STAGES.filter(s => s.part === part.id);
-        const coming = COMING.filter(c => c.part === part.id);
+        const stages = STAGES.filter(s => s.part === part.id).map(stageBox).filter(Boolean);
+        const coming = filter === 'all' ? COMING.filter(c => c.part === part.id) : [];
         if (!stages.length && !coming.length) return '';
         return `
           <h2 class="part-title">${part.title}<span class="en" lang="en">${part.en}</span></h2>
           ${part.desc ? `<p class="part-desc">${part.desc}</p>` : ''}
-          <div class="stages">${stages.map(stageBox).join('')}</div>
+          <div class="stages">${stages.join('')}</div>
           ${coming.length ? `<ul class="units">${coming.map(soonCard).join('')}</ul>` : ''}`;
-      }).join('')}
+      }).join('') || `<p class="filter-empty">${FILTERS.find(f => f.id === filter).empty}</p>`}
       <footer class="foot">
         <p class="store-note">星星和進度只存在這台裝置的瀏覽器裡。在 iPad 上用 Safari 的「分享 → 加入主畫面」，以後從主畫面打開，紀錄比較不會被自動清掉（主畫面和 Safari 的紀錄是分開的）。</p>
         <p><button class="link-btn" data-act="reset">清除學習紀錄</button></p>
