@@ -414,6 +414,13 @@ const VC_TASKS = [
   },
 ];
 
+// A sound wave (x from 0 to 1, height from -1 to 1), the numbers of measurements to try,
+// and the real rate each one plays at in 聽聽看 (the last is CD quality).
+const SM_WAVE = x => Math.sin(x * Math.PI * 4) * 0.7 + Math.sin(x * Math.PI * 10) * 0.25;
+const SM_STEPS = [4, 8, 16, 32, 64];
+const SM_RATES = [1000, 2000, 4000, 11025, 44100];
+let smAudio = null;
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -5755,6 +5762,143 @@ export const WIDGETS = {
       api.good();
       api.done();
     });
+  },
+
+  // Measure a sound wave: few measurements give a blocky copy, many give the same shape.
+  // The numbers are what gets saved. 聽聽看 plays a short tune at the chosen rate.
+  sampler(host, _, api) {
+    const y = w => 100 - w * 80;
+    const smooth = Array.from({ length: 241 }, (_, i) => `${i * 2},${y(SM_WAVE(i / 240)).toFixed(1)}`).join(' ');
+    host.innerHTML = `
+      <div class="w-sampler">
+        <p class="sm-hint">只量 4 次，形狀一點都不像。按「量多一點」</p>
+        <svg class="sm-pic" viewBox="0 0 480 200" role="img" aria-label="一條聲音的波，和量到的點">
+          <line x1="0" y1="100" x2="480" y2="100" stroke="#dee2e6" stroke-width="2"/>
+          <polyline class="sm-wave" points="${smooth}"/>
+          <g class="sm-marks"></g>
+          <polyline class="sm-copy" points=""/>
+        </svg>
+        <p class="sm-nums"></p>
+        <div class="sm-ctrl">
+          <button class="option" data-d="-1">◀ 量少一點</button>
+          <b class="sm-n"></b>
+          <button class="option" data-d="1">量多一點 ▶</button>
+        </div>
+        <button class="option sm-play">🔊 聽聽看</button>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let k = 0, src = null, finished = false;
+    const draw = () => {
+      const n = SM_STEPS[k];
+      const vals = Array.from({ length: n }, (_, i) => SM_WAVE((i + 0.5) / n));
+      $('.sm-copy').setAttribute('points', vals.flatMap((v, i) => [`${(i / n) * 480},${y(v).toFixed(1)}`, `${((i + 1) / n) * 480},${y(v).toFixed(1)}`]).join(' '));
+      $('.sm-marks').innerHTML = n > 32 ? '' : vals.map((v, i) => {
+        const x = ((i + 0.5) / n) * 480;
+        return `<line x1="${x}" y1="100" x2="${x}" y2="${y(v)}"/><circle cx="${x}" cy="${y(v)}" r="${n > 16 ? 3 : 5}"/>`;
+      }).join('');
+      const digits = vals.map(v => Math.round((v + 1) * 4.5));
+      $('.sm-nums').textContent = `存起來的數字：${digits.slice(0, 12).join(' ')}${n > 12 ? ' …' : ''}`;
+      $('.sm-n').textContent = `量 ${n} 次`;
+      host.querySelector('[data-d="-1"]').disabled = k === 0;
+      host.querySelector('[data-d="1"]').disabled = k === SM_STEPS.length - 1;
+    };
+    $('.sm-ctrl').addEventListener('click', e => {
+      const b = e.target.closest('[data-d]');
+      if (!b || b.disabled) return;
+      k = Math.min(Math.max(k + +b.dataset.d, 0), SM_STEPS.length - 1);
+      draw();
+      pop($('.sm-n'));
+      if (finished) return;
+      if (k === SM_STEPS.length - 1) {
+        finished = true;
+        $('.sm-hint').textContent = '🎉 量得夠多，就跟原來的聲音一樣了！CD 每秒量 44,100 次。';
+        $('.sm-hint').classList.add('done');
+        api.good();
+        api.done();
+      } else {
+        $('.sm-hint').textContent = k < 2 ? '有一點像了，可是還是方方的。再多一點' : '越來越像了！再多一點';
+      }
+    });
+    // A short tune (C, E, G), each sample held for as long as the chosen rate leaves it.
+    $('.sm-play').onclick = () => {
+      try {
+        smAudio ??= new (window.AudioContext || window.webkitAudioContext)();
+        smAudio.resume?.();
+        const sr = smAudio.sampleRate, len = Math.floor(sr * 1.2);
+        const buf = smAudio.createBuffer(1, len, sr), d = buf.getChannelData(0);
+        const hold = Math.max(1, Math.round(sr / SM_RATES[k]));
+        for (let i = 0; i < len; i++) {
+          const tt = (i - (i % hold)) / sr, note = Math.min(2, Math.floor(tt / 0.4)), local = tt - note * 0.4;
+          const env = Math.min(1, local * 50) * Math.max(0, 1 - local / 0.4);
+          d[i] = Math.sin(2 * Math.PI * [523, 659, 784][note] * tt) * 0.18 * env;
+        }
+        try { src?.stop(); } catch {}
+        src = smAudio.createBufferSource();
+        src.buffer = buf;
+        src.connect(smAudio.destination);
+        src.start();
+      } catch {}
+    };
+    draw();
+  },
+
+  // A bouncing ball drawn at 1, 4, 12 or 30 pictures a second. Few pictures look jumpy;
+  // faint copies of the last pictures show that a video is separate pictures.
+  fps(host, _, api) {
+    const rates = [1, 4, 12, 30];
+    host.innerHTML = `
+      <div class="w-fps">
+        <p class="fp-hint">現在 1 秒播 12 張。換成 1 張，再換成 30 張，比比看</p>
+        <svg class="fp-stage" viewBox="0 0 480 200" role="img" aria-label="一顆跳來跳去的球">
+          <rect width="480" height="200" fill="#e7f5ff"/>
+          <rect y="172" width="480" height="28" fill="#b2f2bb"/>
+          <g class="fp-ghosts"></g>
+          <circle class="fp-ball" cx="40" cy="152" r="18"/>
+        </svg>
+        <p class="fp-count">這一秒的第 <b>1／12</b> 張</p>
+        <div class="fp-rates">${rates.map(r => `<button class="option" data-r="${r}">1 秒 ${r} 張</button>`).join('')}</div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let rate = 12, last = -1, ghosts = [];
+    const tried = new Set();
+    const at = s => {
+      const p = (s % 3) / 3;
+      return [40 + p * 400, 152 - Math.abs(Math.sin(s * Math.PI * 1.5)) * 110];
+    };
+    const showRate = () => host.querySelectorAll('[data-r]').forEach(b => b.classList.toggle('on', +b.dataset.r === rate));
+    const loop = now => {
+      if (!api.alive()) return;
+      const frame = Math.floor((now / 1000) * rate);
+      if (frame !== last) {
+        last = frame;
+        const [x, y] = at(frame / rate);
+        ghosts = [[x, y], ...ghosts].slice(0, 4);
+        $('.fp-ball').setAttribute('cx', x);
+        $('.fp-ball').setAttribute('cy', y);
+        $('.fp-ghosts').innerHTML = ghosts.slice(1).map(([gx, gy], i) => `<circle cx="${gx}" cy="${gy}" r="18" opacity="${0.3 - i * 0.09}"/>`).join('');
+        $('.fp-count b').textContent = `${(frame % rate) + 1}／${rate}`;
+      }
+      requestAnimationFrame(loop);
+    };
+    $('.fp-rates').addEventListener('click', e => {
+      const b = e.target.closest('[data-r]');
+      if (!b) return;
+      rate = +b.dataset.r;
+      showRate();
+      if (rate === 1) tried.add('slow');
+      if (rate === 30) tried.add('fast');
+      const hint = $('.fp-hint');
+      if (tried.size === 2 && !hint.classList.contains('done')) {
+        hint.textContent = '🎉 1 秒 1 張，像在看照片；1 秒 30 張，就像真的在動！電影大多是 1 秒 24 張。';
+        hint.classList.add('done');
+        api.good();
+        api.done();
+      } else if (!hint.classList.contains('done')) {
+        hint.textContent = rate === 1 ? '1 秒只有 1 張，球是一格一格跳的。再換成 30 張' : rate === 30 ? '1 秒 30 張，很順吧！再換成 1 張比比看' : `1 秒 ${rate} 張。試試 1 張和 30 張`;
+      }
+    });
+    showRate();
+    requestAnimationFrame(loop);
   },
 
   // A tiny "AI" that only looks at color learns from examples, and gets fixed with one more.

@@ -2249,6 +2249,55 @@ export const UNITS = [
   },
 
   {
+    id: 'soundvideo',
+    part: 'adv',
+    icon: '🎞️',
+    title: '聲音和影片怎麼變成數字',
+    en: 'Sound and Video as Numbers',
+    desc: '取樣、影格率，還有影片為什麼要壓縮',
+    color: '#0b7285',
+    slides: [
+      {
+        title: '聲音變成數字',
+        text: `聲音是空氣在振動。${t('麥克風', 'microphone')}每秒量好幾萬次振動有多大，把它變成一串數字，這叫${t('取樣', 'sampling')}。量多一點看看！`,
+        widget: 'sampler',
+      },
+      {
+        title: '影片是很多張圖',
+        text: `影片是很多張圖片，很快地一張接一張播。每一張叫${t('影格', 'frame')}，一秒播幾張叫${t('影格率', 'frame rate')}。換換看！`,
+        widget: 'fps',
+      },
+      {
+        title: '影片為什麼這麼大？',
+        text: `一秒 30 張圖，一分鐘就有 1,800 張！所以影片都要${t('壓縮', 'compression')}，例如只記下這一張和上一張「不一樣的地方」。`,
+        widget: 'choice',
+        params: {
+          question: '一張圖 1 MB，一秒 30 張。1 分鐘的影片不壓縮，有多大？',
+          options: [
+            { text: '📦 1,800 MB', correct: true },
+            { text: '📦 60 MB' },
+            { text: '📦 30 MB' },
+          ],
+          explain: '30 × 60 = 1,800 張，就是 1,800 MB，快 2 GB！壓縮成 .mp4 以後，常常只要幾十 MB。',
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '錄音 App 可以選「高品質」或「一般」。為什麼高品質的檔案比較大？',
+          options: [
+            { text: '🔢 每秒量比較多次，數字比較多', correct: true },
+            { text: '🔊 聲音比較大聲' },
+            { text: '⏳ 錄的時間比較長' },
+          ],
+          explain: '量得越多次，聲音越像原來的，可是要存的數字也越多，檔案就越大。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'gpu',
     part: 'adv',
     icon: '🎮',
@@ -2649,7 +2698,8 @@ export const STAGES = [
   { id: 'apps', part: 'basic', icon: '📲', title: '用 App', en: 'Using Apps', units: ['appbasics', 'apps', 'handy', 'maps'] },
   { id: 'helpers', part: 'basic', icon: '🤖', title: 'AI 小幫手', en: 'AI Helpers', units: ['aichat', 'voice'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
-  { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os', 'screens', 'storage'] },
+  { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os'] },
+  { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'web'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'coding'] },
 ];

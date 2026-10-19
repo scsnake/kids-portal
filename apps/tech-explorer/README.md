@@ -13,7 +13,7 @@ Two parts. Part 1 teaches how to use a device, with rough ideas only. Part 2
 explains how things work inside. Inside each part, a unit only uses ideas from
 the units before it.
 
-The home screen groups the units into 10 stages of 2 to 5 units (`STAGES` in
+The home screen groups the units into 11 stages of 2 to 5 units (`STAGES` in
 `js/units.js`). The next stage not read through is marked 「下一站」 and opens by
 itself; a stage read through gets 🏅. No unit is locked. The
 first time a Part 2 unit opens, a card suggests an earlier stage not read through
@@ -56,13 +56,14 @@ yet; 「直接開始」 closes it.
 30. 作業系統: what an OS does, time sharing (multitasking)
 31. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
 32. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
-33. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
-34. AI 怎麼學？: learning from examples, why data matters (bias)
-35. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
-36. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
-37. 演算法: steps, binary search (number guessing), sorting by swaps
-38. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
-39. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+33. 聲音和影片怎麼變成數字: sampling a sound wave (and hearing it), frames per second with a bouncing ball, why video needs compression
+34. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
+35. AI 怎麼學？: learning from examples, why data matters (bias)
+36. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
+37. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
+38. 演算法: steps, binary search (number guessing), sorting by swaps
+39. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
+40. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
 
 ## Saved progress
 

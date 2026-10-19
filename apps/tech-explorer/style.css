@@ -2071,6 +2071,35 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .w-rle .canvas { width: min(300px, 60vw); }
 .w-rle .hint { flex-basis: 100%; }
 
+/* ---------- sampling a sound wave ---------- */
+
+.w-sampler { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.sm-hint { margin: 0; min-height: 1.5em; font-weight: 800; font-size: 1.1rem; text-align: center; line-height: 1.5; }
+.sm-hint.done { color: var(--good); }
+.sm-pic { display: block; width: min(100%, 560px); height: auto; border-radius: 16px; background: white; border: 2px solid var(--line); }
+.sm-wave { fill: none; stroke: #adb5bd; stroke-width: 4; stroke-linejoin: round; }
+.sm-copy { fill: none; stroke: var(--c); stroke-width: 3; stroke-linejoin: round; }
+.sm-marks line { stroke: var(--c); stroke-width: 2; opacity: .4; }
+.sm-marks circle { fill: var(--c); }
+.sm-nums { margin: 0; font-family: ui-monospace, Menlo, monospace; font-weight: 700; color: var(--ink-2); text-align: center; }
+.sm-ctrl { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.sm-ctrl .option:disabled { opacity: .4; }
+.sm-n { min-width: 5em; font-size: 1.2rem; text-align: center; }
+
+/* ---------- frames per second ---------- */
+
+.w-fps { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.fp-hint { margin: 0; min-height: 1.5em; font-weight: 800; font-size: 1.1rem; text-align: center; line-height: 1.5; }
+.fp-hint.done { color: var(--good); }
+.fp-stage { display: block; width: min(100%, 560px); height: auto; border-radius: 16px; border: 2px solid var(--line); }
+.fp-ball { fill: #f76707; stroke: #d9480f; stroke-width: 3; }
+.fp-ghosts circle { fill: #f76707; }
+.fp-count { margin: 0; font-weight: 800; color: var(--ink-2); }
+.fp-count b { display: inline-block; min-width: 3.4em; color: var(--c); font-family: ui-monospace, Menlo, monospace; text-align: center; }
+.fp-rates { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.fp-rates .option { font-size: 1.05rem; padding: .5rem .9rem; }
+.fp-rates .option.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 12%, white); }
+
 /* ---------- AI training ---------- */
 
 .w-train { display: flex; flex-direction: column; gap: 12px; align-items: center; }
