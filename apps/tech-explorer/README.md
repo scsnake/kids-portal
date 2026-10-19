@@ -65,7 +65,8 @@ yet; 「直接開始」 closes it.
 Stars, viewed pages and the last page are saved in the browser's `localStorage`
 (key `tech-explorer.v2`), by slide identity (title, or a quiz's question), so they
 survive slides being added or moved. The home screen shows the total stars and a
-"繼續上次" button; the footer has "清除學習紀錄".
+"繼續上次" button; the footer has "清除學習紀錄". The time the page is on screen is
+saved too (`secs`); the 3010 slide shows it for this visit and in total.
 
 - The data stays on one device and one browser; it is not synced.
 - Safari may clear a site's storage after 7 days without a visit. A site added to

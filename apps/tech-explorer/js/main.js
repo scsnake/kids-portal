@@ -10,6 +10,7 @@ const STORE = 'tech-explorer.v2';
 //   done: slide keys whose task is finished (each one is a star)
 //   seen: slide keys that were opened
 //   last: { unit, index } of the last slide opened, plus each unit's last index
+//   secs: seconds the app was on screen, in total (shown on the 3010 slide)
 
 const slideKey = sl => (sl.title === '考考你' ? 'Q:' + sl.params.question : sl.title);
 
@@ -77,9 +78,29 @@ function resetProgress() {
   done.clear();
   seen.clear();
   progress = { done: [], seen: [], last: null, lastIn: {} };
+  visit = 0;
   save();
   home();
 }
+
+// ---------- time on screen: counted only while the page is visible ----------
+// A tick adds at most a minute, so a device asleep with the page open adds little.
+
+let visit = 0, shownAt = document.hidden ? 0 : Date.now();
+function addTime() {
+  if (!shownAt) return;
+  const now = Date.now(), secs = Math.min((now - shownAt) / 1000, 60);
+  shownAt = now;
+  visit += secs;
+  progress.secs = (progress.secs || 0) + secs;
+  save();
+}
+setInterval(() => { if (!document.hidden) addTime(); }, 15000);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { addTime(); shownAt = 0; } else shownAt = Date.now();
+});
+window.addEventListener('pagehide', addTime);
+const timeUsed = () => { addTime(); return { visit, total: progress.secs || 0 }; };
 
 // ---------- sound ----------
 
@@ -417,6 +438,7 @@ function lesson(unit, index) {
       alive: () => token === slideToken,
       later: (fn, ms) => setTimeout(() => { if (token === slideToken) fn(); }, ms),
       good: () => sfx.good(),
+      timeUsed,
       bad: () => sfx.bad(),
       done: () => {
         if (token !== slideToken) return;

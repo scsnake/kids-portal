@@ -4082,6 +4082,7 @@ export const WIDGETS = {
         </div>
         <div class="er-clock"><span class="er-label">用眼</span><span class="er-bar"><i></i></span><b class="er-min">0 分鐘</b></div>
         <div class="er-btns"><button class="option" data-act="start">▶ 開始看平板</button></div>
+        ${api.timeUsed ? '<button class="option er-used" data-act="used">⏱️ 我在科技小探險用了多久？</button><p class="er-used-out" hidden></p>' : ''}
       </div>`;
     const $ = sel => host.querySelector(sel);
     const hint = $('.er-hint'), btns = $('.er-btns');
@@ -4106,6 +4107,15 @@ export const WIDGETS = {
       btns.innerHTML = '<button class="option" data-act="start">🔁 再來一次</button>';
       api.done();
     };
+    // Real time spent in this app (counted by main.js while the page is on screen).
+    const dur = s => s < 60 ? '不到 1 分鐘' : s < 3600 ? ` ${Math.floor(s / 60)} 分鐘` : ` ${Math.floor(s / 3600)} 小時 ${Math.floor((s % 3600) / 60)} 分鐘`;
+    $('.er-used')?.addEventListener('click', () => {
+      const { visit, total } = api.timeUsed();
+      const out = $('.er-used-out');
+      out.textContent = `這次打開以後看了${dur(visit)}，在這台裝置上一共${dur(total)}。${visit >= 1800 ? '已經超過 30 分鐘，休息一下吧！' : ''}`;
+      out.classList.toggle('warn', visit >= 1800);
+      out.hidden = false;
+    });
     btns.addEventListener('click', e => {
       const b = e.target.closest('[data-act]');
       if (!b) return;

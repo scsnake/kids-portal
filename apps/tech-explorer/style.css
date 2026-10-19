@@ -1278,6 +1278,9 @@ a.unit-card:active { transform: scale(.98); }
 .er-bar i { display: block; height: 100%; background: var(--c); }
 .er-min { min-width: 4.5em; text-align: right; }
 .er-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; min-height: 56px; }
+.er-used { min-height: 44px; padding: .4rem 1rem; font-size: 1rem; text-align: center; }
+.er-used-out { margin: 0; max-width: 420px; text-align: center; font-weight: 700; color: var(--ink-2); line-height: 1.5; }
+.er-used-out.warn { color: var(--bad); }
 @media (prefers-reduced-motion: reduce) { .er-tab { transition: none; } }
 
 /* ---------- Screen Time: set the daily minutes ---------- */
