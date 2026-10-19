@@ -2616,6 +2616,69 @@ export const UNITS = [
   },
 
   {
+    id: 'freeapps',
+    part: 'adv',
+    icon: '💰',
+    title: '免費 App 怎麼賺錢',
+    en: 'How Free Apps Make Money',
+    desc: '廣告、Cookie 追蹤和你的資料',
+    color: '#c2410c',
+    slides: [
+      {
+        title: '免費的遊戲，誰付錢？',
+        text: `很多 App 不用錢就能下載，可是做 App 要花很多錢。它們常靠${t('廣告', 'ad')}賺錢，還會收集你的${t('資料', 'data')}。玩玩看，也看看 App 在背後記下了什麼！`,
+        widget: 'freegame',
+      },
+      {
+        title: '廣告怎麼跟著你？',
+        text: `網站會在瀏覽器裡放一個小紀錄，叫${t('Cookie', 'cookie')}，記住你看過什麼。廣告公司用它${t('追蹤', 'tracking')}你，所以看過的鞋子，會一直出現在別的網站上。排排看！`,
+        widget: 'order',
+        params: {
+          items: [
+            { icon: '👟', label: '在購物網站看了一雙球鞋' },
+            { icon: '🍪', label: '網站在瀏覽器放了一個 Cookie' },
+            { icon: '📰', label: '過幾天，打開新聞網站' },
+            { icon: '📢', label: '新聞網站的廣告：同一雙球鞋！' },
+          ],
+        },
+      },
+      {
+        title: 'App 的三種賺錢方法',
+        text: '不用錢的 App 和網站，常用三種方法賺錢：請你花錢買東西、讓你看廣告、用你的資料。分分看！',
+        widget: 'sort',
+        params: {
+          bins: [
+            { id: 'buy', icon: '💳', label: '你花錢' },
+            { id: 'ad', icon: '📺', label: '看廣告' },
+            { id: 'data', icon: '📊', label: '用你的資料' },
+          ],
+          items: [
+            { icon: '💎', label: '買遊戲裡的寶石', bin: 'buy' },
+            { icon: '🚫', label: '每個月付錢，就沒有廣告', bin: 'buy' },
+            { icon: '🎬', label: '影片前面的廣告', bin: 'ad' },
+            { icon: '🎮', label: '過關前要看 30 秒廣告', bin: 'ad' },
+            { icon: '🎯', label: '記下你看什麼，挑廣告給你', bin: 'data' },
+            { icon: '📍', label: '把你去過哪裡賣給別的公司', bin: 'data' },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '一個免費的手電筒 App，要看你的聯絡人和位置。最可能是為什麼？',
+          options: [
+            { text: '📊 想收集你的資料來賺錢', correct: true },
+            { text: '🔦 手電筒要有位置才會亮' },
+            { text: '📇 要打電話告訴朋友手電筒開了' },
+          ],
+          explain: '手電筒不需要聯絡人和位置。App 要了用不到的權限，就按「不允許」。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'coding',
     part: 'adv',
     icon: '👩‍💻',
@@ -2701,7 +2764,7 @@ export const STAGES = [
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os'] },
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'web'] },
-  { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'coding'] },
+  { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'freeapps', 'coding'] },
 ];
 
 // Shown greyed out on the home screen until the unit is written.

@@ -421,6 +421,21 @@ const SM_STEPS = [4, 8, 16, 32, 64];
 const SM_RATES = [1000, 2000, 4000, 11025, 44100];
 let smAudio = null;
 
+// What the free game writes down while you play (after how many pops), and its two ads.
+// `pay` is what one line earns the App, in NT$.
+const FG_LOG = [
+  { at: 0, text: '📍 你在哪裡：台北市' },
+  { at: 0, text: '📱 你的裝置：iPad' },
+  { at: 2, text: '🕒 你幾點在玩：晚上 8 點' },
+  { at: 6, text: '🎯 猜你喜歡：甜的飲料 → 以後多放飲料廣告' },
+  { at: 7, text: '📤 把你的喜好給廣告公司', pay: 0.02 },
+  { at: 10, text: '👶 點得很快，可能是小朋友' },
+];
+const FG_ADS = [
+  { icon: '🥤', text: '新口味汽水，好喝到冒泡！', log: '📺 看完 1 個汽水廣告 → 廣告商付錢' },
+  { icon: '🧸', text: '會說話的熊熊，今天特價！', log: '📺 看完 1 個玩具廣告 → 廣告商付錢' },
+];
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -5627,6 +5642,72 @@ export const WIDGETS = {
       }
     });
     draw();
+  },
+
+  // Pop 12 balloons in a free game. Every 4 pops an ad covers the game for 3 seconds.
+  // Beside it, the App's back room lists what it writes down and what it earns.
+  freegame(host, _, api) {
+    const goal = 12;
+    host.innerHTML = `
+      <div class="w-free">
+        <div class="fg-game">
+          <p class="fg-top">🎈 戳氣球 <small>免費</small><b class="fg-score">0／${goal}</b></p>
+          <div class="fg-field"><button class="fg-balloon" aria-label="氣球">🎈</button></div>
+          <div class="fg-ad" hidden></div>
+        </div>
+        <div class="fg-back">
+          <p class="fg-head">🕵️ App 在背後記下的事<small>玩的人看不到</small></p>
+          <ul class="fg-log"></ul>
+          <p class="fg-money">App 賺了：<b>NT$0.00</b></p>
+        </div>
+        <p class="fg-hint">戳破 12 個氣球</p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let pops = 0, money = 0, ads = 0;
+    const earn = x => { money += x; $('.fg-money b').textContent = `NT$${money.toFixed(2)}`; pop($('.fg-money')); };
+    const log = (text, pay) => {
+      $('.fg-log').insertAdjacentHTML('beforeend', `<li>${text}</li>`);
+      pop($('.fg-log').lastElementChild);
+      $('.fg-log').scrollTop = $('.fg-log').scrollHeight;
+      if (pay) earn(pay);
+    };
+    const move = () => {
+      const b = $('.fg-balloon');
+      b.style.left = `${10 + Math.random() * 70}%`;
+      b.style.top = `${8 + Math.random() * 62}%`;
+    };
+    const showAd = () => {
+      const ad = FG_ADS[ads++], box = $('.fg-ad');
+      box.hidden = false;
+      box.innerHTML = `<small class="fg-tag">廣告</small><span class="fg-ad-icon">${ad.icon}</span><b>${ad.text}</b><span class="fg-wait">3 秒後可以關閉</span>`;
+      let left = 3;
+      const tick = () => {
+        if (!api.alive()) return;
+        if (--left > 0) { box.querySelector('.fg-wait').textContent = `${left} 秒後可以關閉`; api.later(tick, 1000); return; }
+        box.querySelector('.fg-wait').outerHTML = '<button class="option fg-close">✕ 關閉廣告</button>';
+        box.querySelector('.fg-close').onclick = () => { box.hidden = true; log(ad.log, 0.05); };
+      };
+      api.later(tick, 1000);
+    };
+    $('.fg-balloon').onclick = () => {
+      if (pops >= goal || !$('.fg-ad').hidden) return;
+      pops++;
+      $('.fg-score').textContent = `${pops}／${goal}`;
+      api.good();
+      FG_LOG.filter(l => l.at === pops).forEach(l => log(l.text, l.pay));
+      if (pops === goal) {
+        $('.fg-balloon').hidden = true;
+        $('.fg-hint').textContent = '🎉 遊戲免費，可是你付出了時間（看了 2 個廣告）和資料。一個人賺得很少，一百萬個人玩就很多了！';
+        $('.fg-hint').classList.add('done');
+        api.done();
+        return;
+      }
+      move();
+      $('.fg-hint').textContent = pops < 4 ? '再戳！也看看右邊，App 記下了什麼' : '繼續戳！';
+      if (pops % 4 === 0) showAd();
+    };
+    FG_LOG.filter(l => l.at === 0).forEach(l => log(l.text));
+    move();
   },
 
   // Sort the cards by swapping neighbors, like a bubble sort. Below, three buttons play bubble,

@@ -63,7 +63,8 @@ yet; 「直接開始」 closes it.
 37. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
 38. 演算法: steps, binary search (number guessing), sorting by swaps
 39. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
-40. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+40. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
+41. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
 
 ## Saved progress
 
