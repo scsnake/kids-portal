@@ -13,9 +13,10 @@ Usage:
 
 Steps for each app:
   1. Create the Pages project (Git-connected; builds only when its folder changes).
-  2. Add the preview domain (<slug>-preview.scsnake.xyz) with a proxied CNAME to <project>.pages.dev.
+  2. Add the preview domain (<slug>-preview.scsnake.xyz) with a proxied CNAME to the
+     project's pages.dev host (<project>.pages.dev, or <project>-xyz.pages.dev if taken).
   3. --cutover: add the real domain to the project and repoint its DNS record from the
-     tunnel to <project>.pages.dev. --rollback repoints it to the tunnel.
+     tunnel to that host. --rollback repoints it to the tunnel.
 
 Idempotent: existing projects, domains and records are left as they are. The tunnel's
 public hostname and the Coolify app are not touched, so --rollback is one DNS change.
@@ -74,10 +75,14 @@ def ensure_project(name, root):
     if got.get("success"):
         print(f"• project {name} exists")
         return got["result"]
+    # static folders: one-stroke and little-writer commit dist/bundle.js, so a package.json
+    # must not make Pages install (and upload) node_modules
+    env = {"SKIP_DEPENDENCY_INSTALL": {"type": "plain_text", "value": "1"}}
     body = {
         "name": name,
         "production_branch": BRANCH,
         "build_config": {"build_command": "", "destination_dir": "", "root_dir": root},
+        "deployment_configs": {"production": {"env_vars": env}, "preview": {"env_vars": env}},
         "source": {
             "type": "github",
             "config": {
@@ -131,11 +136,11 @@ def main():
         sys.exit(f"usage: provision_pages.py <{'|'.join(APPS)}> [--cutover|--rollback]")
     for name in names:
         app = APPS[name]
-        pages_host = f"{name}.pages.dev"
         if "--rollback" in args:
             point_dns(app["domain"], TUNNEL_TARGET)
             continue
-        ensure_project(name, app["root"])
+        # not always <name>.pages.dev: a name taken by another account gets a suffix
+        pages_host = ensure_project(name, app["root"])["subdomain"]
         preview = app["domain"].replace(".scsnake.xyz", "-preview.scsnake.xyz", 1)
         ensure_domain(name, preview)
         point_dns(preview, pages_host)
