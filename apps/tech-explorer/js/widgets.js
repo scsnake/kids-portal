@@ -590,6 +590,14 @@ function fpSVG(f, id) {
     <ellipse cx="60" cy="76" rx="48" ry="64" class="tid-skin"/><g clip-path="url(#tid-${id})" class="tid-lines">${lines}</g><g class="tid-marks"></g></svg>`;
 }
 
+// One day at home for `iotrule`. Hot means 28°C or more.
+const IR_DAY = [
+  { when: '🌅 早上 8 點', temp: 25, home: true },
+  { when: '☀️ 中午 12 點', temp: 33, home: false },
+  { when: '🌇 下午 5 點', temp: 32, home: true },
+  { when: '🌙 晚上 10 點', temp: 26, home: true },
+];
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -3559,6 +3567,57 @@ export const WIDGETS = {
       k = k === steps.length - 1 ? 0 : k + 1;
       show();
     };
+  },
+
+  // A smart air conditioner rule: 太熱 AND/OR 有人在家. Pick the gate, then watch one day run.
+  // OR also turns it on when nobody is home or it is not hot, which wastes power.
+  iotrule(host, _, api) {
+    host.innerHTML = `
+      <div class="w-ir">
+        <p class="ir-rule">如果 <span class="ir-cond">🌡️ 太熱（28°C 以上）</span> <span class="ir-op">？</span> <span class="ir-cond">🚶 有人在家</span>，就開冷氣</p>
+        <div class="ir-ops"><button class="option" data-op="and">AND 而且</button><button class="option" data-op="or">OR 或</button></div>
+        <ol class="ir-day">${IR_DAY.map(s => `
+          <li><b>${s.when}</b><span>🌡️ ${s.temp}°C　${s.home ? '🚶 在家' : '🏫 上學'}</span><span class="ir-ac">冷氣：？</span><small class="ir-note"></small></li>`).join('')}
+        </ol>
+        <p class="ir-hint">選 AND 或 OR，跑一天看看</p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let busy = false;
+    $('.ir-ops').addEventListener('click', e => {
+      const b = e.target.closest('[data-op]');
+      if (!b || busy) return;
+      const and = b.dataset.op === 'and';
+      busy = true;
+      host.querySelectorAll('.ir-ops .option').forEach(x => x.classList.toggle('on', x === b));
+      $('.ir-op').textContent = and ? 'AND 而且' : 'OR 或';
+      pop($('.ir-op'));
+      $('.ir-hint').textContent = '跑一天看看……';
+      $('.ir-hint').className = 'ir-hint';
+      const rows = host.querySelectorAll('.ir-day li');
+      rows.forEach(li => { li.className = ''; li.querySelector('.ir-ac').textContent = '冷氣：？'; li.querySelector('.ir-note').textContent = ''; });
+      let on = 0, waste = 0;
+      IR_DAY.forEach((s, i) => api.later(() => {
+        const hot = s.temp >= 28, run = and ? hot && s.home : hot || s.home;
+        const bad = run && !(hot && s.home);
+        on += run; waste += bad;
+        rows[i].className = `now ${run ? 'run' : ''} ${bad ? 'waste' : ''}`;
+        rows[i].querySelector('.ir-ac').textContent = run ? '❄️ 冷氣：開' : '⭘ 冷氣：關';
+        rows[i].querySelector('.ir-note').textContent = bad ? (s.home ? '不熱也開，浪費電' : '沒人在家也開，浪費電') : '';
+        if (i < IR_DAY.length - 1) return;
+        busy = false;
+        if (and) {
+          $('.ir-hint').textContent = '🎉 AND：兩個都成立才開。冷氣只在該開的時候開，最省電！';
+          $('.ir-hint').className = 'ir-hint done';
+          api.good();
+          api.done();
+        } else {
+          $('.ir-hint').textContent = `OR：只要一個成立就開。冷氣開了 ${on} 次，有 ${waste} 次是浪費。換 AND 試試`;
+          $('.ir-hint').className = 'ir-hint bad';
+          shake($('.ir-op'));
+          api.bad();
+        }
+      }, 300 + i * 650));
+    });
   },
 
   // A small file manager: rename, move, delete, restore, and delete for good.

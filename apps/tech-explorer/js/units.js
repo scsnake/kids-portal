@@ -2967,6 +2967,91 @@ export const UNITS = [
   },
 
   {
+    id: 'iot',
+    part: 'adv',
+    icon: '🏠',
+    title: '物聯網和智慧家電',
+    en: 'Internet of Things',
+    desc: '會上網的家電、感測器、規則和安全',
+    color: '#6d28d9',
+    added: '2026-10-19',
+    slides: [
+      {
+        title: '會上網的東西',
+        text: `不只電腦和手機，燈泡、冷氣、門鈴也能連上網路，用手機就能控制。這些東西連在一起，叫${t('物聯網', 'Internet of Things')}。分分看！`,
+        widget: 'sort',
+        params: {
+          rest: 'off',
+          bins: [
+            { id: 'net', icon: '🌐', label: '會上網' },
+            { id: 'off', icon: '📴', label: '不會上網' },
+          ],
+          items: [
+            { icon: '💡', label: '用手機開關的燈泡', bin: 'net' },
+            { icon: '🤖', label: '掃地機器人', bin: 'net' },
+            { icon: '📹', label: '網路攝影機', bin: 'net' },
+            { icon: '🔊', label: '智慧音箱', bin: 'net' },
+            { icon: '🪑', label: '木頭椅子', bin: 'off' },
+            { icon: '🔦', label: '裝電池的手電筒', bin: 'off' },
+            { icon: '📕', label: '故事書', bin: 'off' },
+          ],
+        },
+      },
+      {
+        title: '感測器、網路、手機',
+        text: '智慧盆栽身上有感測器。土太乾，它就透過 Wi-Fi 傳給雲端的伺服器，伺服器再通知你的手機。依順序點一點。',
+        widget: 'order',
+        params: {
+          items: [
+            { icon: '🌱', label: '感測器量到土太乾' },
+            { icon: '📶', label: '透過 Wi-Fi 送出去' },
+            { icon: '🗄️', label: '雲端的伺服器收到' },
+            { icon: '📱', label: '手機跳出「該澆水了」' },
+          ],
+        },
+      },
+      {
+        title: '照規則做事',
+        text: `智慧家電照${t('規則', 'rule')}做事。邏輯閘的 AND、OR 也用得上：選對了，冷氣只在該開的時候開，最省電。試試看！`,
+        widget: 'iotrule',
+      },
+      {
+        title: '家裡的攝影機要上鎖',
+        text: `很多智慧家電剛買來，${t('預設密碼', 'default password')}都一樣，像 admin 或 1234。壞人知道這些密碼，會在網路上找沒改密碼的攝影機。分分看！`,
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '👍', label: '好習慣' },
+            { id: 'no', icon: '🙅', label: '不要這樣做' },
+          ],
+          items: [
+            { icon: '🔑', label: '改掉預設密碼', bin: 'ok' },
+            { icon: '🔄', label: '有更新就更新', bin: 'ok' },
+            { icon: '🚪', label: '攝影機不對著臥室和浴室', bin: 'ok' },
+            { icon: '🙈', label: '密碼一直用 admin', bin: 'no' },
+            { icon: '📤', label: '把攝影機的畫面連結貼到網路上', bin: 'no' },
+            { icon: '⏳', label: '一直跳過更新', bin: 'no' },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '你在學校，用手機按「開燈」，家裡的燈就亮了。訊息是怎麼到家的？',
+          options: [
+            { text: '☁️ 經過網路和雲端，再到家裡的 Wi-Fi', correct: true },
+            { text: '🎧 手機直接用藍牙連到燈泡' },
+            { text: '🔮 燈泡自己猜到的' },
+          ],
+          explain: '藍牙只有一個房間那麼遠。離家很遠時，要靠網路和雲端的伺服器幫忙傳話。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'algo',
     part: 'adv',
     icon: '🧩',
@@ -3220,7 +3305,8 @@ export const STAGES = [
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os'] },
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },
-  { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'networld', 'web'] },
+  { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },
+  { id: 'ainet', part: 'adv', icon: '🔗', title: '網路怎麼運作', en: 'How Networks Work', units: ['internet', 'networld', 'web', 'iot'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'freeapps', 'coding'] },
 ];
 
