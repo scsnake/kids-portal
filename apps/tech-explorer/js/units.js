@@ -1479,6 +1479,62 @@ export const UNITS = [
   },
 
   {
+    id: 'pay',
+    part: 'basic',
+    icon: '💳',
+    title: '行動支付',
+    en: 'Mobile Payment',
+    desc: '感應付款、付款碼、付錢前看清楚',
+    color: '#b45309',
+    added: '2026-10-19',
+    slides: [
+      {
+        title: '嗶一下就付錢',
+        text: `悠遊卡和手機裡，都有很小的天線。靠近感應機，就能傳資料付錢，這叫${t('近場通訊', 'NFC')}。離太遠就感應不到。試試看！`,
+        widget: 'nfctap',
+      },
+      {
+        title: '付款碼就像錢',
+        text: `也可以掃碼付錢：你掃店家的 QR Code，或讓店員掃你手機上的${t('付款碼', 'payment code')}。付款碼就像錢包，只給收銀機掃。分分看！`,
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '👍', label: '可以' },
+            { id: 'no', icon: '🙅', label: '不可以' },
+          ],
+          items: [
+            { icon: '🏪', label: '結帳時，讓店員掃付款碼', bin: 'ok' },
+            { icon: '🔍', label: '付錢前，看清楚金額', bin: 'ok' },
+            { icon: '🙋', label: '要用手機付錢，先問爸媽', bin: 'ok' },
+            { icon: '📸', label: '把付款碼截圖，傳給網友', bin: 'no' },
+            { icon: '🔑', label: '把付款密碼告訴同學', bin: 'no' },
+            { icon: '🎁', label: '掃陌生人給的 QR Code 領獎金', bin: 'no' },
+          ],
+        },
+      },
+      {
+        title: '付錢以前，看清楚',
+        text: '按下「確認付款」以前，看三件事：是付款還是收錢？付給誰？多少錢？有一個不對，就按「取消」。試試看！',
+        widget: 'paycheck',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '悠遊卡裡面沒有電池，為什麼還能「嗶」？',
+          options: [
+            { text: '🧲 感應機用電磁感應，把電送給卡片', correct: true },
+            { text: '☀️ 卡片裡有太陽能板' },
+            { text: '🔋 卡片晚上會自己充電' },
+          ],
+          explain: '和無線充電一樣，線圈靠近才接得到電，所以卡片要靠得很近才會「嗶」。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'aichat',
     part: 'basic',
     icon: '🤖',
@@ -3103,7 +3159,7 @@ export const STAGES = [
   { id: 'care', part: 'basic', icon: '🔋', title: '照顧裝置和自己', en: 'Care for Devices and You', units: ['cables', 'battery', 'care', 'ewaste', 'health'] },
   { id: 'media', part: 'basic', icon: '📷', title: '拍照和檔案', en: 'Photos and Files', units: ['camera', 'files', 'space', 'formats'] },
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account', 'passkey'] },
-  { id: 'apps', part: 'basic', icon: '📲', title: '用 App', en: 'Using Apps', units: ['appbasics', 'apps', 'handy', 'maps'] },
+  { id: 'apps', part: 'basic', icon: '📲', title: '用 App', en: 'Using Apps', units: ['appbasics', 'apps', 'handy', 'maps', 'pay'] },
   { id: 'helpers', part: 'basic', icon: '🤖', title: 'AI 小幫手', en: 'AI Helpers', units: ['aichat', 'voice'] },
   { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel', 'copyright'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },

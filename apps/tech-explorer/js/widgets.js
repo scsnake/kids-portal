@@ -505,6 +505,32 @@ const CR_PICS = [
   { pic: '🦈', name: '鯊魚', tag: '禁止轉載', why: '「禁止轉載」：作者不讓別人拿去放在別的地方。' },
 ];
 
+// Where each distance sits on the track (% from the left). The reader works within about 4 cm.
+const NF_SPOTS = { 30: 0, 10: 55, 2: 100 };
+
+// Three times at the checkout: read the pay screen before you press 確認付款.
+// The last one is a stranger's "scan to get money" message, which is really a payment.
+const PC_CASES = [
+  {
+    ctx: '<div class="pc-shop"><b>🍳 阿美早餐店</b><small>收銀機</small><big>NT$ 65</big></div>',
+    to: '阿美早餐店', amt: 65, ok: true,
+    yes: '店名對、金額也對，放心付！',
+    no: '店名和金額都對喔，可以付。',
+  },
+  {
+    ctx: '<div class="pc-shop"><b>🧋 好喝飲料店</b><small>收銀機</small><big>NT$ 50</big></div>',
+    to: '好喝飲料店', amt: 500, ok: false,
+    yes: '小心！收銀機是 50 元，手機上是 500 元，多了一個 0。',
+    no: '對！金額不一樣。請店員重新打一次，再付錢。',
+  },
+  {
+    ctx: '<div class="pc-chat"><small>👤 不認識的人傳來訊息</small><p>恭喜你中獎！🎁 掃這個 QR Code，就能領 500 元</p></div>',
+    to: '領獎服務中心', amt: 500, ok: false,
+    yes: '這是「付款」，不是「收錢」！按下去，錢就被轉走了。',
+    no: '對！收錢不用掃碼付款，也不用打密碼。這是詐騙，不確定就打 165 問問。',
+  },
+];
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -5664,6 +5690,134 @@ export const WIDGETS = {
       };
       step();
     };
+  },
+
+  // Pay at a shop counter: move a card or a phone toward the reader. It only beeps when very close.
+  nfctap(host, _, api) {
+    const things = {
+      card: { icon: '💳', name: '悠遊卡', buy: '🥛 牛奶 NT$ 35' },
+      phone: { icon: '📱', name: '手機', buy: '🍙 飯糰 NT$ 30' },
+    };
+    host.innerHTML = `
+      <div class="w-nf">
+        <p class="nf-hint">點下面的按鈕，把悠遊卡拿近一點</p>
+        <div class="nf-pick">${Object.entries(things).map(([k, v]) => `<button class="option nf-item" data-k="${k}">${v.icon} ${v.name}</button>`).join('')}</div>
+        <div class="nf-scene">
+          <div class="nf-track">
+            <span class="nf-range">感應範圍</span>
+            <span class="nf-thing"></span>
+            ${Object.entries(NF_SPOTS).map(([d, x]) => `<span class="nf-tick" style="left:${x}%;translate:-${x}% 0">${d} 公分</span>`).join('')}
+          </div>
+          <div class="nf-reader">
+            <div class="nf-screen"></div>
+            <div class="nf-pad"><span>)))</span>感應區</div>
+            <span class="nf-beep" hidden>嗶！</span>
+          </div>
+        </div>
+        <div class="nf-moves">${Object.keys(NF_SPOTS).reverse().map(d => `<button class="option nf-move" data-d="${d}">拿到 ${d} 公分</button>`).join('')}</div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = (text, cls = '') => { $('.nf-hint').textContent = text; $('.nf-hint').className = `nf-hint ${cls}`; };
+    let k = 'card', d = 30, busy = false, paid = 0;
+    const place = () => {
+      $('.nf-thing').style.left = `${NF_SPOTS[d]}%`;
+      $('.nf-thing').style.translate = `-${NF_SPOTS[d]}% 0`;
+      host.querySelectorAll('.nf-move').forEach(b => { const on = +b.dataset.d === d; b.classList.toggle('on', on); b.disabled = on; });
+    };
+    const pick = key => {
+      k = key; d = 30; busy = false;
+      host.querySelectorAll('.nf-item').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+      $('.nf-thing').textContent = things[k].icon;
+      $('.nf-screen').innerHTML = `${things[k].buy}<small>請感應</small>`;
+      $('.nf-screen').classList.remove('paid');
+      $('.nf-beep').hidden = true;
+      place();
+    };
+    $('.nf-pick').addEventListener('click', e => {
+      const b = e.target.closest('.nf-item');
+      if (!b || busy) return;
+      pick(b.dataset.k);
+      hint(`把${things[k].name}拿近一點`);
+    });
+    $('.nf-moves').addEventListener('click', e => {
+      const b = e.target.closest('.nf-move');
+      if (!b || busy) return;
+      d = +b.dataset.d;
+      place();
+      if (d > 4) {
+        $('.nf-screen').classList.remove('paid');
+        $('.nf-screen').innerHTML = `${things[k].buy}<small>請感應</small>`;
+        $('.nf-beep').hidden = true;
+        hint(`${d} 公分：太遠了，感應機沒有反應`);
+        return;
+      }
+      busy = true;
+      api.later(() => {
+        if (!api.alive()) return;
+        $('.nf-beep').hidden = false;
+        pop($('.nf-beep'));
+        $('.nf-screen').innerHTML = `✅ 付款成功<small>${things[k].buy}</small>`;
+        $('.nf-screen').classList.add('paid');
+        api.good();
+        paid++;
+        busy = false;
+        if (k === 'phone') hint('嗶！手機付款以前，還要看臉或按指紋確認，比卡片多一道鎖', 'done');
+        else hint('🎉 嗶！要靠得很近，NFC 才會感應。藍牙可以連一個房間遠，NFC 只有幾公分', 'done');
+        if (paid === 1) api.done();
+      }, 450);
+    });
+    pick('card');
+  },
+
+  // The pay screen: press 取消 or 確認付款, then the next case comes.
+  paycheck(host, _, api) {
+    host.innerHTML = `
+      <div class="w-pc">
+        <p class="pc-step"></p>
+        <div class="pc-row">
+          <div class="pc-ctx"></div>
+          <div class="pc-phone">
+            <div class="pc-screen">
+              <p class="pc-kind">💸 付款</p>
+              <p class="pc-to">付給：<b></b></p>
+              <p class="pc-amt"></p>
+              <div class="pc-btns"><button class="option" data-act="no">取消</button><button class="go" data-act="yes">確認付款</button></div>
+            </div>
+            <div class="pc-ok" hidden>✅<b>付款成功</b></div>
+          </div>
+        </div>
+        <p class="pc-why" aria-live="polite"></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const why = (text, cls) => { $('.pc-why').textContent = text; $('.pc-why').className = `pc-why ${cls}`; };
+    let n = 0, busy = false;
+    const show = () => {
+      const c = PC_CASES[n];
+      $('.pc-step').textContent = `第 ${n + 1}／${PC_CASES.length} 次：看清楚再按`;
+      $('.pc-ctx').innerHTML = c.ctx;
+      $('.pc-to b').textContent = c.to;
+      $('.pc-amt').textContent = `NT$ ${c.amt}`;
+      $('.pc-ok').hidden = true;
+      why('', '');
+      pop($('.pc-ctx'));
+    };
+    host.querySelector('.pc-btns').addEventListener('click', e => {
+      const b = e.target.closest('[data-act]');
+      if (!b || busy) return;
+      const c = PC_CASES[n], yes = b.dataset.act === 'yes';
+      if (yes !== c.ok) { shake(b); api.bad(); why(yes ? c.yes : c.no, 'bad'); return; }
+      api.good();
+      why(yes ? c.yes : c.no, 'good');
+      if (yes) $('.pc-ok').hidden = false;
+      busy = true;
+      if (n === PC_CASES.length - 1) {
+        $('.pc-step').textContent = '🎉 付錢前看三件事：付款還是收錢、付給誰、多少錢';
+        api.done();
+        return;
+      }
+      api.later(() => { busy = false; n++; show(); }, 2200);
+    });
+    show();
   },
 
   // A pretend AI chat: ask questions, and catch the answer that is wrong.
