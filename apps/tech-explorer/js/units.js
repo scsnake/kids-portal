@@ -539,6 +539,70 @@ export const UNITS = [
   },
 
   {
+    id: 'ewaste',
+    part: 'basic',
+    icon: '♻️',
+    title: '電子廢棄物',
+    en: 'E-waste',
+    desc: '舊 3C 要丟哪裡、手機裡有什麼、送走前先清乾淨',
+    color: '#1864ab',
+    slides: [
+      {
+        title: '舊 3C 要丟哪裡？',
+        text: `壞掉、不用的 3C 叫${t('電子廢棄物', 'e-waste')}，不能丟一般垃圾，要${t('回收', 'recycling')}。電池放超商的回收筒，舊手機拿去電信門市或回收點。分分看！`,
+        widget: 'sort',
+        params: {
+          bins: [
+            { id: 'tech', icon: '♻️', label: '3C 回收' },
+            { id: 'cell', icon: '🔋', label: '電池回收筒' },
+            { id: 'trash', icon: '🗑️', label: '一般垃圾' },
+          ],
+          items: [
+            { icon: '📱', label: '舊手機', bin: 'tech' },
+            { icon: '🎧', label: '壞掉的耳機', bin: 'tech' },
+            { icon: '🔌', label: '舊充電線', bin: 'tech' },
+            { icon: '🔋', label: '用完的乾電池', bin: 'cell' },
+            { icon: '🪫', label: '舊行動電源', bin: 'cell' },
+            { icon: '🧻', label: '用過的衛生紙', bin: 'trash' },
+            { icon: '😷', label: '用過的口罩', bin: 'trash' },
+          ],
+        },
+      },
+      {
+        title: '手機裡面有什麼？',
+        text: '舊手機裡有寶貝，也有危險的東西。回收工廠會把它拆開，好的材料再用一次，危險的東西安全處理。點點看！',
+        widget: 'phoneparts',
+      },
+      {
+        title: '送走以前，先清乾淨',
+        text: '舊手機要回收或送人以前，裡面的照片和帳號要先處理好，不然別人可能看得到。排排看！',
+        widget: 'order',
+        params: {
+          items: [
+            { icon: '☁️', label: '備份照片和資料' },
+            { icon: '🔓', label: '登出帳號，關掉「尋找」' },
+            { icon: '🧹', label: '清除所有內容和設定' },
+            { icon: '♻️', label: '拿去回收，或送給別人' },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '家裡抽屜有 3 支不用的舊手機。怎麼做最好？',
+          options: [
+            { text: '♻️ 清空資料以後，拿去電信門市或回收點', correct: true },
+            { text: '🗄️ 一直放在抽屜裡' },
+            { text: '🗑️ 丟進一般垃圾桶' },
+          ],
+          explain: '放在抽屜裡，裡面的金屬就浪費了，舊電池也可能慢慢鼓起來。清空資料再回收，最安全。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'health',
     part: 'basic',
     icon: '🧘',
@@ -2755,7 +2819,7 @@ export const PARTS = [
 // in no stage does not show on the home screen).
 export const STAGES = [
   { id: 'hello', part: 'basic', icon: '👋', title: '上手', en: 'First Steps', units: ['devices', 'start', 'typing', 'settings'] },
-  { id: 'care', part: 'basic', icon: '🔋', title: '照顧裝置和自己', en: 'Care for Devices and You', units: ['cables', 'battery', 'care', 'health'] },
+  { id: 'care', part: 'basic', icon: '🔋', title: '照顧裝置和自己', en: 'Care for Devices and You', units: ['cables', 'battery', 'care', 'ewaste', 'health'] },
   { id: 'media', part: 'basic', icon: '📷', title: '拍照和檔案', en: 'Photos and Files', units: ['camera', 'files', 'space', 'formats'] },
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account'] },
   { id: 'apps', part: 'basic', icon: '📲', title: '用 App', en: 'Using Apps', units: ['appbasics', 'apps', 'handy', 'maps'] },

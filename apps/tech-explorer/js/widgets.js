@@ -436,6 +436,23 @@ const FG_ADS = [
   { icon: '🧸', text: '會說話的熊熊，今天特價！', log: '📺 看完 1 個玩具廣告 → 廣告商付錢' },
 ];
 
+// The parts of an opened phone and what each one tells about recycling.
+const EW_PARTS = {
+  board: { icon: '🥇', name: '電路板', text: '有金、銀、銅，可以拿出來再做新東西。' },
+  battery: { icon: '🔥', name: '鋰電池', text: '被壓扁、刺破會起火。丟進垃圾車，垃圾車可能會著火！' },
+  speaker: { icon: '🧲', name: '喇叭', text: '裡面有強力磁鐵，用到很難挖的「稀土」。' },
+  shell: { icon: '🧪', name: '外殼和螢幕', text: '鋁和玻璃能回收；有些零件有一點點有毒的金屬，埋進土裡會污染土和水。' },
+};
+const EW_PHONE = `
+  <rect class="ew-p" data-part="shell" x="40" y="14" width="320" height="232" rx="34" fill="#868e96"/>
+  <rect class="ew-p" data-part="shell" x="54" y="28" width="292" height="204" rx="24" fill="#495057"/>
+  <g class="ew-p" data-part="battery"><rect x="70" y="44" width="164" height="172" rx="12" fill="#4c6ef5"/>
+    <text x="152" y="124" font-size="34" text-anchor="middle">⚡</text><text x="152" y="160" font-size="15" font-weight="800" fill="white" text-anchor="middle">Li-ion</text></g>
+  <g class="ew-p" data-part="board"><rect x="248" y="44" width="84" height="112" rx="8" fill="#2f9e44"/>
+    <rect x="260" y="56" width="30" height="30" rx="3" fill="#212529"/><rect x="298" y="60" width="22" height="14" rx="2" fill="#343a40"/><rect x="262" y="98" width="58" height="12" rx="2" fill="#343a40"/>
+    <path d="M262 124H320M262 134H306M262 144H314" stroke="#fcc419" stroke-width="3"/></g>
+  <g class="ew-p" data-part="speaker"><rect x="262" y="176" width="58" height="34" rx="10" fill="#212529"/><circle cx="291" cy="193" r="10" fill="#adb5bd"/></g>`;
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -3523,6 +3540,33 @@ export const WIDGETS = {
       if (!app) return;
       if (!selected) { hint('先點一個檔案，再點 App'); shake($('.ow-hint')); return; }
       open(selected, app.dataset.zone);
+    });
+  },
+
+  // Tap the parts of an opened phone; each one shows why old phones go to recycling.
+  phoneparts(host, _, api) {
+    host.innerHTML = `
+      <div class="w-ew">
+        <p class="ew-hint">點點看手機裡的零件，找出 4 種東西</p>
+        <svg class="ew-pic" viewBox="0 0 400 260" role="img" aria-label="打開的手機：電池、電路板、喇叭和外殼">${EW_PHONE}</svg>
+        <ul class="ew-list">${Object.keys(EW_PARTS).map(() => '<li>❓ 還沒找到</li>').join('')}</ul>
+      </div>`;
+    const found = [];
+    host.querySelector('.ew-pic').addEventListener('click', e => {
+      const p = e.target.closest('[data-part]')?.dataset.part;
+      if (!p || found.includes(p)) return;
+      found.push(p);
+      host.querySelectorAll(`[data-part="${p}"]`).forEach(el => el.classList.add('seen'));
+      const part = EW_PARTS[p], li = host.querySelectorAll('.ew-list li')[found.length - 1];
+      li.innerHTML = `${part.icon} <b>${part.name}</b>：${part.text}`;
+      li.classList.add('got');
+      pop(li);
+      api.good();
+      const hint = host.querySelector('.ew-hint');
+      if (found.length < 4) { hint.textContent = `找到 ${found.length} 種了，還有 ${4 - found.length} 種`; return; }
+      hint.textContent = '🎉 舊手機裡有寶貝，也有危險的東西，所以要拿去回收！';
+      hint.classList.add('done');
+      api.done();
     });
   },
 
