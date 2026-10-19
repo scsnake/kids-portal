@@ -1767,6 +1767,47 @@ export const UNITS = [
   },
 
   {
+    id: 'shareddoc',
+    part: 'basic',
+    icon: '📝',
+    title: '共用文件和雲端硬碟',
+    en: 'Shared Documents',
+    desc: '一起寫一份文件、分享權限、版本記錄',
+    color: '#0b7285',
+    added: '2026-10-19',
+    slides: [
+      {
+        title: '一起寫同一份文件',
+        text: `寫小組報告，可以用${t('共用文件', 'shared document')}，像 Google 文件。文件存在${t('雲端硬碟', 'cloud drive')}裡，大家同時打字，都看得到別人寫的。試試看！`,
+        widget: 'coedit',
+      },
+      {
+        title: '分享連結的權限',
+        text: `分享文件時，可以選每個人的${t('權限', 'permission')}：只能看、可以留言，或可以改。給剛好夠用的就好。選選看！`,
+        widget: 'shareperm',
+      },
+      {
+        title: '改錯了也不怕',
+        text: `共用文件會自動存檔，還有${t('版本記錄', 'version history')}，記住每一次是誰改了什麼。不小心刪掉，也能把舊版本找回來。試試看！`,
+        widget: 'versions',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '小美改了共用文件裡的報告。你要怎麼看到最新的？',
+          options: [
+            { text: '🔗 打開同一個連結，就是最新的', correct: true },
+            { text: '📧 請她把檔案寄給你' },
+            { text: '🖨️ 等她印出來給你' },
+          ],
+          explain: '大家改的是雲端上的同一份文件，所以打開就是最新的，不用傳來傳去。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'safety',
     part: 'basic',
     icon: '🛡️',
@@ -3301,7 +3342,7 @@ export const STAGES = [
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account', 'passkey'] },
   { id: 'apps', part: 'basic', icon: '📲', title: '用 App', en: 'Using Apps', units: ['appbasics', 'apps', 'handy', 'maps', 'pay'] },
   { id: 'helpers', part: 'basic', icon: '🤖', title: 'AI 小幫手', en: 'AI Helpers', units: ['aichat', 'voice'] },
-  { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel', 'copyright'] },
+  { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel', 'copyright', 'shareddoc'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os'] },
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },

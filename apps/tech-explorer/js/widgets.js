@@ -598,6 +598,30 @@ const IR_DAY = [
   { when: '🌙 晚上 10 點', temp: 26, home: true },
 ];
 
+// A group report written by three people at once. `me` is the part the child writes.
+const CE_PARTS = [
+  { who: '小美', color: '#d6336c', head: '1. 蝴蝶的一生', text: '卵、幼蟲、蛹，最後變成蝴蝶。' },
+  { who: '你', color: '#1c7ed6', head: '2. 蝴蝶吃什麼', text: '蝴蝶用長長的嘴吸花蜜。', me: true },
+  { who: '阿傑', color: '#2b8a3e', head: '3. 我們的觀察', text: '校園的花圃裡，有三種蝴蝶。' },
+];
+// Who gets which permission on the shared link.
+const SP_ROLES = [
+  { id: 'view', icon: '👀', name: '檢視者', what: '只能看' },
+  { id: 'comment', icon: '💬', name: '加註者', what: '可以看、留言' },
+  { id: 'edit', icon: '✏️', name: '編輯者', what: '可以改內容' },
+];
+const SP_PEOPLE = [
+  { icon: '👧', who: '組員小美', need: '要一起寫報告', role: 'edit', why: { view: '小美要一起寫，只能看就不能寫了。', comment: '小美要一起寫，只能留言還不夠。' } },
+  { icon: '👩‍🏫', who: '老師', need: '要給你建議', role: 'comment', why: { view: '老師想留言給建議，只能看就不能留言。', edit: '老師只要給建議，不用改你的字。給「加註者」就夠了。' } },
+  { icon: '🏠', who: '爸爸媽媽', need: '想看看你寫了什麼', role: 'view', why: { comment: '爸媽只是想看，給「檢視者」就好。', edit: '爸媽只是想看。能改的人越少，越不會改錯。' } },
+];
+// The version history of the report. Part 2 was deleted by mistake in the newest one.
+const VS_LIST = [
+  { when: '今天 15:20', who: '阿傑', parts: [0, 2], now: true },
+  { when: '今天 14:05', who: '你', parts: [0, 1, 2] },
+  { when: '昨天 20:30', who: '小美', parts: [0] },
+];
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -6204,6 +6228,116 @@ export const WIDGETS = {
       b.parentElement.innerHTML = `<span>${p.pic} ${p.credit}</span>`;
       api.good();
       check();
+    });
+  },
+
+  // Three people write one report at the same time. The others type by themselves;
+  // the child taps to write part 2, and everyone sees it right away.
+  coedit(host, _, api) {
+    host.innerHTML = `
+      <div class="w-ce">
+        <p class="ce-hint">小美和阿傑正在寫。點「寫我的部分」，一起寫！</p>
+        <div class="ce-doc">
+          <div class="ce-bar"><b>📄 自然報告：蝴蝶</b><span class="ce-who">${CE_PARTS.map(p => `<i style="background:${p.color}">${p.who.at(-1)}</i>`).join('')}</span></div>
+          ${CE_PARTS.map((p, i) => `<section class="ce-part" data-i="${i}"><h4>${p.head}</h4><p><span class="ce-txt"></span><span class="ce-cur" style="--who:${p.color}"><small>${p.who}</small></span></p></section>`).join('')}
+        </div>
+        <button class="go ce-write">✏️ 寫我的部分</button>
+      </div>`;
+    const parts = host.querySelectorAll('.ce-part');
+    const type = (i, speed, then) => {
+      const p = CE_PARTS[i], el = parts[i].querySelector('.ce-txt');
+      let n = 0;
+      const step = () => {
+        if (!api.alive()) return;
+        el.textContent = p.text.slice(0, ++n);
+        if (n < p.text.length) api.later(step, speed);
+        else then?.();
+      };
+      api.later(step, speed);
+    };
+    // The others never stop: when a part is done, it starts over after a pause.
+    const loop = (i, speed) => type(i, speed, () => api.later(() => { parts[i].querySelector('.ce-txt').textContent = ''; loop(i, speed); }, 2600));
+    loop(0, 260);
+    api.later(() => loop(2, 320), 700);
+    host.querySelector('.ce-write').addEventListener('click', e => {
+      e.currentTarget.disabled = true;
+      parts[1].classList.add('mine');
+      type(1, 140, () => {
+        parts[1].classList.add('done');
+        host.querySelector('.ce-hint').textContent = '🎉 三個人改的是同一份文件，打開就是最新的，不用把檔案傳來傳去！';
+        host.querySelector('.ce-hint').classList.add('done');
+        api.good();
+        api.done();
+      });
+    });
+  },
+
+  // Pick the permission for each person: just enough to do what they need.
+  shareperm(host, _, api) {
+    host.innerHTML = `
+      <div class="w-pm">
+        <p class="pm-hint">分享「自然報告」：每個人要給哪一種權限？</p>
+        <div class="pm-key">${SP_ROLES.map(r => `<span><b>${r.icon} ${r.name}</b>${r.what}</span>`).join('')}</div>
+        <ul class="pm-list">${SP_PEOPLE.map((p, i) => `
+          <li data-i="${i}"><span class="pm-who"><span>${p.icon}</span><b>${p.who}</b><small>${p.need}</small></span>
+            <span class="pm-roles">${SP_ROLES.map(r => `<button class="option pm-role" data-r="${r.id}">${r.icon} ${r.name}</button>`).join('')}</span></li>`).join('')}
+        </ul>
+        <p class="pm-why" aria-live="polite"></p>
+      </div>`;
+    const why = (text, cls) => { host.querySelector('.pm-why').textContent = text; host.querySelector('.pm-why').className = `pm-why ${cls}`; };
+    const ok = new Set();
+    host.querySelector('.pm-list').addEventListener('click', e => {
+      const b = e.target.closest('.pm-role');
+      if (!b) return;
+      const li = b.closest('li'), p = SP_PEOPLE[li.dataset.i];
+      if (ok.has(p)) return;
+      if (b.dataset.r !== p.role) { shake(b); api.bad(); why(p.why[b.dataset.r], 'bad'); return; }
+      ok.add(p);
+      b.classList.add('right');
+      li.classList.add('set');
+      li.querySelectorAll('.pm-role').forEach(x => { x.disabled = x !== b; });
+      api.good();
+      if (ok.size < SP_PEOPLE.length) { why(`對！${p.who}${p.need}，給「${SP_ROLES.find(r => r.id === p.role).name}」剛剛好。`, 'good'); return; }
+      why('🎉 每個人都拿到剛好夠用的權限。能改的人越少，報告越安全！', 'good');
+      api.done();
+    });
+  },
+
+  // Part 2 is gone. Open the version history, look at each version, and bring back the right one.
+  versions(host, _, api) {
+    const doc = parts => CE_PARTS.map((p, i) => parts.includes(i) ? `<section class="vs-part"><h4>${p.head}</h4><p>${p.text}</p></section>` : '').join('');
+    host.innerHTML = `
+      <div class="w-vs">
+        <p class="vs-hint">糟糕！阿傑不小心把第 2 段刪掉了。點一個舊版本看看</p>
+        <div class="vs-row">
+          <div class="vs-doc"><p class="vs-tag">目前的文件</p><div class="vs-body"></div></div>
+          <ol class="vs-list">${VS_LIST.map((v, i) => `<li><button class="option vs-ver" data-i="${i}"><b>${v.when}</b><small>${v.who}${v.now ? '・目前版本' : ''}</small></button></li>`).join('')}</ol>
+        </div>
+        <button class="go vs-restore" disabled>↩️ 還原這個版本</button>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = (s, cls = '') => { $('.vs-hint').textContent = s; $('.vs-hint').className = `vs-hint ${cls}`; };
+    let pick = 0, done = false;
+    const show = (i, label) => { $('.vs-body').innerHTML = doc(VS_LIST[i].parts); $('.vs-tag').textContent = label; pop($('.vs-doc')); };
+    show(0, '目前的文件');
+    $('.vs-list').addEventListener('click', e => {
+      const b = e.target.closest('.vs-ver');
+      if (!b || done) return;
+      pick = +b.dataset.i;
+      host.querySelectorAll('.vs-ver').forEach(x => x.classList.toggle('on', x === b));
+      show(pick, pick ? `預覽：${VS_LIST[pick].when} 的版本` : '目前的文件');
+      $('.vs-restore').disabled = pick === 0;
+      hint(pick === 0 ? '這是現在的版本，第 2 段不見了' : '這個版本有哪幾段？看清楚再還原');
+    });
+    $('.vs-restore').addEventListener('click', () => {
+      const v = VS_LIST[pick];
+      if (v.parts.length < 3) { shake($('.vs-restore')); api.bad(); hint('這個版本太舊了，第 2、3 段都還沒寫。還原它，會少掉後來寫的東西', 'bad'); return; }
+      done = true;
+      $('.vs-restore').disabled = true;
+      $('.vs-tag').textContent = '目前的文件（已還原）';
+      api.good();
+      hint('🎉 第 2 段回來了！共用文件會記住每一次修改，改錯了也能找回來', 'done');
+      api.done();
     });
   },
 

@@ -2207,6 +2207,58 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .ap-why.done { color: var(--good); }
 @media (prefers-reduced-motion: reduce) { .ap-switch i, .ap-switch i::after { transition: none; } }
 
+/* ---------- one shared document, three writers ---------- */
+
+.w-ce { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.ce-hint { margin: 0; min-height: 3em; width: min(100%, 560px); font-weight: 800; font-size: 1.1rem; line-height: 1.5; text-align: center; }
+.ce-hint.done { color: var(--good); }
+.ce-doc { width: min(100%, 520px); padding: 0 18px 12px; border-radius: 12px; background: white; border: 2px solid var(--line); box-shadow: var(--shadow); }
+.ce-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 -18px 6px; padding: 8px 12px; border-bottom: 2px solid var(--line); background: #f8f9fa; border-radius: 10px 10px 0 0; }
+.ce-who { display: flex; gap: 4px; }
+.ce-who i { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: white; font-style: normal; font-weight: 800; font-size: .85rem; }
+.ce-part h4 { margin: 10px 0 2px; font-size: 1rem; }
+.ce-part p { margin: 0; min-height: 1.7em; line-height: 1.7; font-size: 1.05rem; }
+.ce-part.mine { background: #e7f5ff; margin: 0 -8px; padding: 0 8px 4px; border-radius: 8px; }
+.ce-cur { position: relative; display: inline-block; width: 2px; height: 1.2em; margin-left: 1px; vertical-align: -3px; background: var(--who); }
+.ce-cur small { position: absolute; top: -2px; left: 4px; padding: 0 5px; border-radius: 0 4px 4px 4px; background: var(--who); color: white; font-size: .7rem; font-weight: 800; white-space: nowrap; line-height: 1.4; }
+.ce-part[data-i="1"]:not(.mine) .ce-cur, .ce-part.done .ce-cur { opacity: 0; }
+
+/* ---------- permissions on a shared link ---------- */
+
+.w-pm { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.pm-hint { margin: 0; font-weight: 800; font-size: 1.1rem; text-align: center; }
+.pm-key { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; color: var(--ink-2); font-size: .9rem; }
+.pm-key b { margin-right: 4px; color: var(--ink); }
+.pm-list { display: flex; flex-direction: column; gap: 8px; width: min(100%, 620px); margin: 0; padding: 0; list-style: none; }
+.pm-list li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 14px; background: var(--card); border: 2px solid var(--line); }
+.pm-list li.set { border-color: var(--good); }
+.pm-who { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center; }
+.pm-who > span { grid-row: span 2; font-size: 1.8rem; }
+.pm-who small { color: var(--ink-2); font-weight: 700; }
+.pm-roles { display: flex; gap: 6px; }
+.pm-role { padding: .4rem .7rem; font-size: 1rem; }
+.pm-role.right { border-color: var(--good); background: #ebfbee; }
+.pm-role:disabled:not(.right) { opacity: .35; }
+.pm-why { margin: 0; min-height: 3em; width: min(100%, 560px); font-weight: 700; line-height: 1.6; text-align: center; }
+.pm-why.bad { color: #a61e1e; }
+.pm-why.good { color: var(--good); }
+
+/* ---------- version history ---------- */
+
+.w-vs { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.vs-hint { margin: 0; min-height: 3em; width: min(100%, 560px); font-weight: 800; font-size: 1.1rem; line-height: 1.5; text-align: center; }
+.vs-hint.done { color: var(--good); }
+.vs-hint.bad { color: #a61e1e; }
+.vs-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; width: 100%; }
+.vs-doc { flex: 1 1 260px; max-width: 360px; min-height: 230px; padding: 10px 16px; border-radius: 12px; background: white; border: 2px solid var(--line); box-shadow: var(--shadow); }
+.vs-tag { margin: 0 0 4px; color: var(--ink-3); font-weight: 800; font-size: .85rem; }
+.vs-part h4 { margin: 8px 0 2px; font-size: 1rem; }
+.vs-part p { margin: 0; line-height: 1.6; }
+.vs-list { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.vs-ver { display: flex; flex-direction: column; align-items: flex-start; width: 100%; min-width: 170px; padding: .5rem .9rem; }
+.vs-ver small { color: var(--ink-2); font-weight: 700; font-size: .85rem; }
+.vs-ver.on { border-color: #1c7ed6; background: #e7f5ff; }
+
 /* ---------- multitasking ---------- */
 
 .w-multi { display: flex; flex-direction: column; gap: 12px; align-items: center; }
