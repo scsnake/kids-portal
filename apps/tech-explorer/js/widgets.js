@@ -377,6 +377,43 @@ const MN_MAP = `
     <text x="372" y="45">圖書館</text><text x="260" y="46">學校</text></g>
   <g class="mn-stops" font-size="13" text-anchor="middle"><text x="140" y="214">🚏</text><text x="334" y="139">🚏</text></g>`;
 
+// Four jobs for the voice assistant. Each has one clear command and two that are not:
+// too vague (it asks back or searches the web) or missing the wake word (no answer).
+const VC_TASKS = [
+  {
+    goal: '⏰ 明天早上 7 點叫你起床',
+    cmds: [
+      { say: '嘿 Siri，明天早上 7 點叫我起床', ok: true, reply: '好的，鬧鐘設在明天早上 7:00。', card: '⏰ 7:00<small>明天</small>' },
+      { say: '嘿 Siri，鬧鐘', reply: '要設定幾點的鬧鐘？', why: '說得不夠清楚，它還要問你幾點。' },
+      { say: '嘿 Siri，我明天要早起', reply: '加油，祝你明天順利！', why: '它聽不出你要它做什麼。說出「幾點」和「叫我起床」。' },
+    ],
+  },
+  {
+    goal: '☔ 想知道明天要不要帶傘',
+    cmds: [
+      { say: '嘿 Siri，明天會下雨嗎？', ok: true, reply: '明天有 80% 的機會下雨，記得帶傘。', card: '🌧️ 80%<small>明天</small>' },
+      { say: '嘿 Siri，雨傘', reply: '這是我在網路上找到的「雨傘」……', why: '只說「雨傘」，它會去搜尋雨傘，不知道你想問天氣。' },
+      { say: '明天會下雨嗎？', wake: false, why: '沒有先說「嘿 Siri」，它還在睡，不會回答。' },
+    ],
+  },
+  {
+    goal: '📞 打電話給媽媽',
+    cmds: [
+      { say: '嘿 Siri，打電話給媽媽', ok: true, reply: '正在打電話給「媽媽」……', card: '📞 媽媽<small>撥號中</small>' },
+      { say: '嘿 Siri，媽媽', reply: '你想對「媽媽」做什麼？打電話還是傳訊息？', why: '只說「媽媽」，它不知道要打電話還是傳訊息。' },
+      { say: '媽媽，打電話', wake: false, why: '沒有先說「嘿 Siri」，它還在睡，不會回答。' },
+    ],
+  },
+  {
+    goal: '🍜 泡麵要等 3 分鐘',
+    cmds: [
+      { say: '嘿 Siri，計時 3 分鐘', ok: true, reply: '好的，計時 3 分鐘，開始！', card: '⏱️ 3:00<small>計時器</small>' },
+      { say: '嘿 Siri，泡麵', reply: '這是附近的泡麵店……', why: '它會去找泡麵的資料，不會幫你計時。' },
+      { say: '嘿 Siri，等一下', reply: '我在這裡，你需要什麼？', why: '「等一下」不是工作。說出「計時」和「幾分鐘」。' },
+    ],
+  },
+];
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -5330,6 +5367,70 @@ export const WIDGETS = {
       };
       api.later(type, 300);
     });
+  },
+
+  // Pick the command that gets the job done. The assistant answers each one: a clear
+  // command shows a result card; a vague one asks back; no wake word gets no answer.
+  voicecmd(host, _, api) {
+    host.innerHTML = `
+      <div class="w-voice">
+        <div class="vc-ask">
+          <p class="vc-goal"></p>
+          <div class="vc-cmds"></div>
+          <p class="vc-why" aria-live="polite"></p>
+        </div>
+        <div class="vc-phone">
+          <p class="vc-you"></p>
+          <p class="vc-reply"></p>
+          <div class="vc-card" hidden></div>
+          <span class="vc-orb" aria-hidden="true"></span>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let n = 0, busy = false;
+    const ask = () => {
+      const task = VC_TASKS[n];
+      $('.vc-goal').innerHTML = `任務 ${n + 1}／${VC_TASKS.length}：<b>${task.goal}</b><br>要怎麼說？`;
+      $('.vc-why').textContent = '';
+      $('.vc-cmds').innerHTML = shuffle(task.cmds).map(c => `<button class="option vc-say" data-i="${task.cmds.indexOf(c)}">🗣️ 「${c.say}」</button>`).join('');
+    };
+    $('.vc-cmds').addEventListener('click', e => {
+      const b = e.target.closest('[data-i]');
+      if (!b || b.disabled || busy) return;
+      const c = VC_TASKS[n].cmds[b.dataset.i];
+      busy = true;
+      $('.vc-card').hidden = true;
+      $('.vc-reply').textContent = '';
+      $('.vc-you').textContent = `「${c.say}」`;
+      const phone = $('.vc-phone');
+      phone.classList.toggle('listening', c.wake !== false);
+      phone.classList.toggle('asleep', c.wake === false);
+      api.later(() => {
+        busy = false;
+        phone.classList.remove('listening');
+        if (c.wake === false) $('.vc-reply').textContent = '（螢幕沒有反應）';
+        else $('.vc-reply').textContent = c.reply;
+        if (!c.ok) {
+          b.classList.add('wrong');
+          b.disabled = true;
+          shake(b);
+          $('.vc-why').textContent = c.why;
+          api.bad();
+          return;
+        }
+        b.classList.add('right');
+        $('.vc-card').innerHTML = c.card;
+        $('.vc-card').hidden = false;
+        pop($('.vc-card'));
+        api.good();
+        host.querySelectorAll('.vc-say').forEach(x => { x.disabled = true; });
+        if (++n < VC_TASKS.length) { busy = true; api.later(() => { busy = false; ask(); }, 1600); return; }
+        $('.vc-goal').innerHTML = '🎉 4 個任務都完成了！<br>說清楚「要做什麼」，語音助理就聽得懂。';
+        $('.vc-goal').classList.add('done');
+        api.done();
+      }, 900);
+    });
+    ask();
   },
 
   // The operating system takes turns between apps so fast they look simultaneous.

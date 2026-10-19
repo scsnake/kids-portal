@@ -1403,6 +1403,71 @@ export const UNITS = [
   },
 
   {
+    id: 'voice',
+    part: 'basic',
+    icon: '🎙️',
+    title: '語音助理',
+    en: 'Voice Assistants',
+    desc: '說清楚的指令、喚醒詞、好用和要小心',
+    color: '#7048e8',
+    slides: [
+      {
+        title: '嘿 Siri！',
+        text: `對著裝置說話，它就幫你做事，這叫${t('語音助理', 'voice assistant')}，像 iPhone 和 iPad 的 Siri。話要說清楚：要做什麼、什麼時候。試試看！`,
+        widget: 'voicecmd',
+      },
+      {
+        title: '它一直在聽嗎？',
+        text: `語音助理一直在等一個${t('喚醒詞', 'wake word')}，像「嘿 Siri」。聽到以前，它不會把聲音送出去；聽到以後，才去理解你說的話，常常要傳到網路上。`,
+        widget: 'choice',
+        params: {
+          question: '客廳的智慧音箱突然亮起來，說「我在聽」，可是沒有人叫它。最可能發生了什麼？',
+          options: [
+            { text: '📺 電視裡有人說了很像喚醒詞的話', correct: true },
+            { text: '👻 家裡有看不見的人' },
+            { text: '🔋 它快沒電了' },
+          ],
+          explain: '聲音很像喚醒詞，它就可能被叫醒。不想讓它聽的時候，可以在設定裡把「嘿 Siri」關掉。',
+        },
+      },
+      {
+        title: '語音助理的好用法',
+        text: '手在忙、看不清楚小字的時候，用說的最方便。可是它也會聽錯，你說的話也會傳到網路上。分分看！',
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '👍', label: '好用' },
+            { id: 'care', icon: '⚠️', label: '要小心' },
+          ],
+          items: [
+            { icon: '⏱️', label: '煮東西時設計時器', bin: 'ok' },
+            { icon: '📞', label: '手不方便時打給家人', bin: 'ok' },
+            { icon: '☔', label: '出門前問天氣', bin: 'ok' },
+            { icon: '🎵', label: '請它播音樂', bin: 'ok' },
+            { icon: '🔑', label: '大聲說出密碼', bin: 'care' },
+            { icon: '🛒', label: '叫它幫你買東西', bin: 'care' },
+            { icon: '🤔', label: '它說什麼都相信', bin: 'care' },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '阿嬤看不清楚手機上的小字，想打電話給兒子。最快的方法是？',
+          options: [
+            { text: '🗣️ 說「嘿 Siri，打電話給兒子」', correct: true },
+            { text: '🔍 把手機拿遠一點，慢慢找' },
+            { text: '⏳ 等兒子打來' },
+          ],
+          explain: '不用找、不用點，說一句話就能打電話。手機裡的聯絡人要先存好「兒子」這個名字。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'safety',
     part: 'basic',
     icon: '🛡️',
@@ -2581,7 +2646,8 @@ export const STAGES = [
   { id: 'care', part: 'basic', icon: '🔋', title: '照顧裝置和自己', en: 'Care for Devices and You', units: ['cables', 'battery', 'care', 'health'] },
   { id: 'media', part: 'basic', icon: '📷', title: '拍照和檔案', en: 'Photos and Files', units: ['camera', 'files', 'space', 'formats'] },
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account'] },
-  { id: 'apps', part: 'basic', icon: '📲', title: 'App 和 AI', en: 'Apps and AI', units: ['appbasics', 'apps', 'handy', 'maps', 'aichat'] },
+  { id: 'apps', part: 'basic', icon: '📲', title: '用 App', en: 'Using Apps', units: ['appbasics', 'apps', 'handy', 'maps'] },
+  { id: 'helpers', part: 'basic', icon: '🤖', title: 'AI 小幫手', en: 'AI Helpers', units: ['aichat', 'voice'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os', 'screens', 'storage'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'web'] },

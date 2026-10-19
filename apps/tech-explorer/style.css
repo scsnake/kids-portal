@@ -1960,6 +1960,29 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .chat-qs { display: flex; flex-wrap: wrap; gap: 6px; }
 .chat-qs .option:disabled { opacity: .4; }
 
+/* ---------- voice assistant: say it clearly ---------- */
+
+.w-voice { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; align-items: start; width: 100%; }
+@media (max-width: 700px) { .w-voice { grid-template-columns: 1fr; } }
+.vc-ask { display: flex; flex-direction: column; gap: 10px; }
+.vc-goal { margin: 0; font-weight: 800; font-size: 1.15rem; line-height: 1.6; }
+.vc-goal b { color: var(--c); }
+.vc-goal.done { color: var(--good); }
+.vc-cmds { display: flex; flex-direction: column; gap: 10px; }
+.vc-say { font-size: 1.1rem; }
+.vc-why { margin: 0; min-height: 1.5em; color: var(--bad); font-weight: 700; line-height: 1.5; }
+.vc-phone { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 260px; padding: 16px 14px 84px; border-radius: 28px; border: 8px solid #1f232b; background: linear-gradient(#2b2f3a, #12141a); color: white; text-align: center; }
+.vc-you { margin: 0; min-height: 1.5em; color: #ced4da; font-weight: 700; line-height: 1.5; }
+.vc-reply { margin: 0; min-height: 1.5em; font-weight: 800; font-size: 1.1rem; line-height: 1.5; }
+.vc-card { display: flex; flex-direction: column; align-items: center; padding: 8px 18px; border-radius: 16px; background: rgba(255, 255, 255, .14); font-size: 1.8rem; font-weight: 900; }
+.vc-card small { font-size: .85rem; font-weight: 700; color: #ced4da; }
+/* the assistant's orb: still when asleep, glowing while it listens */
+.vc-orb { position: absolute; bottom: 18px; left: 50%; width: 52px; height: 52px; margin-left: -26px; border-radius: 50%; background: conic-gradient(#ff6b6b, #cc5de8, #4dabf7, #63e6be, #ff6b6b); opacity: .55; }
+.vc-phone.asleep .vc-orb { opacity: .15; }
+.vc-phone.listening .vc-orb { opacity: 1; box-shadow: 0 0 24px 6px rgba(204, 93, 232, .6); }
+@media (prefers-reduced-motion: no-preference) { .vc-phone.listening .vc-orb { animation: vc-spin 1s linear infinite; } }
+@keyframes vc-spin { to { rotate: 1turn; } }
+
 /* ---------- multitasking ---------- */
 
 .w-multi { display: flex; flex-direction: column; gap: 12px; align-items: center; }
