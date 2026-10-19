@@ -4237,6 +4237,56 @@ export const WIDGETS = {
     });
   },
 
+  // A chat thread, then one question at a time. A right choice adds what you did to the
+  // thread and moves on; a wrong one shakes and says why, and can be tried again.
+  chatpick(host, { name, messages, steps, end }, api) {
+    host.innerHTML = `
+      <div class="w-chatpick">
+        <div class="cp-chat">
+          <p class="cp-head">${name}</p>
+          <div class="cp-msgs">${messages.map(m => `<p class="cp-bub">${m}</p>`).join('')}</div>
+        </div>
+        <div class="cp-ask">
+          <p class="cp-q"></p>
+          <div class="cp-opts"></div>
+          <p class="cp-why" aria-live="polite"></p>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let n = 0;
+    const ask = () => {
+      const step = steps[n];
+      $('.cp-q').textContent = `第 ${n + 1} 步：${step.ask}`;
+      $('.cp-why').textContent = '';
+      $('.cp-opts').innerHTML = shuffle(step.options).map(o => `<button class="option" data-i="${step.options.indexOf(o)}">${o.text}</button>`).join('');
+    };
+    $('.cp-opts').addEventListener('click', e => {
+      const b = e.target.closest('[data-i]');
+      if (!b || b.disabled) return;
+      const o = steps[n].options[b.dataset.i];
+      if (!o.ok) {
+        shake(b);
+        b.classList.add('wrong');
+        b.disabled = true;
+        $('.cp-why').textContent = o.why;
+        api.bad();
+        return;
+      }
+      api.good();
+      const msgs = $('.cp-msgs');
+      msgs.insertAdjacentHTML('beforeend', `<p class="cp-act">${o.act}</p>`);
+      msgs.scrollTop = msgs.scrollHeight;
+      n++;
+      if (n < steps.length) { ask(); return; }
+      $('.cp-q').textContent = end;
+      $('.cp-q').classList.add('done');
+      $('.cp-opts').innerHTML = '';
+      $('.cp-why').textContent = '';
+      api.done();
+    });
+    ask();
+  },
+
   // Traps on web pages, one case at a time in a drawn iPad browser: tap 正常 or 可疑, then
   // the clue lights up. One ad has a tiny ×; a touch anywhere else on it leaves the page.
   webtrap(host, _, api) {

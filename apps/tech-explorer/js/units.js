@@ -1389,6 +1389,106 @@ export const UNITS = [
   },
 
   {
+    id: 'kind',
+    part: 'basic',
+    icon: '🤝',
+    title: '網路禮儀和網路霸凌',
+    en: 'Kindness Online',
+    desc: '發文前想一想，被欺負時怎麼做',
+    color: '#e64980',
+    slides: [
+      {
+        title: '發文之前，先想一想',
+        text: `網路上的話和照片，可能被截圖、轉傳，很難收回來。發文前先想：這樣說，會不會讓人難過？這就是${t('網路禮儀', 'netiquette')}。分分看，哪些可以發？`,
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '👍', label: '可以發' },
+            { id: 'no', icon: '✋', label: '先不要' },
+          ],
+          items: [
+            { icon: '🎂', label: '祝同學生日快樂', bin: 'ok' },
+            { icon: '🐶', label: '自己家小狗的照片', bin: 'ok' },
+            { icon: '👏', label: '稱讚朋友的畫', bin: 'ok' },
+            { icon: '🤳', label: '同學跌倒的醜照片', bin: 'no' },
+            { icon: '😡', label: '生氣時罵人的話', bin: 'no' },
+            { icon: '🤫', label: '朋友偷偷告訴你的祕密', bin: 'no' },
+          ],
+        },
+      },
+      {
+        title: '被欺負了怎麼辦？',
+        text: `在網路上一直取笑、威脅、排擠別人，或亂傳別人的照片，就是${t('網路霸凌', 'cyberbullying')}。被欺負不是你的錯。一步一步，選出最好的做法。`,
+        widget: 'chatpick',
+        params: {
+          name: '💬 阿強',
+          messages: ['你很笨耶 😝', '大家都不想跟你玩', '明天不要來學校啦'],
+          steps: [
+            {
+              ask: '有人一直傳難聽的話給你，先怎麼做？',
+              options: [
+                { text: '✋ 先不要回，停下來', ok: true, act: '✋ 你沒有回嘴' },
+                { text: '😡 罵回去', why: '罵回去，對方常常會更兇，事情變得更嚴重。' },
+                { text: '🙇 跟他說對不起', why: '不是你的錯，不用道歉。先不要回。' },
+              ],
+            },
+            {
+              ask: '接下來呢？',
+              options: [
+                { text: '📸 截圖，留下證據', ok: true, act: '📸 已截圖' },
+                { text: '🗑️ 馬上把訊息全部刪掉', why: '刪掉就沒有證據了。先截圖，再交給大人處理。' },
+              ],
+            },
+            {
+              ask: '截好圖了，再來呢？',
+              options: [
+                { text: '🙋 告訴爸媽或老師', ok: true, act: '🙋 已經告訴媽媽' },
+                { text: '🤐 自己忍耐，不讓別人知道', why: '說出來，大人才能幫你。這不是告狀，是保護自己。' },
+              ],
+            },
+            {
+              ask: '不想再收到他的訊息，可以怎麼做？',
+              options: [
+                { text: '🚫 封鎖他，也可以檢舉', ok: true, act: '🚫 已封鎖「阿強」' },
+                { text: '📣 找更多朋友一起罵他', why: '一起罵人，也會變成霸凌。封鎖他，讓大人來處理。' },
+              ],
+            },
+          ],
+          end: '🎉 做得好！不回嘴、截圖、告訴大人、封鎖。',
+        },
+      },
+      {
+        title: '看到別人被欺負',
+        text: '霸凌常常發生在群組裡，很多人在旁邊看。不跟著一起笑、一起轉傳，就是在幫忙。也可以私下關心被欺負的人，再告訴大人。',
+        widget: 'choice',
+        params: {
+          question: '班上群組裡，大家都在笑一位同學的照片，還一直按讚。你會怎麼做？',
+          options: [
+            { text: '🤝 不跟著笑，私下關心他，再告訴老師', correct: true },
+            { text: '👍 跟著按讚，大家都這樣' },
+            { text: '📤 把照片轉給別班的朋友' },
+          ],
+          explain: '按讚和轉傳，會讓更多人看到，被欺負的人會更難過。在台灣，也可以打 1953 反霸凌專線。',
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '朋友傳來一張別人的醜照片，說：「超好笑，快轉給大家！」你會怎麼做？',
+          options: [
+            { text: '🙅 不轉傳，跟朋友說這樣會讓人難過', correct: true },
+            { text: '🤏 只轉給一兩個好朋友就好' },
+            { text: '🎨 加上好笑的字再傳出去' },
+          ],
+          explain: '照片一傳出去，就收不回來了。換成是你的照片，你也不會想被大家笑。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'sos',
     part: 'basic',
     icon: '🆘',
@@ -2140,7 +2240,7 @@ export const STAGES = [
   { id: 'media', part: 'basic', icon: '📷', title: '拍照和檔案', en: 'Photos and Files', units: ['camera', 'files', 'space'] },
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account'] },
   { id: 'apps', part: 'basic', icon: '📲', title: 'App 和 AI', en: 'Apps and AI', units: ['appbasics', 'apps', 'handy', 'aichat'] },
-  { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'sos'] },
+  { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'kind', 'sos'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os', 'screens', 'storage'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'web'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '寫程式', en: 'Coding', units: ['algo', 'coding'] },

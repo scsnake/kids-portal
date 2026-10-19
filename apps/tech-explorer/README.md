@@ -41,21 +41,22 @@ yet; 「直接開始」 closes it.
 18. AI 聊天機器人: what a chatbot is, catching a wrong answer, good and bad uses
 19. 上網安全: scam messages, traps on web pages (fake ads, pop-ups, fake virus alerts, redirects, phishing), verification codes, two-factor authentication, malware, personal information, 165
 20. 假訊息和 AI 假圖: misinformation (source, date, forwarded hoaxes), spotting flaws in an AI-made picture, deepfake voices (a fake call from a parent), habits before forwarding
-21. 緊急求救: 119 vs 110, calling from a locked phone (緊急 on the passcode screen), Medical ID, Emergency SOS
+21. 網路禮儀和網路霸凌: think before you post, cyberbullying in a chat (don't reply, screenshot, tell an adult, block), bystanders
+22. 緊急求救: 119 vs 110, calling from a locked phone (緊急 on the passcode screen), Medical ID, Emergency SOS
 
 **Part 2: 原理探索 (how it works)**
 
-22. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
-23. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
-24. 作業系統: what an OS does, time sharing (multitasking)
-25. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
-26. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
-27. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
-28. AI 怎麼學？: learning from examples, why data matters (bias)
-29. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
-30. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
-31. 演算法: steps, binary search (number guessing), sorting by swaps
-32. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+23. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
+24. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
+25. 作業系統: what an OS does, time sharing (multitasking)
+26. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
+27. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
+28. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
+29. AI 怎麼學？: learning from examples, why data matters (bias)
+30. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
+31. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
+32. 演算法: steps, binary search (number guessing), sorting by swaps
+33. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
 
 ## Saved progress
 
