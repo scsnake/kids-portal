@@ -5521,7 +5521,7 @@ export const WIDGETS = {
           <div class="wt-page"></div>
           <div class="wt-layer"></div>
         </div></div>
-        <div class="wt-btns"><button class="option" data-v="ok">${labels[0]}</button><button class="option" data-v="scam">${labels[1]}</button></div>
+        <div class="wt-btns"><button class="option" data-v="ok">👍 正常</button><button class="option" data-v="scam">🚩 可疑</button></div>
         <p class="wt-why" hidden></p>
         <div class="wt-foot"><span class="wt-count"></span><button class="go" data-act="next" hidden>下一個 ▶</button></div>
       </div>`;
