@@ -1,5 +1,5 @@
-import { UNITS, COMING, PARTS, STAGES } from './units.js?v=14';
-import { WIDGETS } from './widgets.js?v=14';
+import { UNITS, COMING, PARTS, STAGES } from './units.js?v=15';
+import { WIDGETS } from './widgets.js?v=15';
 
 const app = document.getElementById('app');
 const STORE = 'tech-explorer.v2';
