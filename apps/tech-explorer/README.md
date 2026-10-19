@@ -5,6 +5,8 @@ sentences and, on most slides, one small task: drag, tap, put in order, or a min
 simulation. A finished task earns a star. New terms show in zh-TW with the English
 name beside them.
 
+For the look, the layout and how to add a topic, see `DESIGN.md`.
+
 ## Units
 
 Two parts. Part 1 teaches how to use a device, with rough ideas only. Part 2
