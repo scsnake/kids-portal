@@ -622,6 +622,35 @@ const VS_LIST = [
   { when: '昨天 20:30', who: '小美', parts: [0] },
 ];
 
+// Clues in a photo taken at the front door, drawn in a 400×280 box. `hit` is the tap area.
+const PQ_CLUES = [
+  { k: 'tag', icon: '🏷️', label: '名牌：學校和名字', hit: [222, 140, 66, 50], star: [255, 165] },
+  { k: 'door', icon: '🚪', label: '門牌：家的地址', hit: [118, 118, 70, 54], star: [153, 145] },
+  { k: 'bus', icon: '🚏', label: '站牌：家附近的路', hit: [306, 50, 92, 64], star: [352, 82] },
+  { k: 'bag', icon: '🎒', label: '吊牌：電話號碼', hit: [280, 180, 76, 50], star: [318, 216] },
+];
+const PQ_SCENE = `
+  <rect width="400" height="280" fill="#d0ebff"/><rect y="236" width="400" height="44" fill="#ced4da"/>
+  <rect x="10" y="40" width="186" height="196" fill="#ffe8cc"/><path d="M0 46 L103 4 L206 46Z" fill="#c2410c"/>
+  <rect x="50" y="116" width="62" height="120" rx="4" fill="#a0522d"/><circle cx="100" cy="178" r="4" fill="#ffd43b"/>
+  <rect x="126" y="128" width="54" height="34" rx="4" fill="#1864ab"/>
+  <text x="153" y="142" class="pq-t" fill="white">幸福路</text><text x="153" y="156" class="pq-t" fill="white">12 號</text>
+  <rect x="348" y="96" width="6" height="140" fill="#868e96"/>
+  <rect x="312" y="58" width="80" height="48" rx="6" fill="#2b8a3e"/>
+  <text x="352" y="77" class="pq-t" fill="white">🚌 公車站</text><text x="352" y="96" class="pq-t" fill="white">幸福路口</text>
+  <path d="M226 136 Q255 124 284 136 L292 230 H218Z" fill="white" stroke="#adb5bd" stroke-width="2"/>
+  <rect x="220" y="208" width="70" height="28" fill="#364fc7"/>
+  <rect x="210" y="236" width="18" height="12" rx="3" fill="#343a40"/><rect x="262" y="236" width="18" height="12" rx="3" fill="#343a40"/>
+  <rect x="284" y="140" width="34" height="62" rx="10" fill="#e8590c"/><path d="M286 142 L276 182" stroke="#c2410c" stroke-width="5"/>
+  <circle cx="255" cy="104" r="28" fill="#f3c9a5"/><path d="M227 100 Q228 70 255 72 Q284 70 284 102 Q270 84 255 86 Q240 84 227 100Z" fill="#343a40"/>
+  <circle cx="245" cy="106" r="3" fill="#343a40"/><circle cx="265" cy="106" r="3" fill="#343a40"/><path d="M246 118 Q255 124 264 118" stroke="#c0504d" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M282 112 l14 -16 M290 100 l8 4" stroke="#f3c9a5" stroke-width="7" stroke-linecap="round"/>
+  <rect x="230" y="148" width="50" height="32" rx="3" fill="white" stroke="#1864ab" stroke-width="2"/>
+  <text x="255" y="161" class="pq-t pq-s" fill="#1864ab">幸福國小</text><text x="255" y="175" class="pq-t" fill="#212529">王小明</text>
+  <line x1="300" y1="200" x2="304" y2="208" stroke="#495057" stroke-width="2"/>
+  <rect x="278" y="206" width="80" height="20" rx="3" fill="#fff3bf" stroke="#f08c00" stroke-width="1.5"/>
+  <text x="318" y="220" class="pq-t pq-s" fill="#212529">0900-000-000</text>`;
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -6339,6 +6368,104 @@ export const WIDGETS = {
       hint('🎉 第 2 段回來了！共用文件會記住每一次修改，改錯了也能找回來', 'done');
       api.done();
     });
+  },
+
+  // Find the clues in a photo, then cover them with stickers before sharing.
+  photoclue(host, _, api) {
+    host.innerHTML = `
+      <div class="w-pq">
+        <p class="pq-hint">這張照片要傳到網路上。點出 4 個會洩漏你的線索</p>
+        <svg class="pq-pic" viewBox="0 0 400 280" role="img" aria-label="小朋友站在家門口的照片">
+          ${PQ_SCENE}
+          <g class="pq-marks"></g>
+          ${PQ_CLUES.map(c => `<rect class="pq-hit" data-k="${c.k}" x="${c.hit[0]}" y="${c.hit[1]}" width="${c.hit[2]}" height="${c.hit[3]}"/>`).join('')}
+        </svg>
+        <ul class="pq-chips">${PQ_CLUES.map(c => `<li data-k="${c.k}">？</li>`).join('')}</ul>
+        <button class="go pq-cover" hidden>⭐ 用貼圖遮住</button>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = (s, cls = '') => { $('.pq-hint').textContent = s; $('.pq-hint').className = `pq-hint ${cls}`; };
+    const found = new Set();
+    $('.pq-pic').addEventListener('click', e => {
+      if (found.size === PQ_CLUES.length) return;
+      const k = e.target.closest('.pq-hit')?.dataset.k;
+      if (!k) { hint('再找找看：衣服、門口、路邊、包包'); return; }
+      if (found.has(k)) return;
+      found.add(k);
+      const c = PQ_CLUES.find(x => x.k === k);
+      $('.pq-marks').insertAdjacentHTML('beforeend', `<rect class="pq-ring" x="${c.hit[0]}" y="${c.hit[1]}" width="${c.hit[2]}" height="${c.hit[3]}" rx="10"/>`);
+      const chip = host.querySelector(`.pq-chips [data-k="${k}"]`);
+      chip.textContent = `${c.icon} ${c.label}`;
+      chip.classList.add('found');
+      pop(chip);
+      api.good();
+      if (found.size < PQ_CLUES.length) { hint(`找到 ${found.size} 個，還有 ${PQ_CLUES.length - found.size} 個`); return; }
+      hint('4 個都找到了！別人會知道你是誰、讀哪裡、住哪裡。遮起來再分享');
+      $('.pq-cover').hidden = false;
+    });
+    $('.pq-cover').addEventListener('click', e => {
+      e.currentTarget.hidden = true;
+      $('.pq-marks').innerHTML = PQ_CLUES.map(c => `<g class="pq-sticker"><circle cx="${c.star[0]}" cy="${c.star[1]}" r="${Math.min(c.hit[2], c.hit[3]) / 2 + 6}" fill="#ffd43b" stroke="white" stroke-width="3"/><text x="${c.star[0]}" y="${c.star[1] + 9}" font-size="26" text-anchor="middle">⭐</text></g>`).join('');
+      hint('🎉 線索都遮住了，現在分享安全多了。也可以裁掉，或換一張照片', 'done');
+      api.done();
+    });
+  },
+
+  // A photo on the phone: ⓘ shows where it was taken. Share it to the class group with
+  // the location turned off in 選項.
+  photoloc(host, _, api) {
+    host.innerHTML = `
+      <div class="w-pl">
+        <p class="pl-hint">先點「ⓘ 資訊」，看看照片藏了什麼</p>
+        <div class="pl-phone">
+          <div class="pl-photo"><span>🎂</span><span>🎈</span></div>
+          <div class="pl-tools"><button class="option" data-act="info">ⓘ 資訊</button><button class="option" data-act="share">⬆️ 分享</button></div>
+          <div class="pl-sheet pl-info" hidden>
+            <b>星期日 下午 3:12</b><small>iPhone 相機</small>
+            <svg viewBox="0 0 200 70" class="pl-map" aria-hidden="true"><rect width="200" height="70" fill="#e9ecef"/><path d="M0 40 H200 M70 0 V70 M150 0 V70" stroke="white" stroke-width="8"/><text x="104" y="34" font-size="24" text-anchor="middle">📍</text></svg>
+            <p class="pl-where">📍 幸福路 12 號附近（你家）</p>
+            <button class="option" data-act="close">關閉</button>
+          </div>
+          <div class="pl-sheet pl-share" hidden>
+            <div class="pl-head"><span>已選取 1 張照片<small class="pl-state"></small></span><button class="option pl-opt" data-act="opts">選項 ›</button></div>
+            <div class="pl-opts" hidden>
+              <span>包含</span>
+              <button class="pl-switch" role="switch" aria-checked="true" data-act="loc"><span>📍 位置</span><i></i></button>
+              <button class="option" data-act="optsdone">完成</button>
+            </div>
+            <button class="option pl-to" data-act="send">👥 班級群組（30 人）</button>
+          </div>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = (s, cls = '') => { $('.pl-hint').textContent = s; $('.pl-hint').className = `pl-hint ${cls}`; };
+    let loc = true, sent = false;
+    const state = () => {
+      $('.pl-switch').setAttribute('aria-checked', loc);
+      $('.pl-state').textContent = loc ? '📍 會一起傳出位置' : '不含位置';
+      $('.pl-state').classList.toggle('off', !loc);
+    };
+    host.querySelector('.pl-phone').addEventListener('click', e => {
+      const act = e.target.closest('[data-act]')?.dataset.act;
+      if (!act || sent) return;
+      if (act === 'info') { $('.pl-info').hidden = false; $('.pl-share').hidden = true; hint('照片裡存著拍照的地方，就是你家！現在點「關閉」，再按「分享」'); }
+      if (act === 'close') $('.pl-info').hidden = true;
+      if (act === 'share') { $('.pl-share').hidden = false; $('.pl-info').hidden = true; hint('傳給班級群組以前，先點「選項」看看'); }
+      if (act === 'opts') { $('.pl-opts').hidden = false; hint('把「位置」關掉'); }
+      if (act === 'optsdone') $('.pl-opts').hidden = true;
+      if (act === 'loc') { loc = !loc; hint(loc ? '把「位置」關掉' : '關掉了！按「完成」，再傳給班級群組'); }
+      if (act === 'send') {
+        if (loc) { shake($('.pl-to')); api.bad(); hint('等一下！位置還開著，群組裡 30 個人都會知道你家在哪裡。先到「選項」關掉位置', 'bad'); return; }
+        sent = true;
+        $('.pl-share').innerHTML = '<p class="pl-sent">✅ 已傳送<br><small>照片傳出去了，位置沒有</small></p>';
+        api.good();
+        hint('🎉 照片分享了，你家的位置沒有跟著傳出去！', 'done');
+        api.done();
+        return;
+      }
+      state();
+    });
+    state();
   },
 
   // The operating system takes turns between apps so fast they look simultaneous.

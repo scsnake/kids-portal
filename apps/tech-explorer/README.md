@@ -49,31 +49,32 @@ yet; 「直接開始」 closes it.
 26. AI 生成內容的標示: find the AI labels in a feed of real photos and real AI images (public domain, see img/ailabel/CREDITS.md), share your own AI picture honestly, AI and homework
 27. 網路上的著作權: own work vs other people's work, pick pictures for a report by their license (創用 CC, public domain) and write the source, share the link instead of re-uploading
 28. 共用文件和雲端硬碟: three people type in one document at once, 檢視者 / 加註者 / 編輯者 for a teammate, a teacher and parents, restoring a deleted part from the version history
-29. 上網安全: scam messages, traps on web pages (fake ads, pop-ups, fake virus alerts, redirects, phishing), verification codes, two-factor authentication, malware, personal information, 165
-30. 假訊息和 AI 假圖: misinformation (source, date, forwarded hoaxes), spotting flaws in an AI-made picture, deepfake voices (a fake call from a parent), creepy videos dressed as cartoons (Elsagate), habits before forwarding
-31. 公共 Wi-Fi 和網購: pick the Wi-Fi on the library poster (look-alike and open networks), what to leave for home, a fake shop with 4 warning signs, in-app purchases (Ask to Buy), paying outside the shop
-32. 網路禮儀和網路霸凌: think before you post, cyberbullying in a chat (don't reply, screenshot, tell an adult, block), bystanders
-33. 緊急求救: 119 vs 110, calling from a locked phone (緊急 on the passcode screen), Medical ID, Emergency SOS
+29. 分享照片之前: find four clues in a photo (name tag, house number, bus stop, phone tag) and cover them, turn off 位置 in the share sheet's 選項, which photos to think twice about, asking friends first
+30. 上網安全: scam messages, traps on web pages (fake ads, pop-ups, fake virus alerts, redirects, phishing), verification codes, two-factor authentication, malware, personal information, 165
+31. 假訊息和 AI 假圖: misinformation (source, date, forwarded hoaxes), spotting flaws in an AI-made picture, deepfake voices (a fake call from a parent), creepy videos dressed as cartoons (Elsagate), habits before forwarding
+32. 公共 Wi-Fi 和網購: pick the Wi-Fi on the library poster (look-alike and open networks), what to leave for home, a fake shop with 4 warning signs, in-app purchases (Ask to Buy), paying outside the shop
+33. 網路禮儀和網路霸凌: think before you post, cyberbullying in a chat (don't reply, screenshot, tell an adult, block), bystanders
+34. 緊急求救: 119 vs 110, calling from a locked phone (緊急 on the passcode screen), Medical ID, Emergency SOS
 
 **Part 2: 原理探索 (how it works)**
 
-34. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
-35. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
-36. 作業系統: what an OS does, time sharing (multitasking)
-37. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
-38. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
-39. 聲音和影片怎麼變成數字: sampling a sound wave (and hearing it), frames per second with a bouncing ball, why video needs compression
-40. 人臉和指紋辨識: Face ID dots on a face and on a flat photo (front and side views, unlock or shake), a face as numbers compared with a limit (a twin gets in), Touch ID feature points, why the passcode still matters
-41. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
-42. AI 怎麼學？: learning from examples, why data matters (bias)
-43. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
-44. 網路的實體: follow a message from Taiwan to the US (cell tower, machine room, submarine cable, data center) on a map with Taiwan's real outline, submarine cables, data centers and their power
-45. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
-46. 物聯網和智慧家電: which things go online, a smart plant pot's message from sensor to phone, an air-conditioner rule with AND or OR over one day, default passwords on home cameras, how a tap at school reaches a lamp at home
-47. 演算法: steps, binary search (number guessing), sorting by swaps
-48. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
-49. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
-50. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+35. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
+36. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
+37. 作業系統: what an OS does, time sharing (multitasking)
+38. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
+39. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
+40. 聲音和影片怎麼變成數字: sampling a sound wave (and hearing it), frames per second with a bouncing ball, why video needs compression
+41. 人臉和指紋辨識: Face ID dots on a face and on a flat photo (front and side views, unlock or shake), a face as numbers compared with a limit (a twin gets in), Touch ID feature points, why the passcode still matters
+42. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
+43. AI 怎麼學？: learning from examples, why data matters (bias)
+44. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
+45. 網路的實體: follow a message from Taiwan to the US (cell tower, machine room, submarine cable, data center) on a map with Taiwan's real outline, submarine cables, data centers and their power
+46. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
+47. 物聯網和智慧家電: which things go online, a smart plant pot's message from sensor to phone, an air-conditioner rule with AND or OR over one day, default passwords on home cameras, how a tap at school reaches a lamp at home
+48. 演算法: steps, binary search (number guessing), sorting by swaps
+49. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
+50. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
+51. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
 
 ## Saved progress
 

@@ -1808,6 +1808,63 @@ export const UNITS = [
   },
 
   {
+    id: 'photoshare',
+    part: 'basic',
+    icon: '📸',
+    title: '分享照片之前',
+    en: 'Before You Share a Photo',
+    desc: '照片裡的線索、位置資訊、傳出去就收不回來',
+    color: '#7048e8',
+    added: '2026-10-19',
+    slides: [
+      {
+        title: '照片裡的小線索',
+        text: '分享照片以前，先看看背景。名牌、門牌、站牌，都會告訴別人你是誰、住在哪裡。找找看！',
+        widget: 'photoclue',
+      },
+      {
+        title: '照片藏著位置',
+        text: `手機拍照時，常會把拍照地點的${t('位置資訊', 'location data')}，一起存進照片。傳給別人以前，可以在「選項」把位置關掉。試試看！`,
+        widget: 'photoloc',
+      },
+      {
+        title: '傳出去，就收不回來',
+        text: '照片傳出去，別人可以存下來、再轉傳，就收不回來了。有些照片，分享前要先想一想。分分看！',
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '👍', label: '可以分享' },
+            { id: 'stop', icon: '✋', label: '先想一想' },
+          ],
+          items: [
+            { icon: '🌅', label: '海邊的風景', bin: 'ok' },
+            { icon: '🖍️', label: '自己畫的圖', bin: 'ok' },
+            { icon: '🐶', label: '家裡的小狗', bin: 'ok' },
+            { icon: '🎫', label: '機票和登機證', bin: 'stop' },
+            { icon: '🪪', label: '健保卡和身分證', bin: 'stop' },
+            { icon: '🙈', label: '朋友出糗的照片', bin: 'stop' },
+            { icon: '🏫', label: '穿制服站在校門口', bin: 'stop' },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '你想把和好朋友的合照，貼到網路上。要先做什麼？',
+          options: [
+            { text: '🙋 先問朋友可不可以', correct: true },
+            { text: '📤 直接貼，反正是合照' },
+            { text: '🤐 先貼，以後再跟他說' },
+          ],
+          explain: '照片裡有朋友，也是他的隱私。先問一聲，他說可以再分享。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'safety',
     part: 'basic',
     icon: '🛡️',
@@ -3342,7 +3399,7 @@ export const STAGES = [
   { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account', 'passkey'] },
   { id: 'apps', part: 'basic', icon: '📲', title: '用 App', en: 'Using Apps', units: ['appbasics', 'apps', 'handy', 'maps', 'pay'] },
   { id: 'helpers', part: 'basic', icon: '🤖', title: 'AI 小幫手', en: 'AI Helpers', units: ['aichat', 'voice'] },
-  { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel', 'copyright', 'shareddoc'] },
+  { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel', 'copyright', 'shareddoc', 'photoshare'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os'] },
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },

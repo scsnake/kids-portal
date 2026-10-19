@@ -2259,6 +2259,51 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .vs-ver small { color: var(--ink-2); font-weight: 700; font-size: .85rem; }
 .vs-ver.on { border-color: #1c7ed6; background: #e7f5ff; }
 
+/* ---------- clues in a photo ---------- */
+
+.w-pq { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.pq-hint { margin: 0; min-height: 3em; width: min(100%, 560px); font-weight: 800; font-size: 1.1rem; line-height: 1.5; text-align: center; }
+.pq-hint.done { color: var(--good); }
+.pq-pic { display: block; width: min(100%, 520px); max-height: 46vh; border-radius: 12px; border: 6px solid white; box-shadow: var(--shadow); cursor: pointer; }
+.pq-t { font-size: 13px; font-weight: 800; text-anchor: middle; }
+.pq-t.pq-s { font-size: 10px; }
+.pq-hit { fill: transparent; }
+.pq-ring { fill: none; stroke: #1c7ed6; stroke-width: 4; }
+.pq-chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; width: min(100%, 520px); margin: 0; padding: 0; list-style: none; }
+.pq-chips li { min-height: 40px; display: flex; align-items: center; justify-content: center; padding: 4px 8px; border-radius: 12px; border: 2px dashed var(--line); color: var(--ink-3); font-weight: 800; font-size: .95rem; text-align: center; }
+.pq-chips li.found { border: 2px solid #1c7ed6; background: #e7f5ff; color: var(--ink); }
+
+/* ---------- location in a photo ---------- */
+
+.w-pl { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.pl-hint { margin: 0; min-height: 3em; width: min(100%, 560px); font-weight: 800; font-size: 1.1rem; line-height: 1.5; text-align: center; }
+.pl-hint.done { color: var(--good); }
+.pl-hint.bad { color: #a61e1e; }
+.pl-phone { position: relative; display: flex; flex-direction: column; gap: 8px; width: min(100%, 300px); height: 400px; padding: 12px; border-radius: 34px; background: #1f232b; box-shadow: var(--shadow); overflow: hidden; }
+.pl-photo { flex: 1; display: grid; grid-template-columns: 1fr 1fr; place-items: center; border-radius: 22px 22px 8px 8px; background: linear-gradient(160deg, #ffd8a8, #fcc2d7); font-size: 4rem; }
+.pl-tools { display: flex; gap: 8px; }
+.pl-tools .option { flex: 1; text-align: center; padding: .5rem; font-size: 1rem; }
+.pl-sheet { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 20px; background: #f8f9fa; box-shadow: 0 -6px 24px rgba(0, 0, 0, .3); }
+.pl-info { align-items: center; text-align: center; }
+.pl-info small { color: var(--ink-3); font-weight: 700; }
+.pl-map { width: 100%; border-radius: 10px; }
+.pl-where { margin: 0; font-weight: 800; color: #c2410c; }
+.pl-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 800; }
+.pl-head > span { display: flex; flex-direction: column; }
+.pl-state { color: #c2410c; font-size: .8rem; }
+.pl-state.off { color: var(--good); }
+.pl-opt { padding: .3rem .7rem; font-size: .95rem; min-height: 44px; }
+.pl-opts { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 14px; background: white; }
+.pl-opts > span { color: var(--ink-3); font-weight: 800; font-size: .8rem; }
+.pl-switch { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 0 4px; border: 0; background: none; font: inherit; font-weight: 800; }
+.pl-switch i { position: relative; width: 52px; height: 32px; border-radius: 16px; background: #ced4da; transition: background .2s; }
+.pl-switch i::after { content: ''; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: white; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: translate .2s; }
+.pl-switch[aria-checked="true"] i { background: #40c057; }
+.pl-switch[aria-checked="true"] i::after { translate: 20px 0; }
+.pl-to { text-align: center; font-size: 1rem; }
+.pl-sent { margin: 0; padding: 16px; text-align: center; font-weight: 900; font-size: 1.3rem; color: var(--good); }
+.pl-sent small { color: var(--ink-2); font-size: .9rem; }
+
 /* ---------- multitasking ---------- */
 
 .w-multi { display: flex; flex-direction: column; gap: 12px; align-items: center; }
