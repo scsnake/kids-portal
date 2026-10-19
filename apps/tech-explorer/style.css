@@ -697,6 +697,25 @@ a.unit-card:active { transform: scale(.98); }
 .rt-table span.rt-hit { background: color-mix(in srgb, var(--c) 15%, white); outline: 2px solid var(--c); }
 .rt-msg { margin: 0; font-weight: 800; text-align: center; }
 
+/* ---------- a message's trip across the sea ---------- */
+
+.w-net { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.nw-say { margin: 0; width: min(100%, 600px); min-height: 3em; font-weight: 800; font-size: 1.1rem; line-height: 1.5; text-align: center; }
+.nw-say.done { color: var(--good); }
+.nw-map { display: block; width: min(100%, 600px); height: auto; border-radius: 18px; border: 2px solid var(--line); touch-action: manipulation; }
+.nw-cable { fill: none; stroke: #1864ab; stroke-width: 3; stroke-dasharray: 6 5; opacity: .5; }
+.nw-trail { fill: none; stroke: #f59f00; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.nw-hit { fill: transparent; }
+.nw-dot { fill: white; stroke: #adb5bd; stroke-width: 2; }
+.nw-hop { cursor: pointer; }
+.nw-hop.been .nw-dot { stroke: #f59f00; stroke-width: 3; }
+.nw-hop.next .nw-dot { stroke: var(--c); stroke-width: 4; }
+@media (prefers-reduced-motion: no-preference) { .nw-hop.next .nw-dot { animation: nw-blink 1s ease-in-out infinite; } }
+@keyframes nw-blink { 50% { fill: color-mix(in srgb, var(--c) 35%, white); } }
+.nw-steps { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 6px; margin: 0; padding: 0; list-style: none; counter-reset: nw; }
+.nw-steps li { padding: 2px 8px; border-radius: 99px; background: #fff3bf; font-weight: 700; font-size: .95rem; }
+.nw-steps li + li::before { content: '→ '; color: var(--ink-3); }
+
 /* ---------- race ---------- */
 
 .w-race { display: flex; flex-direction: column; align-items: center; gap: 14px; }

@@ -2531,6 +2531,71 @@ export const UNITS = [
   },
 
   {
+    id: 'networld',
+    part: 'adv',
+    icon: '🌊',
+    title: '網路的實體',
+    en: 'The Physical Internet',
+    desc: '基地台、海底電纜和資料中心',
+    color: '#1971c2',
+    slides: [
+      {
+        title: '訊息怎麼到美國？',
+        text: `網路不是在空中飛的。訊息會經過${t('基地台', 'cell tower')}、電信公司的機房，再鑽進海底的電纜，一站一站傳過去。跟著訊息走！`,
+        widget: 'seacable',
+      },
+      {
+        title: '海底電纜',
+        text: `${t('海底電纜', 'submarine cable')}大約像水管那麼粗，裡面是比頭髮還細的${t('光纖', 'optical fiber')}，用光傳資料。台灣和外國的網路，大部分都走海底電纜。`,
+        widget: 'choice',
+        params: {
+          question: '台灣的網路要連到其他國家，大部分走哪裡？',
+          options: [
+            { text: '🌊 海底電纜', correct: true },
+            { text: '🛰️ 太空中的衛星' },
+            { text: '📶 很大很大的 Wi-Fi' },
+          ],
+          explain: '衛星比較慢，主要用在海上、山上這些拉不到電纜的地方。海底電纜被船錨勾斷時，網路就會變慢，馬祖就發生過。',
+        },
+      },
+      {
+        title: '雲端在哪裡？',
+        text: `雲端的資料存在${t('資料中心', 'data center')}：一棟大房子，裡面有好幾萬台電腦，一整天開著，很耗電，還要很多冷氣降溫。分分看！`,
+        widget: 'sort',
+        params: {
+          rest: 'cloud',
+          bins: [
+            { id: 'cloud', icon: '🏭', label: '要用到資料中心' },
+            { id: 'local', icon: '📱', label: '手機自己就能做' },
+          ],
+          items: [
+            { icon: '📺', label: '看線上影片', bin: 'cloud' },
+            { icon: '🤖', label: '跟 AI 聊天', bin: 'cloud' },
+            { icon: '☁️', label: '照片備份到雲端', bin: 'cloud' },
+            { icon: '📹', label: '視訊通話', bin: 'cloud' },
+            { icon: '🧮', label: '用計算機算數學', bin: 'local' },
+            { icon: '📷', label: '拍一張照片', bin: 'local' },
+            { icon: '🎬', label: '看已經下載好的影片', bin: 'local' },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '看線上影片時，除了你的手機，還有哪裡在用電？',
+          options: [
+            { text: '🏭 遠方的資料中心和一路上的網路設備', correct: true },
+            { text: '🙅 沒有，只有手機在用電' },
+            { text: '🛰️ 只有天上的衛星' },
+          ],
+          explain: '資料中心、機房和基地台都一直開著。不看的影片就關掉，也是在幫地球省電。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'web',
     part: 'adv',
     icon: '🔐',
@@ -2827,7 +2892,7 @@ export const STAGES = [
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'os'] },
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo'] },
-  { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'web'] },
+  { id: 'ainet', part: 'adv', icon: '🔗', title: 'AI 和網路', en: 'AI and Networks', units: ['gpu', 'ailearn', 'internet', 'networld', 'web'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'freeapps', 'coding'] },
 ];
 

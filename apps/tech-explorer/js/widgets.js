@@ -453,6 +453,25 @@ const EW_PHONE = `
     <path d="M262 124H320M262 134H306M262 144H314" stroke="#fcc419" stroke-width="3"/></g>
   <g class="ew-p" data-part="speaker"><rect x="262" y="176" width="58" height="34" rx="10" fill="#212529"/><circle cx="291" cy="193" r="10" fill="#adb5bd"/></g>`;
 
+// The stops of a message from Taiwan to the US (viewBox 480×260, not to scale), and what
+// happens on the way to each one. `path` is the way there when it is not a straight line.
+const NW_HOPS = [
+  { x: 80, y: 178, icon: '📱', name: '你的手機' },
+  { x: 98, y: 140, icon: '📶', name: '基地台', text: '📶 訊息先用無線電波，飛到附近的基地台。' },
+  { x: 100, y: 92, icon: '🏢', name: '機房', text: '🏢 基地台用光纖，把訊息送到電信公司的機房。路由器決定：往美國走！' },
+  { x: 148, y: 58, icon: '🏖️', name: '登陸站', text: '🏖️ 到了海邊的登陸站，海底電纜從這裡下海。' },
+  { x: 424, y: 100, icon: '🏖️', name: '登陸站', text: '🌊 訊息變成光，在海底電纜裡跑過太平洋，大約 1 萬公里！', path: [[200, 50], [270, 44], [345, 56], [400, 80]] },
+  { x: 452, y: 146, icon: '🏭', name: '資料中心', text: '🏭 到了美國的資料中心，聊天 App 的電腦收下訊息。' },
+  { x: 440, y: 204, icon: '📱', name: '表哥的手機', text: '🎉 再傳到表哥的手機。這麼遠，全程不到 1 秒！' },
+];
+const NW_MAP = `
+  <rect width="480" height="260" fill="#a5d8ff"/>
+  <path d="M0 0H40C34 50 26 80 22 130S20 220 0 260Z" fill="#d8f5a2"/>
+  <path d="M135 28 140 32 146 37 156 38 160 45 151 54 153 70 149 79 146 88 139 107 134 130 126 160 113 181 105 190 100 205 98 214 97 232 90 230 89 223 82 204 75 198 65 189 60 173 58 166 55 154 58 139 61 119 72 100 78 89 84 79 101 57 110 43 121 38 127 35Z" fill="#c0eb75" stroke="#94d82d" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M480 0V260H416C436 210 404 160 418 112S412 30 426 0Z" fill="#d8f5a2"/>
+  <g font-size="12" font-weight="800" fill="#2b8a3e" text-anchor="middle"><text x="152" y="178">台灣</text><text x="452" y="246">美國</text></g>
+  <text x="270" y="170" font-size="15" font-weight="800" fill="#1971c2" text-anchor="middle" opacity=".7">太 平 洋</text>`;
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -1221,6 +1240,73 @@ export const WIDGETS = {
         });
       });
     };
+  },
+
+  // Follow a message from a phone in Taiwan to one in the US: tap the stop that blinks, and
+  // the ✉️ travels there (through the cable under the Pacific for the long part).
+  seacable(host, _, api) {
+    const line = (a, b) => [[a.x, a.y], ...(b.path || []), [b.x, b.y]];
+    host.innerHTML = `
+      <div class="w-net">
+        <p class="nw-say">你在台灣，要傳訊息給在美國的表哥。點閃閃的地方，跟著訊息走！</p>
+        <svg class="nw-map" viewBox="0 0 480 260" role="img" aria-label="地圖：台灣、太平洋和美國，中間有海底電纜">
+          ${NW_MAP}
+          <polyline class="nw-cable" points="${line(NW_HOPS[3], NW_HOPS[4]).map(p => p.join(',')).join(' ')}"/>
+          <polyline class="nw-trail" points="${NW_HOPS[0].x},${NW_HOPS[0].y}"/>
+          ${NW_HOPS.map((h, i) => `<g class="nw-hop" data-i="${i}"><circle class="nw-hit" cx="${h.x}" cy="${h.y}" r="22"/><circle class="nw-dot" cx="${h.x}" cy="${h.y}" r="15"/><text x="${h.x}" y="${h.y + 6}" font-size="17" text-anchor="middle">${h.icon}</text></g>`).join('')}
+          <text class="nw-msg" x="${NW_HOPS[0].x}" y="${NW_HOPS[0].y - 18}" font-size="18" text-anchor="middle">✉️</text>
+        </svg>
+        <ol class="nw-steps"></ol>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let n = 0, moving = false;
+    const trail = [[NW_HOPS[0].x, NW_HOPS[0].y]];
+    const mark = () => host.querySelectorAll('.nw-hop').forEach((g, i) => {
+      g.classList.toggle('next', i === n + 1);
+      g.classList.toggle('been', i <= n);
+    });
+    // move the ✉️ along the points, a few pixels each step
+    const travel = (pts, done) => {
+      const segs = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]));
+      const total = segs.reduce((a, b) => a + b, 0);
+      let d = 0;
+      const step = () => {
+        if (!api.alive()) return;
+        d = Math.min(d + Math.max(3, total / 40), total);
+        let left = d, i = 0;
+        while (i < segs.length - 1 && left > segs[i]) left -= segs[i++];
+        const k = Math.min(left / segs[i], 1);
+        const x = pts[i][0] + (pts[i + 1][0] - pts[i][0]) * k, y = pts[i][1] + (pts[i + 1][1] - pts[i][1]) * k;
+        $('.nw-msg').setAttribute('x', x);
+        $('.nw-msg').setAttribute('y', y - 18);
+        $('.nw-trail').setAttribute('points', [...trail, ...pts.slice(1, i + 1), [x, y]].map(p => p.join(',')).join(' '));
+        if (d < total) api.later(step, 30);
+        else { trail.push(...pts.slice(1)); done(); }
+      };
+      step();
+    };
+    $('.nw-map').addEventListener('click', e => {
+      const g = e.target.closest('.nw-hop');
+      if (!g || moving || n === NW_HOPS.length - 1) return;
+      const i = +g.dataset.i;
+      if (i <= n) return;
+      if (i !== n + 1) { $('.nw-say').textContent = '訊息要一站一站走，先點閃閃的那一站'; shake($('.nw-say')); return; }
+      moving = true;
+      host.querySelectorAll('.nw-hop').forEach(x => x.classList.remove('next'));
+      travel(line(NW_HOPS[n], NW_HOPS[i]), () => {
+        moving = false;
+        n = i;
+        mark();
+        const hop = NW_HOPS[n];
+        $('.nw-say').textContent = hop.text;
+        $('.nw-steps').insertAdjacentHTML('beforeend', `<li>${hop.icon} ${hop.name}</li>`);
+        pop($('.nw-steps').lastElementChild);
+        api.good();
+        if (n === NW_HOPS.length - 1) { $('.nw-say').classList.add('done'); api.done(); }
+      });
+    });
+    $('.nw-steps').innerHTML = `<li>${NW_HOPS[0].icon} ${NW_HOPS[0].name}</li>`;
+    mark();
   },
 
   // A network of six routers: you are each router in turn. Read the packet's address, check

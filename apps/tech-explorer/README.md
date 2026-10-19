@@ -61,11 +61,12 @@ yet; 「直接開始」 closes it.
 35. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
 36. AI 怎麼學？: learning from examples, why data matters (bias)
 37. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
-38. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
-39. 演算法: steps, binary search (number guessing), sorting by swaps
-40. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
-41. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
-42. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+38. 網路的實體: follow a message from Taiwan to the US (cell tower, machine room, submarine cable, data center) on a map with Taiwan's real outline, submarine cables, data centers and their power
+39. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
+40. 演算法: steps, binary search (number guessing), sorting by swaps
+41. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
+42. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
+43. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
 
 ## Saved progress
 
