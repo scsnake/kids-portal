@@ -18,6 +18,7 @@ tmp/
 scratch/
 OPS.md
 PLAN-PAID.md
+MIGRATE-PAGES.md
 
 # cf CLI local cache (holds the Cloudflare account id)
 .cloudflare/
