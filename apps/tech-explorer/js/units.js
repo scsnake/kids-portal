@@ -1142,6 +1142,62 @@ export const UNITS = [
   },
 
   {
+    id: 'passkey',
+    part: 'basic',
+    icon: '🗝️',
+    title: '密碼管理和通行密鑰',
+    en: 'Passwords and Passkeys',
+    desc: '每個網站不同密碼、密碼 App、通行密鑰',
+    color: '#087f5b',
+    added: '2026-10-19',
+    slides: [
+      {
+        title: '一個密碼走天下？',
+        text: `很多人每個網站都用同一個密碼。可是只要一個網站被駭、密碼被偷走，這叫${t('資料外洩', 'data breach')}，壞人就能拿它打開你所有的帳號。試試看！`,
+        widget: 'reuse',
+      },
+      {
+        title: '讓 App 幫你記密碼',
+        text: `每個網站都用不一樣的密碼，誰記得住？交給${t('密碼管理工具', 'password manager')}，像 iPad 的「密碼」App：它幫你想很難猜的密碼、幫你記住，用臉或指紋就能填進去。分分看！`,
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '👍', label: '好方法' },
+            { id: 'no', icon: '🙅', label: '不要這樣' },
+          ],
+          items: [
+            { icon: '🔑', label: '用「密碼」App 記住密碼', bin: 'ok' },
+            { icon: '🎲', label: '讓它想一個很難猜的密碼', bin: 'ok' },
+            { icon: '🧩', label: '每個網站都不一樣', bin: 'ok' },
+            { icon: '📝', label: '寫在便利貼，貼在螢幕上', bin: 'no' },
+            { icon: '🐼', label: '每個網站都用 panda123', bin: 'no' },
+            { icon: '🤫', label: '告訴好朋友，請他幫忙記', bin: 'no' },
+          ],
+        },
+      },
+      {
+        title: '通行密鑰：不用打密碼',
+        text: `${t('通行密鑰', 'passkey')}存在你的裝置裡，用臉、指紋或解鎖密碼就能登入，不用打密碼。它只對真正的網站有用，假網站偷不走。有的網站叫它「通行金鑰」或「密碼金鑰」。試試看！`,
+        widget: 'passkeylogin',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '你玩的遊戲網站公告：「我們的密碼資料被偷了。」你應該怎麼做？',
+          options: [
+            { text: '🔁 改掉這個網站的密碼；別的網站用一樣的密碼，也要改', correct: true },
+            { text: '🙈 不用理它，又不是我被偷' },
+            { text: '📧 回信，把新密碼寄給他們' },
+          ],
+          explain: '被偷的密碼，壞人會拿去試別的網站。每個網站密碼都不一樣，就只要改一個。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'appbasics',
     part: 'basic',
     icon: '📲',
@@ -2930,7 +2986,7 @@ export const STAGES = [
   { id: 'hello', part: 'basic', icon: '👋', title: '上手', en: 'First Steps', units: ['devices', 'start', 'typing', 'settings'] },
   { id: 'care', part: 'basic', icon: '🔋', title: '照顧裝置和自己', en: 'Care for Devices and You', units: ['cables', 'battery', 'care', 'ewaste', 'health'] },
   { id: 'media', part: 'basic', icon: '📷', title: '拍照和檔案', en: 'Photos and Files', units: ['camera', 'files', 'space', 'formats'] },
-  { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account'] },
+  { id: 'net', part: 'basic', icon: '🌐', title: '上網', en: 'Going Online', units: ['online', 'wireless', 'browser', 'account', 'passkey'] },
   { id: 'apps', part: 'basic', icon: '📲', title: '用 App', en: 'Using Apps', units: ['appbasics', 'apps', 'handy', 'maps'] },
   { id: 'helpers', part: 'basic', icon: '🤖', title: 'AI 小幫手', en: 'AI Helpers', units: ['aichat', 'voice'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },

@@ -472,6 +472,16 @@ const NW_MAP = `
   <g font-size="12" font-weight="800" fill="#2b8a3e" text-anchor="middle"><text x="152" y="178">台灣</text><text x="452" y="246">美國</text></g>
   <text x="270" y="170" font-size="15" font-weight="800" fill="#1971c2" text-anchor="middle" opacity=".7">太 平 洋</text>`;
 
+// Five accounts and the password on each. First all the same; then each one different,
+// as a password manager makes them.
+const RU_SITES = [
+  { icon: '🎮', name: '遊戲網站', strong: 'Tq7#mzW2' },
+  { icon: '🏫', name: '學校平台', strong: 'r9!Kd3vP' },
+  { icon: '📧', name: '電子郵件', strong: 'Lw4@xN8s' },
+  { icon: '🛒', name: '購物網站', strong: 'b2$Ye6Qh' },
+  { icon: '📺', name: '影片網站', strong: 'Zm8%cT1u' },
+];
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -3654,6 +3664,142 @@ export const WIDGETS = {
       hint.classList.add('done');
       api.done();
     });
+  },
+
+  // The game site is hacked and its password stolen; the thief tries it on every other
+  // account. With one password for all, everything opens; with different ones, only one does.
+  reuse(host, _, api) {
+    host.innerHTML = `
+      <div class="w-reuse">
+        <p class="ru-hint">每個帳號都用同一個密碼 <code>panda123</code>。按下面的按鈕看看會怎樣</p>
+        <div class="ru-sites">${RU_SITES.map((s, i) => `
+          <div class="ru-site" data-i="${i}"><span class="ru-icon">${s.icon}</span><b>${s.name}</b><code class="ru-pw">panda123</code><span class="ru-state">🔒</span></div>`).join('')}
+        </div>
+        <p class="ru-thief" aria-live="polite"></p>
+        <div class="ru-btns">
+          <button class="go" data-act="hack">💥 遊戲網站被駭了</button>
+          <button class="option" data-act="fix" hidden>🔑 改成每個網站都不一樣</button>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const sites = [...host.querySelectorAll('.ru-site')];
+    let strong = false, busy = false;
+    const hint = (text, cls = '') => { $('.ru-hint').innerHTML = text; $('.ru-hint').className = `ru-hint ${cls}`; };
+    const reset = () => sites.forEach(el => { el.className = 'ru-site'; el.querySelector('.ru-state').textContent = '🔒'; });
+    const hack = () => {
+      busy = true;
+      reset();
+      $('[data-act="hack"]').disabled = true;
+      const stolen = strong ? RU_SITES[0].strong : 'panda123';
+      sites[0].classList.add('open');
+      sites[0].querySelector('.ru-state').textContent = '💥';
+      $('.ru-thief').textContent = `🦹 壞人偷到遊戲網站的密碼「${stolen}」，拿去試你的其他帳號……`;
+      let n = 0;
+      sites.slice(1).forEach((el, k) => api.later(() => {
+        const ok = !strong;
+        el.classList.add(ok ? 'open' : 'safe');
+        el.querySelector('.ru-state').textContent = ok ? '🔓 被登入了！' : '❌ 密碼不對';
+        pop(el);
+        if (ok) { n++; api.bad(); } else api.good();
+        if (k < RU_SITES.length - 2) return;
+        busy = false;
+        if (!strong) {
+          hint(`同一個密碼，壞人偷到一個，<b>${n + 1} 個帳號</b>全都打開了！`, 'bad');
+          $('[data-act="fix"]').hidden = false;
+        } else {
+          hint('🎉 每個密碼都不一樣，壞人只打開被駭的那一個。改掉遊戲網站的密碼就好了！', 'done');
+          api.done();
+        }
+      }, 700 + k * 600));
+    };
+    host.querySelector('.ru-btns').addEventListener('click', e => {
+      const act = e.target.closest('[data-act]')?.dataset.act;
+      if (!act || busy) return;
+      if (act === 'hack') hack();
+      if (act === 'fix') {
+        strong = true;
+        reset();
+        $('.ru-thief').textContent = '';
+        sites.forEach((el, i) => { el.querySelector('.ru-pw').textContent = RU_SITES[i].strong; pop(el.querySelector('.ru-pw')); });
+        hint('密碼管理工具幫每個網站產生不一樣、很難猜的密碼。再被駭一次看看');
+        $('[data-act="fix"]').hidden = true;
+        const go = $('[data-act="hack"]');
+        go.disabled = false;
+        go.textContent = '💥 遊戲網站又被駭了';
+      }
+    });
+  },
+
+  // Sign in with a passkey: on the real shop it works with a look at the screen. On a
+  // look-alike fake shop there is no passkey to give, and typing the password there is a trap.
+  passkeylogin(host, _, api) {
+    const cases = [
+      { url: 'www.elephant.com.tw', real: true, ask: '這是真的「大象購物」。用通行密鑰登入看看' },
+      { url: 'www.e1ephant-shop.top', real: false, ask: '收到一封信，點進來是這一頁。再用通行密鑰登入看看' },
+    ];
+    host.innerHTML = `
+      <div class="w-pk">
+        <p class="pk-ask"></p>
+        <div class="pk-ipad">
+          <div class="pk-bar"><span>🔒</span><span class="pk-url"></span></div>
+          <div class="pk-page">
+            <p class="pk-site">🐘 大象購物</p>
+            <p class="pk-sub">登入你的帳號</p>
+            <button class="go pk-key" data-act="key">🔑 用通行密鑰登入</button>
+            <button class="option pk-pw" data-act="pw">用密碼登入</button>
+          </div>
+          <div class="pk-sheet" hidden></div>
+        </div>
+        <p class="pk-why" aria-live="polite"></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let n = 0, busy = false;
+    const show = () => {
+      const c = cases[n];
+      $('.pk-url').textContent = c.url;
+      $('.pk-ask').textContent = c.ask;
+      $('.pk-why').textContent = '';
+      $('.pk-why').className = 'pk-why';
+      $('.pk-sheet').hidden = true;
+    };
+    const why = (text, cls) => { $('.pk-why').textContent = text; $('.pk-why').className = `pk-why ${cls}`; };
+    host.querySelector('.pk-ipad').addEventListener('click', e => {
+      const act = e.target.closest('[data-act]')?.dataset.act;
+      if (!act || busy) return;
+      const c = cases[n], sheet = $('.pk-sheet');
+      if (act === 'pw') {
+        if (c.real) { why('可以用密碼，不過通行密鑰更快、更安全。試試「用通行密鑰登入」', 'tip'); return; }
+        shake($('.pk-pw'));
+        api.bad();
+        why('小心！網址是「e1ephant」，用數字 1 假裝成英文字母 l。在這裡打密碼，密碼就被偷走了。', 'bad');
+        return;
+      }
+      if (act === 'key') {
+        sheet.hidden = false;
+        sheet.innerHTML = c.real
+          ? `<b>要用通行密鑰登入「elephant.com.tw」嗎？</b><small>帳號：小明</small><button class="go" data-act="face">👤 看著螢幕，繼續</button>`
+          : `<b>這個網站沒有你的通行密鑰</b><small>e1ephant-shop.top</small><button class="option" data-act="close">好</button>`;
+        if (!c.real) {
+          api.good();
+          why('🎉 通行密鑰只認真的網站。假網站拿不到，也偷不走，你就不會被騙！', 'done');
+          $('.pk-ask').textContent = '假網站登不進去，這樣才安全';
+          api.done();
+        }
+        return;
+      }
+      if (act === 'close') { sheet.hidden = true; return; }
+      if (act === 'face') {
+        busy = true;
+        sheet.innerHTML = '<span class="pk-face">👤</span><b>Face ID</b>';
+        api.later(() => {
+          sheet.innerHTML = '<span class="pk-face pk-ok">✅</span><b>登入成功！</b><small>沒有打任何密碼</small>';
+          api.good();
+          why('用臉就登入了。通行密鑰存在你的 iPad 裡，網站只有一把「鎖」，沒有你的鑰匙。', 'done');
+          api.later(() => { busy = false; n = 1; show(); }, 2200);
+        }, 900);
+      }
+    });
+    show();
   },
 
   // A lock screen: unlock with a passcode or a face, then lock again.

@@ -38,35 +38,36 @@ yet; 「直接開始」 closes it.
 15. 藍牙、GPS 和飛航模式: Bluetooth pairing, how GPS finds you, airplane mode in Control Center
 16. 瀏覽器和網頁: address bar, links, back / forward / reload, browsing history
 17. 帳號和雲端: sign up, user name, password, log in, good passwords, cloud sync, https and the lock icon
-18. App 和更新: hardware vs software, installing from the App Store, permissions, updates
-19. 常用的 App: messenger vs email, video meetings, social media, search engines, office apps
-20. 實用小技巧: screenshots, QR codes (and fake ones), backup, Find My
-21. 地圖和導航: search a place, walk / bus / car routes, follow the turn-by-turn banner; who may see your location; a stranger asking for it; bus time includes the wait
-22. AI 聊天機器人: what a chatbot is, catching a wrong answer, good and bad uses
-23. 語音助理: clear commands for four jobs (vague ones ask back, no wake word gets no answer), the wake word, good and careful uses
-24. 上網安全: scam messages, traps on web pages (fake ads, pop-ups, fake virus alerts, redirects, phishing), verification codes, two-factor authentication, malware, personal information, 165
-25. 假訊息和 AI 假圖: misinformation (source, date, forwarded hoaxes), spotting flaws in an AI-made picture, deepfake voices (a fake call from a parent), creepy videos dressed as cartoons (Elsagate), habits before forwarding
-26. 公共 Wi-Fi 和網購: pick the Wi-Fi on the library poster (look-alike and open networks), what to leave for home, a fake shop with 4 warning signs, in-app purchases (Ask to Buy), paying outside the shop
-27. 網路禮儀和網路霸凌: think before you post, cyberbullying in a chat (don't reply, screenshot, tell an adult, block), bystanders
-28. 緊急求救: 119 vs 110, calling from a locked phone (緊急 on the passcode screen), Medical ID, Emergency SOS
+18. 密碼管理和通行密鑰: one password everywhere vs a different one each (a breach opens every account), the 密碼 App, signing in with a passkey on a real and a fake shop
+19. App 和更新: hardware vs software, installing from the App Store, permissions, updates
+20. 常用的 App: messenger vs email, video meetings, social media, search engines, office apps
+21. 實用小技巧: screenshots, QR codes (and fake ones), backup, Find My
+22. 地圖和導航: search a place, walk / bus / car routes, follow the turn-by-turn banner; who may see your location; a stranger asking for it; bus time includes the wait
+23. AI 聊天機器人: what a chatbot is, catching a wrong answer, good and bad uses
+24. 語音助理: clear commands for four jobs (vague ones ask back, no wake word gets no answer), the wake word, good and careful uses
+25. 上網安全: scam messages, traps on web pages (fake ads, pop-ups, fake virus alerts, redirects, phishing), verification codes, two-factor authentication, malware, personal information, 165
+26. 假訊息和 AI 假圖: misinformation (source, date, forwarded hoaxes), spotting flaws in an AI-made picture, deepfake voices (a fake call from a parent), creepy videos dressed as cartoons (Elsagate), habits before forwarding
+27. 公共 Wi-Fi 和網購: pick the Wi-Fi on the library poster (look-alike and open networks), what to leave for home, a fake shop with 4 warning signs, in-app purchases (Ask to Buy), paying outside the shop
+28. 網路禮儀和網路霸凌: think before you post, cyberbullying in a chat (don't reply, screenshot, tell an adult, block), bystanders
+29. 緊急求救: 119 vs 110, calling from a locked phone (緊急 on the passcode screen), Medical ID, Emergency SOS
 
 **Part 2: 原理探索 (how it works)**
 
-29. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
-30. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
-31. 作業系統: what an OS does, time sharing (multitasking)
-32. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
-33. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
-34. 聲音和影片怎麼變成數字: sampling a sound wave (and hearing it), frames per second with a bouncing ball, why video needs compression
-35. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
-36. AI 怎麼學？: learning from examples, why data matters (bias)
-37. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
-38. 網路的實體: follow a message from Taiwan to the US (cell tower, machine room, submarine cable, data center) on a map with Taiwan's real outline, submarine cables, data centers and their power
-39. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
-40. 演算法: steps, binary search (number guessing), sorting by swaps
-41. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
-42. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
-43. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+30. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
+31. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
+32. 作業系統: what an OS does, time sharing (multitasking)
+33. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
+34. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
+35. 聲音和影片怎麼變成數字: sampling a sound wave (and hearing it), frames per second with a bouncing ball, why video needs compression
+36. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
+37. AI 怎麼學？: learning from examples, why data matters (bias)
+38. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
+39. 網路的實體: follow a message from Taiwan to the US (cell tower, machine room, submarine cable, data center) on a map with Taiwan's real outline, submarine cables, data centers and their power
+40. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
+41. 演算法: steps, binary search (number guessing), sorting by swaps
+42. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
+43. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
+44. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
 
 ## Saved progress
 

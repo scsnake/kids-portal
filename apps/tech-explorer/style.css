@@ -1426,6 +1426,45 @@ g.ew-p.seen { stroke: none; }
 .form .go { align-self: flex-start; margin-top: 6px; }
 .form .msg { margin: 0; font-weight: 700; line-height: 1.6; min-height: 1.6em; }
 
+/* ---------- one password everywhere vs a different one each ---------- */
+
+.w-reuse { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.ru-hint { margin: 0; min-height: 1.5em; font-weight: 800; font-size: 1.1rem; line-height: 1.6; text-align: center; }
+.ru-hint.bad { color: #a61e1e; }
+.ru-hint.done { color: var(--good); }
+.ru-sites { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; width: min(100%, 640px); }
+@media (max-width: 560px) { .ru-sites { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.ru-site { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px; border-radius: 16px; border: 2px solid var(--line); background: var(--card); text-align: center; }
+.ru-icon { font-size: 2rem; }
+.ru-site b { font-size: .95rem; }
+.ru-pw { padding: 1px 6px; border-radius: 6px; background: var(--paper); font-size: .9rem; }
+.ru-state { min-height: 1.4em; font-weight: 800; font-size: .9rem; }
+.ru-site.open { border-color: #ffa8a8; background: #fff5f5; color: #a61e1e; }
+.ru-site.safe { border-color: #8ce99a; background: #ebfbee; color: var(--good); }
+.ru-thief { margin: 0; min-height: 1.5em; font-weight: 700; color: var(--ink-2); text-align: center; }
+.ru-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+
+/* ---------- sign in with a passkey, on a real and a fake shop ---------- */
+
+.w-pk { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.pk-ask { margin: 0; min-height: 1.5em; font-weight: 800; font-size: 1.1rem; text-align: center; line-height: 1.5; }
+.pk-ipad { position: relative; width: min(100%, 460px); padding: 12px; border-radius: 26px; background: #1f232b; box-shadow: var(--shadow); }
+.pk-bar { display: flex; gap: 6px; padding: 6px 10px; border-radius: 10px 10px 0 0; background: #f1f3f5; font-family: ui-monospace, Menlo, monospace; font-size: .95rem; }
+.pk-page { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px 16px 18px; border-radius: 0 0 12px 12px; background: white; }
+.pk-site { margin: 0; font-weight: 900; font-size: 1.3rem; }
+.pk-sub { margin: 0; color: var(--ink-2); font-weight: 700; }
+.pk-page .go, .pk-page .option { width: min(100%, 300px); text-align: center; }
+.pk-sheet { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px; border-radius: 18px; background: #f8f9fa; box-shadow: 0 -6px 24px rgba(0, 0, 0, .25); text-align: center; }
+.pk-sheet b { font-size: 1.05rem; }
+.pk-sheet small { color: var(--ink-3); font-weight: 700; }
+.pk-face { font-size: 2.6rem; }
+@media (prefers-reduced-motion: no-preference) { .pk-face:not(.pk-ok) { animation: pk-scan .9s ease-in-out; } }
+@keyframes pk-scan { 50% { scale: 1.15; filter: drop-shadow(0 0 8px #4dabf7); } }
+.pk-why { margin: 0; width: min(100%, 560px); min-height: 1.5em; font-weight: 700; line-height: 1.6; text-align: center; }
+.pk-why.bad { color: #a61e1e; }
+.pk-why.done { color: var(--good); }
+.pk-why.tip { color: var(--ink-2); }
+
 /* ---------- network speed ---------- */
 
 .w-speed { display: flex; flex-direction: column; align-items: center; gap: 14px; }
