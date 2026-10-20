@@ -3129,7 +3129,7 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .w-tri { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
 .tri-hint { margin: 0; min-height: 3em; width: min(100%, 560px); font-weight: 800; font-size: 1.1rem; line-height: 1.5; text-align: center; }
 .tri-hint.done { color: var(--good); }
-.tri-sky { display: block; width: min(100%, 480px, 56vh); aspect-ratio: 400 / 240; border-radius: 18px; background: linear-gradient(#1c2a5a, #364fc7); }
+.tri-sky { display: block; width: min(100%, 480px, 52vh); aspect-ratio: 400 / 240; border-radius: 18px; background: linear-gradient(#1c2a5a, #364fc7); }
 .tri-beam { stroke: rgba(255,255,255,.35); stroke-width: 2; stroke-dasharray: 5 6; }
 .tri-sat { font-size: 30px; text-anchor: middle; }
 .tri-lab { font-size: 17px; font-weight: 900; fill: #ffd43b; text-anchor: middle; }
