@@ -2929,7 +2929,7 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .sb-switch[aria-checked="true"] i { background: #40c057; }
 .sb-switch[aria-checked="true"] i::after { translate: 20px 0; }
 .sb-sum { margin: 0; font-weight: 800; font-size: 1.1rem; }
-.sb-sum b { display: inline-block; font-family: ui-monospace, Menlo, monospace; font-size: 1.3rem; color: var(--c); }
+.sb-sum b { display: inline-block; font-variant-numeric: tabular-nums; font-size: 1.3rem; color: var(--c); }
 
 /* ---------- smartwatch: heart rate and fall detection ---------- */
 

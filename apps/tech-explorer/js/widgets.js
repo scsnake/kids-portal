@@ -8041,8 +8041,8 @@ export const WIDGETS = {
     const all = SB_LIST.reduce((a, s) => a + s.price, 0);
     const total = () => {
       const m = SB_LIST.reduce((a, s, i) => a + (on[i] ? s.price : 0), 0);
-      $('.sb-month').textContent = `NT$${m.toLocaleString()}`;
-      $('.sb-year').textContent = `NT$${(m * 12).toLocaleString()}`;
+      $('.sb-month').textContent = `NT$${m.toLocaleString('en-US')}`;
+      $('.sb-year').textContent = `NT$${(m * 12).toLocaleString('en-US')}`;
       return m;
     };
     total();
@@ -8060,9 +8060,9 @@ export const WIDGETS = {
       pop($('.sb-year'));
       if (on[i]) { hint('哪些很久沒用了？把它關掉'); return; }
       api.good();
-      if (SB_LIST.some((x, k) => x.off && on[k])) { hint(`關掉${s.name}，一年少花 NT$${(s.price * 12).toLocaleString()}`, 'good'); return; }
+      if (SB_LIST.some((x, k) => x.off && on[k])) { hint(`關掉${s.name}，一年少花 NT$${(s.price * 12).toLocaleString('en-US')}`, 'good'); return; }
       finished = true;
-      hint(`🎉 一年省下 NT$${((all - m) * 12).toLocaleString()}！每個月一點點，加起來很多。`, 'done');
+      hint(`🎉 一年省下 NT$${((all - m) * 12).toLocaleString('en-US')}！每個月一點點，加起來很多。`, 'done');
       api.done();
     });
   },
