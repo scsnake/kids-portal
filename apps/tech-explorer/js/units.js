@@ -2457,6 +2457,56 @@ export const UNITS = [
   },
 
   {
+    id: 'subscribe',
+    part: 'basic',
+    icon: '🔁',
+    title: '訂閱和自動續訂',
+    en: 'Subscriptions and Auto-Renewal',
+    desc: '免費試用、每月扣款和取消訂閱',
+    color: '#a61e4d',
+    added: '2026-10-20',
+    slides: [
+      {
+        title: '免費試用的陷阱',
+        text: `很多 App 可以${t('免費試用', 'free trial')}，時間到了會${t('自動續訂', 'auto-renewal')}，開始每個月扣錢。不想用了，就要在試用結束前取消。試試看！`,
+        widget: 'trialcal',
+      },
+      {
+        title: '每個月加起來',
+        text: `${t('訂閱', 'subscription')}每個月只扣一點點，好幾個加起來就很多。很久沒用的，就取消吧。關關看！`,
+        widget: 'subsum',
+      },
+      {
+        title: '怎麼取消訂閱？',
+        text: `<b>把 App 刪掉，不會停止扣錢！</b>要到「設定」裡的${t('訂閱項目', 'Subscriptions')}取消。依順序點一點。`,
+        widget: 'order',
+        params: {
+          items: [
+            { icon: '⚙️', label: '打開「設定」' },
+            { icon: '👤', label: '點最上面你的名字' },
+            { icon: '🔁', label: '點「訂閱項目」' },
+            { icon: '👆', label: '選要取消的訂閱' },
+            { icon: '❌', label: '點「取消訂閱」' },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '遊戲寫著「第一個月只要 1 元」，你要怎麼做？',
+          options: [
+            { text: '🙋 先問大人，看清楚第二個月起要多少錢', correct: true },
+            { text: '💳 馬上按下去，反正才 1 元' },
+            { text: '🙈 先玩再說，說明不用看' },
+          ],
+          explain: '「1 元」常常只是第一個月，之後會自動續訂，每個月扣比較多的錢。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'inside',
     part: 'adv',
     icon: '🧠',
@@ -3555,7 +3605,7 @@ export const STAGES = [
   { id: 'helpers', part: 'basic', icon: '🤖', title: 'AI 小幫手', en: 'AI Helpers', units: ['aichat', 'voice'] },
   { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel', 'copyright', 'shareddoc', 'photoshare'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
-  { id: 'smart', part: 'basic', icon: '🧭', title: '聰明的數位生活', en: 'Smart Digital Life', units: ['search', 'footprint'] },
+  { id: 'smart', part: 'basic', icon: '🧭', title: '聰明的數位生活', en: 'Smart Digital Life', units: ['search', 'footprint', 'subscribe'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'adder', 'os'] },
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },
   { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },

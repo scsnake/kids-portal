@@ -706,6 +706,20 @@ const DT_AUD = [
     why: '「只有我」的話，朋友也看不到喔。你想給朋友看，要選哪一個？' },
 ];
 
+// ---- subscribe consts ----
+const SB_DAYS = 10;
+const SB_TRIAL = 7;
+const SB_PRICE = 290;
+
+const SB_LIST = [
+  { icon: '🎬', name: '影片 App', price: 290, last: '昨天' },
+  { icon: '🎵', name: '音樂 App', price: 149, last: '今天' },
+  { icon: '☁️', name: '雲端空間', price: 30, last: '每天自動備份' },
+  { icon: '🎮', name: '遊戲月卡', price: 170, last: '3 個月前', off: true },
+  { icon: '📚', name: '背單字 App', price: 390, last: '半年前', off: true },
+  { icon: '📰', name: '雜誌 App', price: 120, last: '2 個月前', off: true },
+];
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -7695,6 +7709,119 @@ export const WIDGETS = {
       api.done();
     });
     draw();
+  },
+
+  // A 7-day free trial that turns into NT$290 a month. Cancel before day 8 to pay nothing.
+  trialcal(host, _, api) {
+    host.innerHTML = `
+      <div class="w-sb">
+        <p class="sb-hint">按「下一天」過日子。想想看：什麼時候要取消？</p>
+        <div class="sb-app"><span class="sb-icon">🎬</span><span><b>影片 App 豪華方案</b><small>免費試用 ${SB_TRIAL} 天，之後每個月 NT$${SB_PRICE}</small></span></div>
+        <ol class="sb-cal">${Array.from({ length: SB_DAYS }, (_, i) => `<li data-d="${i + 1}"><small>第 ${i + 1} 天</small><span class="sb-tag">${i < SB_TRIAL ? '試用' : ''}</span></li>`).join('')}</ol>
+        <p class="sb-state">狀態：<b>免費試用中</b></p>
+        <div class="sb-btns">
+          <button class="go sb-next">下一天 ▶</button>
+          <button class="option sb-cancel">❌ 取消訂閱</button>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const days = host.querySelectorAll('.sb-cal li');
+    let day = 1, over = false;
+    const hint = (text, cls = '') => { $('.sb-hint').textContent = text; $('.sb-hint').className = `sb-hint ${cls}`; };
+    const show = () => days.forEach((li, i) => { li.classList.toggle('now', i + 1 === day); li.classList.toggle('past', i + 1 < day); });
+    const reset = () => {
+      day = 1; over = false;
+      days.forEach((li, i) => { li.className = ''; li.querySelector('.sb-tag').textContent = i < SB_TRIAL ? '試用' : ''; });
+      $('.sb-state').innerHTML = '狀態：<b>免費試用中</b>';
+      $('.sb-next').textContent = '下一天 ▶';
+      $('.sb-next').disabled = false;
+      $('.sb-cancel').disabled = false;
+      hint('按「下一天」過日子。想想看：什麼時候要取消？');
+      show();
+    };
+    show();
+    $('.sb-next').addEventListener('click', () => {
+      if (over) { reset(); return; }
+      day++;
+      show();
+      if (day === SB_TRIAL) hint('今天是試用的最後一天！明天就會開始扣錢', 'warn');
+      else if (day < SB_TRIAL) hint(`第 ${day} 天，還在免費試用`);
+      if (day <= SB_TRIAL) return;
+      // Day 8: the trial ended and the first month is charged.
+      over = true;
+      const li = days[day - 1];
+      li.classList.add('paid');
+      li.querySelector('.sb-tag').textContent = `−${SB_PRICE}`;
+      pop(li);
+      shake(li);
+      api.bad();
+      $('.sb-state').innerHTML = `狀態：<b class="sb-paid">自動續訂，扣了 NT$${SB_PRICE}</b>`;
+      $('.sb-cancel').disabled = true;
+      $('.sb-next').textContent = '↺ 從第 1 天再試';
+      hint('試用結束，自動扣錢了。要在第 7 天結束前取消喔！', 'bad');
+    });
+    $('.sb-cancel').addEventListener('click', e => {
+      if (over) return;
+      over = true;
+      e.currentTarget.disabled = true;
+      $('.sb-next').disabled = true;
+      // The trial still works until it ends; nothing is charged after it.
+      days.forEach((li, i) => {
+        if (i + 1 < day) return;
+        api.later(() => {
+          li.classList.add(i < SB_TRIAL ? 'free' : 'stop');
+          li.querySelector('.sb-tag').textContent = i < SB_TRIAL ? '還能看' : '不扣錢';
+        }, (i + 1 - day) * 120);
+      });
+      $('.sb-state').innerHTML = `狀態：<b class="sb-ok">已取消，試用到第 ${SB_TRIAL} 天</b>`;
+      hint(`🎉 取消了！試用期還能繼續看到第 ${SB_TRIAL} 天，之後不會扣錢。`, 'done');
+      api.good();
+      api.done();
+    });
+  },
+
+  // Six subscriptions add up. Turn off the ones not used for months and watch the yearly total drop.
+  subsum(host, _, api) {
+    const on = SB_LIST.map(() => true);
+    host.innerHTML = `
+      <div class="w-sb">
+        <p class="sb-hint">哪些很久沒用了？把它關掉</p>
+        <ul class="sb-list">${SB_LIST.map((s, i) => `
+          <li data-i="${i}"><span class="sb-icon">${s.icon}</span>
+            <span class="sb-name"><b>${s.name}</b><small>上次用：${s.last}</small></span>
+            <span class="sb-price">NT$${s.price}<small>/月</small></span>
+            <button class="sb-switch" role="switch" aria-checked="true" aria-label="${s.name}"><i></i></button></li>`).join('')}
+        </ul>
+        <p class="sb-sum">每個月 <b class="sb-month"></b>　一年 <b class="sb-year"></b></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const all = SB_LIST.reduce((a, s) => a + s.price, 0);
+    const total = () => {
+      const m = SB_LIST.reduce((a, s, i) => a + (on[i] ? s.price : 0), 0);
+      $('.sb-month').textContent = `NT$${m.toLocaleString()}`;
+      $('.sb-year').textContent = `NT$${(m * 12).toLocaleString()}`;
+      return m;
+    };
+    total();
+    const hint = (text, cls = '') => { $('.sb-hint').textContent = text; $('.sb-hint').className = `sb-hint ${cls}`; };
+    let finished = false;
+    $('.sb-list').addEventListener('click', e => {
+      const b = e.target.closest('.sb-switch');
+      if (!b || finished) return;
+      const i = +b.closest('li').dataset.i, s = SB_LIST[i];
+      if (!s.off && on[i]) { shake(b.closest('li')); api.bad(); hint(`${s.name}${s.last}才用過，還在用喔`, 'bad'); return; }
+      on[i] = !on[i];
+      b.setAttribute('aria-checked', on[i]);
+      b.closest('li').classList.toggle('off', !on[i]);
+      const m = total();
+      pop($('.sb-year'));
+      if (on[i]) { hint('哪些很久沒用了？把它關掉'); return; }
+      api.good();
+      if (SB_LIST.some((x, k) => x.off && on[k])) { hint(`關掉${s.name}，一年少花 NT$${(s.price * 12).toLocaleString()}`, 'good'); return; }
+      finished = true;
+      hint(`🎉 一年省下 NT$${((all - m) * 12).toLocaleString()}！每個月一點點，加起來很多。`, 'done');
+      api.done();
+    });
   },
 
   // A pretend browser: links, back, forward, reload, and typing an address.
