@@ -2507,6 +2507,62 @@ export const UNITS = [
   },
 
   {
+    id: 'wearable',
+    part: 'basic',
+    icon: '⌚',
+    title: '智慧手錶和穿戴裝置',
+    en: 'Smartwatches and Wearables',
+    desc: '量心跳、和手機合作、跌倒偵測',
+    color: '#5a4fcf',
+    added: '2026-10-20',
+    slides: [
+      {
+        title: '手錶怎麼量心跳？',
+        text: `${t('智慧手錶', 'smartwatch')}背面有綠色的燈。血會吸收綠光，心臟每跳一下，手腕裡的血變多，反射回來的光就變少。量量看！`,
+        widget: 'pulse',
+      },
+      {
+        title: '手錶和手機合作',
+        text: `手錶很小，有些事自己就能做；要上網的事，大多要透過${t('藍牙', 'Bluetooth')}請手機幫忙。分分看！`,
+        widget: 'sort',
+        params: {
+          rest: 'self',
+          bins: [
+            { id: 'self', icon: '⌚', label: '手錶自己就能做' },
+            { id: 'phone', icon: '📱', label: '要靠手機幫忙' },
+          ],
+          items: [
+            { icon: '👣', label: '算今天走了幾步', bin: 'self' },
+            { icon: '❤️', label: '量心跳', bin: 'self' },
+            { icon: '⏰', label: '鬧鐘震動叫你起床', bin: 'self' },
+            { icon: '💬', label: '收到 LINE 訊息', bin: 'phone' },
+            { icon: '📞', label: '接電話', bin: 'phone' },
+            { icon: '🌦️', label: '看今天的天氣預報', bin: 'phone' },
+          ],
+        },
+      },
+      {
+        title: '跌倒偵測',
+        text: `有的手錶會${t('偵測跌倒', 'fall detection')}。跌倒以後，手錶會先問你；大約 1 分鐘沒回答，就自動打 119，還把位置傳給家人。試試看！`,
+        widget: 'falldetect',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '手錶說你的心跳比平常快很多，怎麼辦？',
+          options: [
+            { text: '🙋 覺得不舒服，就告訴大人或去看醫生', correct: true },
+            { text: '📴 把手錶拿掉，就沒事了' },
+            { text: '🤖 手錶比醫生還準，聽手錶的就好' },
+          ],
+          explain: '手錶可以提醒你，但它不是醫生。心跳、睡眠這些健康資料也很私人，不要隨便分享。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'inside',
     part: 'adv',
     icon: '🧠',
@@ -3605,7 +3661,7 @@ export const STAGES = [
   { id: 'helpers', part: 'basic', icon: '🤖', title: 'AI 小幫手', en: 'AI Helpers', units: ['aichat', 'voice'] },
   { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel', 'copyright', 'shareddoc', 'photoshare'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
-  { id: 'smart', part: 'basic', icon: '🧭', title: '聰明的數位生活', en: 'Smart Digital Life', units: ['search', 'footprint', 'subscribe'] },
+  { id: 'smart', part: 'basic', icon: '🧭', title: '聰明的數位生活', en: 'Smart Digital Life', units: ['search', 'footprint', 'subscribe', 'wearable'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'adder', 'os'] },
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },
   { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },

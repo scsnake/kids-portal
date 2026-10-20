@@ -2930,3 +2930,63 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .sb-switch[aria-checked="true"] i::after { translate: 20px 0; }
 .sb-sum { margin: 0; font-weight: 800; font-size: 1.1rem; }
 .sb-sum b { display: inline-block; font-family: ui-monospace, Menlo, monospace; font-size: 1.3rem; color: var(--c); }
+
+/* ---------- smartwatch: heart rate and fall detection ---------- */
+
+.w-wr { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.wr-hint { margin: 0; min-height: 3em; width: min(100%, 560px); font-weight: 800; font-size: 1.1rem; line-height: 1.5; text-align: center; }
+.wr-hint.done { color: var(--good); }
+.wr-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px; width: 100%; }
+.wr-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.wr-btns .option { width: auto; }
+
+.wr-wrist { display: block; width: min(100%, 300px); max-height: 30vh; }
+.wr-label { font-size: 13px; font-weight: 800; fill: var(--ink-2); text-anchor: middle; }
+.wr-vessel { fill: #c92a2a; }
+.wr-led { fill: #69db7c; }
+.wr-rays path { fill: none; stroke: #40c057; stroke-width: 4; stroke-linecap: round; opacity: 0; }
+.wr-rays .wr-back { stroke-dasharray: 4 5; }
+.w-wr.on .wr-led { fill: #2f9e44; animation: wr-blink .5s steps(2) infinite; }
+.w-wr.on .wr-rays path { opacity: .8; }
+@keyframes wr-blink { 50% { fill: #b2f2bb; } }
+.wr-read { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.wr-read > small { color: var(--ink-3); font-weight: 800; }
+.wr-chart { display: block; width: 240px; max-width: 100%; }
+.wr-line { fill: none; stroke: #2f9e44; stroke-width: 3; stroke-linejoin: round; }
+.wr-bpm { margin: 4px 0 0; font-weight: 800; font-size: 1.1rem; }
+.wr-bpm b { display: inline-block; min-width: 2.2em; font-family: ui-monospace, Menlo, monospace; font-size: 2rem; color: var(--c); text-align: center; }
+.wr-heart { display: inline-block; }
+
+.wr-room { position: relative; width: 200px; height: 220px; border-radius: var(--radius); background: #fff9db; border: 2px solid var(--line); overflow: hidden; }
+.wr-floor { position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: #e9d8b6; }
+.wr-man { position: absolute; left: 50%; bottom: 34px; font-size: 5.5rem; line-height: 1; translate: -50% 0; transform-origin: 50% 100%; transition: rotate .5s ease-in, translate .5s ease-in; }
+.wr-room.down .wr-man { rotate: -90deg; translate: 0 -.5em; }
+.wr-bump { position: absolute; top: 40px; right: 18px; font-weight: 900; font-size: 1.3rem; color: #c2410c; opacity: 0; }
+.wr-room.down .wr-bump { animation: wr-bump 1.2s .45s both; }
+@keyframes wr-bump { 10% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
+
+.wr-watch { display: grid; place-items: center; padding: 28px 0; border-radius: 26px; background: linear-gradient(var(--c) 0 22px, transparent 22px calc(100% - 22px), var(--c) calc(100% - 22px)); }
+.wr-face { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; width: 210px; min-height: 230px; padding: 12px; border-radius: 40px; background: #111; border: 6px solid #495057; color: white; text-align: center; }
+.wr-face p { margin: 0; line-height: 1.4; font-weight: 700; }
+.wr-time { font-size: 2.8rem; font-weight: 800; }
+.wr-small { color: #ced4da; font-size: .9rem; }
+.wr-small b { color: white; font-size: 1.1rem; }
+.wr-big { font-size: 2.6rem; }
+.wr-warn { font-size: 1.1rem; font-weight: 900; color: #ffd43b; }
+.wr-face button { width: 100%; min-height: 46px; border: 0; border-radius: 23px; color: white; font: inherit; font-weight: 800; cursor: pointer; }
+.wr-ok { background: #495057; }
+.wr-sos { background: #e03131; }
+
+@media (max-width: 560px) {
+  .wr-fallrow { flex-wrap: nowrap; gap: 8px; }
+  .wr-room { width: 130px; height: 200px; }
+  .wr-man { font-size: 4rem; }
+  .wr-watch { padding: 22px 0; }
+  .wr-face { width: 176px; min-height: 200px; padding: 10px; border-radius: 34px; }
+  .wr-time { font-size: 2.2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .w-wr.on .wr-led { animation: none; }
+  .wr-man { transition: none; }
+}

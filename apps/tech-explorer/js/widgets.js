@@ -720,6 +720,50 @@ const SB_LIST = [
   { icon: '📰', name: '雜誌 App', price: 120, last: '2 個月前', off: true },
 ];
 
+// ---- wearable consts ----
+const WR_REST = 78;
+const WR_RUN = 128;
+const WR_WAIT = 8;
+
+// Blood in the wrist over one heartbeat (0 to 1): a quick rise, then a small second bump.
+const wrBlood = phase => Math.exp(-(((phase - 0.15) / 0.07) ** 2)) + 0.35 * Math.exp(-(((phase - 0.42) / 0.1) ** 2));
+
+// A heartbeat as heard through a stethoscope: a low "lub", then a softer, shorter "dub".
+// Each thump is a falling low tone plus muffled noise, so small tablet speakers can play it.
+let wrAudio = null;
+const wrThump = (ac, t, gain, len, f) => {
+  const env = ac.createGain();
+  env.gain.setValueAtTime(0.0001, t);
+  env.gain.exponentialRampToValueAtTime(gain, t + 0.012);
+  env.gain.exponentialRampToValueAtTime(0.0001, t + len);
+  env.connect(ac.destination);
+  const o = ac.createOscillator();
+  o.frequency.setValueAtTime(f * 2, t);
+  o.frequency.exponentialRampToValueAtTime(f, t + len * 0.6);
+  o.connect(env);
+  o.start(t);
+  o.stop(t + len + 0.02);
+  const n = ac.createBufferSource(), buf = ac.createBuffer(1, Math.ceil(ac.sampleRate * len), ac.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * 0.5;
+  const lp = ac.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = 220;
+  n.buffer = buf;
+  n.connect(lp).connect(env);
+  n.start(t);
+};
+// The dub comes sooner when the heart beats faster.
+const wrBeat = bpm => {
+  try {
+    wrAudio ??= new (window.AudioContext || window.webkitAudioContext)();
+    wrAudio.resume?.();
+    const t = wrAudio.currentTime + 0.01;
+    wrThump(wrAudio, t, 0.6, 0.14, 55);
+    wrThump(wrAudio, t + (bpm > 100 ? 0.25 : 0.32), 0.35, 0.09, 70);
+  } catch {}
+};
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -7821,6 +7865,164 @@ export const WIDGETS = {
       finished = true;
       hint(`🎉 一年省下 NT$${((all - m) * 12).toLocaleString()}！每個月一點點，加起來很多。`, 'done');
       api.done();
+    });
+  },
+
+  // Green LEDs shine into the wrist. More blood takes in more green light, so the light that
+  // comes back dips with each beat. Measure at rest, then after running.
+  pulse(host, _, api) {
+    host.innerHTML = `
+      <div class="w-wr">
+        <p class="wr-hint">點「量心跳」，看手錶怎麼量</p>
+        <div class="wr-row">
+          <svg class="wr-wrist" viewBox="0 0 300 200" role="img" aria-label="手錶背面的綠燈照進手腕">
+            <rect x="10" y="96" width="280" height="96" rx="40" fill="#f4c7a1"/>
+            <rect x="10" y="62" width="280" height="22" rx="8" fill="#495057"/>
+            <rect x="92" y="40" width="116" height="56" rx="14" fill="#343a40"/>
+            <g class="wr-rays">
+              <path d="M126 96 L144 146 M174 96 L156 146" />
+              <path class="wr-back" d="M144 146 L150 98 M156 146 L150 98" />
+            </g>
+            <ellipse class="wr-vessel" cx="150" cy="152" rx="34" ry="12"/>
+            <rect class="wr-led" x="118" y="88" width="16" height="8" rx="3"/>
+            <rect class="wr-led" x="166" y="88" width="16" height="8" rx="3"/>
+            <rect x="144" y="88" width="12" height="8" rx="2" fill="#adb5bd"/>
+            <text x="96" y="122" class="wr-label">綠燈</text>
+            <text x="218" y="122" class="wr-label">綠燈</text>
+            <text x="150" y="30" class="wr-label">手錶背面</text>
+            <text x="150" y="186" class="wr-label">血管</text>
+          </svg>
+          <div class="wr-read">
+            <svg class="wr-chart" viewBox="0 0 240 90" aria-hidden="true"><rect width="240" height="90" rx="10" fill="#f8f9fa"/><polyline class="wr-line" points=""/></svg>
+            <small>反射回來的光</small>
+            <p class="wr-bpm"><span class="wr-heart">❤️</span> <b>--</b> 下/分鐘</p>
+          </div>
+        </div>
+        <div class="wr-btns">
+          <button class="go wr-measure">💚 量心跳</button>
+          <button class="option wr-run" disabled>🏃 跑一跑，再量</button>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = (text, cls = '') => { $('.wr-hint').textContent = text; $('.wr-hint').className = `wr-hint ${cls}`; };
+    const vals = Array(60).fill(1);
+    let bpm = WR_REST, time = 0, running = false, lastBeat = 0, listening = false;
+    const draw = () => {
+      $('.wr-line').setAttribute('points', vals.map((v, i) => `${i * 4},${12 + (1 - v) * 66}`).join(' '));
+    };
+    draw();
+    const tick = () => {
+      if (!api.alive()) return;
+      time += 50;
+      const phase = (time * bpm / 60000) % 1;
+      const blood = wrBlood(phase);
+      vals.shift();
+      vals.push(1 - 0.8 * blood);
+      draw();
+      $('.wr-vessel').setAttribute('ry', 12 + 6 * blood);
+      const beat = Math.floor(time * bpm / 60000);
+      // The heart sound comes first; the pulse reaches the wrist a moment later (phase 0.15).
+      if (beat !== lastBeat) {
+        lastBeat = beat;
+        pop($('.wr-heart'));
+        if (listening) wrBeat(bpm);
+      }
+      api.later(tick, 50);
+    };
+    // Measure for three seconds, then show the rate. The heartbeat sound plays while it measures.
+    const measure = (rate, then) => {
+      bpm = rate;
+      listening = true;
+      host.querySelector('.w-wr').classList.add('on');
+      $('.wr-measure').disabled = true;
+      $('.wr-run').disabled = true;
+      $('.wr-bpm b').textContent = '…';
+      if (!running) { running = true; tick(); }
+      api.later(() => { listening = false; $('.wr-bpm b').textContent = rate; pop($('.wr-bpm b')); then(); }, 3000);
+    };
+    $('.wr-measure').addEventListener('click', () => {
+      hint('🩺 聽，撲通、撲通！綠燈一閃一閃，手錶在看反射回來的光……');
+      measure(WR_REST, () => {
+        hint(`每分鐘 ${WR_REST} 下。光每暗一次，就是心跳一下。現在跑一跑！`);
+        $('.wr-run').disabled = false;
+        api.good();
+      });
+    });
+    $('.wr-run').addEventListener('click', () => {
+      hint('🏃 跑完了，再量一次。聽聽看，心跳變快了嗎？');
+      measure(WR_RUN, () => {
+        hint(`🎉 跑步後每分鐘 ${WR_RUN} 下！光暗得越快，心跳就越快。`, 'done');
+        $('.wr-measure').disabled = false;
+        api.good();
+        api.done();
+      });
+    });
+  },
+
+  // A fall: the watch asks first. "I'm OK" cancels; no answer calls 119 and sends the location.
+  falldetect(host, _, api) {
+    host.innerHTML = `
+      <div class="w-wr">
+        <p class="wr-hint">點「跌倒了」，看手錶會做什麼</p>
+        <div class="wr-row wr-fallrow">
+          <div class="wr-room"><span class="wr-man">🧓</span><span class="wr-bump">咚！</span><span class="wr-floor"></span></div>
+          <div class="wr-watch"><div class="wr-face"></div></div>
+        </div>
+        <button class="go wr-fall">▶ 跌倒了</button>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = (text, cls = '') => { $('.wr-hint').textContent = text; $('.wr-hint').className = `wr-hint ${cls}`; };
+    const face = html => { $('.wr-face').innerHTML = html; };
+    const idle = () => face('<p class="wr-time">10:30</p><p class="wr-small">❤️ 78</p>');
+    idle();
+    let run = 0, cancelled = false;
+    const call = id => {
+      if (id !== run) return;
+      run++;
+      face('<p class="wr-big">📞</p><p>正在打給 <b>119</b>…</p>');
+      shake($('.wr-watch'));
+      api.later(() => {
+        face('<p class="wr-big">📍</p><p>已經把位置傳給<br><b>媽媽</b>（緊急聯絡人）</p>');
+        hint('🎉 沒回答，手錶就自己打 119，還告訴家人你在哪裡。', 'done');
+        $('.wr-fall').disabled = false;
+        $('.wr-fall').textContent = '▶ 再跌一次';
+        api.good();
+        api.done();
+      }, 1600);
+    };
+    const count = (id, n) => {
+      if (!api.alive() || id !== run) return;
+      if (n === 0) { call(id); return; }
+      if ($('.wr-left')) $('.wr-left').textContent = n;
+      shake($('.wr-watch'));
+      api.later(() => count(id, n - 1), 1000);
+    };
+    $('.wr-fall').addEventListener('click', e => {
+      e.currentTarget.disabled = true;
+      const id = ++run;
+      host.querySelector('.wr-room').classList.add('down');
+      hint('……');
+      api.later(() => {
+        if (id !== run) return;
+        face(`<p class="wr-warn">你好像跌倒了</p>
+          <button class="wr-ok" data-id="${id}">我沒事</button>
+          <button class="wr-sos" data-id="${id}">🆘 緊急求救</button>
+          <p class="wr-small">沒回答，<b class="wr-left">${WR_WAIT}</b> 秒後自動求救</p>`);
+        hint(cancelled ? '這次不要按，等一等看' : '手錶在問你。可以按「我沒事」，或什麼都不按');
+        count(id, WR_WAIT);
+      }, 900);
+    });
+    $('.wr-face').addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b || +b.dataset.id !== run) return;
+      if (b.classList.contains('wr-sos')) { call(run); return; }
+      run++;
+      cancelled = true;
+      host.querySelector('.wr-room').classList.remove('down');
+      idle();
+      hint('按「我沒事」就取消了。再跌一次，這次什麼都不要按');
+      $('.wr-fall').disabled = false;
+      $('.wr-fall').textContent = '▶ 再跌一次';
     });
   },
 
