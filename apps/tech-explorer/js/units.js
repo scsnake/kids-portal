@@ -2344,6 +2344,63 @@ export const UNITS = [
   },
 
   {
+    id: 'search',
+    part: 'basic',
+    icon: '🔍',
+    title: '搜尋技巧',
+    en: 'Search Smarter',
+    desc: '挑關鍵字、分辨廣告、比較來源',
+    color: '#1d6fa5',
+    added: '2026-10-20',
+    slides: [
+      {
+        title: '挑出關鍵字',
+        text: `用${t('搜尋引擎', 'search engine')}，不用打一整句話。只挑最重要的${t('關鍵字', 'keywords')}，找到的結果會更準。試試看！`,
+        widget: 'kwpick',
+      },
+      {
+        title: '廣告排在最上面',
+        text: `搜尋結果最上面，常常是${t('廣告', 'ad')}，旁邊有小小的${t('贊助', 'sponsored')}兩個字。店家付錢就能排上去，不一定是最好的。找出${t('官方網站', 'official website')}！`,
+        widget: 'serp',
+      },
+      {
+        title: '這個來源可靠嗎？',
+        text: `找到資料，先看${t('來源', 'source')}：誰寫的？什麼時候寫的？別的地方也這樣說嗎？搜尋頁最上面的 AI 摘要也可能說錯。分分看！`,
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '📗', label: '可以參考' },
+            { id: 'check', icon: '🔎', label: '要再查一查' },
+          ],
+          items: [
+            { icon: '🏛️', label: '政府網站的公告', bin: 'ok' },
+            { icon: '📚', label: '圖書館找到的書', bin: 'ok' },
+            { icon: '📰', label: '有記者名字和日期的新聞', bin: 'ok' },
+            { icon: '🤫', label: '「醫生不會告訴你的祕密」', bin: 'check' },
+            { icon: '❓', label: '沒有作者、沒有日期的文章', bin: 'check' },
+            { icon: '🛒', label: '賣東西的網站說自己最好', bin: 'check' },
+            { icon: '🤖', label: 'AI 摘要，還沒點開來源', bin: 'check' },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '搜尋結果最上面寫著「贊助」，這是什麼意思？',
+          options: [
+            { text: '🪧 這是廣告，店家付錢排在上面', correct: true },
+            { text: '🏆 這是最好、最正確的網站' },
+            { text: '✅ 這是政府檢查過的網站' },
+          ],
+          explain: '「贊助」就是廣告。想找官方資料，要往下看名字和網址。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'inside',
     part: 'adv',
     icon: '🧠',
@@ -3442,6 +3499,7 @@ export const STAGES = [
   { id: 'helpers', part: 'basic', icon: '🤖', title: 'AI 小幫手', en: 'AI Helpers', units: ['aichat', 'voice'] },
   { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel', 'copyright', 'shareddoc', 'photoshare'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
+  { id: 'smart', part: 'basic', icon: '🧭', title: '聰明的數位生活', en: 'Smart Digital Life', units: ['search'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'adder', 'os'] },
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },
   { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },

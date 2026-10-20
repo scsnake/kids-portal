@@ -13,7 +13,7 @@ Two parts. Part 1 teaches how to use a device, with rough ideas only. Part 2
 explains how things work inside. Inside each part, a unit only uses ideas from
 the units before it.
 
-The home screen groups the units into 13 stages of 2 to 5 units (`STAGES` in
+The home screen groups the units into 14 stages of 2 to 5 units (`STAGES` in
 `js/units.js`). The next stage not read through is marked 「下一站」 and opens by
 itself; a stage read through gets 🏅. No unit is locked. The
 first time a Part 2 unit opens, a card suggests an earlier stage not read through
@@ -55,27 +55,28 @@ yet; 「直接開始」 closes it.
 32. 公共 Wi-Fi 和網購: pick the Wi-Fi on the library poster (look-alike and open networks), what to leave for home, a fake shop with 4 warning signs, in-app purchases (Ask to Buy), paying outside the shop
 33. 網路禮儀和網路霸凌: think before you post, cyberbullying in a chat (don't reply, screenshot, tell an adult, block), bystanders
 34. 緊急求救: 119 vs 110, calling from a locked phone (緊急 on the passcode screen), Medical ID, Emergency SOS
+35. 搜尋技巧: pick the key words out of a question (filler words shake), find the official site under the 「贊助」 ads, sort sources by how far to trust them (an AI summary too)
 
 **Part 2: 原理探索 (how it works)**
 
-35. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
-36. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
-37. 電腦怎麼做加法？: counting up in binary with carries, a half adder from XOR and AND, a 4-bit ripple-carry adder stepped one column at a time
-38. 作業系統: what an OS does, time sharing (multitasking)
-39. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
-40. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
-41. 聲音和影片怎麼變成數字: sampling a sound wave (and hearing it), frames per second with a bouncing ball, why video needs compression
-42. 人臉和指紋辨識: Face ID dots on a face and on a flat photo (front and side views, unlock or shake), a face as numbers compared with a limit (a twin gets in), Touch ID feature points, why the passcode still matters
-43. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
-44. AI 怎麼學？: learning from examples, why data matters (bias)
-45. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
-46. 網路的實體: follow a message from Taiwan to the US (cell tower, machine room, submarine cable, data center) on a map with Taiwan's real outline, submarine cables, data centers and their power
-47. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
-48. 物聯網和智慧家電: which things go online, a smart plant pot's message from sensor to phone, an air-conditioner rule with AND or OR over one day, default passwords on home cameras, how a tap at school reaches a lamp at home
-49. 演算法: steps, binary search (number guessing), sorting by swaps
-50. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
-51. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
-52. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+36. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
+37. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
+38. 電腦怎麼做加法？: counting up in binary with carries, a half adder from XOR and AND, a 4-bit ripple-carry adder stepped one column at a time
+39. 作業系統: what an OS does, time sharing (multitasking)
+40. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
+41. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
+42. 聲音和影片怎麼變成數字: sampling a sound wave (and hearing it), frames per second with a bouncing ball, why video needs compression
+43. 人臉和指紋辨識: Face ID dots on a face and on a flat photo (front and side views, unlock or shake), a face as numbers compared with a limit (a twin gets in), Touch ID feature points, why the passcode still matters
+44. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
+45. AI 怎麼學？: learning from examples, why data matters (bias)
+46. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
+47. 網路的實體: follow a message from Taiwan to the US (cell tower, machine room, submarine cable, data center) on a map with Taiwan's real outline, submarine cables, data centers and their power
+48. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
+49. 物聯網和智慧家電: which things go online, a smart plant pot's message from sensor to phone, an air-conditioner rule with AND or OR over one day, default passwords on home cameras, how a tap at school reaches a lamp at home
+50. 演算法: steps, binary search (number guessing), sorting by swaps
+51. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
+52. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
+53. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
 
 ## Saved progress
 

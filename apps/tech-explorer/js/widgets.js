@@ -654,6 +654,41 @@ const PQ_SCENE = `
 // Place values of the four bits, left to right.
 const BK_PLACES = [8, 4, 2, 1];
 
+// ---- search consts ----
+// The question, cut into words. Words with `why` are too common to help a search.
+const SQ_ASK = [
+  { w: '請問', why: '「請問」很有禮貌，可是搜尋引擎不需要它' },
+  { w: '臺北市立動物園', key: 'name' },
+  { w: '星期一', key: 'when' },
+  { w: '有沒有', why: '「有沒有」太普通了，很多網頁都有這三個字' },
+  { w: '開', why: '「開」太短了，意思很多。換成下面的「開放時間」更準' },
+];
+const SQ_MORE = [{ w: '開放時間', key: 'what' }, { w: '休園日', key: 'what' }];
+const SQ_RESULTS = {
+  good: [
+    { site: '臺北市立動物園', url: 'zoo.taipei.example.tw', title: '開放時間和休園日', top: true },
+    { site: '親子出遊部落格', url: 'mama-trip.example.com', title: '動物園星期一去，人好少！' },
+  ],
+  vague: [
+    { site: '旅遊網', url: 'trip.example.com', title: '全台灣 10 個好玩的動物園' },
+    { site: '購物網', url: 'shop.example.com', title: '動物園門票特價' },
+  ],
+  lost: [
+    { site: '百科', url: 'wiki.example.org', title: '星期一：一個星期的第一天' },
+    { site: '音樂網', url: 'music.example.com', title: '〈有沒有〉歌詞' },
+  ],
+};
+// A results page for 臺北市立動物園 門票: two ads on top, then the real site.
+const SQ_SERP = [
+  { ad: true, site: '票票網', url: 'zoo-ticket-sale.example.com', title: '動物園門票 75 折！今天下單', snip: '限時特價，買越多省越多。',
+    why: '這是廣告！看到小小的「贊助」了嗎？店家付錢，就能排在最上面。' },
+  { ad: true, site: '玩樂通', url: 'fun-pass.example.com', title: '親子門票特價，只到今天', snip: '加入會員再送點數。',
+    why: '這也是「贊助」的廣告，不是動物園自己的網站。' },
+  { site: '臺北市立動物園', url: 'zoo.taipei.example.tw', title: '臺北市立動物園｜門票和開放時間', snip: '門票價格、開放時間、交通方式。', right: true },
+  { site: '親子出遊部落格', url: 'mama-trip.example.com', title: '2019 年動物園門票整理', snip: '我們全家去動物園的心得……',
+    why: '這是別人寫的心得，而且是很久以前的，票價可能改了。' },
+];
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -7460,6 +7495,97 @@ export const WIDGETS = {
     };
     window.addEventListener('keydown', onKey);
     draw();
+  },
+
+  // Build a search from the words of a question: keep the key words, drop the rest.
+  kwpick(host, _, api) {
+    host.innerHTML = `
+      <div class="w-sq">
+        <p class="sq-hint">點重要的詞，放進搜尋框</p>
+        <p class="sq-ask">👧 「${SQ_ASK.map(a => a.w).join('')}？」</p>
+        <div class="sq-words">${SQ_ASK.map((a, i) => `<button class="option sq-w" data-i="${i}">${a.w}</button>`).join('')}</div>
+        <div class="sq-more"><span>更準的說法：</span>${SQ_MORE.map((a, i) => `<button class="option sq-w" data-m="${i}">${a.w}</button>`).join('')}</div>
+        <div class="sq-bar"><span class="sq-box" aria-live="polite"><i>🔍</i><span class="sq-q"></span></span><button class="go sq-go">搜尋</button></div>
+        <ol class="sq-res"></ol>
+      </div>`;
+    const $ = s => host.querySelector(s);
+    const hint = (s, cls = '') => { $('.sq-hint').textContent = s; $('.sq-hint').className = `sq-hint ${cls}`; };
+    const word = b => b.dataset.m !== undefined ? SQ_MORE[b.dataset.m] : SQ_ASK[b.dataset.i];
+    let picked = [], finished = false;
+    const draw = () => {
+      $('.sq-q').innerHTML = picked.length ? picked.map(b => `<button class="sq-tag" data-k="${b.dataset.m ?? ''}|${b.dataset.i ?? ''}">${word(b).w} ✕</button>`).join('') : '<small>（還是空的）</small>';
+      host.querySelectorAll('.sq-w').forEach(b => { b.disabled = finished || picked.includes(b); });
+    };
+    host.querySelector('.w-sq').addEventListener('click', e => {
+      if (finished) return;
+      const tag = e.target.closest('.sq-tag');
+      if (tag) {
+        picked = picked.filter(b => `${b.dataset.m ?? ''}|${b.dataset.i ?? ''}` !== tag.dataset.k);
+        draw();
+        return;
+      }
+      const b = e.target.closest('.sq-w');
+      if (b) {
+        const a = word(b);
+        if (a.why) { shake(b); api.bad(); hint(a.why, 'bad'); return; }
+        picked.push(b);
+        api.good();
+        hint('好！還有別的重要的詞嗎？好了就按「搜尋」');
+        draw();
+        return;
+      }
+      if (!e.target.closest('.sq-go')) return;
+      if (!picked.length) { shake($('.sq-go')); api.bad(); hint('搜尋框還是空的。先點重要的詞', 'bad'); return; }
+      const keys = new Set(picked.map(b => word(b).key));
+      const kind = !keys.has('name') ? 'lost' : keys.size > 1 ? 'good' : 'vague';
+      $('.sq-res').innerHTML = SQ_RESULTS[kind].map(r => `<li class="${r.top ? 'top' : ''}"><small>${r.site}・${r.url}</small><b>${r.title}</b></li>`).join('');
+      pop($('.sq-res'));
+      if (kind === 'lost') { api.bad(); hint('結果都不對！少了最重要的詞：要找哪一個地方？', 'bad'); return; }
+      if (kind === 'vague') { api.bad(); hint('結果太多、太雜了。再加上你想知道的事，像「星期一」或「開放時間」', 'bad'); return; }
+      finished = true;
+      draw();
+      api.good();
+      hint('🎉 只用幾個重要的詞，第一筆就是動物園自己的網站！', 'done');
+      api.done();
+    });
+    draw();
+  },
+
+  // A results page with ads on top: find the official site.
+  serp(host, _, api) {
+    host.innerHTML = `
+      <div class="w-sq">
+        <p class="sq-hint">想買門票，要找動物園自己的網站（官方網站）。點它！</p>
+        <div class="sq-page">
+          <div class="sq-bar"><span class="sq-box"><i>🔍</i><span>臺北市立動物園 門票</span></span></div>
+          <ul class="sq-list">${SQ_SERP.map((r, i) => `
+            <li><button class="sq-r" data-i="${i}">
+              <small>${r.ad ? '<em class="sq-ad">贊助</em>' : ''}${r.site}・${r.url}</small>
+              <b>${r.title}</b><span>${r.snip}</span>
+            </button></li>`).join('')}
+          </ul>
+        </div>
+      </div>`;
+    const hint = (s, cls = '') => { host.querySelector('.sq-hint').textContent = s; host.querySelector('.sq-hint').className = `sq-hint ${cls}`; };
+    let finished = false;
+    host.querySelector('.sq-list').addEventListener('click', e => {
+      const b = e.target.closest('.sq-r');
+      if (!b || finished) return;
+      const r = SQ_SERP[b.dataset.i];
+      if (!r.right) {
+        shake(b);
+        api.bad();
+        b.querySelector('.sq-ad')?.classList.add('flag');
+        hint(`${r.why}再找找看`, 'bad');
+        return;
+      }
+      finished = true;
+      b.classList.add('right');
+      host.querySelectorAll('.sq-ad').forEach(x => x.classList.add('flag'));
+      api.good();
+      hint('🎉 對！名字和網址都是動物園自己的。寫著「贊助」的是廣告，不一定是官方的。', 'done');
+      api.done();
+    });
   },
 
   // A pretend browser: links, back, forward, reload, and typing an address.
