@@ -10,6 +10,20 @@
   <title>科技原理小探險</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖥️</text></svg>">
   <link rel="stylesheet" href="style.css?v=22">
+  <script>
+    // Desktop windows are often shorter than the 800px the slides are made for.
+    // Scale the page down to fit, like pressing ⌘− once. Mouse devices only.
+    (() => {
+      const fine = matchMedia('(hover: hover) and (pointer: fine)');
+      const fit = () => {
+        const z = fine.matches && innerWidth >= 900 ? Math.max(0.75, Math.min(1, innerHeight / 800)) : 1;
+        document.documentElement.style.zoom = z === 1 ? '' : z;
+        document.documentElement.style.setProperty('--z', z);
+      };
+      fit();
+      addEventListener('resize', fit);
+    })();
+  </script>
   <script src="changelog-widget.js?v=1" defer></script>
   <script type="module" src="js/main.js?v=22"></script>
 </head>
