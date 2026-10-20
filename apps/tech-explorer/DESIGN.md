@@ -63,6 +63,9 @@ iPad landscape (≥ 900px wide)          iPad portrait / phone
   A slide only gives its title, its text, and an `art` or a `widget`.
 - The whole slide must fit on one iPad screen and on a MacBook screen, with no
   scrolling. Check both orientations.
+- A browser window on a MacBook is only about 680px tall. On a computer with a mouse,
+  `index.html` scales the page to window height / 800 (not below 75%), so a slide
+  that fits at 1280×800 also fits in a shorter window. iPad is never scaled.
 
 ## 4. Writing the text
 
@@ -157,8 +160,8 @@ Interaction rules:
 2. Write the slide: title, text, and `art` or `widget` + `params` (section 4).
 3. Reuse `choice`, `sort` or `order` if they fit. Write a new widget only if needed.
 4. Add a 考考你 question if the unit has none for this idea.
-5. Check on iPad portrait (820×1180), iPad landscape (1180×820) and 1280×800.
-   Check with a finger and with a mouse.
+5. Check on iPad portrait (820×1180), iPad landscape (1180×820), 1280×800 and a
+   short browser window (1280×680). Check with a finger and with a mouse.
 6. Bump the `?v=` numbers (see `README.md`).
 7. Add a line to `changelog.json` in plain words for parents.
 8. Update the unit list in `README.md` if the topic is new.
