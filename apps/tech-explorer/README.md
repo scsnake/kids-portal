@@ -81,6 +81,7 @@ yet; 「直接開始」 closes it.
 55. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
 56. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
 57. QR Code 怎麼運作？: tap the three finder squares to turn a tilted code upright, black = 1 and white = 0 (paint two bytes to spell Hi), error correction (which damage still scans)
+58. 電腦怎麼記住時間？: a quartz crystal drives a 15-bit counter (32768 = 2^15) with slow and normal speed, syncing with an atomic-clock time server, time zones
 
 ## Saved progress
 

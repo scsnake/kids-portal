@@ -832,6 +832,30 @@ function qxDamageSVG(id) {
   return `<path class="qx-blot" d="${qxTear([[25, 7.6], [7.6, 7.6], [7.6, 25]], [[25, 25]])}"/>`;
 }
 
+// ---- clock consts ----
+const CK_HZ = 32768;
+// Vibrations counted per second of the animation: slow motion, then the real speed.
+const CK_RATE = { slow: 4, fast: CK_HZ };
+const CK_CITIES = [
+  { name: '台北', icon: '🏙️', utc: 8 },
+  { name: '東京', icon: '🗼', utc: 9 },
+  { name: '倫敦', icon: '💂', utc: 0 },
+  { name: '紐約', icon: '🗽', utc: -5 },
+];
+const CK_ANSWERS = [
+  { text: '凌晨 4 點', why: '倫敦比台北晚 8 小時，要往回數喔：20 − 8 = ？' },
+  { text: '中午 12 點', correct: true },
+  { text: '晚上 8 點', why: '那是台北的時間。倫敦在另一個時區，時間不一樣' },
+];
+
+// hh:mm:ss (and tenths) from seconds after midnight.
+function ckTime(sec, tenths = false) {
+  const s = ((sec % 86400) + 86400) % 86400;
+  const hh = String(Math.floor(s / 3600)).padStart(2, '0'), mm = String(Math.floor(s / 60) % 60).padStart(2, '0');
+  const ss = tenths ? (s % 60).toFixed(1).padStart(4, '0') : String(Math.floor(s % 60)).padStart(2, '0');
+  return `${hh}:${mm}:${ss}`;
+}
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -8226,6 +8250,204 @@ export const WIDGETS = {
         $('.qx-hint').classList.add('done');
         api.done();
       }, 1200);
+    });
+  },
+
+  // A quartz crystal vibrates and a 15-bit counter counts each vibration.
+  // When it fills up (32768 = 2^15), one second has passed. Speed switches at any time.
+  quartz(host, _, api) {
+    host.innerHTML = `
+      <div class="w-ck">
+        <p class="ck-hint">石英每震一下，計數器就 +1。現在是慢動作，按「⚡ 正常速度」看看</p>
+        <div class="ck-row">
+          <figure class="ck-xtal">
+            <svg viewBox="0 0 120 150" aria-hidden="true">
+              <rect x="20" y="8" width="80" height="134" rx="18" class="ck-can"/>
+              <g class="ck-fork"><path class="ck-tine l" d="M48 110 V30 a6 6 0 0 1 12 0 V110"/><path class="ck-tine r" d="M60 110 V30 a6 6 0 0 1 12 0 V110"/></g>
+              <rect x="44" y="104" width="32" height="16" rx="4" class="ck-base"/>
+              <path d="M52 120 V148 M68 120 V148" class="ck-leg"/>
+            </svg>
+            <figcaption>石英</figcaption>
+          </figure>
+          <div class="ck-count">
+            <p class="ck-n"><b>0</b> / 32768 下</p>
+            <div class="ck-bar"><i></i></div>
+            <p class="ck-bin" aria-label="二進位計數器">000000000000000</p>
+            <p class="ck-note">15 個位元的計數器</p>
+          </div>
+          <div class="ck-face"><small>時鐘</small><b class="ck-sec">10:00:00</b><small class="ck-pass">走了 0 秒</small></div>
+        </div>
+        <div class="ck-speed"><button class="option ck-mode on" data-m="slow">🐢 慢動作</button><button class="option ck-mode" data-m="fast">⚡ 正常速度</button></div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let mode = 'slow', count = 0, secs = 0, last = performance.now(), finished = false;
+    const draw = () => {
+      const n = Math.floor(count);
+      $('.ck-n b').textContent = n.toLocaleString('en-US');
+      $('.ck-bar i').style.width = `${(count / CK_HZ) * 100}%`;
+      $('.ck-bin').textContent = n.toString(2).padStart(15, '0');
+    };
+    const tick = () => {
+      if (!api.alive()) return;
+      const now = performance.now();
+      count += CK_RATE[mode] * Math.min(now - last, 250) / 1000;
+      last = now;
+      while (count >= CK_HZ) {
+        count -= CK_HZ;
+        secs++;
+        $('.ck-sec').textContent = ckTime(36000 + secs);
+        $('.ck-pass').textContent = `走了 ${secs} 秒`;
+        pop($('.ck-face'));
+        if (secs >= 3 && !finished) {
+          finished = true;
+          $('.ck-hint').textContent = '🎉 數滿 32768（2 的 15 次方）就是 1 秒。所以石英時鐘這麼準！';
+          $('.ck-hint').classList.add('done');
+          api.good();
+          api.done();
+        }
+      }
+      draw();
+      api.later(tick, mode === 'slow' ? 120 : 50);
+    };
+    host.querySelector('.ck-speed').addEventListener('click', e => {
+      const b = e.target.closest('.ck-mode');
+      if (!b || b.dataset.m === mode) return;
+      mode = b.dataset.m;
+      host.querySelectorAll('.ck-mode').forEach(x => x.classList.toggle('on', x === b));
+      $('.w-ck').classList.toggle('fast', mode === 'fast');
+      if (!finished) {
+        $('.ck-hint').textContent = mode === 'fast'
+          ? '⚡ 一秒震 32768 次，快到看不清楚！每數滿一次，時鐘就走 1 秒'
+          : '🐢 慢動作：一下一下數，看最右邊的位元怎麼跳';
+      }
+    });
+    draw();
+    tick();
+  },
+
+  // The tablet's clock runs fast after a month. Ask a time server with an atomic clock,
+  // count the trip time, and set the clock right.
+  ntpsync(host, _, api) {
+    host.innerHTML = `
+      <div class="w-ck">
+        <p class="ck-hint">平板和原子鐘現在一樣準。按「⏩ 過了一個月」</p>
+        <div class="ck-sync">
+          <div class="ck-dev"><span class="ck-ico">📱</span><b>平板的時鐘</b><span class="ck-t ck-mine">--:--:--</span></div>
+          <div class="ck-wire"><i class="ck-pkt" hidden></i><small class="ck-say"></small></div>
+          <div class="ck-dev"><span class="ck-ico">⚛️</span><b>時間伺服器<br><small>原子鐘</small></b><span class="ck-t ck-real">--:--:--</span></div>
+        </div>
+        <p class="ck-diff" aria-live="polite"></p>
+        <button class="go ck-act">⏩ 過了一個月</button>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const start = performance.now();
+    // The real time starts at 10:00:00; the tablet is `drift` seconds off.
+    let drift = 0, step = 0;
+    const real = () => 36000 + (performance.now() - start) / 1000;
+    const draw = () => {
+      if (!api.alive()) return;
+      $('.ck-real').textContent = ckTime(real(), true);
+      $('.ck-mine').textContent = ckTime(real() + drift, true);
+      api.later(draw, 100);
+    };
+    const say = (text, back) => new Promise(done => {
+      const p = $('.ck-pkt');
+      p.hidden = false;
+      p.className = `ck-pkt${back ? ' back' : ''}`;
+      void p.offsetWidth;
+      p.classList.add('fly');
+      $('.ck-say').textContent = text;
+      api.later(done, 900);
+    });
+    $('.ck-act').addEventListener('click', async e => {
+      const b = e.currentTarget;
+      if (step === 0) {
+        step = 1;
+        drift = 12.4;
+        $('.ck-diff').textContent = '平板快了 12.4 秒！';
+        $('.ck-diff').className = 'ck-diff bad';
+        $('.ck-hint').textContent = '石英不是完美的，一個月就跑掉幾秒。按「🌐 上網對時」';
+        b.textContent = '🌐 上網對時';
+        pop($('.ck-mine'));
+        api.bad();
+        return;
+      }
+      if (step !== 1) return;
+      step = 2;
+      b.disabled = true;
+      $('.ck-diff').className = 'ck-diff';
+      $('.ck-diff').textContent = '平板問：「現在幾點？」';
+      $('.ck-hint').textContent = '平板上網，問時間伺服器……';
+      await say('現在幾點？', false);
+      if (!api.alive()) return;
+      const ans = real();
+      $('.ck-diff').textContent = `伺服器回答：「${ckTime(ans, true)}」`;
+      await say(ckTime(ans, true), true);
+      if (!api.alive()) return;
+      drift = 0;
+      $('.ck-pkt').hidden = true;
+      $('.ck-say').textContent = '';
+      $('.ck-diff').className = 'ck-diff good';
+      $('.ck-diff').textContent = '來回花了 0.2 秒，單程約 0.1 秒：設成「回答 + 0.1 秒」（動畫放慢了）';
+      pop($('.ck-mine'));
+      $('.ck-hint').textContent = '🎉 對好了！連路上花的時間也算進去，平板和原子鐘一樣準。手機會自己定時這樣做。';
+      $('.ck-hint').classList.add('done');
+      api.good();
+      api.done();
+    });
+    draw();
+  },
+
+  // The same moment in four cities. Tap a city to see its time, then answer.
+  timezone(host, _, api) {
+    const here = 20;
+    host.innerHTML = `
+      <div class="w-ck">
+        <p class="ck-hint">台北現在是晚上 8 點。點城市，看看那裡幾點</p>
+        <div class="ck-cities">${CK_CITIES.map((c, i) => `
+          <button class="ck-city${i ? '' : ' open'}" data-i="${i}">
+            <span class="ck-flag">${c.icon}</span><b>${c.name}</b><small>UTC${c.utc >= 0 ? '+' : '−'}${Math.abs(c.utc)}</small>
+            <span class="ck-local">${i ? '點我看' : ''}</span>
+          </button>`).join('')}
+        </div>
+        <p class="ck-q">冬天，台北晚上 8 點的時候，倫敦是幾點？</p>
+        <div class="ck-ans">${CK_ANSWERS.map((a, i) => `<button class="option ck-a" data-i="${i}">${a.text}</button>`).join('')}</div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let won = false;
+    const open = i => {
+      const c = CK_CITIES[i], h = (here - 8 + c.utc + 24) % 24;
+      const el = host.querySelector(`.ck-city[data-i="${i}"]`);
+      el.classList.add('open');
+      el.classList.toggle('night', h < 6 || h >= 18);
+      el.querySelector('.ck-local').textContent = `${h >= 6 && h < 18 ? '☀️' : '🌙'} ${String(h).padStart(2, '0')}:00`;
+    };
+    open(0);
+    host.querySelector('.ck-cities').addEventListener('click', e => {
+      const b = e.target.closest('.ck-city');
+      if (!b || b.classList.contains('open')) return;
+      open(+b.dataset.i);
+      pop(b);
+      if (!won) $('.ck-hint').textContent = `${CK_CITIES[b.dataset.i].name}和台北差 ${Math.abs(8 - CK_CITIES[b.dataset.i].utc)} 小時。差幾小時，就看 UTC 後面的數字差多少`;
+    });
+    host.querySelector('.ck-ans').addEventListener('click', e => {
+      const b = e.target.closest('.ck-a');
+      if (!b || won) return;
+      const a = CK_ANSWERS[b.dataset.i];
+      if (!a.correct) {
+        shake(b);
+        b.classList.add('wrong');
+        api.bad();
+        $('.ck-hint').textContent = a.why;
+        return;
+      }
+      won = true;
+      b.classList.add('right');
+      open(2);
+      api.good();
+      $('.ck-hint').textContent = '🎉 對！倫敦 UTC+0，比台北晚 8 小時，那裡才中午。電腦只要知道時區，就能換算。';
+      $('.ck-hint').classList.add('done');
+      api.done();
     });
   },
 

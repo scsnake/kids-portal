@@ -3682,6 +3682,47 @@ export const UNITS = [
       },
     ],
   },
+
+  {
+    id: 'clock',
+    part: 'adv',
+    icon: '⏰',
+    title: '電腦怎麼記住時間？',
+    en: 'How Computers Keep Time',
+    desc: '石英震動、網路對時、時區',
+    color: '#a65400',
+    added: '2026-10-20',
+    slides: [
+      {
+        title: '石英一秒震 32768 次',
+        text: `電腦裡有一小片${t('石英', 'quartz')}，通電後每秒剛好震動 32768 次。計數器數滿 32768，就是 1 秒。關機時，有一顆小電池讓它繼續數。切換速度看看！`,
+        widget: 'quartz',
+      },
+      {
+        title: '上網對時間',
+        text: `石英不是完美的，時間久了會快一點或慢一點。所以手機和電腦會${t('上網對時', 'network time sync')}，問有${t('原子鐘', 'atomic clock')}的時間伺服器：現在幾點？試試看！`,
+        widget: 'ntpsync',
+      },
+      {
+        title: '時區',
+        text: `地球會轉，各地的白天、黑夜不一樣，所以分成很多${t('時區', 'time zone')}。台灣是 UTC+8，冬天比倫敦快 8 小時。點城市看看，再回答問題！`,
+        widget: 'timezone',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '坐飛機到日本，下飛機打開手機，時間自己變成日本時間了。為什麼？',
+          options: [
+            { text: '📶 手機連上當地的網路，自動換成當地時區', correct: true },
+            { text: '💎 手機裡的石英在日本震得比較快' },
+            { text: '✈️ 飛機上的時鐘幫手機改的' },
+          ],
+          explain: '手機從當地的網路知道自己在哪個時區，再上網對時，所以一下飛機時間就對了。',
+        },
+      },
+    ],
+  },
 ];
 
 // Home screen sections, in order.
@@ -3708,7 +3749,7 @@ export const STAGES = [
   { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: '網路怎麼運作', en: 'How Networks Work', units: ['internet', 'networld', 'web', 'iot'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'freeapps', 'coding'] },
-  { id: 'secret', part: 'adv', icon: '🔬', title: '生活科技的祕密', en: 'Secrets of Everyday Tech', units: ['qrcode'] },
+  { id: 'secret', part: 'adv', icon: '🔬', title: '生活科技的祕密', en: 'Secrets of Everyday Tech', units: ['qrcode', 'clock'] },
 ];
 
 // Shown greyed out on the home screen until the unit is written.
