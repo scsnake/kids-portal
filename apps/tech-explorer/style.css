@@ -2827,7 +2827,7 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .sq-box > i { font-style: normal; }
 .sq-box small { color: var(--ink-3); font-weight: 700; }
 .sq-q { display: contents; }
-.sq-tag { min-height: 40px; padding: 0 12px; border: 0; border-radius: 20px; background: color-mix(in srgb, var(--c) 14%, white); color: var(--ink); font: inherit; font-weight: 800; }
+.sq-tag { min-height: 44px; padding: 0 12px; border: 0; border-radius: 20px; background: color-mix(in srgb, var(--c) 14%, white); color: var(--ink); font: inherit; font-weight: 800; }
 .sq-res { display: flex; flex-direction: column; gap: 6px; width: min(100%, 560px); margin: 0; padding: 0; list-style: none; }
 .sq-res:empty { display: none; }
 .sq-res li { display: flex; flex-direction: column; padding: 8px 14px; border-radius: 12px; background: var(--card); border: 2px solid var(--line); }
