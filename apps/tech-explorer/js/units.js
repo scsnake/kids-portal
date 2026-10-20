@@ -2401,6 +2401,62 @@ export const UNITS = [
   },
 
   {
+    id: 'footprint',
+    part: 'basic',
+    icon: '👣',
+    title: '數位足跡',
+    en: 'Digital Footprint',
+    desc: '貼文和照片會留很久、被轉傳和被搜尋',
+    color: '#9c4221',
+    added: '2026-10-20',
+    slides: [
+      {
+        title: '刪掉了，還在嗎？',
+        text: `貼文發出去，別人可能馬上截圖、轉傳，搜尋引擎也會存一份。就算你刪掉，別的地方還在。這些留下來的痕跡，叫做${t('數位足跡', 'digital footprint')}。發一篇試試看！`,
+        widget: 'postspread',
+      },
+      {
+        title: '誰看得到？',
+        text: `發文前，可以選${t('分享對象', 'audience')}：「公開」是全世界都看得到，「朋友」只給朋友看。很多 App 一開始是「公開」，要自己改。試試看！`,
+        widget: 'audience',
+      },
+      {
+        title: '十年後的你',
+        text: '數位足跡可能留很多年。以後的新同學、老師、老闆，都可能搜尋到。好的足跡也會留下來喔！分分看，十年後還想讓人看到嗎？',
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '👍', label: '十年後也不怕' },
+            { id: 'no', icon: '✋', label: '先不要貼' },
+          ],
+          items: [
+            { icon: '🎨', label: '自己畫的作品', bin: 'ok' },
+            { icon: '🙋', label: '幫別人解答問題的留言', bin: 'ok' },
+            { icon: '🏅', label: '參加比賽的心得', bin: 'ok' },
+            { icon: '😡', label: '生氣時罵老師的話', bin: 'no' },
+            { icon: '🧗', label: '挑戰危險動作的影片', bin: 'no' },
+            { icon: '🙈', label: '別人出糗的影片', bin: 'no' },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '你發了一張照片，後來把它刪掉了。下面哪一個是對的？',
+          options: [
+            { text: '📸 別人截圖、轉傳的，還在', correct: true },
+            { text: '🧹 刪掉以後，全部都消失了' },
+            { text: '⏪ 可以請網路把它收回來' },
+          ],
+          explain: '刪除只刪掉你自己的那一份。別人存下來的，你刪不掉，所以發布前要先想一想。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'inside',
     part: 'adv',
     icon: '🧠',
@@ -3499,7 +3555,7 @@ export const STAGES = [
   { id: 'helpers', part: 'basic', icon: '🤖', title: 'AI 小幫手', en: 'AI Helpers', units: ['aichat', 'voice'] },
   { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel', 'copyright', 'shareddoc', 'photoshare'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
-  { id: 'smart', part: 'basic', icon: '🧭', title: '聰明的數位生活', en: 'Smart Digital Life', units: ['search'] },
+  { id: 'smart', part: 'basic', icon: '🧭', title: '聰明的數位生活', en: 'Smart Digital Life', units: ['search', 'footprint'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'adder', 'os'] },
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },
   { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },

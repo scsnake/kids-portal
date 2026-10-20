@@ -689,6 +689,23 @@ const SQ_SERP = [
     why: '這是別人寫的心得，而且是很久以前的，票價可能改了。' },
 ];
 
+// ---- footprint consts ----
+// What other people do with a post in the first minutes.
+const DT_COPIES = [
+  { icon: '📸', who: '小傑', what: '截圖存起來' },
+  { icon: '🔁', who: '小美', what: '轉傳到班級群組' },
+  { icon: '💾', who: '阿華', what: '把照片存到手機' },
+  { icon: '🔍', who: '搜尋引擎', what: '存了一份' },
+];
+// Who can see a post for each audience setting.
+const DT_AUD = [
+  { id: 'all', icon: '🌏', name: '公開', sees: [['🙂', '朋友'], ['🕵️', '陌生人'], ['🔍', '搜尋引擎']],
+    why: '「公開」的話，陌生人也看得到，搜尋引擎還會存起來。換一個試試' },
+  { id: 'friends', icon: '👥', name: '朋友', sees: [['🙂', '朋友']] },
+  { id: 'me', icon: '🔒', name: '只有我', sees: [['🙋', '只有你自己']],
+    why: '「只有我」的話，朋友也看不到喔。你想給朋友看，要選哪一個？' },
+];
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -7586,6 +7603,98 @@ export const WIDGETS = {
       hint('🎉 對！名字和網址都是動物園自己的。寫著「贊助」的是廣告，不一定是官方的。', 'done');
       api.done();
     });
+  },
+
+  // Post a silly photo; copies appear; deleting the post does not delete the copies.
+  postspread(host, _, api) {
+    host.innerHTML = `
+      <div class="w-dt">
+        <p class="dt-hint">點「發布」，把扮鬼臉的照片貼出去</p>
+        <div class="dt-board">
+          <article class="dt-post">
+            <header><span>🙂</span><b>我</b><small>剛剛</small></header>
+            <div class="dt-pic">🤪</div>
+            <p>我的超醜鬼臉，哈哈！</p>
+            <button class="go dt-act">發布</button>
+          </article>
+          <ul class="dt-copies">${DT_COPIES.map(c => `<li hidden><span>${c.icon}</span><b>${c.who}</b><small>${c.what}</small><em>還在！</em></li>`).join('')}</ul>
+        </div>
+      </div>`;
+    const $ = s => host.querySelector(s);
+    const hint = (s, cls = '') => { $('.dt-hint').textContent = s; $('.dt-hint').className = `dt-hint ${cls}`; };
+    const copies = [...host.querySelectorAll('.dt-copies li')];
+    let step = 'post';
+    $('.dt-act').addEventListener('click', e => {
+      const b = e.currentTarget;
+      if (step === 'post') {
+        step = 'wait';
+        b.disabled = true;
+        b.textContent = '已發布';
+        hint('發布了！看看接下來發生什麼事……');
+        copies.forEach((li, k) => api.later(() => {
+          li.hidden = false;
+          pop(li);
+          if (k < copies.length - 1) return;
+          step = 'delete';
+          b.disabled = false;
+          b.className = 'option dt-act dt-del';
+          b.textContent = '🗑️ 刪除貼文';
+          hint('過了一天，你覺得好丟臉。點「刪除貼文」');
+        }, 900 + k * 900));
+        return;
+      }
+      if (step !== 'delete') return;
+      step = 'end';
+      $('.dt-post').classList.add('gone');
+      $('.dt-post').innerHTML = '<p class="dt-gone">🗑️ 這則貼文已經刪除</p>';
+      copies.forEach(li => li.classList.add('stay'));
+      api.good();
+      hint('🎉 你的貼文刪掉了，可是截圖、轉傳和存起來的照片都還在！', 'done');
+      api.done();
+    });
+  },
+
+  // Pick who can see a post before it goes out.
+  audience(host, _, api) {
+    host.innerHTML = `
+      <div class="w-dt">
+        <p class="dt-hint">這張照片只想給朋友看。選好「誰看得到」，再發布</p>
+        <article class="dt-post dt-small">
+          <header><span>🙂</span><b>我</b><small>新貼文</small></header>
+          <div class="dt-pic">🏖️</div>
+          <p>放假和家人去海邊玩！</p>
+        </article>
+        <div class="dt-aud" role="radiogroup" aria-label="誰看得到">${DT_AUD.map(a => `<button class="option dt-pick" role="radio" data-id="${a.id}">${a.icon} ${a.name}</button>`).join('')}</div>
+        <div class="dt-sees"><span>誰看得到：</span><ul></ul></div>
+        <button class="go dt-send">發布</button>
+      </div>`;
+    const $ = s => host.querySelector(s);
+    const hint = (s, cls = '') => { $('.dt-hint').textContent = s; $('.dt-hint').className = `dt-hint ${cls}`; };
+    let cur = DT_AUD[0], finished = false;
+    const draw = () => {
+      host.querySelectorAll('.dt-pick').forEach(b => { b.classList.toggle('on', b.dataset.id === cur.id); b.setAttribute('aria-checked', b.dataset.id === cur.id); });
+      $('.dt-sees ul').innerHTML = cur.sees.map(([i, n]) => `<li><span>${i}</span>${n}</li>`).join('');
+    };
+    $('.dt-aud').addEventListener('click', e => {
+      const b = e.target.closest('.dt-pick');
+      if (!b || finished) return;
+      cur = DT_AUD.find(a => a.id === b.dataset.id);
+      hint('看看下面，現在誰看得到？選好就按「發布」');
+      draw();
+      pop($('.dt-sees ul'));
+    });
+    $('.dt-send').addEventListener('click', e => {
+      if (finished) return;
+      if (cur.why) { shake(e.currentTarget); api.bad(); hint(cur.why, 'bad'); return; }
+      finished = true;
+      e.currentTarget.disabled = true;
+      e.currentTarget.textContent = '已發布';
+      host.querySelectorAll('.dt-pick').forEach(b => { b.disabled = true; });
+      api.good();
+      hint('🎉 只有朋友看得到，搜尋引擎找不到。不過朋友還是能截圖，所以發布前還是要想一想。', 'done');
+      api.done();
+    });
+    draw();
   },
 
   // A pretend browser: links, back, forward, reload, and typing an address.
