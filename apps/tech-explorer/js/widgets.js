@@ -775,7 +775,7 @@ const QX_BYTES = [
 const QX_DAMAGE = [
   { id: 'dot', label: '🏷️ 貼一小張貼紙', size: '約 5%', ok: true },
   { id: 'corner', label: '✂️ 破掉一角', size: '約 20%', ok: true },
-  { id: 'big', label: '💧 弄髒一大塊', size: '約 40%', ok: false, why: '髒掉的地方太多了，超過大約 30%，算不回來。' },
+  { id: 'big', label: '💧 弄髒一大塊', size: '約 40%', ok: false, why: '髒掉的地方太多了，超過錯誤更正救得回來的量，算不回來。' },
   { id: 'finder', label: '🏷️ 貼紙蓋住大方框', size: '約 10%', ok: false, why: '大方框被蓋住，相機找不到 QR Code 在哪裡。' },
 ];
 
@@ -7978,7 +7978,8 @@ export const WIDGETS = {
       if (over) { reset(); return; }
       day++;
       show();
-      if (day === SB_TRIAL) hint('今天是試用的最後一天！明天就會開始扣錢', 'warn');
+      if (day === SB_TRIAL) hint('今天是試用的最後一天！現在才取消，可能來不及了', 'warn');
+      else if (day === SB_TRIAL - 1) hint('明天就是最後一天。要在結束前至少一天取消，今天就要決定！', 'warn');
       else if (day < SB_TRIAL) hint(`第 ${day} 天，還在免費試用`);
       if (day <= SB_TRIAL) return;
       // Day 8: the trial ended and the first month is charged.
@@ -7992,10 +7993,18 @@ export const WIDGETS = {
       $('.sb-state').innerHTML = `狀態：<b class="sb-paid">自動續訂，扣了 NT$${SB_PRICE}</b>`;
       $('.sb-cancel').disabled = true;
       $('.sb-next').textContent = '↺ 從第 1 天再試';
-      hint('試用結束，自動扣錢了。要在第 7 天結束前取消喔！', 'bad');
+      hint(`試用結束，自動扣錢了。最晚要在第 ${SB_TRIAL - 1} 天取消（結束前一天）喔！`, 'bad');
     });
     $('.sb-cancel').addEventListener('click', e => {
       if (over) return;
+      // Less than a day before the trial ends is too late: the first month may still be charged.
+      if (day === SB_TRIAL) {
+        e.currentTarget.disabled = true;
+        shake(e.currentTarget);
+        api.bad();
+        hint('最後一天才取消，太晚了！App Store 要在試用結束前至少 24 小時取消。按「下一天」看看', 'bad');
+        return;
+      }
       over = true;
       e.currentTarget.disabled = true;
       $('.sb-next').disabled = true;
@@ -8166,14 +8175,14 @@ export const WIDGETS = {
     const idle = () => face('<p class="wr-time">10:30</p><p class="wr-small">❤️ 78</p>');
     idle();
     let run = 0, cancelled = false;
-    const call = id => {
+    const call = (id, asked) => {
       if (id !== run) return;
       run++;
       face('<p class="wr-big">📞</p><p>正在打給 <b>119</b>…</p>');
       shake($('.wr-watch'));
       api.later(() => {
         face('<p class="wr-big">📍</p><p>已經把位置傳給<br><b>媽媽</b>（緊急聯絡人）</p>');
-        hint('🎉 沒回答，手錶就自己打 119，還告訴家人你在哪裡。', 'done');
+        hint(asked ? '🎉 按「緊急求救」，手錶馬上打 119，還告訴家人你在哪裡。' : '🎉 沒回答，手錶就自己打 119，還告訴家人你在哪裡。', 'done');
         $('.wr-fall').disabled = false;
         $('.wr-fall').textContent = '▶ 再跌一次';
         api.good();
@@ -8205,7 +8214,7 @@ export const WIDGETS = {
     $('.wr-face').addEventListener('click', e => {
       const b = e.target.closest('button');
       if (!b || +b.dataset.id !== run) return;
-      if (b.classList.contains('wr-sos')) { call(run); return; }
+      if (b.classList.contains('wr-sos')) { call(run, true); return; }
       run++;
       cancelled = true;
       host.querySelector('.wr-room').classList.remove('down');
@@ -8344,7 +8353,7 @@ export const WIDGETS = {
           $('.qx-hint').textContent = d.ok ? '破了還能讀！再試一個讀不到的' : '再試一個破了，卻還讀得到的';
           return;
         }
-        $('.qx-hint').textContent = '🎉 破掉不超過大約 30%，錯誤更正都救得回來；可是三個大方框一定要看得到。';
+        $('.qx-hint').textContent = '🎉 這個 QR Code 用備份最多的等級，破掉大約 30% 以內都救得回來；可是三個大方框一定要看得到。';
         $('.qx-hint').classList.add('done');
         api.done();
       }, 1200);

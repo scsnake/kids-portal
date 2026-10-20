@@ -2468,7 +2468,7 @@ export const UNITS = [
     slides: [
       {
         title: '免費試用的陷阱',
-        text: `很多 App 可以${t('免費試用', 'free trial')}，時間到了會${t('自動續訂', 'auto-renewal')}，開始每個月扣錢。不想用了，就要在試用結束前取消。試試看！`,
+        text: `很多 App 可以${t('免費試用', 'free trial')}，時間到了會${t('自動續訂', 'auto-renewal')}，開始每個月扣錢。不想用了，最晚要在試用結束前一天取消。試試看！`,
         widget: 'trialcal',
       },
       {
@@ -3664,7 +3664,7 @@ export const UNITS = [
       },
       {
         title: '破了一角還能掃',
-        text: `QR Code 裡多存了一些備份的資料，叫做${t('錯誤更正', 'error correction')}。髒了、破了一部分，還是能算回來，最多大約 30%。試試看！`,
+        text: `QR Code 裡多存了一些備份的資料，叫做${t('錯誤更正', 'error correction')}。髒了、破了一部分，還是能算回來；備份最多的 QR Code，大約能救回 30%。試試看！`,
         widget: 'qrdamage',
       },
       {
@@ -3677,7 +3677,7 @@ export const UNITS = [
             { text: '📷 相機會自己猜網址' },
             { text: '🔦 手機的燈把破掉的地方照亮了' },
           ],
-          explain: '這叫錯誤更正。QR Code 多存了一些備份資料，破掉不超過大約 30% 都能算回來；可是三個大方框要看得到。',
+          explain: '這叫錯誤更正。QR Code 多存了一些備份資料；備份最多的，破掉大約 30% 以內都能算回來；可是三個大方框要看得到。',
         },
       },
     ],
