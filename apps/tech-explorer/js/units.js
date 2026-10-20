@@ -3641,6 +3641,47 @@ export const UNITS = [
       },
     ],
   },
+
+  {
+    id: 'qrcode',
+    part: 'adv',
+    icon: '🔳',
+    title: 'QR Code 怎麼運作？',
+    en: 'How QR Codes Work',
+    desc: '格子是位元、三個定位方塊、破了也能讀',
+    color: '#343a40',
+    added: '2026-10-20',
+    slides: [
+      {
+        title: '三個大方框',
+        text: `相機看到 QR Code，會先找三個角上的${t('定位方塊', 'finder pattern')}。有了它們，就知道 QR Code 在哪裡、哪一邊朝上，拿歪了也能讀。點點看！`,
+        widget: 'qrfinder',
+      },
+      {
+        title: '黑格子是 1，白格子是 0',
+        text: `QR Code 的每個小格子就是一個${t('位元', 'bit')}：黑色是 1，白色是 0。8 個格子合成一個${t('位元組', 'byte')}，可以代表一個字母。塗塗看！`,
+        widget: 'qrbits',
+      },
+      {
+        title: '破了一角還能掃',
+        text: `QR Code 裡多存了一些備份的資料，叫做${t('錯誤更正', 'error correction')}。髒了、破了一部分，還是能算回來，最多大約 30%。試試看！`,
+        widget: 'qrdamage',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: 'QR Code 破了一小角，為什麼還掃得到？',
+          options: [
+            { text: '🧩 裡面多存了備份資料，可以算回來', correct: true },
+            { text: '📷 相機會自己猜網址' },
+            { text: '🔦 手機的燈把破掉的地方照亮了' },
+          ],
+          explain: '這叫錯誤更正。QR Code 多存了一些備份資料，破掉不超過大約 30% 都能算回來；可是三個大方框要看得到。',
+        },
+      },
+    ],
+  },
 ];
 
 // Home screen sections, in order.
@@ -3667,6 +3708,7 @@ export const STAGES = [
   { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: '網路怎麼運作', en: 'How Networks Work', units: ['internet', 'networld', 'web', 'iot'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'freeapps', 'coding'] },
+  { id: 'secret', part: 'adv', icon: '🔬', title: '生活科技的祕密', en: 'Secrets of Everyday Tech', units: ['qrcode'] },
 ];
 
 // Shown greyed out on the home screen until the unit is written.

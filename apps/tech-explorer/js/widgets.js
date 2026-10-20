@@ -764,6 +764,74 @@ const wrBeat = bpm => {
   } catch {}
 };
 
+// ---- qrcode consts ----
+const QX_N = 21;
+// Top-left corners (x, y) of the three finder squares of a 21×21 QR Code.
+const QX_FINDERS = [[0, 0], [14, 0], [0, 14]];
+const QX_BYTES = [
+  { ch: 'H', bits: '01001000', y: 20 },
+  { ch: 'i', bits: '01101001', y: 16 },
+];
+const QX_DAMAGE = [
+  { id: 'dot', label: '🏷️ 貼一小張貼紙', size: '約 5%', ok: true },
+  { id: 'corner', label: '✂️ 破掉一角', size: '約 20%', ok: true },
+  { id: 'big', label: '💧 弄髒一大塊', size: '約 40%', ok: false, why: '髒掉的地方太多了，超過大約 30%，算不回來。' },
+  { id: 'finder', label: '🏷️ 貼紙蓋住大方框', size: '約 10%', ok: false, why: '大方框被蓋住，相機找不到 QR Code 在哪裡。' },
+];
+
+// A version-1 QR Code look: three finder squares, the timing lines and fixed "random" cells.
+// It is a picture only; it does not scan.
+function qxGrid() {
+  const g = Array.from({ length: QX_N }, () => Array(QX_N).fill(0));
+  let s = 20261019;
+  const rnd = () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648;
+  for (let y = 0; y < QX_N; y++) for (let x = 0; x < QX_N; x++) g[y][x] = rnd() < 0.5 ? 1 : 0;
+  for (let i = 8; i < 13; i++) { g[6][i] = g[i][6] = i % 2 ? 0 : 1; }
+  for (const [fx, fy] of QX_FINDERS) {
+    for (let y = -1; y <= 7; y++) for (let x = -1; x <= 7; x++) {
+      const X = fx + x, Y = fy + y;
+      if (X < 0 || Y < 0 || X >= QX_N || Y >= QX_N) continue;
+      const d = Math.max(Math.abs(x - 3), Math.abs(y - 3));
+      g[Y][X] = d === 3 || d <= 1 ? 1 : 0;
+    }
+  }
+  return g;
+}
+
+// Draw a grid as an SVG with a white quiet zone; `extra` goes on top.
+function qxSVG(g, cls, extra = '') {
+  let d = '';
+  g.forEach((row, y) => row.forEach((v, x) => { if (v) d += `M${x} ${y}h1v1h-1z`; }));
+  return `<svg class="${cls}" viewBox="-3 -3 27 27"><rect x="-3" y="-3" width="27" height="27" rx="1.2" fill="white"/><path d="${d}" fill="#1d2738"/>${extra}</svg>`;
+}
+
+// Where bit k of byte r sits: bytes fill 2-cell-wide columns from the bottom right, upward.
+function qxCell(r, k) {
+  return [k % 2 ? 19 : 20, QX_BYTES[r].y - Math.floor(k / 2)];
+}
+
+// A torn edge for the damage shapes: a zigzag line through `jag`, then straight back
+// through `rest` (outside the code, so only the torn edge shows).
+function qxTear(jag, rest) {
+  let d = `M${jag[0][0]} ${jag[0][1]}`;
+  for (let i = 1; i < jag.length; i++) {
+    const [ax, ay] = jag[i - 1], [bx, by] = jag[i], len = Math.hypot(bx - ax, by - ay);
+    const steps = Math.max(2, Math.round(len / 1.3)), nx = -(by - ay) / len, ny = (bx - ax) / len;
+    for (let j = 1; j <= steps; j++) {
+      const f = j / steps, w = j === steps ? 0 : (j % 2 ? 0.6 : -0.6);
+      d += ` L${(ax + (bx - ax) * f + nx * w).toFixed(2)} ${(ay + (by - ay) * f + ny * w).toFixed(2)}`;
+    }
+  }
+  return d + rest.map(([x, y]) => ` L${x} ${y}`).join('') + 'Z';
+}
+
+function qxDamageSVG(id) {
+  if (id === 'dot') return '<g class="qx-stk"><rect x="9" y="9" width="4.6" height="4.2" rx="1"/><text x="11.3" y="12.2">🐻</text></g>';
+  if (id === 'finder') return '<g class="qx-stk"><rect x="-0.6" y="-0.6" width="8.2" height="8.2" rx="1.4"/><text x="3.5" y="5.4" style="font-size:5px">🐻</text></g>';
+  if (id === 'corner') return `<path class="qx-tear" d="${qxTear([[25, 7], [8, 25]], [[25, 25]])}"/>`;
+  return `<path class="qx-blot" d="${qxTear([[25, 7.6], [7.6, 7.6], [7.6, 25]], [[25, 25]])}"/>`;
+}
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -8023,6 +8091,141 @@ export const WIDGETS = {
       hint('按「我沒事」就取消了。再跌一次，這次什麼都不要按');
       $('.wr-fall').disabled = false;
       $('.wr-fall').textContent = '▶ 再跌一次';
+    });
+  },
+
+  // The camera sees a tilted code. Tap the three big corner squares; then it turns upright.
+  qrfinder(host, _, api) {
+    const rings = QX_FINDERS.map(([x, y], i) => `<rect class="qx-find" data-f="${i}" x="${x - 0.5}" y="${y - 0.5}" width="8" height="8" rx="1"/>`).join('');
+    host.innerHTML = `
+      <div class="w-qx">
+        <p class="qx-hint">相機拍到一個歪歪的 QR Code。點三個角上的大方框！</p>
+        <div class="qx-cam">${qxSVG(qxGrid(), 'qx-code', rings)}<svg class="qx-frame" viewBox="0 0 100 100" aria-hidden="true"><path d="M6 22V6h16M78 6h16v16M94 78v16H78M22 94H6V78"/></svg></div>
+        <p class="qx-count">找到 <b>0</b> / 3 個大方框</p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const found = new Set();
+    $('.qx-code').addEventListener('click', e => {
+      if (found.size === 3) return;
+      const f = e.target.closest('.qx-find');
+      if (!f) {
+        api.bad();
+        $('.qx-hint').textContent = '這裡是小格子。大方框在三個角上，外面黑、裡面也黑';
+        return;
+      }
+      if (found.has(f.dataset.f)) return;
+      found.add(f.dataset.f);
+      f.classList.add('got');
+      $('.qx-count b').textContent = found.size;
+      pop($('.qx-count'));
+      api.good();
+      if (found.size < 3) { $('.qx-hint').textContent = `對！這是定位方塊。還有 ${3 - found.size} 個`; return; }
+      $('.qx-hint').textContent = '相機找到三個大方框了……';
+      $('.qx-cam').classList.add('up');
+      api.later(() => {
+        if (!api.alive()) return;
+        $('.qx-cam').classList.add('read');
+        $('.qx-hint').textContent = '🎉 三個大方框告訴相機 QR Code 在哪裡；沒有方框的那個角，就知道哪一邊朝上。';
+        $('.qx-hint').classList.add('done');
+        api.done();
+      }, 900);
+    });
+  },
+
+  // Paint 8 cells to match each byte: black is 1, white is 0. Each byte becomes a letter.
+  qrbits(host, _, api) {
+    host.innerHTML = `
+      <div class="w-qx">
+        <p class="qx-hint">照著上面的數字塗格子：1 就點成黑色</p>
+        <div class="qx-bitrow">
+          <div class="qx-bytes">${QX_BYTES.map((b, r) => `
+            <div class="qx-byte" data-r="${r}">
+              <div class="qx-target">${[...b.bits].map(c => `<span>${c}</span>`).join('')}</div>
+              <div class="qx-cells">${[...b.bits].map((_, k) => `<button class="qx-bit" data-r="${r}" data-k="${k}" aria-label="第 ${k + 1} 格">0</button>`).join('')}</div>
+              <b class="qx-ch">？</b>
+            </div>`).join('')}
+          </div>
+          <figure class="qx-mini"><div class="qx-minipic"></div><figcaption>在 QR Code 裡，<br>8 格排成這樣</figcaption></figure>
+        </div>
+        <p class="qx-msg" aria-live="polite"></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const on = QX_BYTES.map(() => Array(8).fill(0)), ok = new Set();
+    const drawMini = () => {
+      const g = qxGrid();
+      on.forEach((row, r) => row.forEach((v, k) => { const [x, y] = qxCell(r, k); g[y][x] = v; }));
+      const boxes = QX_BYTES.map(b => `<rect class="qx-box" x="18.85" y="${b.y - 3.15}" width="2.3" height="4.3" rx=".4"/>`).join('');
+      $('.qx-minipic').innerHTML = qxSVG(g, 'qx-small', boxes);
+    };
+    host.querySelector('.qx-bytes').addEventListener('click', e => {
+      const b = e.target.closest('.qx-bit');
+      if (!b || ok.has(+b.dataset.r)) return;
+      const r = +b.dataset.r, k = +b.dataset.k;
+      on[r][k] ^= 1;
+      b.classList.toggle('on', !!on[r][k]);
+      b.textContent = on[r][k];
+      drawMini();
+      if (on[r].join('') !== QX_BYTES[r].bits) return;
+      ok.add(r);
+      const row = host.querySelector(`.qx-byte[data-r="${r}"]`);
+      row.classList.add('ok');
+      row.querySelector('.qx-ch').textContent = QX_BYTES[r].ch;
+      pop(row.querySelector('.qx-ch'));
+      row.querySelectorAll('.qx-bit').forEach(x => { x.disabled = true; });
+      api.good();
+      $('.qx-msg').textContent = `讀出來的字：${QX_BYTES.filter((_, i) => ok.has(i)).map(x => x.ch).join('')}`;
+      if (ok.size < QX_BYTES.length) { $('.qx-hint').textContent = `${QX_BYTES[r].bits} 就是「${QX_BYTES[r].ch}」！再塗下一排`; return; }
+      $('.qx-msg').textContent = '讀出來的字：Hi';
+      $('.qx-hint').textContent = '🎉 16 個格子，就是 16 個位元，藏了「Hi」兩個字母。網址也是這樣一個字一個字存的！';
+      $('.qx-hint').classList.add('done');
+      api.done();
+    });
+    drawMini();
+  },
+
+  // Damage the code in four ways and scan it. Up to about 30% can be rebuilt,
+  // but the big corner squares must stay visible.
+  qrdamage(host, _, api) {
+    host.innerHTML = `
+      <div class="w-qx">
+        <p class="qx-hint">選一種弄壞的方法，看看還掃不掃得到</p>
+        <div class="qx-dmgrow">
+          <div class="qx-scan"><div class="qx-dmgpic"></div><i class="qx-line"></i></div>
+          <div class="qx-dmgbtns">${QX_DAMAGE.map(d => `<button class="option qx-dmg" data-d="${d.id}">${d.label}<small>${d.size}</small></button>`).join('')}</div>
+        </div>
+        <p class="qx-res" aria-live="polite"></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const grid = qxGrid(), seen = new Set();
+    let busy = false;
+    const draw = id => { $('.qx-dmgpic').innerHTML = qxSVG(grid, 'qx-code', id ? qxDamageSVG(id) : ''); };
+    draw();
+    $('.qx-dmgbtns').addEventListener('click', e => {
+      const b = e.target.closest('.qx-dmg');
+      if (!b || busy) return;
+      const d = QX_DAMAGE.find(x => x.id === b.dataset.d);
+      busy = true;
+      host.querySelectorAll('.qx-dmg').forEach(x => x.classList.toggle('sel', x === b));
+      draw(d.id);
+      $('.qx-res').className = 'qx-res';
+      $('.qx-res').textContent = '📷 掃描中……';
+      $('.qx-scan').classList.add('scanning');
+      api.later(() => {
+        if (!api.alive()) return;
+        busy = false;
+        $('.qx-scan').classList.remove('scanning');
+        seen.add(d.ok);
+        $('.qx-res').classList.add(d.ok ? 'good' : 'bad');
+        $('.qx-res').textContent = d.ok ? '✅ 讀到了：library.example.tw　錯誤更正把破掉的部分算回來了' : `❌ 讀不到！${d.why}`;
+        if (d.ok) api.good(); else api.bad();
+        if (seen.size < 2) {
+          $('.qx-hint').textContent = d.ok ? '破了還能讀！再試一個讀不到的' : '再試一個破了，卻還讀得到的';
+          return;
+        }
+        $('.qx-hint').textContent = '🎉 破掉不超過大約 30%，錯誤更正都救得回來；可是三個大方框一定要看得到。';
+        $('.qx-hint').classList.add('done');
+        api.done();
+      }, 1200);
     });
   },
 
