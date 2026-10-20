@@ -2873,7 +2873,7 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .dt-pick.on { border-color: #1c7ed6; background: #e7f5ff; }
 .dt-sees { display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 52px; font-weight: 800; color: var(--ink-2); }
 .dt-sees ul { display: flex; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.dt-sees li { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 12px; background: var(--card); border: 2px solid var(--line); color: var(--ink); }
+.dt-sees li { display: flex; align-items: center; gap: 4px; padding: 4px 6px; color: var(--ink); }
 .dt-sees li span { font-size: 1.4rem; }
 @media (max-width: 600px) {
   .dt-post { min-height: 0; }
