@@ -3162,3 +3162,61 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 @media (prefers-reduced-motion: reduce) {
   .tri-ring { transition: none; }
 }
+
+/* ---------- robots and self-driving cars: the sense-think-act flow chart, sensor views, a robot vacuum ---------- */
+.w-rb { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+.rb-hint { margin: 0; min-height: 3em; width: min(100%, 560px); font-weight: 800; font-size: 1.1rem; line-height: 1.5; text-align: center; }
+.rb-hint.done { color: var(--good); }
+.rb-view { display: block; width: min(100%, 500px, 62vh); aspect-ratio: 400 / 240; border-radius: 18px; box-shadow: var(--shadow); }
+.rb-tag { font-size: 14px; font-weight: 800; fill: #b2f2bb; text-anchor: middle; }
+.rb-view .rb-name { font-size: 17px; font-weight: 900; fill: white; paint-order: stroke; stroke: rgba(0,0,0,.55); stroke-width: 4px; }
+.rb-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.rb-tabs .option { min-height: 52px; padding: .6rem 1rem; font-size: 1.1rem; }
+.rb-tab.on { border-color: #1c7ed6; background: #e7f5ff; }
+.rb-fog.on { border-color: var(--ink-2); background: #f1f3f5; }
+.rb-what { margin: 0; width: min(100%, 520px); min-height: 3em; font-size: 1.05rem; line-height: 1.5; }
+.rb-what b { color: var(--c); }
+.rb-pair { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; width: 100%; }
+.rb-pair figure { flex: 1 1 260px; max-width: 360px; margin: 0; }
+.rb-pair figcaption { margin-bottom: 4px; font-weight: 800; color: var(--ink-2); text-align: center; }
+.rb-pair svg { display: block; width: 100%; border-radius: 12px; border: 2px solid var(--line); }
+.rb-room { background: #f8f0e3; cursor: pointer; }
+.rb-cell { fill: #f8f0e3; stroke: #ecdcc2; stroke-width: 1; }
+.rb-emo { font-size: 24px; text-anchor: middle; pointer-events: none; }
+.rb-small { font-size: 11px; font-weight: 800; fill: white; text-anchor: middle; pointer-events: none; }
+.rb-bot { pointer-events: none; transition: transform .25s ease-out; }
+.rb-map { background: #dee2e6; }
+.rb-m.unk { fill: #ced4da; }
+.rb-m.free { fill: white; }
+.rb-m.clean { fill: color-mix(in srgb, var(--c) 22%, white); }
+.rb-m.wall { fill: #495057; }
+.rb-m.drop { fill: #e67700; }
+.rb-q { font-size: 15px; font-weight: 800; fill: #868e96; text-anchor: middle; }
+.rb-key { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 10px; margin: 4px 0 0; font-size: .9rem; font-weight: 700; color: var(--ink-2); }
+.rb-key i { display: inline-block; width: 14px; height: 14px; margin-right: 4px; border-radius: 3px; vertical-align: -2px; border: 1px solid var(--line); }
+.rb-key .unk { background: #ced4da; } .rb-key .free { background: white; } .rb-key .clean { background: color-mix(in srgb, var(--c) 22%, white); } .rb-key .wall { background: #495057; } .rb-key .drop { background: #e67700; }
+.rb-log { margin: 0; min-height: 1.6em; font-weight: 800; color: var(--ink-2); text-align: center; }
+@media (prefers-reduced-motion: reduce) {
+  .rb-bot { transition: none; }
+}
+
+/* senseloop: the flow chart and the light that walks it */
+.rb-flow { display: block; width: min(100%, 540px); margin: 0 auto; overflow: visible; animation: rb-in .4s ease-out; }
+@keyframes rb-in { from { opacity: 0; transform: scale(.96); } }
+.rb-flow text { font-size: 15px; font-weight: 800; text-anchor: middle; fill: var(--ink); }
+.rb-node rect, .rb-node polygon { fill: var(--card); stroke: var(--line); stroke-width: 2; transition: fill .2s, stroke .2s; }
+.rb-node.trail rect, .rb-node.trail polygon { stroke: color-mix(in srgb, var(--c) 45%, white); }
+.rb-node.lit rect, .rb-node.lit polygon { fill: color-mix(in srgb, var(--c) 14%, white); stroke: var(--c); stroke-width: 3.5; }
+.rb-edge path { fill: none; stroke: var(--line); stroke-width: 3; stroke-linejoin: round; }
+.rb-edge polygon { fill: var(--line); }
+.rb-edge.trail path { stroke: color-mix(in srgb, var(--c) 45%, white); }
+.rb-edge.trail polygon { fill: color-mix(in srgb, var(--c) 45%, white); }
+.rb-edge.lit path { stroke: var(--c); stroke-width: 4; stroke-dasharray: 100; animation: rb-draw .3s ease-out both; }
+.rb-edge.lit polygon { fill: var(--c); }
+@keyframes rb-draw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+.rb-flow .rb-yn { font-size: 14px; fill: var(--ink-2); }
+.rb-saw rect { fill: #fff9db; stroke: #f59f00; stroke-width: 2; }
+.rb-saw { transform-box: fill-box; transform-origin: center; }
+@media (prefers-reduced-motion: reduce) {
+  .rb-flow, .rb-edge.lit path { animation: none; }
+}

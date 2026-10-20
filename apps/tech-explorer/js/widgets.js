@@ -879,6 +879,81 @@ const TRI_STREETS = `
   <g fill="#e6e0d2"><rect x="150" y="16" width="70" height="60" rx="4"/><rect x="270" y="90" width="110" height="60" rx="4"/><rect x="16" y="16" width="96" height="100" rx="4"/></g>
   <g fill="none"><path d="M0 132H400M130 0V260M250 0V260" stroke="#d6cfbd" stroke-width="16"/><path d="M0 132H400M130 0V260M250 0V260" stroke="#fff" stroke-width="12"/></g>`;
 
+// ---- robocar consts ----
+// What each sensor is good at, shown under the view.
+const RB_SENSORS = [
+  { id: 'cam', icon: '📷', name: '鏡頭', what: '看得到顏色和字：紅燈、車道線、路標。可是晚上和大霧就看不清楚。', fog: '霧把鏡頭擋住了，前面的車幾乎看不見。' },
+  { id: 'radar', icon: '📡', name: '雷達', what: '用無線電波量距離和速度，下雨、起霧也看得到。可是看不出顏色。', fog: '雷達的電波穿得過霧，還是看得到前車！' },
+  { id: 'lidar', icon: '✨', name: '光達', what: '一直射出雷射光，畫出四周立體的形狀，非常精準。大霧、大雨時會變差。', fog: '霧把雷射光打散了，點變得亂亂的，看不出前車的形狀。' },
+];
+// A room 8 cells wide and 5 high. s = sofa, p = plant, t = table, x = stairs (a drop), . = floor.
+const RB_ROOM = [
+  '..ss...p',
+  '........',
+  '....t...',
+  '.......x',
+  '.......x',
+];
+const RB_THINGS = { s: '🛋️', p: '🪴', t: '🪑' };
+const RB_CELL = 40;
+// Dots along a line, for the lidar picture.
+const rbDots = (x1, y1, x2, y2, n, color) => Array.from({ length: n }, (_, i) => {
+  const k = n === 1 ? 0 : i / (n - 1);
+  return `<circle cx="${(x1 + (x2 - x1) * k).toFixed(1)}" cy="${(y1 + (y2 - y1) * k).toFixed(1)}" r="2.6" fill="${color}"/>`;
+}).join('');
+const RB_VIEWS = {
+  cam: `
+    <rect width="400" height="240" fill="#a5d8ff"/><rect y="110" width="400" height="130" fill="#8ce99a"/>
+    <path d="M40 240 L185 110 H215 L360 240Z" fill="#868e96"/>
+    <path d="M200 116V132M200 146V168M200 186V214" stroke="white" stroke-width="5"/>
+    <rect x="86" y="36" width="8" height="90" fill="#495057"/><rect x="74" y="16" width="32" height="58" rx="6" fill="#343a40"/>
+    <circle cx="90" cy="30" r="8" fill="#ff6b6b"/><circle cx="90" cy="45" r="8" fill="#5c5f66"/><circle cx="90" cy="60" r="8" fill="#5c5f66"/>
+    <g transform="translate(168 132)"><rect width="64" height="40" rx="8" fill="#e8590c"/><rect x="8" y="5" width="48" height="13" rx="3" fill="#d0ebff"/>
+      <circle cx="12" cy="31" r="5" fill="#ffd43b"/><circle cx="52" cy="31" r="5" fill="#ffd43b"/></g>
+    <text x="312" y="176" font-size="44" text-anchor="middle">🚶</text>`,
+  radar: `
+    <rect width="400" height="240" fill="#0b1d14"/>
+    <g fill="none" stroke="#2b8a3e" stroke-width="1.5" opacity=".7"><circle cx="200" cy="240" r="60"/><circle cx="200" cy="240" r="120"/><circle cx="200" cy="240" r="180"/></g>
+    <path d="M200 240 L60 40 M200 240 L340 40" stroke="#2b8a3e" stroke-width="1.5" opacity=".7"/>
+    <circle cx="200" cy="150" r="13" fill="#69db7c"/><circle cx="200" cy="150" r="22" fill="none" stroke="#69db7c" stroke-width="2" opacity=".6"/>
+    <text x="200" y="124" class="rb-tag">前車 25 公尺・時速 40</text>
+    <circle cx="300" cy="168" r="7" fill="#69db7c" opacity=".75"/><text x="300" y="196" class="rb-tag">有東西 18 公尺</text>
+    <text x="100" y="64" class="rb-tag">紅綠燈？看不出顏色</text>`,
+  lidar: `
+    <rect width="400" height="240" fill="#111"/>
+    ${rbDots(40, 240, 185, 112, 14, '#fd7e14')}${rbDots(360, 240, 215, 112, 14, '#fd7e14')}
+    ${rbDots(168, 132, 232, 132, 9, '#4dabf7')}${rbDots(168, 172, 232, 172, 9, '#4dabf7')}${rbDots(168, 136, 168, 168, 5, '#4dabf7')}${rbDots(232, 136, 232, 168, 5, '#4dabf7')}
+    ${rbDots(312, 132, 312, 178, 7, '#ffd43b')}${rbDots(304, 140, 320, 140, 3, '#ffd43b')}<circle cx="312" cy="126" r="6" fill="none" stroke="#ffd43b" stroke-width="2.5" stroke-dasharray="2 3"/>
+    ${rbDots(90, 36, 90, 126, 10, '#74c0fc')}${rbDots(74, 16, 106, 16, 5, '#74c0fc')}${rbDots(74, 74, 106, 74, 5, '#74c0fc')}
+    <text x="200" y="124" class="rb-tag">車子的形狀</text><text x="312" y="116" class="rb-tag">人</text>`,
+};
+// Fog over each view: the camera goes white, radar is unchanged, lidar gets scattered dots.
+const RB_FOG = {
+  cam: '<rect width="400" height="240" fill="#f1f3f5" opacity=".9"/>',
+  radar: '',
+  lidar: `<rect width="400" height="240" fill="#111"/>${Array.from({ length: 90 }, (_, i) => `<circle cx="${(i * 97) % 400}" cy="${70 + ((i * 53) % 170)}" r="2.4" fill="#adb5bd" opacity=".8"/>`).join('')}${rbDots(40, 240, 120, 170, 6, '#fd7e14')}${rbDots(360, 240, 280, 170, 6, '#fd7e14')}`,
+};
+
+// The flow chart that the four steps turn into. Nodes A–E, edges named by the nodes they join.
+const rbBox = (k, x, y, w, label) => `<g class="rb-node" data-k="${k}"><rect x="${x - w / 2}" y="${y - 20}" width="${w}" height="40" rx="12"/><text x="${x}" y="${y + 6}">${label}</text></g>`;
+const rbEdge = (k, d, head) => `<g class="rb-edge" data-k="${k}"><path d="${d}" pathLength="100"/><polygon points="${head}"/></g>`;
+const RB_FLOW = `
+  <svg class="rb-flow" viewBox="0 0 440 320" role="img" aria-label="流程圖：鏡頭看前面，判斷前面有沒有人，有人就踩煞車，沒人就繼續開，然後再看一次">
+    ${rbEdge('ab', 'M210 52 V70', '203,70 217,70 210,80')}
+    ${rbEdge('bc', 'M130 112 H110 V170', '103,170 117,170 110,180')}
+    ${rbEdge('bd', 'M290 112 H330 V170', '323,170 337,170 330,180')}
+    ${rbEdge('ce', 'M110 220 V270 H125', '125,263 125,277 135,270')}
+    ${rbEdge('de', 'M330 220 V270 H295', '295,263 295,277 285,270')}
+    ${rbEdge('ea', 'M210 290 V308 H14 V32 H125', '125,25 125,39 135,32')}
+    <text class="rb-yn" x="112" y="102">有</text><text class="rb-yn" x="318" y="102">沒有</text>
+    ${rbBox('A', 210, 32, 150, '📷 感測：看前面')}
+    <g class="rb-node rb-diamond" data-k="B"><polygon points="210,78 290,112 210,146 130,112"/><text x="210" y="118">🧠 前面有人嗎？</text></g>
+    ${rbBox('C', 110, 200, 150, '🛑 踩煞車')}
+    ${rbBox('D', 330, 200, 150, '🚗 繼續往前開')}
+    ${rbBox('E', 210, 270, 150, '🔁 再看一次')}
+    <g class="rb-saw"><rect x="300" y="14" width="128" height="36" rx="18"/><text x="364" y="38"></text></g>
+  </svg>`;
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -8641,6 +8716,201 @@ export const WIDGETS = {
       h.textContent = off > 0 ? '圓還是太大，交不到一點。時鐘還是太快' : '圓太小了，碰不到一起。時鐘變太慢了';
     });
     draw();
+  },
+
+  // The order task. Once the steps are right, they turn into a flow chart with the yes / no
+  // branch, and a light walks it again and again, through 有人 or 沒人 at random.
+  senseloop(host, params, api) {
+    WIDGETS.order(host, params, { ...api, done: () => { api.done(); api.later(start, 900); } });
+    const start = () => {
+      if (!api.alive()) return;
+      host.querySelector('.ord-hint').textContent = '🎉 對了！變成流程圖：有人就停，沒人就繼續開，然後再看一次。';
+      const seq = host.querySelector('.seq');
+      seq.insertAdjacentHTML('afterend', RB_FLOW);
+      seq.hidden = true;
+      const flow = host.querySelector('.rb-flow'), bubble = flow.querySelector('.rb-saw text');
+      const el = k => flow.querySelector(`[data-k="${k}"]`);
+      let route = [], i = 0, last = null, streak = 0;
+      const step = () => {
+        if (!api.alive()) return;
+        if (i === route.length) {
+          // A new look: pick 有人 or 沒人, but never the same three times in a row.
+          const yes = streak >= 2 ? !last : Math.random() < 0.5;
+          streak = yes === last ? streak + 1 : 1;
+          last = yes;
+          route = yes ? ['A', 'ab', 'B', 'bc', 'C', 'ce', 'E', 'ea'] : ['A', 'ab', 'B', 'bd', 'D', 'de', 'E', 'ea'];
+          i = 0;
+          flow.querySelectorAll('[data-k]').forEach(x => x.classList.remove('lit', 'trail'));
+          bubble.textContent = yes ? '看到 🚶 有人' : '看到 🛣️ 沒人';
+          pop(flow.querySelector('.rb-saw'));
+        }
+        const k = route[i++];
+        flow.querySelectorAll('.lit').forEach(x => { x.classList.remove('lit'); x.classList.add('trail'); });
+        el(k).classList.add('lit');
+        api.later(step, k.length === 1 ? 630 : 330);
+      };
+      step();
+    };
+  },
+
+  // Switch between what the camera, radar and lidar see; then add fog and find who still sees the car.
+  carsensors(host, _, api) {
+    host.innerHTML = `
+      <div class="w-rb">
+        <p class="rb-hint">點三種感測器，看看車子看到什麼</p>
+        <svg class="rb-view" viewBox="0 0 400 240" aria-hidden="true"></svg>
+        <div class="rb-tabs">
+          ${RB_SENSORS.map(s => `<button class="option rb-tab" data-s="${s.id}">${s.icon} ${s.name}</button>`).join('')}
+          <button class="option rb-fog">🌫️ 起霧</button>
+        </div>
+        <p class="rb-what" aria-live="polite"></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = (text, done) => { $('.rb-hint').textContent = text; $('.rb-hint').classList.toggle('done', !!done); };
+    let cur = 'cam', fog = false, finished = false;
+    const seen = new Set();
+    const draw = () => {
+      const s = RB_SENSORS.find(x => x.id === cur);
+      $('.rb-view').innerHTML = RB_VIEWS[cur] + (fog ? RB_FOG[cur] : '') + `<text x="12" y="28" class="rb-name">${s.icon} ${s.name}${fog ? '・大霧' : ''}</text>`;
+      host.querySelectorAll('.rb-tab').forEach(b => b.classList.toggle('on', b.dataset.s === cur));
+      $('.rb-fog').textContent = fog ? '☀️ 霧散了' : '🌫️ 起霧';
+      $('.rb-fog').classList.toggle('on', fog);
+      $('.rb-what').innerHTML = `<b>${s.icon} ${s.name}：</b>${fog ? s.fog : s.what}`;
+      if (finished) return;
+      if (fog && cur === 'radar') {
+        finished = true;
+        api.good();
+        hint('🎉 大霧裡只有雷達還看得到前車。每種眼睛都有弱點，所以自動駕駛車會一起用！', true);
+        api.done();
+      } else if (fog) hint('大霧裡，哪一種感測器還看得到前面的車？');
+      else if (seen.size < 3) hint(`點三種感測器，看看車子看到什麼（還有 ${3 - seen.size} 種）`);
+      else hint('三種都看過了！按「🌫️ 起霧」試試看');
+    };
+    host.querySelector('.rb-tabs').addEventListener('click', e => {
+      const b = e.target.closest('.rb-tab, .rb-fog');
+      if (!b) return;
+      if (b.classList.contains('rb-fog')) fog = !fog;
+      else { cur = b.dataset.s; seen.add(cur); }
+      draw();
+      pop($('.rb-view'));
+    });
+    seen.add(cur);
+    draw();
+  },
+
+  // A robot vacuum drives, senses the cells around it and draws its own map. Socks can be dropped.
+  vacuum(host, _, api) {
+    const W = RB_ROOM[0].length, H = RB_ROOM.length, C = RB_CELL;
+    const real = RB_ROOM.map(r => r.split(''));
+    const map = RB_ROOM.map(r => r.split('').map(() => '?')); // ? unknown, . free, # blocked, x drop
+    const done = new Set();
+    let pos = [0, 0], running = false, finished = false;
+    const logged = new Set();
+    host.innerHTML = `
+      <div class="w-rb">
+        <p class="rb-hint">點地板丟一隻襪子 🧦，再按「開始打掃」</p>
+        <div class="rb-pair">
+          <figure><figcaption>🏠 房間</figcaption><svg class="rb-room" viewBox="0 0 ${W * C} ${H * C}"></svg></figure>
+          <figure><figcaption>🗺️ 機器人畫的地圖</figcaption><svg class="rb-map" viewBox="0 0 ${W * C} ${H * C}" aria-hidden="true"></svg>
+            <p class="rb-key"><span><i class="unk"></i>還不知道</span><span><i class="free"></i>看到了</span><span><i class="clean"></i>掃過了</span><span><i class="wall"></i>擋住</span><span><i class="drop"></i>樓梯</span></p></figure>
+        </div>
+        <button class="go rb-start">▶ 開始打掃</button>
+        <p class="rb-log" aria-live="polite"></p>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const key = (x, y) => `${x},${y}`;
+    const bot = ([x, y]) => `<g class="rb-bot" transform="translate(${x * C + C / 2} ${y * C + C / 2})"><circle r="15" fill="#495057" stroke="white" stroke-width="3"/><circle cy="-7" r="3.5" fill="#69db7c"/></g>`;
+    const drawRoom = () => {
+      $('.rb-room').innerHTML = real.map((row, y) => row.map((c, x) => {
+        const r = `<rect class="rb-cell" data-x="${x}" data-y="${y}" x="${x * C}" y="${y * C}" width="${C}" height="${C}"/>`;
+        if (c === 'x') return `<rect x="${x * C}" y="${y * C}" width="${C}" height="${C}" fill="url(#rb-stairs)"/>`;
+        if (c === 'k') return r + `<text x="${x * C + C / 2}" y="${y * C + 28}" class="rb-emo">🧦</text>`;
+        if (RB_THINGS[c]) return `<rect x="${x * C}" y="${y * C}" width="${C}" height="${C}" fill="#e9dcc5"/><text x="${x * C + C / 2}" y="${y * C + 29}" class="rb-emo">${RB_THINGS[c]}</text>`;
+        return r;
+      }).join('')).join('') + `<defs><pattern id="rb-stairs" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="#adb5bd"/><rect width="10" height="4" fill="#495057"/></pattern></defs>
+        <text x="${(W - 0.5) * C}" y="${(H - 0.2) * C}" class="rb-small">樓梯</text>` + bot(pos);
+    };
+    const drawMap = () => {
+      $('.rb-map').innerHTML = map.map((row, y) => row.map((c, x) => {
+        const cls = c === '?' ? 'unk' : c === '#' ? 'wall' : c === 'x' ? 'drop' : done.has(key(x, y)) ? 'clean' : 'free';
+        return `<rect class="rb-m ${cls}" x="${x * C + 1}" y="${y * C + 1}" width="${C - 2}" height="${C - 2}" rx="4"/>${c === '?' ? `<text x="${x * C + C / 2}" y="${y * C + 26}" class="rb-q">?</text>` : ''}`;
+      }).join('')).join('') + bot(pos);
+    };
+    const say = text => { $('.rb-log').textContent = text; };
+    // Look at the four cells next to the robot and write them on the map.
+    const sense = () => {
+      const [x, y] = pos;
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H) return;
+        const c = real[ny][nx];
+        if (c === 'x') {
+          map[ny][nx] = 'x';
+          if (!logged.has('x')) { logged.add('x'); say('🪜 懸崖感測器：前面是樓梯，不往前走！'); }
+        } else if (c === 'k') {
+          map[ny][nx] = '#';
+          if (!logged.has('k')) { logged.add('k'); say('🧦 看到襪子了，記在地圖上，繞過去'); }
+        } else if (c !== '.') {
+          map[ny][nx] = '#';
+          if (!logged.has(c)) { logged.add(c); say(`${RB_THINGS[c]} 碰到${c === 's' ? '沙發' : c === 'p' ? '盆栽' : '椅子'}，記在地圖上，換個方向`); }
+        } else if (map[ny][nx] === '?') map[ny][nx] = '.';
+      });
+    };
+    // The first step toward the nearest floor cell it has seen but not cleaned yet.
+    const nextStep = () => {
+      const prev = new Map([[key(...pos), null]]), queue = [pos];
+      while (queue.length) {
+        const p = queue.shift();
+        if (!done.has(key(...p))) {
+          let s = p;
+          while (prev.get(key(...s)) && key(...prev.get(key(...s))) !== key(...pos)) s = prev.get(key(...s));
+          return s;
+        }
+        for (const [dx, dy] of [[1, 0], [0, 1], [-1, 0], [0, -1]]) {
+          const n = [p[0] + dx, p[1] + dy];
+          if (n[0] < 0 || n[1] < 0 || n[0] >= W || n[1] >= H || map[n[1]][n[0]] !== '.' || prev.has(key(...n))) continue;
+          prev.set(key(...n), p);
+          queue.push(n);
+        }
+      }
+      return null;
+    };
+    const tick = () => {
+      if (!api.alive()) return;
+      done.add(key(...pos));
+      sense();
+      const n = nextStep();
+      if (n) pos = n;
+      drawRoom();
+      drawMap();
+      if (n) { api.later(tick, 280); return; }
+      running = false;
+      finished = true;
+      $('.rb-hint').textContent = '🎉 掃完了，地圖也畫好了！下次它就照著地圖走，不用再亂撞。';
+      $('.rb-hint').classList.add('done');
+      say('');
+      api.good();
+      api.done();
+    };
+    $('.rb-room').addEventListener('click', e => {
+      const r = e.target.closest('.rb-cell');
+      if (!r || finished) return;
+      const x = +r.dataset.x, y = +r.dataset.y;
+      if (real[y][x] !== '.' || key(x, y) === key(...pos)) return;
+      if (real.flat().filter(c => c === 'k').length >= 3) { say('襪子夠多了！'); return; }
+      real[y][x] = 'k';
+      drawRoom();
+      api.good();
+      if (!running) $('.rb-hint').textContent = '丟好了！按「開始打掃」，看它會不會繞過去';
+    });
+    $('.rb-start').addEventListener('click', e => {
+      e.currentTarget.disabled = true;
+      running = true;
+      $('.rb-hint').textContent = '機器人一邊掃，一邊畫地圖……還可以再丟襪子';
+      tick();
+    });
+    drawRoom();
+    drawMap();
   },
 
   // A pretend browser: links, back, forward, reload, and typing an address.

@@ -3764,6 +3764,55 @@ export const UNITS = [
       },
     ],
   },
+
+  {
+    id: 'robocar',
+    part: 'adv',
+    icon: '🚗',
+    title: '機器人和自動駕駛怎麼看路？',
+    en: 'How Robots and Self-Driving Cars See',
+    desc: '感測、判斷、行動；鏡頭、雷達、光達',
+    color: '#0f766e',
+    added: '2026-10-20',
+    slides: [
+      {
+        title: '感測、判斷、行動',
+        text: `自動駕駛車和機器人都照三個步驟做事：${t('感測', 'sense')}、${t('判斷', 'think')}、${t('行動', 'act')}。而且一秒鐘就重複很多次。排排看！`,
+        widget: 'senseloop',
+        params: {
+          items: [
+            { icon: '📷', label: '鏡頭看到前面有人' },
+            { icon: '🧠', label: '電腦判斷：要停下來' },
+            { icon: '🛑', label: '踩煞車' },
+            { icon: '🔁', label: '再看一次，一直重複' },
+          ],
+        },
+      },
+      {
+        title: '不一樣的眼睛',
+        text: `自動駕駛車有好幾種眼睛：${t('鏡頭', 'camera')}看顏色，${t('雷達', 'radar')}用電波量距離，${t('光達', 'lidar')}用雷射光畫出形狀。每種都看看，再起霧試試！`,
+        widget: 'carsensors',
+      },
+      {
+        title: '掃地機器人怎麼不迷路？',
+        text: `${t('掃地機器人', 'robot vacuum')}一邊走，一邊記下哪裡有沙發、牆，慢慢畫出家裡的${t('地圖', 'map')}。底下還有${t('懸崖感測器', 'cliff sensor')}，不會掉下樓梯。試試看！`,
+        widget: 'vacuum',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '自動駕駛車遇到哪一種情況，最需要人來幫忙？',
+          options: [
+            { text: '👮 警察站在路口，用手勢指揮交通', correct: true },
+            { text: '🚗 前面的車慢下來' },
+            { text: '🔴 前面的紅綠燈變紅燈' },
+          ],
+          explain: '很少見的情況，像施工改道、警察的手勢、被貼紙蓋住的路標，AI 沒學過就可能看錯，所以還需要人注意。',
+        },
+      },
+    ],
+  },
 ];
 
 // Home screen sections, in order.
@@ -3790,7 +3839,7 @@ export const STAGES = [
   { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: '網路怎麼運作', en: 'How Networks Work', units: ['internet', 'networld', 'web', 'iot'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'freeapps', 'coding'] },
-  { id: 'secret', part: 'adv', icon: '🔬', title: '生活科技的祕密', en: 'Secrets of Everyday Tech', units: ['qrcode', 'clock', 'gpsmath'] },
+  { id: 'secret', part: 'adv', icon: '🔬', title: '生活科技的祕密', en: 'Secrets of Everyday Tech', units: ['qrcode', 'clock', 'gpsmath', 'robocar'] },
 ];
 
 // Shown greyed out on the home screen until the unit is written.
