@@ -2941,7 +2941,7 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .wr-btns .option { width: auto; }
 
 .wr-wrist { display: block; width: min(100%, 300px); max-height: 30vh; }
-.wr-label { font-size: 13px; font-weight: 800; fill: var(--ink-2); text-anchor: middle; }
+.wr-label { font-size: 16px; font-weight: 800; fill: var(--ink-2); text-anchor: middle; }
 .wr-vessel { fill: #c92a2a; }
 .wr-led { fill: #69db7c; }
 .wr-rays path { fill: none; stroke: #40c057; stroke-width: 4; stroke-linecap: round; opacity: 0; }
@@ -2950,7 +2950,7 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .w-wr.on .wr-rays path { opacity: .8; }
 @keyframes wr-blink { 50% { fill: #b2f2bb; } }
 .wr-read { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.wr-read > small { color: var(--ink-3); font-weight: 800; }
+.wr-read > small { color: var(--ink-2); font-weight: 800; }
 .wr-chart { display: block; width: 240px; max-width: 100%; }
 .wr-line { fill: none; stroke: #2f9e44; stroke-width: 3; stroke-linejoin: round; }
 .wr-bpm { margin: 4px 0 0; font-weight: 800; font-size: 1.1rem; }
