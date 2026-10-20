@@ -3723,6 +3723,47 @@ export const UNITS = [
       },
     ],
   },
+
+  {
+    id: 'gpsmath',
+    part: 'adv',
+    icon: '🛰️',
+    title: 'GPS 怎麼算出位置？',
+    en: 'How GPS Finds You',
+    desc: '用時間算距離、三個圓找交點、第四顆對時鐘',
+    color: '#1b5e9e',
+    added: '2026-10-20',
+    slides: [
+      {
+        title: '用時間算距離',
+        text: `每顆${t('GPS 衛星', 'GPS satellite')}上都有很準的${t('原子鐘', 'atomic clock')}，訊號裡寫著發出的時間。訊號用${t('光速', 'speed of light')}飛，一秒 30 萬公里，所以晚多久收到，就知道離多遠。找出最近的衛星！`,
+        widget: 'sigtime',
+      },
+      {
+        title: '三個圓找交點',
+        text: `知道離一顆衛星多遠，你就在一個圓上。兩個圓會交在兩個點，第三個圓只經過其中一點，那就是你在的地方。這叫${t('三邊定位', 'trilateration')}。點點看！`,
+        widget: 'trilat',
+      },
+      {
+        title: '為什麼要第 4 顆？',
+        text: `手機的時鐘沒有原子鐘準。差 0.001 秒，距離就差 300 公里！所以手機要再收第 4 顆衛星，把自己的${t('時鐘誤差', 'clock error')}算出來。你來調調看！`,
+        widget: 'fourthsat',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '在哪裡，手機最難收到 GPS 衛星的訊號？',
+          options: [
+            { text: '🅿️ 地下停車場', correct: true },
+            { text: '🏞️ 空曠的公園' },
+            { text: '🏖️ 海邊，手機沒有網路' },
+          ],
+          explain: 'GPS 訊號從天上來，穿不過厚厚的水泥和土，所以在地下室、隧道裡收不到。GPS 不用網路，在海邊、山上也能用。',
+        },
+      },
+    ],
+  },
 ];
 
 // Home screen sections, in order.
@@ -3749,7 +3790,7 @@ export const STAGES = [
   { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: '網路怎麼運作', en: 'How Networks Work', units: ['internet', 'networld', 'web', 'iot'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'freeapps', 'coding'] },
-  { id: 'secret', part: 'adv', icon: '🔬', title: '生活科技的祕密', en: 'Secrets of Everyday Tech', units: ['qrcode', 'clock'] },
+  { id: 'secret', part: 'adv', icon: '🔬', title: '生活科技的祕密', en: 'Secrets of Everyday Tech', units: ['qrcode', 'clock', 'gpsmath'] },
 ];
 
 // Shown greyed out on the home screen until the unit is written.

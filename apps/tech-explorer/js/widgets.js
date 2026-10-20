@@ -856,6 +856,29 @@ function ckTime(sec, tenths = false) {
   return `${hh}:${mm}:${ss}`;
 }
 
+// ---- gpsmath consts ----
+// Three satellites, their signal delays (seconds) and where they sit in the sky picture.
+const TRI_SATS = [
+  { id: 'A', delay: 0.067, x: 110, y: 46 },
+  { id: 'B', delay: 0.075, x: 40, y: 62 },
+  { id: 'C', delay: 0.072, x: 330, y: 58 },
+];
+// The map for the circle slides: you are at TRI_ME; each satellite's circle passes through you.
+const TRI_ME = [220, 190];
+const TRI_MAP = [[40, 70], [370, 200], [300, 30]];
+const triKm = s => Math.round(s * 300000).toLocaleString('en-US');
+// The second point where two circles meet: you, mirrored over the line between their centres.
+const triMirror = ([ax, ay], [bx, by]) => {
+  const dx = bx - ax, dy = by - ay, l = Math.hypot(dx, dy), ux = dx / l, uy = dy / l;
+  const k = (TRI_ME[0] - ax) * ux + (TRI_ME[1] - ay) * uy;
+  return [2 * (ax + k * ux) - TRI_ME[0], 2 * (ay + k * uy) - TRI_ME[1]];
+};
+const TRI_STREETS = `
+  <rect width="400" height="260" fill="#f2efe6"/>
+  <rect x="16" y="150" width="96" height="90" rx="8" fill="#c3e8c8"/>
+  <g fill="#e6e0d2"><rect x="150" y="16" width="70" height="60" rx="4"/><rect x="270" y="90" width="110" height="60" rx="4"/><rect x="16" y="16" width="96" height="100" rx="4"/></g>
+  <g fill="none"><path d="M0 132H400M130 0V260M250 0V260" stroke="#d6cfbd" stroke-width="16"/><path d="M0 132H400M130 0V260M250 0V260" stroke="#fff" stroke-width="12"/></g>`;
+
 export const WIDGETS = {
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
@@ -8449,6 +8472,175 @@ export const WIDGETS = {
       $('.ck-hint').classList.add('done');
       api.done();
     });
+  },
+
+  // Three satellites send the time; the child sees whose signal arrives first and taps the nearest.
+  sigtime(host, _, api) {
+    const scale = 25000; // 0.067 s of flight shown as 1.7 s on screen
+    host.innerHTML = `
+      <div class="w-tri">
+        <p class="tri-hint">按「接收訊號」，看三顆衛星的訊號什麼時候到</p>
+        <svg class="tri-sky" viewBox="0 0 400 240" aria-hidden="true">
+          <path d="M-20 250 Q200 170 420 250Z" fill="#b2f2bb"/>
+          ${TRI_SATS.map(s => `<line x1="${s.x}" y1="${s.y}" x2="200" y2="212" class="tri-beam"/>`).join('')}
+          ${TRI_SATS.map(s => `<text x="${s.x}" y="${s.y + 10}" class="tri-sat">🛰️</text><text x="${s.x}" y="${s.y - 18}" class="tri-lab">${s.id}</text>`).join('')}
+          ${TRI_SATS.map((s, i) => `<circle class="tri-dot" data-i="${i}" r="7" cx="${s.x}" cy="${s.y}"/>`).join('')}
+          <text x="200" y="226" class="tri-sat">📱</text>
+          <text x="200" y="168" class="tri-clock">0.000 秒</text>
+        </svg>
+        <div class="tri-rows">${TRI_SATS.map((s, i) => `
+          <button class="option tri-row" data-i="${i}" disabled><b>🛰️ ${s.id}</b><span>發出 10:00:00.000</span><span class="tri-got">收到：？</span></button>`).join('')}
+        </div>
+        <button class="go tri-go">📡 接收訊號</button>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = (text, done) => { $('.tri-hint').textContent = text; $('.tri-hint').classList.toggle('done', !!done); };
+    let finished = false;
+    $('.tri-go').addEventListener('click', e => {
+      e.currentTarget.disabled = true;
+      hint('訊號用光速飛過來……');
+      const t0 = performance.now(), last = Math.max(...TRI_SATS.map(s => s.delay)) * scale;
+      const arrived = new Set();
+      const step = () => {
+        if (!api.alive()) return;
+        const ms = Math.min(performance.now() - t0, last);
+        $('.tri-clock').textContent = `${(ms / scale).toFixed(3)} 秒`;
+        TRI_SATS.forEach((s, i) => {
+          const p = Math.min(ms / (s.delay * scale), 1), d = $(`.tri-dot[data-i="${i}"]`);
+          d.setAttribute('cx', s.x + (200 - s.x) * p);
+          d.setAttribute('cy', s.y + (212 - s.y) * p);
+          if (p === 1 && !arrived.has(i)) {
+            arrived.add(i);
+            d.classList.add('in');
+            const row = $(`.tri-row[data-i="${i}"]`);
+            row.querySelector('.tri-got').textContent = `收到 10:00:00.${String(Math.round(s.delay * 1000)).padStart(3, '0')}・花了 ${s.delay} 秒`;
+            pop(row);
+          }
+        });
+        if (ms < last) { api.later(step, 30); return; }
+        host.querySelectorAll('.tri-row').forEach(b => { b.disabled = false; });
+        hint('哪一顆衛星離你最近？點它那一行');
+      };
+      step();
+    });
+    $('.tri-rows').addEventListener('click', e => {
+      const b = e.target.closest('.tri-row');
+      if (!b || finished) return;
+      const s = TRI_SATS[b.dataset.i], near = TRI_SATS.reduce((a, x) => (x.delay < a.delay ? x : a));
+      if (s !== near) { shake(b); api.bad(); hint(`${s.id} 的訊號比較晚到，表示比較遠。再找找！`); return; }
+      finished = true;
+      b.classList.add('right');
+      host.querySelectorAll('.tri-row').forEach((r, i) => {
+        r.querySelector('.tri-got').textContent += ` ≈ ${triKm(TRI_SATS[i].delay)} 公里`;
+      });
+      api.good();
+      hint(`🎉 ${s.id} 的訊號最早到，所以最近：${s.delay} 秒 × 每秒 30 萬公里 ≈ ${triKm(s.delay)} 公里！`, true);
+      api.done();
+    });
+  },
+
+  // Tap the satellites in order to draw their circles; then tap the one point all three pass through.
+  trilat(host, _, api) {
+    const r = TRI_MAP.map(p => Math.hypot(p[0] - TRI_ME[0], p[1] - TRI_ME[1]));
+    const ghost = triMirror(TRI_MAP[0], TRI_MAP[1]);
+    const pct = ([x, y]) => `left:${x / 4}%;top:${y / 2.6}%`;
+    host.innerHTML = `
+      <div class="w-tri">
+        <p class="tri-hint">依序點衛星 A、B、C，畫出你可能在的圓</p>
+        <div class="tri-map">
+          <svg viewBox="0 0 400 260" aria-hidden="true">${TRI_STREETS}
+            ${TRI_MAP.map((p, i) => `<circle class="tri-ring" data-i="${i}" cx="${p[0]}" cy="${p[1]}" r="${r[i]}"/>`).join('')}
+          </svg>
+          ${TRI_MAP.map((p, i) => `<button class="tri-satb${i ? '' : ' next'}" data-i="${i}" style="${pct(p)}">🛰️<b>${TRI_SATS[i].id}</b></button>`).join('')}
+          <button class="tri-spot" data-k="me" style="${pct(TRI_ME)}" hidden>?</button>
+          <button class="tri-spot" data-k="ghost" style="${pct(ghost)}" hidden>?</button>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    const hint = (text, done) => { $('.tri-hint').textContent = text; $('.tri-hint').classList.toggle('done', !!done); };
+    let n = 0, finished = false;
+    host.querySelector('.tri-map').addEventListener('click', e => {
+      const sat = e.target.closest('.tri-satb'), spot = e.target.closest('.tri-spot');
+      if (sat && !finished) {
+        const i = +sat.dataset.i;
+        if (i < n) return;
+        if (i > n) { shake(sat); api.bad(); hint(`照順序來：先點衛星 ${TRI_SATS[n].id}`); return; }
+        n++;
+        sat.classList.remove('next');
+        sat.classList.add('on');
+        host.querySelector(`.tri-satb[data-i="${n}"]`)?.classList.add('next');
+        $(`.tri-ring[data-i="${i}"]`).classList.add('show');
+        api.good();
+        if (n === 1) hint(`離 A ${triKm(TRI_SATS[0].delay)} 公里：你在這個圓上的某個地方`);
+        if (n === 2) {
+          host.querySelectorAll('.tri-spot').forEach(s => { s.hidden = false; pop(s); });
+          hint('兩個圓交在兩個點（藍色的 ？）。你在哪一個？再點衛星 C');
+        }
+        if (n === 3) hint('第三個圓只經過一個 ？。點那個點！');
+      }
+      if (spot && !finished) {
+        if (n < 3) { shake(spot); api.bad(); hint('兩個點都有可能。先點衛星 C，畫出第三個圓'); return; }
+        if (spot.dataset.k !== 'me') { shake(spot); api.bad(); hint('C 的圓沒有經過這裡，所以你不在這裡。'); return; }
+        finished = true;
+        spot.textContent = '📍';
+        spot.classList.add('found');
+        $('.tri-spot[data-k="ghost"]').hidden = true;
+        pop(spot);
+        api.good();
+        hint('🎉 三個圓都經過這一點，你就在這裡！這就是三邊定位。', true);
+        api.done();
+      }
+    });
+  },
+
+  // The phone's clock is a little fast, so every circle is too big. Fix the clock until they meet.
+  fourthsat(host, _, api) {
+    const r = TRI_MAP.map(p => Math.hypot(p[0] - TRI_ME[0], p[1] - TRI_ME[1]));
+    const k = 16; // pixels of radius for each 0.001 s of clock error
+    host.innerHTML = `
+      <div class="w-tri">
+        <p class="tri-hint">手機時鐘快了一點，三個圓交不到一起。你來當第 4 顆衛星，把時鐘調準！</p>
+        <div class="tri-map">
+          <svg viewBox="0 0 400 260" aria-hidden="true">${TRI_STREETS}
+            ${TRI_MAP.map((p, i) => `<circle class="tri-ring show" data-i="${i}" cx="${p[0]}" cy="${p[1]}" r="${r[i]}"/>`).join('')}
+            ${TRI_MAP.map((p, i) => `<text x="${p[0]}" y="${p[1] + 9}" class="tri-sat">🛰️</text><text x="${p[0] + (p[0] > 340 ? -20 : 18)}" y="${p[1] - 10}" class="tri-lab">${TRI_SATS[i].id}</text>`).join('')}
+            <text x="${TRI_ME[0]}" y="${TRI_ME[1] + 4}" class="tri-pin" opacity="0">📍</text>
+          </svg>
+        </div>
+        <p class="tri-time"></p>
+        <div class="tri-btns">
+          <button class="option tri-adj" data-d="-1">⏪ 調慢 0.001 秒</button>
+          <button class="option tri-adj" data-d="1">調快 0.001 秒 ⏩</button>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let off = 3, finished = false;
+    const draw = () => {
+      host.querySelectorAll('.tri-ring').forEach((c, i) => c.setAttribute('r', Math.max(4, r[i] + off * k)));
+      $('.tri-pin').setAttribute('opacity', off ? 0 : 1);
+      const ms = Math.abs(off);
+      $('.tri-time').innerHTML = off === 0 ? '⌚ 手機時鐘：<b>剛剛好</b>'
+        : `⌚ 手機時鐘：${off > 0 ? '快' : '慢'}了 <b>0.00${ms} 秒</b>・每個距離都${off > 0 ? '多' : '少'}算了 ${(ms * 300).toLocaleString('en-US')} 公里`;
+      host.querySelector('.w-tri').classList.toggle('met', off === 0);
+    };
+    host.querySelector('.tri-btns').addEventListener('click', e => {
+      const b = e.target.closest('.tri-adj');
+      if (!b) return;
+      off = Math.max(-3, Math.min(5, off + +b.dataset.d));
+      draw();
+      const h = $('.tri-hint');
+      if (off === 0) {
+        h.textContent = '🎉 時鐘對準了，三個圓交在一點！手機就是靠第 4 顆衛星，自動把時鐘調準。';
+        h.classList.add('done');
+        pop($('.tri-time'));
+        api.good();
+        if (!finished) { finished = true; api.done(); }
+        return;
+      }
+      h.classList.remove('done');
+      h.textContent = off > 0 ? '圓還是太大，交不到一點。時鐘還是太快' : '圓太小了，碰不到一起。時鐘變太慢了';
+    });
+    draw();
   },
 
   // A pretend browser: links, back, forward, reload, and typing an address.
