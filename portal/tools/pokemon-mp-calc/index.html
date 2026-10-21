@@ -285,6 +285,7 @@
 
             const startTime = performance.now();
             const solutions = [];
+            let searchStopped = false;
 
             if (mode === 'standard') {
                 function findStandard(xIndex, currentTVals) {
@@ -312,48 +313,53 @@
                 solutions.sort((a, b) => a.actionCount - b.actionCount);
 
             } else if (mode === 'equalize') {
-                function findEqualize(xIndex, currentTValsA, currentTValsB) {
-                    if (xIndex === parsedXValues.length) {
-                        const sumA = currentTValsA.reduce((sum, t, i) => sum + (t * parsedXValues[i].value), 0);
-                        const sumB = currentTValsB.reduce((sum, t, i) => sum + (t * parsedXValues[i].value), 0);
-                        
-                        const netDiff = sumB - sumA; 
+                // Search one total action count at a time (0, 1, 2, ...), so solutions come out
+                // fewest actions first and the search can stop at EQUALIZE_MAX_SHOWN.
+                const n = parsedXValues.length;
+                const tValsA = [];
+                const tValsB = [];
+                let level;
 
-                        if (netDiff >= targetMin && netDiff <= targetMax) {
-                            solutions.push({ tValsA: currentTValsA, tValsB: currentTValsB, result: netDiff });
+                // spend exactly `budget` actions on items xIndex..n-1
+                function findEqualize(xIndex, budget, diff) {
+                    if (solutions.length >= EQUALIZE_MAX_SHOWN) return;
+                    if (xIndex === n) {
+                        if (budget === 0 && diff >= targetMin && diff <= targetMax) {
+                            solutions.push({ tValsA: [...tValsA], tValsB: [...tValsB], result: diff, actionCount: level });
                         }
                         return;
                     }
+                    if (budget > (n - xIndex) * tMax) return;
 
                     const currentX = parsedXValues[xIndex];
-                    for (let tA = 0; tA <= tMax; tA++) {
-                        for (let tB = 0; tB <= tMax; tB++) {
-                            let totalT = tA + tB;
-                            if (totalT <= tMax && isConstraintMet(totalT, currentX.constraint)) {
-                                findEqualize(xIndex + 1, [...currentTValsA, tA], [...currentTValsB, tB]);
-                            }
+                    for (let tA = 0; tA <= Math.min(tMax, budget); tA++) {
+                        for (let tB = 0; tA + tB <= Math.min(tMax, budget); tB++) {
+                            if (!isConstraintMet(tA + tB, currentX.constraint)) continue;
+                            tValsA.push(tA);
+                            tValsB.push(tB);
+                            findEqualize(xIndex + 1, budget - tA - tB, diff + (tB - tA) * currentX.value);
+                            tValsA.pop();
+                            tValsB.pop();
                         }
                     }
                 }
-                
-                findEqualize(0, [], []);
 
-                solutions.forEach(sol => { 
-                    sol.actionCount = sol.tValsA.reduce((a, b) => a + b, 0) + sol.tValsB.reduce((a, b) => a + b, 0); 
-                });
-                solutions.sort((a, b) => a.actionCount - b.actionCount);
+                for (level = 0; level <= n * tMax && solutions.length < EQUALIZE_MAX_SHOWN; level++) {
+                    findEqualize(0, level, 0);
+                }
+                searchStopped = solutions.length >= EQUALIZE_MAX_SHOWN;
             }
 
             const endTime = performance.now();
             const duration = ((endTime - startTime) / 1000).toFixed(3);
 
             if (solutions.length > 0) {
-                const shown = mode === 'equalize' ? solutions.slice(0, EQUALIZE_MAX_SHOWN) : solutions;
-                statusDiv.textContent = `Found ${solutions.length} solution(s) in ${duration} seconds. Sorted by action count.`
-                    + (shown.length < solutions.length ? ` Showing the first ${shown.length}.` : '')
-                    + ' Click a result to copy it.';
+                statusDiv.textContent = (searchStopped
+                    ? `Found the first ${solutions.length} solutions in ${duration} seconds (search stops at ${EQUALIZE_MAX_SHOWN}).`
+                    : `Found ${solutions.length} solution(s) in ${duration} seconds.`)
+                    + ' Sorted by action count. Click a result to copy it.';
                 
-                shown.forEach((sol) => {
+                solutions.forEach((sol) => {
                     const resultEl = document.createElement('div');
                     resultEl.className = 'relative p-3 bg-gray-50 border rounded-lg text-sm mb-2 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500';
                     resultEl.setAttribute('role', 'button');
