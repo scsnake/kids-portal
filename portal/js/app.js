@@ -3,8 +3,38 @@ const { createApp, ref, computed, onMounted } = Vue;
 const app = createApp({
     template: `
     <div class="page">
+        <div v-if="menuOpen" class="menu-backdrop" @click="menuOpen = false"></div>
+        <nav id="side-menu" class="side-menu" :class="{ open: menuOpen }" :inert="!menuOpen" aria-label="更多小工具" @click.stop>
+            <div class="side-menu-head">
+                <span>更多小工具</span>
+                <button class="side-menu-close" aria-label="關閉" @click="menuOpen = false">×</button>
+            </div>
+            <ul class="side-menu-list">
+                <li v-for="m in menuApps" :key="m.id">
+                    <a :href="m.url" class="side-menu-link">
+                        <span class="side-menu-icon">{{ m.icon }}</span>
+                        <span class="side-menu-text">
+                            <span class="side-menu-title">{{ m.title }}</span>
+                            <span v-if="m.desc" class="side-menu-desc">{{ m.desc }}</span>
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
         <header class="page-header">
-            <h1>Kids Portal</h1>
+            <div class="title-row">
+                <button
+                    v-if="menuApps.length"
+                    class="menu-toggle"
+                    :aria-expanded="menuOpen"
+                    aria-controls="side-menu"
+                    aria-label="更多小工具"
+                    title="更多小工具"
+                    @click.stop="menuOpen = !menuOpen"
+                ><span class="menu-bars" aria-hidden="true"></span></button>
+                <h1>Kids Portal</h1>
+            </div>
             <p class="subtitle">選一個練習開始 ・ 共 {{ apps.length }} 個</p>
         </header>
 
@@ -91,6 +121,9 @@ const app = createApp({
     `,
     setup() {
         const apps = ref([]);
+        // small tools that live in the collapsed side menu, not in the main list
+        const menuApps = ref([]);
+        const menuOpen = ref(false);
         const loading = ref(true);
         const q = ref('');
         const subjectFilter = ref('');
@@ -100,6 +133,7 @@ const app = createApp({
                 const res = await fetch('apps.json?t=' + Date.now());
                 const data = await res.json();
                 apps.value = Array.isArray(data.apps) ? data.apps : [];
+                menuApps.value = Array.isArray(data.menu) ? data.menu : [];
             } catch (e) {
                 console.error('Failed to load apps.json:', e);
             } finally {
@@ -147,14 +181,14 @@ const app = createApp({
         function cancelLeave() { clearTimeout(leaveTimer); }
         const closeNote = () => { noteFor.value = null; pinned = false; };
         document.addEventListener('click', closeNote);
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNote(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeNote(); menuOpen.value = false; } });
 
         function resetFilters() {
             q.value = '';
             subjectFilter.value = '';
         }
 
-        return { apps, loading, q, subjectFilter, subjects, filteredApps, resetFilters, noteFor, clickNote, hoverNote, leaveNote, cancelLeave };
+        return { apps, menuApps, menuOpen, loading, q, subjectFilter, subjects, filteredApps, resetFilters, noteFor, clickNote, hoverNote, leaveNote, cancelLeave };
     }
 });
 

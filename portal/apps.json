@@ -64,5 +64,14 @@
       "subject": "駕駛",
       "level": ["大人"]
     }
+  ],
+  "menu": [
+    {
+      "id": "pokemon-mp-calc",
+      "title": "Pokemon MP Calculator",
+      "desc": "找出收集／使用 MP 的組合，讓 MP 剛好落在目標範圍",
+      "url": "tools/pokemon-mp-calc/",
+      "icon": "⚡"
+    }
   ]
 }

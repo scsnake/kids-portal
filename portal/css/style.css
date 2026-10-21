@@ -383,3 +383,166 @@ html, body {
         font-size: 15px;
     }
 }
+
+/* ---- side menu: small tools that are not in the main list ---- */
+
+.title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.title-row h1 {
+    margin: 0;
+}
+
+.menu-toggle {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-surface);
+    box-shadow: var(--shadow);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.menu-toggle:hover,
+.menu-toggle[aria-expanded="true"] {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.menu-toggle:focus-visible,
+.side-menu-close:focus-visible,
+.side-menu-link:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* three bars drawn with one span and two shadows */
+.menu-bars {
+    width: 18px;
+    height: 2px;
+    border-radius: 1px;
+    background: currentColor;
+    box-shadow: 0 -6px 0 currentColor, 0 6px 0 currentColor;
+}
+
+.menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(15, 23, 42, 0.25);
+}
+
+.side-menu {
+    position: fixed;
+    z-index: 60;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(300px, 85vw);
+    padding: max(16px, env(safe-area-inset-top)) 12px 16px max(12px, env(safe-area-inset-left));
+    background: var(--color-surface);
+    border-right: 1px solid var(--color-border);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    overflow-y: auto;
+    transform: translateX(-105%);
+    visibility: hidden;
+    transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s 0.22s;
+}
+
+.side-menu.open {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .side-menu, .side-menu.open { transition: none; }
+}
+
+.side-menu-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.side-menu-close {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: var(--color-text-muted);
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.side-menu-close:hover {
+    background: #f1f3f5;
+    color: var(--color-text);
+}
+
+.side-menu-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.side-menu-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.side-menu-link:hover {
+    background: var(--color-primary-soft);
+}
+
+.side-menu-icon {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    background: var(--color-primary-soft);
+    border-radius: 8px;
+}
+
+.side-menu-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.side-menu-title {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.side-menu-desc {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--color-text-muted);
+}

@@ -62,6 +62,12 @@ kids-portal/
 `subject` becomes a filter chip in the portal automatically.
 Add `"private": true` for an app that still needs a login (it shows a 🔒 家人限定 tag).
 
+Small tools that should not be on the main list go in the `"menu"` array of
+`apps.json` instead (same fields, no `subject`/`level`). They show in the side
+menu that opens from the ☰ button. A one-file tool can live in
+`portal/tools/<slug>/index.html` and use a relative `url` (`tools/<slug>/`),
+so it deploys with the portal and needs no new Pages project.
+
 ## The "?" button (changelog)
 
 Every app shows a "?" button with the date of its last update at the bottom of

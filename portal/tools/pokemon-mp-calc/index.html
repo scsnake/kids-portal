@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon MP Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple animation for the spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+        <header class="relative text-center mb-8">
+            <!-- Back to the Kids Portal -->
+            <a href="../../" aria-label="Back to Kids Portal" title="Kids Portal" class="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full text-gray-600 hover:bg-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+            </a>
+            <h1 class="px-12 text-3xl md:text-4xl font-bold text-gray-900">Pokemon MP Calculator</h1>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <!-- Input Form Section -->
+            <div class="md:col-span-1 bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                <h2 class="text-xl font-semibold mb-4 border-b pb-2">Parameters</h2>
+                <form id="calculator-form" class="space-y-4">
+                    <div class="mb-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Calculation Mode</label>
+                        <div class="flex gap-4">
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="radio" name="calcMode" value="standard" checked class="form-radio text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                                <span class="ml-2 text-sm text-gray-700">Standard</span>
+                            </label>
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="radio" name="calcMode" value="equalize" class="form-radio text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                                <span class="ml-2 text-sm text-gray-700">Equalize (Find N)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="standard-fields" class="space-y-4">
+                        <div>
+                            <label for="initialValue" class="block text-sm font-medium text-gray-700">Initial MP</label>
+                            <input type="number" id="initialValue" value="1240" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="targetMin" class="block text-sm font-medium text-gray-700">Target MP min</label>
+                            <input type="number" id="targetMin" value="1470" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="targetMax" class="block text-sm font-medium text-gray-700">Target MP max</label>
+                            <input type="number" id="targetMax" value="1490" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                    </div>
+
+                    <div id="equalize-fields" class="hidden space-y-4">
+                        <div>
+                            <label for="targetDiff" class="block text-sm font-medium text-gray-700">MP Difference (N)</label>
+                            <input type="number" id="targetDiff" value="180" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <p class="mt-1 text-xs text-gray-500">Example: If A is 300 and B is 120, N is 180. The result will show how to equalize them.</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="xValues" class="block text-sm font-medium text-gray-700">Collect/Use MP (comma-separated)</label>
+                        <input type="text" id="xValues" value="300, 120, -400, -250" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <p class="mt-1 text-xs text-gray-500">Syntax hints: `* 1`, `> 2`</p>
+                    </div>
+                    <div>
+                        <label for="tMax" class="block text-sm font-medium text-gray-700">Max Multiplier (t)</label>
+                        <input type="number" id="tMax" value="10" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                        Find Combinations
+                    </button>
+                </form>
+            </div>
+
+            <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                <h2 class="text-xl font-semibold mb-4 border-b pb-2">Results</h2>
+                <div id="status" class="text-gray-600 mb-4">Enter parameters and click the button to start.</div>
+                <div id="results-container" class="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
+                    <!-- Results will be injected here -->
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const form = document.getElementById('calculator-form');
+        const statusDiv = document.getElementById('status');
+        const resultsContainer = document.getElementById('results-container');
+        
+        const standardFields = document.getElementById('standard-fields');
+        const equalizeFields = document.getElementById('equalize-fields');
+        const modeRadios = document.getElementsByName('calcMode');
+
+        modeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'standard') {
+                    standardFields.classList.remove('hidden');
+                    equalizeFields.classList.add('hidden');
+                } else {
+                    standardFields.classList.add('hidden');
+                    equalizeFields.classList.remove('hidden');
+                }
+            });
+        });
+
+        function parseXValuesWithConstraints(xValuesStr) {
+            const parts = xValuesStr.split(',');
+            const parsedValues = [];
+            const operators = ['>=', '<=', '>', '<', '*'];
+
+            for (const part of parts) {
+                const trimmedPart = part.trim();
+                if (trimmedPart === '') continue;
+
+                let foundOp = null;
+                for (const op of operators) {
+                    if (trimmedPart.includes(op)) {
+                        foundOp = op;
+                        break;
+                    }
+                }
+
+                if (foundOp) {
+                    const [valStr, constStr] = trimmedPart.split(foundOp).map(s => s.trim());
+                    const value = parseFloat(valStr);
+                    const constraintVal = parseFloat(constStr);
+                    if (isNaN(value) || isNaN(constraintVal)) return null; 
+                    parsedValues.push({ value, constraint: { op: foundOp, val: constraintVal } });
+                } else {
+                    const value = parseFloat(trimmedPart);
+                    if (isNaN(value)) return null; 
+                    parsedValues.push({ value, constraint: null });
+                }
+            }
+            return parsedValues;
+        }
+
+        function isConstraintMet(t, constraint) {
+            if (!constraint) return true; 
+
+            switch (constraint.op) {
+                case '*': return t === constraint.val;
+                case '>': return t > constraint.val;
+                case '>=': return t >= constraint.val;
+                case '<': return t < constraint.val;
+                case '<=': return t <= constraint.val;
+                default: return true;
+            }
+        }
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const tMax = parseInt(document.getElementById('tMax').value, 10);
+            if (tMax > 20) {
+                const proceed = confirm("Warning: A high 'Max Multiplier' (>20) can cause the calculation to be very slow or freeze your browser. Do you want to continue?");
+                if (!proceed) {
+                    statusDiv.textContent = 'Calculation cancelled by user.';
+                    return;
+                }
+            }
+
+            resultsContainer.innerHTML = '';
+            statusDiv.innerHTML = `<div class="flex items-center text-indigo-600"><div class="spinner w-5 h-5 border-4 border-t-indigo-600 border-r-indigo-200 border-b-indigo-200 border-l-indigo-200 rounded-full mr-3"></div>Searching for combinations... This may take a moment.</div>`;
+            setTimeout(runCalculation, 10); 
+        });
+
+        function runCalculation() {
+            const mode = document.querySelector('input[name="calcMode"]:checked').value;
+            let initialValue, targetMin, targetMax;
+
+            if (mode === 'standard') {
+                initialValue = parseFloat(document.getElementById('initialValue').value);
+                targetMin = parseFloat(document.getElementById('targetMin').value);
+                targetMax = parseFloat(document.getElementById('targetMax').value);
+            } else {
+                initialValue = 0; 
+                const diff = parseFloat(document.getElementById('targetDiff').value);
+                targetMin = diff;
+                targetMax = diff;
+            }
+
+            const xValuesStr = document.getElementById('xValues').value;
+            const tMax = parseInt(document.getElementById('tMax').value, 10);
+            
+            const parsedXValues = parseXValuesWithConstraints(xValuesStr);
+
+            if (!parsedXValues || isNaN(targetMin) || isNaN(targetMax) || isNaN(tMax) || parsedXValues.length === 0) {
+                statusDiv.textContent = 'Error: Please ensure all fields are filled with valid numbers and syntax.';
+                return;
+            }
+
+            const startTime = performance.now();
+            const solutions = [];
+
+            if (mode === 'standard') {
+                function findStandard(xIndex, currentTVals) {
+                    if (xIndex === parsedXValues.length) {
+                        const weightedSum = currentTVals.reduce((sum, t, i) => sum + (t * parsedXValues[i].value), 0);
+                        const finalValue = initialValue + weightedSum;
+
+                        if (finalValue >= targetMin && finalValue <= targetMax) {
+                            solutions.push({ tVals: currentTVals, result: finalValue });
+                        }
+                        return;
+                    }
+
+                    const currentX = parsedXValues[xIndex];
+                    for (let t = 0; t <= tMax; t++) {
+                        if (isConstraintMet(t, currentX.constraint)) {
+                            findStandard(xIndex + 1, [...currentTVals, t]);
+                        }
+                    }
+                }
+                
+                findStandard(0, []);
+                
+                solutions.forEach(sol => { sol.actionCount = sol.tVals.reduce((a, b) => a + b, 0); });
+                solutions.sort((a, b) => a.actionCount - b.actionCount);
+
+            } else if (mode === 'equalize') {
+                function findEqualize(xIndex, currentTValsA, currentTValsB) {
+                    if (xIndex === parsedXValues.length) {
+                        const sumA = currentTValsA.reduce((sum, t, i) => sum + (t * parsedXValues[i].value), 0);
+                        const sumB = currentTValsB.reduce((sum, t, i) => sum + (t * parsedXValues[i].value), 0);
+                        
+                        const netDiff = sumB - sumA; 
+
+                        if (netDiff >= targetMin && netDiff <= targetMax) {
+                            solutions.push({ tValsA: currentTValsA, tValsB: currentTValsB, result: netDiff });
+                        }
+                        return;
+                    }
+
+                    const currentX = parsedXValues[xIndex];
+                    for (let tA = 0; tA <= tMax; tA++) {
+                        for (let tB = 0; tB <= tMax; tB++) {
+                            let totalT = tA + tB;
+                            if (totalT <= tMax && isConstraintMet(totalT, currentX.constraint)) {
+                                findEqualize(xIndex + 1, [...currentTValsA, tA], [...currentTValsB, tB]);
+                            }
+                        }
+                    }
+                }
+                
+                findEqualize(0, [], []);
+
+                solutions.forEach(sol => { 
+                    sol.actionCount = sol.tValsA.reduce((a, b) => a + b, 0) + sol.tValsB.reduce((a, b) => a + b, 0); 
+                });
+                solutions.sort((a, b) => a.actionCount - b.actionCount);
+            }
+
+            const endTime = performance.now();
+            const duration = ((endTime - startTime) / 1000).toFixed(3);
+
+            if (solutions.length > 0) {
+                statusDiv.textContent = `Found ${solutions.length} solution(s) in ${duration} seconds. Sorted by action count.`;
+                
+                solutions.forEach((sol) => {
+                    const resultEl = document.createElement('div');
+                    resultEl.className = 'p-3 bg-gray-50 border rounded-lg text-sm mb-2';
+                    
+                    if (mode === 'equalize') {
+                        let sumAVal = 0;
+                        const partsA = sol.tValsA
+                            .map((t, i) => {
+                                sumAVal += t * parsedXValues[i].value;
+                                return { t, x: parsedXValues[i].value };
+                            })
+                            .filter(pair => pair.t > 0)
+                            .map(pair => `${pair.t} * <span class="font-bold text-green-700">(${pair.x})</span>`);
+                        const strA = partsA.join(' + ') || '0';
+
+                        let sumBVal = 0;
+                        const partsB = sol.tValsB
+                            .map((t, i) => {
+                                sumBVal += t * parsedXValues[i].value;
+                                return { t, x: parsedXValues[i].value };
+                            })
+                            .filter(pair => pair.t > 0)
+                            .map(pair => `${pair.t} * <span class="font-bold text-green-700">(${pair.x})</span>`);
+                        const strB = partsB.join(' + ') || '0';
+
+                        resultEl.innerHTML = `
+                            <div class="font-mono flex flex-col gap-1">
+                                <div class="flex justify-between items-start">
+                                    <div class="pr-2"><span class="text-gray-500 w-6 inline-block font-semibold">A:</span> ${strA}</div>
+                                    <div class="text-indigo-700 font-semibold whitespace-nowrap">= ${Math.round(sumAVal)}</div>
+                                </div>
+                                <div class="flex justify-between items-start">
+                                    <div class="pr-2"><span class="text-gray-500 w-6 inline-block font-semibold">B:</span> ${strB}</div>
+                                    <div class="text-indigo-700 font-semibold whitespace-nowrap">= ${Math.round(sumBVal)}</div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        const equationParts = sol.tVals
+                            .map((t, i) => ({ t, x: parsedXValues[i].value }))
+                            .filter(pair => pair.t > 0)
+                            .map(pair => `${pair.t} * <span class="font-bold text-green-700">(${pair.x})</span>`);
+                        
+                        let equationStr = equationParts.join(' + ');
+                        if (!equationStr) equationStr = '0';
+
+                        resultEl.innerHTML = `<span class="font-mono">${initialValue} + ${equationStr} = <span class="font-semibold text-indigo-700">${Math.round(sol.result)}</span></span>`;
+                    }
+                    
+                    resultsContainer.appendChild(resultEl);
+                });
+            } else {
+                statusDiv.textContent = `Search complete. No solutions found in ${duration} seconds.`;
+            }
+        }
+    </script>
+</body>
+</html>
