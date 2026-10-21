@@ -225,7 +225,7 @@
             setTimeout(runCalculation, 10); 
         });
 
-        const EQUALIZE_MAX_SHOWN = 100;
+        const MAX_SOLUTIONS = 100;
 
         // "2 * (120) + 1 * (-250)", the same terms as a result row, without markup
         function plainTerms(tVals, xs) {
@@ -285,77 +285,71 @@
 
             const startTime = performance.now();
             const solutions = [];
-            let searchStopped = false;
 
-            if (mode === 'standard') {
-                function findStandard(xIndex, currentTVals) {
-                    if (xIndex === parsedXValues.length) {
-                        const weightedSum = currentTVals.reduce((sum, t, i) => sum + (t * parsedXValues[i].value), 0);
-                        const finalValue = initialValue + weightedSum;
+            // Search one total action count at a time (0, 1, 2, ...), so solutions come out
+            // fewest actions first and the search can stop at MAX_SOLUTIONS.
+            const n = parsedXValues.length;
+            let level;
 
-                        if (finalValue >= targetMin && finalValue <= targetMax) {
-                            solutions.push({ tVals: currentTVals, result: finalValue });
-                        }
-                        return;
+            // standard: spend exactly `budget` actions on items xIndex..n-1
+            const tVals = [];
+            function findStandard(xIndex, budget, value) {
+                if (solutions.length >= MAX_SOLUTIONS) return;
+                if (xIndex === n) {
+                    if (budget === 0 && value >= targetMin && value <= targetMax) {
+                        solutions.push({ tVals: [...tVals], result: value, actionCount: level });
                     }
-
-                    const currentX = parsedXValues[xIndex];
-                    for (let t = 0; t <= tMax; t++) {
-                        if (isConstraintMet(t, currentX.constraint)) {
-                            findStandard(xIndex + 1, [...currentTVals, t]);
-                        }
-                    }
+                    return;
                 }
-                
-                findStandard(0, []);
-                
-                solutions.forEach(sol => { sol.actionCount = sol.tVals.reduce((a, b) => a + b, 0); });
-                solutions.sort((a, b) => a.actionCount - b.actionCount);
+                if (budget > (n - xIndex) * tMax) return;
 
-            } else if (mode === 'equalize') {
-                // Search one total action count at a time (0, 1, 2, ...), so solutions come out
-                // fewest actions first and the search can stop at EQUALIZE_MAX_SHOWN.
-                const n = parsedXValues.length;
-                const tValsA = [];
-                const tValsB = [];
-                let level;
-
-                // spend exactly `budget` actions on items xIndex..n-1
-                function findEqualize(xIndex, budget, diff) {
-                    if (solutions.length >= EQUALIZE_MAX_SHOWN) return;
-                    if (xIndex === n) {
-                        if (budget === 0 && diff >= targetMin && diff <= targetMax) {
-                            solutions.push({ tValsA: [...tValsA], tValsB: [...tValsB], result: diff, actionCount: level });
-                        }
-                        return;
-                    }
-                    if (budget > (n - xIndex) * tMax) return;
-
-                    const currentX = parsedXValues[xIndex];
-                    for (let tA = 0; tA <= Math.min(tMax, budget); tA++) {
-                        for (let tB = 0; tA + tB <= Math.min(tMax, budget); tB++) {
-                            if (!isConstraintMet(tA + tB, currentX.constraint)) continue;
-                            tValsA.push(tA);
-                            tValsB.push(tB);
-                            findEqualize(xIndex + 1, budget - tA - tB, diff + (tB - tA) * currentX.value);
-                            tValsA.pop();
-                            tValsB.pop();
-                        }
-                    }
+                const currentX = parsedXValues[xIndex];
+                for (let t = 0; t <= Math.min(tMax, budget); t++) {
+                    if (!isConstraintMet(t, currentX.constraint)) continue;
+                    tVals.push(t);
+                    findStandard(xIndex + 1, budget - t, value + t * currentX.value);
+                    tVals.pop();
                 }
-
-                for (level = 0; level <= n * tMax && solutions.length < EQUALIZE_MAX_SHOWN; level++) {
-                    findEqualize(0, level, 0);
-                }
-                searchStopped = solutions.length >= EQUALIZE_MAX_SHOWN;
             }
+
+            // equalize: the same, with each item's actions split between A and B
+            const tValsA = [];
+            const tValsB = [];
+            function findEqualize(xIndex, budget, diff) {
+                if (solutions.length >= MAX_SOLUTIONS) return;
+                if (xIndex === n) {
+                    if (budget === 0 && diff >= targetMin && diff <= targetMax) {
+                        solutions.push({ tValsA: [...tValsA], tValsB: [...tValsB], result: diff, actionCount: level });
+                    }
+                    return;
+                }
+                if (budget > (n - xIndex) * tMax) return;
+
+                const currentX = parsedXValues[xIndex];
+                for (let tA = 0; tA <= Math.min(tMax, budget); tA++) {
+                    for (let tB = 0; tA + tB <= Math.min(tMax, budget); tB++) {
+                        if (!isConstraintMet(tA + tB, currentX.constraint)) continue;
+                        tValsA.push(tA);
+                        tValsB.push(tB);
+                        findEqualize(xIndex + 1, budget - tA - tB, diff + (tB - tA) * currentX.value);
+                        tValsA.pop();
+                        tValsB.pop();
+                    }
+                }
+            }
+
+            for (level = 0; level <= n * tMax && solutions.length < MAX_SOLUTIONS; level++) {
+                if (mode === 'standard') findStandard(0, level, initialValue);
+                else findEqualize(0, level, 0);
+            }
+            const searchStopped = solutions.length >= MAX_SOLUTIONS;
 
             const endTime = performance.now();
             const duration = ((endTime - startTime) / 1000).toFixed(3);
 
             if (solutions.length > 0) {
                 statusDiv.textContent = (searchStopped
-                    ? `Found the first ${solutions.length} solutions in ${duration} seconds (search stops at ${EQUALIZE_MAX_SHOWN}).`
+                    ? `Found the first ${solutions.length} solutions in ${duration} seconds (search stops at ${MAX_SOLUTIONS}).`
                     : `Found ${solutions.length} solution(s) in ${duration} seconds.`)
                     + ' Sorted by action count. Click a result to copy it.';
                 
