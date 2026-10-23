@@ -124,6 +124,9 @@ Each task slide has a ↺ 重新玩 button. It starts the task again from the be
 The 📖 button (home screen and lesson bar) opens a side panel with the contents
 by chapter and an index of every new term, each linked to its slide.
 
+The ‹ 單元 link returns to the current unit's card, with its stage open.
+If the current filter hides that card, the home screen switches to 全部.
+
 ## Local dev
 
 ```sh

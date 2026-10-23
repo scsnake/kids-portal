@@ -298,7 +298,7 @@ function unitCard(u) {
   const { got, total } = starsOf(u);
   const fresh = newSlides(u).length;
   return `
-    <li><a class="unit-card${got === total ? ' full' : ''}" href="#/u/${u.id}/${resumeAt(u)}" style="--c:${u.color}">
+    <li><a class="unit-card${got === total ? ' full' : ''}" data-unit="${u.id}" href="#/u/${u.id}/${resumeAt(u)}" style="--c:${u.color}">
       ${isNewUnit(u) ? '<span class="new-tag">🆕 新</span>' : fresh ? `<span class="new-tag">＋${fresh} 頁新內容</span>` : ''}
       <span class="unit-no">${UNITS.indexOf(u) + 1}</span>
       <span class="unit-icon">${u.icon}</span>
@@ -376,7 +376,13 @@ function filterBar() {
     </div>`;
 }
 
-function home() {
+function home(returnUnit = null) {
+  if (returnUnit) {
+    // A first visit can remove this unit from "not opened yet" or "new".
+    if (!FILTERS.find(f => f.id === filter).test(returnUnit)) filter = 'all';
+    const stage = stageOf(returnUnit);
+    if (stage) openStages.add(stage.id);
+  }
   hush();
   onFinish = null;
   slideToken++; // ends the last slide's widget, so its key and sensor listeners stop
@@ -560,7 +566,14 @@ function route() {
   } else if (kind === 'done' && unit) {
     finished(unit);
   } else {
-    home();
+    const returnUnit = here?.unit || onFinish;
+    home(returnUnit);
+    const card = returnUnit && app.querySelector(`.unit-card[data-unit="${returnUnit.id}"]`);
+    if (card) {
+      card.focus({ preventScroll: true });
+      card.scrollIntoView({ behavior: 'instant', block: 'center' });
+      return;
+    }
   }
   window.scrollTo(0, 0);
 }
