@@ -325,10 +325,10 @@ export default {
 .bk-demo { width: 100%; max-width: 690px; margin: auto; display: grid; gap: 14px; font-size: 18px; line-height: 1.5; }
 .bk-row { display: flex; justify-content: center; gap: 12px; align-items: stretch; position: relative; }
 .bk-store { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 8px; text-align: center; padding: 16px 10px; background: #fdfdfd; border: 2.5px solid #8ce99a; border-radius: 18px; min-height: 165px; transition: all 250ms cubic-bezier(.23,1,.32,1); position: relative; box-shadow: 0 4px 12px rgba(43,138,62,0.08); }
-.bk-store-badge { font-size: 14px; font-weight: 700; color: var(--ink-2); background: #f1eee8; padding: 2px 8px; border-radius: 6px; align-self: center; }
+.bk-store-badge { font-size: max(15px, 14px); font-weight: 700; color: var(--ink-2); background: #f1eee8; padding: 2px 8px; border-radius: 6px; align-self: center; }
 .bk-icon { font-size: 42px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.08)); }
 .bk-detail { font-size: 15px; overflow-wrap: anywhere; }
-.bk-health-badge { display: inline-block; font-size: 13px; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: #ebfbee; color: #2b8a3e; border: 1px solid #b2f2bb; margin-top: 2px; }
+.bk-health-badge { display: inline-block; font-size: max(15px, 13px); font-weight: 800; padding: 2px 8px; border-radius: 6px; background: #ebfbee; color: #2b8a3e; border: 1px solid #b2f2bb; margin-top: 2px; }
 
 /* Non-broken vs Broken Visual Differentiation */
 .bk-store.bk-lost { background: #fff5f5 !important; border: 2.5px dashed #e03131 !important; transform: translateY(4px) scale(0.98); box-shadow: 0 4px 18px rgba(224, 49, 49, 0.25) !important; animation: bk-shake-damage 0.4s ease; }

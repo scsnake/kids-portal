@@ -1,0 +1,1178 @@
+/* ==========================================================================
+   科技原理小探險 (tech-explorer) - 硬體與裝置探索 (Group A: Hardware, Storage, GPU)
+   Taiwan Mandarin (zh-TW) · Touch-first (>=44px) · Reduced-motion safe
+   ========================================================================== */
+
+:root {
+  --hw-gear-speed: 2s;
+  --hw-disc-speed: 3s;
+}
+
+/* --------------------------------------------------------------------------
+   Shared Panel & Components
+   -------------------------------------------------------------------------- */
+
+.hw-panel {
+  width: min(100%, 680px);
+  margin-inline: auto;
+  padding: 18px;
+  border: 2px solid var(--line, #e6dfd0);
+  border-radius: var(--radius, 18px);
+  background: var(--card, #ffffff);
+  box-shadow: var(--shadow, 0 2px 0 rgba(29, 39, 56, .08), 0 8px 24px rgba(29, 39, 56, .06));
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hw-status {
+  min-height: 1.8em;
+  margin: 4px 0 0;
+  color: var(--ink-2, #4a5568);
+  font-weight: 800;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.hw-status.good { color: var(--good, #2b8a3e); }
+.hw-status.bad { color: var(--bad, #e03131); }
+.hw-status.warn { color: #d9480f; }
+
+.hw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 48px;
+  min-width: 48px;
+  padding: 10px 18px;
+  border: 2px solid var(--line, #e6dfd0);
+  border-radius: 14px;
+  background: var(--card, #ffffff);
+  color: var(--ink, #1d2738);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--line, #e6dfd0);
+  touch-action: manipulation;
+  transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, background-color 0.15s ease-out, border-color 0.15s ease-out;
+}
+
+.hw-btn:active:not(:disabled) {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 0 1px 0 var(--line, #e6dfd0);
+}
+
+.hw-btn:focus-visible {
+  outline: 3px solid var(--c, #2f6fdf);
+  outline-offset: 2px;
+}
+
+.hw-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  box-shadow: none;
+  transform: none;
+}
+
+.hw-btn.primary {
+  background: var(--c, #2f6fdf);
+  border-color: var(--c, #2f6fdf);
+  color: #ffffff;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--c, #2f6fdf) 70%, black);
+}
+
+.hw-btn.primary:active:not(:disabled) {
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--c, #2f6fdf) 70%, black);
+}
+
+.hw-btn.danger {
+  background: #fff5f5;
+  border-color: #ffc9c9;
+  color: var(--bad, #e03131);
+  box-shadow: 0 3px 0 #ffc9c9;
+}
+
+.hw-btn.danger:active:not(:disabled) {
+  box-shadow: 0 1px 0 #ffc9c9;
+}
+
+.hw-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   1. juicebox: 「電腦是什麼？」 (Input -> Process -> Output)
+   -------------------------------------------------------------------------- */
+
+.hw-jb-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  font-size: max(15px, 0.92rem);
+  font-weight: 800;
+  color: var(--ink-2, #4a5568);
+}
+
+.hw-jb-step {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s;
+}
+
+.hw-jb-step.active {
+  background: color-mix(in srgb, var(--c, #2f6fdf) 15%, white);
+  color: var(--c, #2f6fdf);
+  transform: scale(1.04);
+}
+
+.hw-jb-arrow {
+  color: var(--ink-3, #8a93a3);
+  font-size: max(15px, 0.9rem);
+}
+
+.hw-jb-stage {
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) minmax(200px, 1.4fr) minmax(130px, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+@media (max-width: 580px) {
+  .hw-jb-stage {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Fruit Hopper / Input */
+.hw-jb-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 2px dashed var(--line, #e6dfd0);
+  border-radius: 14px;
+  background: #fdfdfd;
+}
+
+.hw-jb-zone-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ink-2, #4a5568);
+  text-align: center;
+}
+
+.hw-jb-fruits {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (max-width: 580px) {
+  .hw-jb-fruits {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+.hw-jb-fruit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 2px solid var(--line, #e6dfd0);
+  border-radius: 12px;
+  background: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--line, #e6dfd0);
+  touch-action: manipulation;
+  transition: transform 0.15s ease-out, border-color 0.15s ease-out;
+}
+
+.hw-jb-fruit-btn:active:not(:disabled) {
+  transform: translateY(2px) scale(0.97);
+}
+
+.hw-jb-fruit-btn.done {
+  opacity: 0.55;
+  background: #f1f3f5;
+  border-color: #dee2e6;
+  cursor: default;
+  box-shadow: none;
+}
+
+.hw-jb-fruit-btn.dragging {
+  z-index: 100;
+  cursor: grabbing;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  touch-action: none;
+  opacity: 0.95;
+}
+
+.hw-jb-fruit-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+/* Machine / Processor */
+.hw-jb-machine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+  border: 2px solid var(--line, #e6dfd0);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.hw-jb-hopper {
+  width: 100%;
+  max-width: 150px;
+  height: 38px;
+  border: 2px solid #adb5bd;
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  background: #dee2e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: max(15px, 0.85rem);
+  font-weight: 800;
+  color: var(--ink-2, #4a5568);
+  margin-bottom: 6px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.hw-jb-hopper.over, .hw-jb-hopper.pulse {
+  background: #ffe066;
+  border-color: #f59f00;
+}
+
+.hw-jb-chamber {
+  width: 100%;
+  padding: 12px 10px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid #ced4da;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.hw-jb-gears {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 52px;
+}
+
+.hw-jb-gear {
+  font-size: 2.2rem;
+  line-height: 1;
+  display: inline-block;
+  transform-origin: center;
+  color: #495057;
+}
+
+.hw-jb-machine.processing .hw-jb-gear:first-child {
+  animation: hw-spin var(--hw-gear-speed) linear infinite;
+}
+
+.hw-jb-machine.processing .hw-jb-gear:last-child {
+  animation: hw-spin-reverse var(--hw-gear-speed) linear infinite;
+  font-size: 1.8rem;
+}
+
+.hw-jb-circuits {
+  font-size: 1.2rem;
+  display: flex;
+  gap: 6px;
+  opacity: 0.25;
+  transition: opacity 0.2s;
+}
+
+.hw-jb-machine.processing .hw-jb-circuits {
+  opacity: 1;
+  animation: hw-pulse-glow 0.8s ease-in-out infinite alternate;
+}
+
+.hw-jb-screen {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ink, #1d2738);
+  text-align: center;
+}
+
+.hw-jb-meter {
+  width: 100%;
+  height: 8px;
+  background: #dee2e6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.hw-jb-meter-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--c, #2f6fdf);
+  border-radius: 4px;
+  transition: width 0.15s ease-out;
+}
+
+/* Output / Tray */
+.hw-jb-tray {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (max-width: 580px) {
+  .hw-jb-tray {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+.hw-jb-cup-slot {
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 2px dashed #ced4da;
+  border-radius: 12px;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  color: var(--ink-3, #8a93a3);
+  transition: background-color 0.25s, border-color 0.25s, transform 0.25s;
+}
+
+.hw-jb-cup-slot.filled {
+  border-style: solid;
+  border-color: #b2f2bb;
+  background: #ebfbee;
+  color: #2b8a3e;
+}
+
+.hw-jb-cup-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+   2. phonepeek: 「口袋裡的電腦」
+   -------------------------------------------------------------------------- */
+
+.hw-phonepeek-layout {
+  display: grid;
+  grid-template-columns: minmax(210px, 1fr) minmax(220px, 1.2fr);
+  gap: 16px;
+  align-items: center;
+}
+
+@media (max-width: 600px) {
+  .hw-phonepeek-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Phone Frame */
+.hw-pp-phone-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.hw-pp-phone {
+  width: 170px;
+  height: 310px;
+  border: 5px solid #343a40;
+  border-radius: 36px;
+  background: #212529;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15), inset 0 0 0 2px #495057;
+  position: relative;
+  overflow: hidden;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hw-pp-notch {
+  width: 46px;
+  height: 12px;
+  background: #000000;
+  border-radius: 0 0 8px 8px;
+  margin: -10px auto 4px;
+}
+
+.hw-pp-screen-content {
+  flex: 1;
+  border-radius: 24px;
+  background: #121820;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 10px 6px;
+}
+
+.hw-pp-xray-beam {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 44px;
+  background: linear-gradient(180deg, rgba(51, 154, 240, 0.1) 0%, rgba(51, 154, 240, 0.45) 50%, rgba(51, 154, 240, 0.1) 100%);
+  border-top: 2px solid #74c0fc;
+  border-bottom: 2px solid #74c0fc;
+  pointer-events: none;
+  transition: top 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 0 14px rgba(116, 192, 252, 0.4);
+  z-index: 1;
+}
+
+/* Phone Internal Chips (hotspots) */
+.hw-pp-chip {
+  min-height: 44px;
+  padding: 6px 8px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.15s ease-out, background-color 0.15s ease-out, border-color 0.15s ease-out;
+}
+
+.hw-pp-chip:active {
+  transform: scale(0.96);
+}
+
+.hw-pp-chip.active {
+  border-color: #ffd43b;
+  background: rgba(255, 212, 59, 0.2);
+  box-shadow: 0 0 12px rgba(255, 212, 59, 0.4);
+}
+
+.hw-pp-chip.found {
+  border-color: #51cf66;
+}
+
+.hw-pp-chip-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.hw-pp-chip-name {
+  font-size: max(15px, 0.85rem);
+  font-weight: 800;
+  text-align: left;
+}
+
+.hw-pp-home-bar {
+  width: 50px;
+  height: 4px;
+  background: #868e96;
+  border-radius: 2px;
+  margin: 6px auto 0;
+}
+
+/* Detail Card & Shrink Slider */
+.hw-pp-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hw-pp-card {
+  min-height: 96px;
+  padding: 14px;
+  border: 2px solid var(--line, #e6dfd0);
+  border-radius: 16px;
+  background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.hw-pp-card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--ink, #1d2738);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hw-pp-card-desc {
+  font-size: 0.95rem;
+  color: var(--ink-2, #4a5568);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Shrink Slider Box */
+.hw-pp-shrink-box {
+  padding: 14px;
+  border: 2px solid var(--line, #e6dfd0);
+  border-radius: 16px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hw-pp-shrink-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.hw-pp-range {
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  background: #e9ecef;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.hw-pp-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--c, #2f6fdf);
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+.hw-pp-range::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--c, #2f6fdf);
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+.hw-pp-morph-visual {
+  min-height: 80px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #f1f3f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ink-2, #4a5568);
+  text-align: center;
+  transition: transform 0.2s ease-out;
+}
+
+/* --------------------------------------------------------------------------
+   3. hddseek: 「硬碟：會轉的圓盤」
+   -------------------------------------------------------------------------- */
+
+.hw-hdd-enclosure {
+  width: 100%;
+  max-width: 380px;
+  height: 280px;
+  margin: 0 auto;
+  border: 4px solid #ced4da;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.08), 0 6px 16px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.hw-hdd-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.hw-hdd-platter-group {
+  transform-origin: 150px 140px;
+  animation: hw-spin var(--hw-disc-speed) linear infinite;
+}
+
+.hw-hdd-platter-group.scratched {
+  filter: drop-shadow(0 0 4px rgba(224, 49, 49, 0.6));
+}
+
+.hw-hdd-arm-group {
+  transform-origin: 290px 40px;
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hw-hdd-sparks {
+  position: absolute;
+  pointer-events: none;
+  font-size: 1.5rem;
+  display: none;
+}
+
+.hw-hdd-sparks.active {
+  display: block;
+  animation: hw-spark-pop 0.6s ease-out forwards;
+}
+
+.hw-hdd-files {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.hw-hdd-file-btn {
+  min-height: 48px;
+  padding: 8px 14px;
+  border: 2px solid var(--line, #e6dfd0);
+  border-radius: 12px;
+  background: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--line, #e6dfd0);
+  touch-action: manipulation;
+  transition: transform 0.1s, border-color 0.15s, background-color 0.15s;
+}
+
+.hw-hdd-file-btn.active {
+  border-color: var(--c, #2f6fdf);
+  background: color-mix(in srgb, var(--c, #2f6fdf) 12%, white);
+}
+
+.hw-hdd-file-btn.read {
+  border-color: var(--good, #2b8a3e);
+}
+
+.hw-hdd-alert {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff5f5;
+  border: 2px solid #ffc9c9;
+  color: var(--bad, #e03131);
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   4. flashtrap: 「隨身碟和 SSD：不會動」
+   -------------------------------------------------------------------------- */
+
+.hw-ft-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 500px) {
+  .hw-ft-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.hw-ft-cell {
+  padding: 12px 10px;
+  border: 2px solid #ced4da;
+  border-radius: 14px;
+  background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  transition: border-color 0.25s, background-color 0.25s, box-shadow 0.25s;
+}
+
+.hw-ft-cell.trapped {
+  border-color: #ffd43b;
+  background: #fff9db;
+  box-shadow: 0 0 10px rgba(245, 159, 0, 0.25);
+}
+
+.hw-ft-cell-label {
+  font-size: max(15px, 0.8rem);
+  font-weight: 800;
+  color: var(--ink-2, #4a5568);
+}
+
+.hw-ft-gate {
+  width: 100%;
+  height: 8px;
+  background: #adb5bd;
+  border-radius: 4px;
+}
+
+.hw-ft-insulator {
+  width: 100%;
+  height: 4px;
+  background: #e9ecef;
+  border-top: 1px dashed #ced4da;
+  border-bottom: 1px dashed #ced4da;
+}
+
+.hw-ft-chamber {
+  min-height: 48px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 1.4rem;
+}
+
+.hw-ft-bit {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--ink-3, #8a93a3);
+}
+
+.hw-ft-cell.trapped .hw-ft-bit {
+  color: #f76707;
+}
+
+.hw-ft-badge {
+  font-size: max(15px, 0.85rem);
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #e9ecef;
+  color: var(--ink-2, #4a5568);
+}
+
+.hw-ft-cell.trapped .hw-ft-badge {
+  background: #ffe066;
+  color: #d9480f;
+}
+
+/* --------------------------------------------------------------------------
+   5. cpuchefs: 「CPU：幾位聰明大廚」
+   -------------------------------------------------------------------------- */
+
+.hw-cc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 520px) {
+  .hw-cc-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hw-cc-chef {
+  padding: 12px;
+  border: 2px solid var(--line, #e6dfd0);
+  border-radius: 16px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow: 0 2px 0 var(--line, #e6dfd0);
+  transition: transform 0.1s, border-color 0.2s, background-color 0.2s;
+}
+
+.hw-cc-chef:active:not(.busy) {
+  transform: translateY(2px) scale(0.98);
+}
+
+.hw-cc-chef.busy {
+  border-color: #ffd43b;
+  background: #fffdf5;
+}
+
+.hw-cc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hw-cc-name {
+  font-size: 1rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hw-cc-state {
+  font-size: max(15px, 0.8rem);
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: #ebfbee;
+  color: #2b8a3e;
+}
+
+.hw-cc-chef.busy .hw-cc-state {
+  background: #fff3bf;
+  color: #d9480f;
+}
+
+.hw-cc-dish {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ink, #1d2738);
+  min-height: 1.4em;
+}
+
+.hw-cc-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.hw-cc-step-badge {
+  padding: 4px 2px;
+  border-radius: 6px;
+  background: #f1f3f5;
+  font-size: max(15px, 0.75rem);
+  font-weight: 800;
+  color: var(--ink-3, #8a93a3);
+  text-align: center;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.hw-cc-step-badge.now {
+  background: #ffe066;
+  color: #d9480f;
+  transform: scale(1.05);
+}
+
+.hw-cc-step-badge.done {
+  background: #d3f9d8;
+  color: #2b8a3e;
+}
+
+.hw-cc-shelf {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  overflow-x: auto;
+}
+
+/* --------------------------------------------------------------------------
+   6. gpusimd: 「GPU：一大群小幫手」
+   -------------------------------------------------------------------------- */
+
+.hw-simd-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.hw-simd-board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  gap: 3px;
+  width: min(100%, 300px);
+  aspect-ratio: 1 / 1;
+  padding: 8px;
+  border: 3px solid #ced4da;
+  border-radius: 14px;
+  background: #f1f3f5;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.hw-simd-tile {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: max(15px, 0.85rem);
+  line-height: 1;
+  transition: transform 0.1s, background-color 0.15s, border-color 0.15s;
+}
+
+.hw-simd-tile.has-ant {
+  background: #e7f5ff;
+}
+
+.hw-simd-tile.stamped {
+  border-color: transparent;
+  transform: scale(0.98);
+}
+
+.hw-simd-chef-pointer {
+  font-size: 1.4rem;
+  position: absolute;
+  transition: top 0.06s linear, left 0.06s linear;
+  pointer-events: none;
+}
+
+.hw-simd-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #f8f9fa;
+  font-weight: 800;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.hw-simd-stat-col {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hw-simd-stat-col.gpu-col {
+  color: #2b8a3e;
+}
+
+.hw-simd-stat-col.cpu-col {
+  color: #d9480f;
+}
+
+.hw-simd-stat-val {
+  color: var(--c, #2f6fdf);
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #e7f5ff;
+}
+
+/* Gemini Tag at HTML Level */
+.hw-panel > .gemini-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: max(15px, 0.76rem);
+  font-weight: 800;
+  color: #1971c2;
+  background: #e7f5ff;
+  border: 1.5px solid #a5d8ff;
+  border-radius: 999px;
+  padding: 2px 10px;
+  margin-bottom: 12px;
+  letter-spacing: 0.02em;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(25, 113, 194, 0.1);
+}
+
+.hw-panel > .gemini-tag .gemini-spark {
+  font-size: max(15px, 0.85rem);
+}
+
+/* --------------------------------------------------------------------------
+   7. aimath: 「AI 也愛用 GPU」
+   -------------------------------------------------------------------------- */
+
+.hw-ai-layout {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(210px, 1.2fr);
+  gap: 14px;
+  align-items: center;
+}
+
+@media (max-width: 580px) {
+  .hw-ai-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hw-ai-matrix {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  gap: 2px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 260px;
+  margin: 0 auto;
+  padding: 6px;
+  border: 2px solid #ced4da;
+  border-radius: 12px;
+  background: #f8f9fa;
+}
+
+.hw-ai-cell {
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 2px;
+  transition: background-color 0.2s, transform 0.15s;
+}
+
+.hw-ai-cell.computed {
+  background: #51cf66;
+  border-color: #40c057;
+}
+
+.hw-ai-cell.gpu-flash {
+  background: #ff922b;
+  border-color: #fd7e14;
+}
+
+.hw-ai-console {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 2px solid var(--line, #e6dfd0);
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.hw-ai-robot-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hw-ai-face {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.hw-ai-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hw-ai-target {
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.hw-ai-count {
+  font-size: max(15px, 0.9rem);
+  font-weight: 800;
+  color: var(--ink-2, #4a5568);
+}
+
+.hw-ai-meter-bar {
+  width: 100%;
+  height: 12px;
+  background: #e9ecef;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.hw-ai-meter-track {
+  width: 0%;
+  height: 100%;
+  background: var(--c, #2f6fdf);
+  border-radius: 6px;
+  transition: width 0.15s ease-out;
+}
+
+.hw-ai-verdict {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #f8f9fa;
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Keyframes & Animations
+   -------------------------------------------------------------------------- */
+
+@keyframes hw-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes hw-spin-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes hw-pulse-glow {
+  from { filter: drop-shadow(0 0 2px #ffe066); }
+  to { filter: drop-shadow(0 0 8px #f59f00); }
+}
+
+@keyframes hw-spark-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+/* Production lesson shell: retain readable labels and complete touch targets. */
+.hw-panel { padding: 14px; gap: 10px; }
+.hw-panel > .gemini-tag { margin-bottom: 0; }
+.hw-panel button { min-height: 46px; min-width: 46px; flex-shrink: 0; }
+.hw-panel input[type="range"] { min-height: 46px; margin-block: 0; }
+.hw-panel small { font-size: 15px; }
+.hw-hdd-enclosure { height: 230px; }
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  .hw-jb-machine.processing .hw-jb-gear:first-child,
+  .hw-jb-machine.processing .hw-jb-gear:last-child,
+  .hw-hdd-platter-group {
+    animation: none !important;
+  }
+  .hw-jb-machine.processing .hw-jb-circuits,
+  .hw-hdd-sparks.active {
+    animation: none !important;
+  }
+  .hw-btn, .hw-jb-fruit-btn, .hw-pp-chip, .hw-cc-chef, .hw-simd-tile {
+    transition: none !important;
+  }
+}

@@ -127,8 +127,10 @@ export const UNITS = [
     slides: [
       {
         title: '電腦是什麼？',
-        text: `${t('電腦', 'computer')}是一台很聽話、又超級快的機器。它只會做三件事：<b>收到</b>、<b>想一想</b>、<b>送出去</b>。`,
-        art: '<div class="art-row"><span>👀</span><span class="art-arrow">→</span><span>🧠</span><span class="art-arrow">→</span><span>📣</span></div>',
+        text: "電腦其實就像一台神奇的果汁機！<b class=\"term\">輸入<span class=\"en\" lang=\"en\">Input</span></b>收到材料，在肚子裡<b class=\"term\">處理<span class=\"en\" lang=\"en\">Process</span></b>想一想，最後把好喝的果汁<b class=\"term\">輸出<span class=\"en\" lang=\"en\">Output</span></b>送出來。把水果放進漏斗試試看！",
+        widget: 'juicebox',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '桌機和筆電',
@@ -151,8 +153,10 @@ export const UNITS = [
       },
       {
         title: '口袋裡的電腦',
-        text: `${t('手機', 'phone')}和${t('平板', 'tablet')}其實就是小電腦，一樣會輸入、處理、輸出，只是多了一顆${t('電池', 'battery')}，可以帶著走。`,
-        art: '<div class="art-row"><span>📱</span><span class="art-eq">=</span><span>💻</span><span class="art-eq">+</span><span>🔋</span></div>',
+        text: "智慧型手機就是一台縮小放進口袋的超級電腦！裡面有大腦 <b class=\"term\">處理器<span class=\"en\" lang=\"en\">CPU</span></b>、隨身帶電的<b class=\"term\">鋰電池<span class=\"en\" lang=\"en\">Battery</span></b>，以及能看能摸的<b class=\"term\">觸控螢幕<span class=\"en\" lang=\"en\">Touchscreen</span></b>。點開晶片並拉動滑桿！",
+        widget: 'phonepeek',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '輸入 → 處理 → 輸出',
@@ -1901,17 +1905,10 @@ export const UNITS = [
       },
       {
         title: '驗證碼不能給別人',
-        text: `登入或付錢時，手機常會收到一組${t('驗證碼', 'verification code')}。它就像一次性的鑰匙，有了它，別人就能登入你的帳號或付錢。真正的客服不會跟你要驗證碼。`,
-        widget: 'choice',
-        params: {
-          question: '網友說：「我的驗證碼不小心傳到你手機了，可以唸給我聽嗎？」你會怎麼做？',
-          options: [
-            { text: '🙅 不給他，告訴大人', correct: true },
-            { text: '📱 唸給他聽，幫個忙' },
-            { text: '🔢 只給他前面三個數字' },
-          ],
-          explain: '這是很常見的騙法。驗證碼就是你的鑰匙，誰都不能給，包括說自己是客服的人。',
-        },
+        text: "<b class=\"term\">簡訊驗證碼<span class=\"en\" lang=\"en\">SMS OTP</span></b>就像大門的單次鑰匙。壞人常假裝「不小心傳錯了」向你要數字。千萬別交出去！",
+        widget: 'otpdefense',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '雙重驗證',
@@ -2000,24 +1997,10 @@ export const UNITS = [
       },
       {
         title: '公共 Wi-Fi 上做什麼？',
-        text: '公共 Wi-Fi 很多人一起用。查資料、看影片沒關係；要輸入密碼、付錢的事，回家再做，或改用自己的行動網路。分分看！',
-        widget: 'sort',
-        params: {
-          rest: 'ok',
-          bins: [
-            { id: 'ok', icon: '👍', label: '可以做' },
-            { id: 'home', icon: '🏠', label: '回家再做' },
-          ],
-          items: [
-            { icon: '🚌', label: '查公車什麼時候來', bin: 'ok' },
-            { icon: '📰', label: '看新聞', bin: 'ok' },
-            { icon: '🗺️', label: '查地圖', bin: 'ok' },
-            { icon: '📺', label: '看卡通', bin: 'ok' },
-            { icon: '🏦', label: '登入網路銀行', bin: 'home' },
-            { icon: '💳', label: '輸入信用卡號碼', bin: 'home' },
-            { icon: '🔑', label: '輸入重要的密碼', bin: 'home' },
-          ],
-        },
+        text: "咖啡廳的公共開放 Wi-Fi 就像在廣場講話，任何人都能竊聽。<b class=\"term\">HTTPS 加密<span class=\"en\" lang=\"en\">HTTPS Encryption</span></b>會把資料鎖在保險箱裡！",
+        widget: 'packetsniff',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '這家網路商店可信嗎？',
@@ -2026,17 +2009,10 @@ export const UNITS = [
       },
       {
         title: '遊戲裡的錢是真的錢',
-        text: `遊戲裡的寶石、造型要花錢買，這叫${t('App 內購買', 'in-app purchase')}，用的是爸媽的信用卡，是<b>真的錢</b>。`,
-        widget: 'choice',
-        params: {
-          question: '玩遊戲時跳出：「🎁 超值寶石包 NT$90，按一下就買！」你可以怎麼做？',
-          options: [
-            { text: '🙋 先問爸媽，因為這是真的錢', correct: true },
-            { text: '👆 按下去，反正是遊戲幣' },
-            { text: '🤫 用爸媽的密碼偷偷買' },
-          ],
-          explain: '按下去就會從信用卡扣錢。爸媽可以在 iPad 打開「購買前詢問」，你按購買時，要先經過爸媽同意。',
-        },
+        text: "遊戲裡的寶石與金幣都是用家裡的真實新台幣買的。打開<b class=\"term\">購買前詢問<span class=\"en\" lang=\"en\">Ask to Buy</span></b>，保護荷包不亂花！",
+        widget: 'realwallet',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '考考你',
@@ -2087,18 +2063,10 @@ export const UNITS = [
       },
       {
         title: '救回帳號',
-        text: `發現帳號被盜，先別慌。先告訴大人，再一步一步把帳號拿回來，最後${t('登出所有裝置', 'sign out everywhere')}，把壞人趕出去。依順序點一點。`,
-        widget: 'order',
-        params: {
-          items: [
-            { icon: '🙋', label: '告訴大人（被騙錢就打 165）' },
-            { icon: '📱', label: '用另一台自己的裝置' },
-            { icon: '🔑', label: '改一個新的密碼' },
-            { icon: '🚪', label: '登出所有裝置' },
-            { icon: '🛡️', label: '打開雙重驗證' },
-            { icon: '💬', label: '告訴朋友：怪訊息不是我傳的' },
-          ],
-        },
+        text: "發現帳號有陌生人登入？改密碼、<b class=\"term\">登出所有裝置<span class=\"en\" lang=\"en\">Sign out everywhere</span></b>，再加上<b class=\"term\">雙重驗證<span class=\"en\" lang=\"en\">2FA</span></b>！",
+        widget: 'kickhacker',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '檔案被鎖住了',
@@ -2158,17 +2126,10 @@ export const UNITS = [
       },
       {
         title: '聲音和影片也能假造',
-        text: `AI 還能模仿一個人的臉和聲音，做出假的影片或電話，叫${t('深偽', 'deepfake')}。壞人會假裝成家人，說「很急」，要你開門、出門，或給錢、驗證碼。`,
-        widget: 'choice',
-        params: {
-          question: '你一個人在家，電話裡是媽媽的聲音：「媽媽手機快沒電了，你快下樓到門口，有個叔叔會載你來找我！」你會怎麼做？',
-          options: [
-            { text: '🏠 不出門，掛掉後打媽媽原本的電話', correct: true },
-            { text: '🏃 是媽媽的聲音，馬上下樓' },
-            { text: '🚪 先開門，看看叔叔在不在' },
-          ],
-          explain: '聲音可以用 AI 假造。要你開門、出門，或跟不認識的人走，就算聲音很像家人，也不要去。待在家裡，打家人原本的電話，或告訴其他大人。也可以和家人約好一個只有你們知道的「通關密語」。',
-        },
+        text: "現在 AI 能學會親人的聲音打電話假冒。遇到緊急要錢或接送，記得問<b class=\"term\">通關密語<span class=\"en\" lang=\"en\">Secret Passcode</span></b>並掛斷回撥！",
+        widget: 'voiceclone',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '看起來像卡通，其實不是',
@@ -2951,13 +2912,17 @@ export const UNITS = [
     slides: [
       {
         title: '硬碟：會轉的圓盤',
-        text: `傳統${t('硬碟', 'hard disk')}裡面有一片很快轉動的圓盤，用超小的${t('磁鐵', 'magnet')}記錄 0 和 1。它很怕摔。`,
-        art: '<div class="platter"><div class="platter-disc"></div><div class="platter-arm"></div></div>',
+        text: "傳統的<b class=\"term\">機械硬碟<span class=\"en\" lang=\"en\">HDD</span></b>裡面有一張像唱片一樣轉得飛快的金屬圓盤，還有一隻像留聲機的<b class=\"term\">讀寫臂<span class=\"en\" lang=\"en\">Actuator Arm</span></b>在上面讀資料。點點看不同的檔案，再看看摔到筆電會發生什麼事！",
+        widget: 'hddseek',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '隨身碟和 SSD：不會動',
-        text: `${t('隨身碟', 'USB flash drive')}和${t('固態硬碟', 'SSD')}用好多小格子把電子關起來，記錄 0 和 1。沒有會動的零件，所以更快、也比較不怕摔。`,
-        art: '<div class="cells" aria-hidden="true">' + '<i></i>'.repeat(24) + '</div>',
+        text: "<b class=\"term\">固態硬碟<span class=\"en\" lang=\"en\">SSD</span></b>和隨身碟裡面完全沒有任何會動的轉盤或手臂！它們用微小的<b class=\"term\">浮柵電晶體<span class=\"en\" lang=\"en\">Floating Gate</span></b>把電子牢牢鎖住。把資料寫進去並用力搖晃它！",
+        widget: 'flashtrap',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '壓縮：把檔案變小',
@@ -3132,13 +3097,17 @@ export const UNITS = [
     slides: [
       {
         title: 'CPU：幾位聰明大廚',
-        text: `${t('CPU 中央處理器', 'Central Processing Unit')}像幾位很厲害的大廚，每一位叫做一個${t('核心', 'core')}。什麼菜都會做，可是人數不多，一次只能做幾件事。`,
-        art: '<div class="art-row"><span>👨‍🍳</span><span>👩‍🍳</span><span>👨‍🍳</span><span>👩‍🍳</span></div>',
+        text: "<b class=\"term\">中央處理器<span class=\"en\" lang=\"en\">CPU</span></b>裡有幾位算術非常強大的「核心大廚」。不管料理步驟多複雜，大廚都能井然有序地一步一步做完。點餐讓大廚們開工！",
+        widget: 'cpuchefs',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: 'GPU：一大群小幫手',
-        text: `${t('GPU 圖形處理器', 'Graphics Processing Unit')}有幾千個小幫手。每個只會做簡單的事，但是可以同時一起做，這叫做${t('平行運算', 'parallel computing')}。`,
-        art: '<div class="ants" aria-hidden="true">' + '<span>🐜</span>'.repeat(40) + '</div>',
+        text: "<b class=\"term\">圖形處理器<span class=\"en\" lang=\"en\">GPU</span></b>就像幾千位戴著工作帽的小工蟻。雖然每個人只會蓋簡單的印章，但只要一聲令下全部「同時蓋章」，一瞬間就能畫好整個螢幕！",
+        widget: 'gpusimd',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '塗色比賽',
@@ -3164,8 +3133,10 @@ export const UNITS = [
       },
       {
         title: 'AI 也愛用 GPU',
-        text: `${t('人工智慧', 'AI, Artificial Intelligence')}學東西時，要做超多超多次簡單的計算。很多小幫手一起算最快，所以 AI 大多用 GPU 來${t('訓練', 'train')}。`,
-        art: '<div class="art-row"><span>🤖</span><span class="art-heart">❤️</span><span>🐜🐜🐜</span></div>',
+        text: "現代 <b class=\"term\">人工智慧<span class=\"en\" lang=\"en\">AI</span></b> 辨識一張圖片或回答問題，需要計算成千上萬道簡單的數學乘法。如果用 CPU 一題一題算要等很久，但換成 GPU 同步運算，眨眼間就能辨識出小貓！",
+        widget: 'aimath',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '考考你',
@@ -3372,16 +3343,10 @@ export const UNITS = [
       },
       {
         title: 'DNS：網路的通訊錄',
-        text: `電腦其實是用 IP 位址找到彼此。${t('DNS', 'Domain Name System')} 就像手機的通訊錄，把好記的網址換成 IP 位址。依順序點一點。`,
-        widget: 'order',
-        params: {
-          items: [
-            { icon: '⌨️', label: '你輸入網址 kids.example.tw' },
-            { icon: '📒', label: 'DNS 查通訊錄：kids.example.tw → 203.0.113.25' },
-            { icon: '📨', label: '平板連到 203.0.113.25 的伺服器' },
-            { icon: '📄', label: '伺服器把網頁傳回來' },
-          ],
-        },
+        text: "電腦只認得像「140.112.1.25」這樣的數字門牌。<b class=\"term\">DNS<span class=\"en\" lang=\"en\">Domain Name System</span></b> 就像網路世界的超大電話簿與地址通訊錄，負責把網址翻譯成 IP 位址！",
+        widget: 'dnslookup',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '為什麼要加密？',
@@ -3904,17 +3869,10 @@ export const UNITS = [
       },
       {
         title: '如果……就……',
-        text: `App 會看情況做不同的事，這叫${t('條件判斷', 'if-then')}。App 也會一直${t('重複', 'loop')}檢查：時間到了沒？有沒有人按按鈕？`,
-        widget: 'choice',
-        params: {
-          question: '鬧鐘 App 的程式：「如果時間到了 7:00，就……」接下來應該是什麼？',
-          options: [
-            { text: '⏰ 響鈴', correct: true },
-            { text: '📴 關機' },
-            { text: '🗑️ 刪掉照片' },
-          ],
-          explain: '寫程式的人要把每一種情況想清楚，告訴電腦「如果怎樣，就做什麼」。',
-        },
+        text: "電腦最擅長依照情況做決定：<b class=\"term\">如果<span class=\"en\" lang=\"en\">IF</span></b> 遇到這件事，<b class=\"term\">就<span class=\"en\" lang=\"en\">THEN</span></b> 做這個動作；<b class=\"term\">否則<span class=\"en\" lang=\"en\">ELSE</span></b> 做另一個動作。組合積木讓機器人動起來！",
+        widget: 'ifcondition',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '從程式到 App',

@@ -94,32 +94,32 @@ const css = baseCss('vpn', '#6741d9', '#f3f0ff') + `
 .vpn-stations-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-items:stretch;margin-top:4px}
 @media (max-width:680px){.vpn-stations-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .vpn-station{background:var(--card,#fff);border:2px solid var(--line,#e6dfd0);border-radius:16px;padding:10px 8px;display:flex;flex-direction:column;gap:6px;min-height:120px;transition:border-color .2s ease,background-color .2s ease,box-shadow .2s ease}
-.vpn-station-h{font-weight:700;font-size:14px;display:flex;align-items:center;gap:4px}
-.vpn-ip-tag{font-size:12px;color:var(--ink-2,#4a5568)}
-.vpn-ip-tag code{font-size:12px}
-.vpn-station-desc{font-size:12px;color:var(--ink-2,#4a5568);margin-top:auto}
+.vpn-station-h{font-weight:700;font-size: max(15px, 14px);display:flex;align-items:center;gap:4px}
+.vpn-ip-tag{font-size: max(15px, 12px);color:var(--ink-2,#4a5568)}
+.vpn-ip-tag code{font-size: max(15px, 12px)}
+.vpn-station-desc{font-size: max(15px, 12px);color:var(--ink-2,#4a5568);margin-top:auto}
 .vpn-spy-box{display:flex;flex-direction:column;gap:4px;margin-top:auto}
-.vpn-spy-avatar{font-size:12px;font-weight:700;color:#d9480f}
-.vpn-spy-bubble{font-size:12px;font-weight:700;padding:4px 8px;border-radius:8px;line-height:1.3;border:1px solid var(--line,#e6dfd0);background:#f8f9fa}
+.vpn-spy-avatar{font-size: max(15px, 12px);font-weight:700;color:#d9480f}
+.vpn-spy-bubble{font-size: max(15px, 12px);font-weight:700;padding:4px 8px;border-radius:8px;line-height:1.3;border:1px solid var(--line,#e6dfd0);background:#f8f9fa}
 .vpn-spy-leak{background:#fff5f5;border-color:#ff8787;color:#c92a2a;animation:vpn-pop .3s ease-out}
 .vpn-spy-safe{background:#f3f0ff;border-color:#b197fc;color:#5f3dc4;animation:vpn-pop .3s ease-out}
 .vpn-st-off{opacity:.7;background:#fdfcfb;border-style:dashed}
 .vpn-hop-vpn{border-color:var(--c,#6741d9)!important;background:#f8f6ff!important;box-shadow:0 0 0 2px rgba(103,65,217,.15);font-weight:700}
-.vpn-relay-box{font-size:12px;padding:4px 8px;border-radius:8px;background:#f1f3f5;border:1px dashed #ced4da;margin-top:auto;line-height:1.3}
+.vpn-relay-box{font-size: max(15px, 12px);padding:4px 8px;border-radius:8px;background:#f1f3f5;border:1px dashed #ced4da;margin-top:auto;line-height:1.3}
 .vpn-relay-box.vpn-relay-active{border-style:solid;border-color:var(--c,#6741d9);background:#f3f0ff;color:#5f3dc4;font-weight:700;animation:vpn-pop .3s ease-out}
-.vpn-target-log-box{font-size:12px;padding:4px 8px;border-radius:8px;background:#f1f3f5;border:1px solid #ced4da;margin-top:auto;display:flex;flex-direction:column;gap:2px;line-height:1.3}
-.vpn-log-title{font-weight:700;font-size:11px;color:var(--ink-2,#4a5568)}
-.vpn-log-val{font-size:12px}
+.vpn-target-log-box{font-size: max(15px, 12px);padding:4px 8px;border-radius:8px;background:#f1f3f5;border:1px solid #ced4da;margin-top:auto;display:flex;flex-direction:column;gap:2px;line-height:1.3}
+.vpn-log-title{font-weight:700;font-size: max(15px, 11px);color:var(--ink-2,#4a5568)}
+.vpn-log-val{font-size: max(15px, 12px)}
 .vpn-target-log-box.vpn-log-leak{background:#fff5f5;border-color:#ff8787;color:#c92a2a;animation:vpn-pop .3s ease-out}
 .vpn-target-log-box.vpn-log-masked{background:#ebfbee;border-color:#8ce99a;color:#2b8a3e;font-weight:700;animation:vpn-pop .3s ease-out}
 .vpn-corridor{position:relative;margin:8px 0;border-radius:14px;overflow:visible}
 .vpn-tunnel-pipe{display:flex;width:100%;min-height:50px;border-radius:14px;box-shadow:inset 0 2px 6px rgba(0,0,0,.35);overflow:hidden}
-.vpn-pipe-body{flex:0 0 75%;background:linear-gradient(180deg,#2b303a 0%,#16181d 50%,#262931 100%);border:2px solid #495057;border-right:3px solid #7950f2;border-radius:14px 0 0 14px;display:flex;align-items:center;justify-content:center;color:#d0bfff;font-size:13px;font-weight:700;letter-spacing:.3px;text-shadow:0 1px 3px rgba(0,0,0,.9);padding:6px 10px;text-align:center;box-sizing:border-box}
-.vpn-exit-body{flex:1;background:#ebfbee;border:2px dashed #8ce99a;border-left:none;border-radius:0 14px 14px 0;display:flex;align-items:center;justify-content:center;color:#2b8a3e;font-size:13px;font-weight:700;padding:6px 8px;text-align:center;box-sizing:border-box}
-.vpn-plain-road{width:100%;min-height:50px;background:#f8f9fa;border:2px dashed #ced4da;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--ink-2,#4a5568);font-size:13px;font-weight:600;padding:6px 12px;text-align:center;box-sizing:border-box}
+.vpn-pipe-body{flex:0 0 75%;background:linear-gradient(180deg,#2b303a 0%,#16181d 50%,#262931 100%);border:2px solid #495057;border-right:3px solid #7950f2;border-radius:14px 0 0 14px;display:flex;align-items:center;justify-content:center;color:#d0bfff;font-size: max(15px, 13px);font-weight:700;letter-spacing:.3px;text-shadow:0 1px 3px rgba(0,0,0,.9);padding:6px 10px;text-align:center;box-sizing:border-box}
+.vpn-exit-body{flex:1;background:#ebfbee;border:2px dashed #8ce99a;border-left:none;border-radius:0 14px 14px 0;display:flex;align-items:center;justify-content:center;color:#2b8a3e;font-size: max(15px, 13px);font-weight:700;padding:6px 8px;text-align:center;box-sizing:border-box}
+.vpn-plain-road{width:100%;min-height:50px;background:#f8f9fa;border:2px dashed #ced4da;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--ink-2,#4a5568);font-size: max(15px, 13px);font-weight:600;padding:6px 12px;text-align:center;box-sizing:border-box}
 .vpn-packet-lane{position:absolute;inset:0;pointer-events:none;overflow:visible}
 .vpn-flying-packet{position:absolute;top:50%;will-change:transform,left,opacity}
-.vpn-pkt-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+.vpn-pkt-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size: max(15px, 12px);font-weight:700;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.25)}
 .vpn-pkt-plain{background:#fff;border:2px solid #fd7e14;color:#d9480f}
 .vpn-pkt-dark{background:#212529;border:2px solid #b197fc;color:#f3f0ff}
 .vpn-pkt-green{background:#2b8a3e;border:2px solid #51cf66;color:#fff}

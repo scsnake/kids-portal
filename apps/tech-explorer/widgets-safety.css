@@ -1,0 +1,1355 @@
+/* widgets-safety.css - Group B Interactive Widgets (Security, Network, Logic) */
+
+/* ==========================================================================
+   Shared Panel & Component Foundations
+   ========================================================================== */
+
+.ws-panel {
+  width: min(100%, 720px);
+  margin-inline: auto;
+  padding: 20px;
+  border: 2px solid var(--line, #e6dfd0);
+  border-radius: var(--radius, 18px);
+  background: var(--card, #ffffff);
+  box-shadow: var(--shadow, 0 2px 0 rgba(29, 39, 56, .08), 0 8px 24px rgba(29, 39, 56, .06));
+  color: var(--ink, #1d2738);
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.ws-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px dashed var(--line, #e6dfd0);
+}
+
+.ws-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ws-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: max(15px, 0.85rem);
+  font-weight: 700;
+  background: #f1f3f5;
+  color: var(--ink-2, #4a5568);
+}
+
+.ws-badge-warn {
+  background: #fff3bf;
+  color: #d9480f;
+}
+
+.ws-badge-good {
+  background: #ebfbee;
+  color: var(--good, #2b8a3e);
+}
+
+.ws-badge-bad {
+  background: #ffe3e3;
+  color: var(--bad, #e03131);
+}
+
+/* Touch-Friendly Interactive Buttons (>= 44px) */
+.ws-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  min-width: 44px;
+  padding: 10px 18px;
+  border: 2px solid var(--line, #e6dfd0);
+  border-radius: 14px;
+  background: var(--card, #ffffff);
+  color: var(--ink, #1d2738);
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--line, #e6dfd0);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+              box-shadow 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+              background-color 180ms ease-out,
+              border-color 180ms ease-out,
+              opacity 180ms ease-out;
+}
+
+.ws-btn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--c, #2f6fdf) 40%, var(--line, #e6dfd0));
+}
+
+.ws-btn:active:not(:disabled) {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 0 1px 0 var(--line, #e6dfd0);
+}
+
+.ws-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.ws-btn-primary {
+  background: var(--c, #2f6fdf);
+  border-color: var(--c, #2f6fdf);
+  color: #ffffff;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--c, #2f6fdf) 70%, black);
+}
+
+.ws-btn-primary:active:not(:disabled) {
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--c, #2f6fdf) 70%, black);
+}
+
+.ws-btn-success {
+  background: var(--good, #2b8a3e);
+  border-color: var(--good, #2b8a3e);
+  color: #ffffff;
+  box-shadow: 0 3px 0 #1b5e20;
+}
+
+.ws-btn-danger {
+  background: var(--bad, #e03131);
+  border-color: var(--bad, #e03131);
+  color: #ffffff;
+  box-shadow: 0 3px 0 #9b1c1c;
+}
+
+.ws-btn-warn {
+  background: #f59f00;
+  border-color: #f59f00;
+  color: #ffffff;
+  box-shadow: 0 3px 0 #b26b00;
+}
+
+.ws-btn-ghost {
+  background: #f8f9fa;
+  border-color: #dee2e6;
+  color: var(--ink-2, #4a5568);
+}
+
+.ws-btn-sm {
+  min-height: 38px;
+  padding: 6px 12px;
+  font-size: max(15px, 0.9rem);
+  border-radius: 10px;
+}
+
+/* Status message bar */
+.ws-status {
+  min-height: 2em;
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f8f9fa;
+  color: var(--ink-2, #4a5568);
+  font-weight: 800;
+  line-height: 1.5;
+  text-align: center;
+  transition: background-color 200ms ease-out, color 200ms ease-out;
+}
+
+.ws-status.good {
+  background: #ebfbee;
+  color: var(--good, #2b8a3e);
+}
+
+.ws-status.bad {
+  background: #fff5f5;
+  color: var(--bad, #e03131);
+}
+
+.ws-status.warn {
+  background: #fff9db;
+  color: #e67700;
+}
+
+/* Animations */
+.ws-shake {
+  animation: wsShakeKey 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.ws-pop {
+  animation: wsPopKey 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes wsShakeKey {
+  10%, 90% { transform: translate3d(-2px, 0, 0); }
+  20%, 80% { transform: translate3d(3px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+  40%, 60% { transform: translate3d(5px, 0, 0); }
+}
+
+@keyframes wsPopKey {
+  0% { transform: scale(0.92); opacity: 0.6; }
+  60% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ==========================================================================
+   Widget 1: otpdefense - 驗證碼不能給別人
+   ========================================================================== */
+
+.ws-otp-scene {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  position: relative;
+}
+
+@media (max-width: 600px) {
+  .ws-otp-scene {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ws-phone-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #f1f3f5;
+  border: 2px solid #dee2e6;
+  border-radius: 20px;
+  position: relative;
+}
+
+.ws-phone-notch {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #ced4da;
+  font-size: max(15px, 0.82rem);
+  color: var(--ink-3, #8a93a3);
+  font-weight: 700;
+}
+
+.ws-sms-bubble {
+  padding: 12px;
+  background: #ffffff;
+  border: 2px solid #e9ecef;
+  border-radius: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.ws-sms-sender {
+  font-size: max(15px, 0.85rem);
+  font-weight: 800;
+  color: var(--c, #2f6fdf);
+  margin-bottom: 4px;
+}
+
+.ws-sms-body {
+  font-size: 0.95rem;
+  color: var(--ink, #1d2738);
+  line-height: 1.4;
+}
+
+.ws-code-badge {
+  display: inline-block;
+  margin: 6px 0;
+  padding: 4px 10px;
+  background: #fff3bf;
+  border: 2px solid #ffd43b;
+  border-radius: 8px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: #d9480f;
+}
+
+.ws-sms-warn {
+  font-size: max(15px, 0.8rem);
+  font-weight: 800;
+  color: var(--bad, #e03131);
+}
+
+.ws-stranger-bubble {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  background: #fff5f5;
+  border: 2px solid #ffc9c9;
+  border-radius: 14px;
+  transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease;
+}
+
+.ws-stranger-bubble.scared {
+  transform: translateX(-30px) rotate(-8deg);
+  opacity: 0.35;
+}
+
+.ws-avatar-lg {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.ws-stranger-text {
+  font-size: max(15px, 0.9rem);
+  line-height: 1.4;
+  color: #c92a2a;
+}
+
+.ws-stranger-text b {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.95rem;
+}
+
+/* Vault Side */
+.ws-vault-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: #e9ecef;
+  border: 2px solid #ced4da;
+  border-radius: 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.ws-vault-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ink, #1d2738);
+}
+
+.ws-vault-door {
+  width: 140px;
+  height: 140px;
+  margin: 12px 0;
+  background: linear-gradient(135deg, #adb5bd 0%, #6c757d 100%);
+  border: 6px solid #495057;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 4px 8px rgba(255, 255, 255, 0.4), 0 8px 16px rgba(0, 0, 0, 0.2);
+  position: relative;
+  transition: transform 500ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 300ms ease;
+}
+
+.ws-vault-door.open {
+  transform: rotate(-75deg) scale(0.9);
+  border-color: var(--bad, #e03131);
+}
+
+.ws-vault-door.safe {
+  border-color: #ffd43b;
+  box-shadow: 0 0 20px #ffd43b;
+}
+
+.ws-vault-wheel {
+  font-size: 2.8rem;
+  line-height: 1;
+  transition: transform 400ms ease;
+}
+
+.ws-vault-keypad {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.ws-vault-keypad span {
+  width: 18px;
+  height: 22px;
+  background: #343a40;
+  color: #fff;
+  border-radius: 4px;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: max(15px, 0.8rem);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ws-vault-treasures {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1.8rem;
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.ws-vault-treasures.looted {
+  opacity: 0.15;
+  transform: translateY(-10px) scale(0.8);
+}
+
+.ws-vault-label {
+  margin: 6px 0 0;
+  font-size: max(15px, 0.85rem);
+  font-weight: 700;
+  color: var(--ink-2, #4a5568);
+}
+
+/* Energy Barrier Overlay */
+.ws-energy-barrier {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 250ms ease, transform 250ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.ws-energy-barrier.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ws-barrier-shield {
+  padding: 10px 18px;
+  background: rgba(43, 138, 62, 0.95);
+  color: #ffffff;
+  border: 3px solid #69db7c;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 900;
+  box-shadow: 0 0 25px rgba(105, 219, 124, 0.8);
+}
+
+.ws-otp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+  justify-content: center;
+}
+
+.ws-otp-actions .ws-btn {
+  flex: 1 1 200px;
+}
+
+/* ==========================================================================
+   Widget 2: packetsniff - 公共 Wi-Fi 上做什麼？
+   ========================================================================== */
+
+.ws-sniff-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ws-sniff-stage {
+  display: grid;
+  grid-template-columns: 140px 1fr 140px;
+  gap: 12px;
+  align-items: center;
+  padding: 16px;
+  background: #fdf2e9;
+  border: 2px solid #ffe8cc;
+  border-radius: 18px;
+  position: relative;
+  min-height: 220px;
+}
+
+@media (max-width: 580px) {
+  .ws-sniff-stage {
+    grid-template-columns: 100px 1fr 100px;
+    padding: 10px;
+  }
+}
+
+.ws-sniff-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.ws-device-icon {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.ws-device-text {
+  font-size: max(15px, 0.85rem);
+  font-weight: 800;
+  color: var(--ink, #1d2738);
+}
+
+/* Air Path & Floating Packet */
+.ws-air-path {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+.ws-air-waves {
+  font-size: 1.1rem;
+  color: #fd7e14;
+  letter-spacing: 0.2em;
+  opacity: 0.65;
+}
+
+.ws-packet-capsule {
+  position: absolute;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: max(15px, 0.82rem);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease;
+  z-index: 5;
+}
+
+.ws-packet-capsule.weather {
+  background: #e7f5ff;
+  border: 2px solid #74c0fc;
+  color: #1971c2;
+}
+
+.ws-packet-capsule.http-plain {
+  background: #ffe3e3;
+  border: 2px solid #ff8787;
+  color: #c92a2a;
+}
+
+.ws-packet-capsule.https-secure {
+  background: #d3f9d8;
+  border: 2px solid #40c057;
+  color: #2b8a3e;
+  box-shadow: 0 0 16px rgba(64, 192, 87, 0.5);
+}
+
+/* Snooper Fox in the bottom corner */
+.ws-snooper-card {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 2px solid #dee2e6;
+  border-radius: 14px;
+  transition: border-color 200ms ease, background-color 200ms ease;
+}
+
+.ws-snooper-card.alert {
+  border-color: var(--bad, #e03131);
+  background: #fff5f5;
+}
+
+.ws-snooper-avatar {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.ws-snooper-bubble {
+  font-size: max(15px, 0.9rem);
+  line-height: 1.4;
+  color: var(--ink-2, #4a5568);
+}
+
+.ws-snooper-bubble b {
+  display: block;
+  font-size: max(15px, 0.92rem);
+  color: var(--ink, #1d2738);
+}
+
+.ws-sniff-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  justify-content: center;
+}
+
+.ws-sniff-actions .ws-btn {
+  flex: 1 1 180px;
+}
+
+/* ==========================================================================
+   Widget 3: realwallet - 遊戲裡的錢是真的錢
+   ========================================================================== */
+
+.ws-shop-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #f8f9fa;
+  border: 2px solid #dee2e6;
+  border-radius: 16px;
+}
+
+.ws-item-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ws-item-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.ws-item-title {
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.ws-item-price {
+  font-size: max(15px, 0.9rem);
+  font-weight: 700;
+  color: #f59f00;
+}
+
+.ws-conduit-scene {
+  margin: 16px 0;
+  padding: 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 18px;
+  background: #fdfbf7;
+  position: relative;
+  transition: background 300ms ease, border-color 300ms ease;
+}
+
+.ws-conduit-scene.xray-on {
+  background: #1a1e29;
+  border-color: #3b5bdb;
+  color: #edf2ff;
+}
+
+.ws-conduit-wire {
+  height: 28px;
+  margin: 12px auto;
+  border-radius: 14px;
+  background: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  color: #adb5bd;
+  font-size: max(15px, 0.85rem);
+  position: relative;
+  overflow: hidden;
+  transition: background 300ms ease, box-shadow 300ms ease;
+}
+
+.ws-conduit-scene.xray-on .ws-conduit-wire {
+  background: #364fc7;
+  box-shadow: 0 0 12px #4c6ef5;
+  color: #ffd43b;
+}
+
+.ws-real-wallet-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 2px solid #dee2e6;
+  border-radius: 16px;
+  background: #ffffff;
+  transition: background 300ms ease, color 300ms ease;
+}
+
+.ws-conduit-scene.xray-on .ws-real-wallet-box {
+  background: #252a3a;
+  border-color: #4c6ef5;
+  color: #ffffff;
+}
+
+.ws-wallet-big-icon {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.ws-converter-banner {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: #fff9db;
+  border: 2px solid #ffe066;
+  border-radius: 14px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #d9480f;
+  animation: wsPopKey 0.3s ease;
+}
+
+.ws-wallet-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  justify-content: center;
+}
+
+.ws-wallet-tools .ws-btn {
+  flex: 1 1 200px;
+}
+
+/* Parent Confirmation Modal Mock */
+.ws-parent-dialog {
+  margin-top: 14px;
+  padding: 16px;
+  background: #e7f5ff;
+  border: 2px solid #74c0fc;
+  border-radius: 16px;
+  animation: wsPopKey 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.ws-parent-header {
+  font-weight: 800;
+  font-size: 1rem;
+  color: #1971c2;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ws-parent-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.ws-parent-choices .ws-btn {
+  flex: 1 1 180px;
+}
+
+/* ==========================================================================
+   Widget 4: kickhacker - 救回帳號
+   ========================================================================== */
+
+.ws-devices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.ws-device-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 14px;
+  background: #ffffff;
+  transition: transform 350ms cubic-bezier(0.2, 0.8, 0.2, 1),
+              opacity 350ms ease,
+              border-color 200ms ease;
+}
+
+.ws-device-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ws-dev-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.ws-device-text b {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.ws-device-text small {
+  font-size: max(15px, 0.82rem);
+  color: var(--ink-2, #4a5568);
+}
+
+@keyframes ws-hacker-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(224, 49, 49, 0.55);
+    border-color: #ff8787;
+    background: #fff5f5;
+  }
+  50% {
+    box-shadow: 0 0 16px 5px rgba(224, 49, 49, 0.45);
+    border-color: #e03131;
+    background: #ffe3e3;
+    transform: scale(1.02);
+  }
+}
+
+.ws-device-row.hacker {
+  border: 2px solid #ff8787;
+  background: #fff5f5;
+  animation: ws-hacker-pulse 1.4s ease-in-out infinite;
+}
+
+.ws-device-row.kicked {
+  animation: none !important;
+  transform: translate3d(120%, -30px, 0) rotate(25deg);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ws-kick-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.ws-step-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.ws-step-btn.ready {
+  border-color: var(--c, #2f6fdf);
+  background: #f0f7ff;
+}
+
+.ws-step-btn.done {
+  border-color: var(--good, #2b8a3e);
+  background: #ebfbee;
+  color: #1f6b30;
+}
+
+.ws-step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #dee2e6;
+  color: var(--ink-2, #4a5568);
+  font-weight: 900;
+  font-size: max(15px, 0.9rem);
+}
+
+.ws-step-btn.ready .ws-step-badge {
+  background: var(--c, #2f6fdf);
+  color: #ffffff;
+}
+
+.ws-step-btn.done .ws-step-badge {
+  background: var(--good, #2b8a3e);
+  color: #ffffff;
+}
+
+/* Comic Boot Animation */
+.ws-boot-drop {
+  display: inline-block;
+  font-size: 3rem;
+  animation: wsBootKey 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes wsBootKey {
+  0% { transform: translateY(-80px) rotate(-30deg) scale(0.6); opacity: 0; }
+  60% { transform: translateY(0) rotate(15deg) scale(1.2); opacity: 1; }
+  100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+}
+
+/* ==========================================================================
+   Widget 5: voiceclone - 聲音和影片也能假造
+   ========================================================================== */
+
+.ws-voice-phone {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 20px 16px;
+  border: 3px solid #ced4da;
+  border-radius: 28px;
+  background: #f8f9fa;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.ws-phone-status-bar {
+  display: flex;
+  justify-content: space-between;
+  font-size: max(15px, 0.8rem);
+  font-weight: 700;
+  color: var(--ink-3, #8a93a3);
+  margin-bottom: 16px;
+}
+
+.ws-call-card {
+  text-align: center;
+  padding: 16px 10px;
+}
+
+.ws-caller-avatar {
+  font-size: 3.5rem;
+  margin-bottom: 8px;
+}
+
+.ws-caller-name {
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.ws-caller-sub {
+  font-size: max(15px, 0.9rem);
+  color: var(--ink-2, #4a5568);
+  margin-top: 2px;
+}
+
+/* Equalizer audio wave animation */
+.ws-audio-wave {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 36px;
+  margin: 14px 0;
+}
+
+.ws-wave-bar {
+  width: 5px;
+  height: 8px;
+  background: var(--c, #2f6fdf);
+  border-radius: 4px;
+  animation: wsWaveKey 0.6s ease-in-out infinite alternate;
+}
+
+.ws-wave-bar:nth-child(2) { animation-delay: 0.1s; height: 16px; }
+.ws-wave-bar:nth-child(3) { animation-delay: 0.25s; height: 26px; }
+.ws-wave-bar:nth-child(4) { animation-delay: 0.15s; height: 32px; }
+.ws-wave-bar:nth-child(5) { animation-delay: 0.3s; height: 18px; }
+.ws-wave-bar:nth-child(6) { animation-delay: 0.2s; height: 10px; }
+
+@keyframes wsWaveKey {
+  0% { transform: scaleY(0.4); }
+  100% { transform: scaleY(1.4); }
+}
+
+.ws-ai-gauge {
+  padding: 8px 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+  background: #fff3bf;
+  border: 1px solid #ffe066;
+  font-size: max(15px, 0.85rem);
+  font-weight: 800;
+  color: #d9480f;
+  animation: wsPopKey 0.3s ease;
+}
+
+.ws-speech-bubble {
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 2px solid #dee2e6;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--ink, #1d2738);
+  margin: 12px 0;
+  text-align: left;
+}
+
+.ws-voice-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+/* ==========================================================================
+   Widget 6: dnslookup - DNS：網路的通訊錄
+   ========================================================================== */
+
+.ws-browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #e9ecef;
+  border-radius: 12px;
+  font-family: ui-monospace, Menlo, monospace;
+}
+
+.ws-browser-url {
+  flex: 1;
+  padding: 6px 12px;
+  background: #ffffff;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-weight: 750;
+  font-size: 0.95rem;
+}
+
+.ws-dns-stage {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+  align-items: stretch;
+}
+
+@media (max-width: 620px) {
+  .ws-dns-stage {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ws-dns-station {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 10px;
+  border: 2px solid #dee2e6;
+  border-radius: 16px;
+  background: #f8f9fa;
+  text-align: center;
+}
+
+.ws-station-screen {
+  width: 100%;
+  min-height: 80px;
+  padding: 8px;
+  background: #ffffff;
+  border: 1px solid #ced4da;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: max(15px, 0.85rem);
+  font-weight: 750;
+}
+
+.ws-yellow-book {
+  width: 100%;
+  padding: 10px;
+  background: #fff9db;
+  border: 2px solid #ffd43b;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.ws-dns-entry {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: max(15px, 0.8rem);
+  font-family: ui-monospace, Menlo, monospace;
+  margin-bottom: 2px;
+}
+
+.ws-dns-entry.target {
+  background: #ffd43b;
+  font-weight: 800;
+  box-shadow: 0 0 8px rgba(255, 212, 59, 0.8);
+}
+
+.ws-dns-envelope {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  background: #fff;
+  border: 2px dashed var(--c, #2f6fdf);
+  border-radius: 12px;
+  margin-top: 12px;
+  font-weight: 800;
+}
+
+.ws-dns-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  justify-content: center;
+}
+
+.ws-dns-tools .ws-btn {
+  flex: 1 1 180px;
+}
+
+/* ==========================================================================
+   Widget 7: ifcondition - 如果……就……
+   ========================================================================== */
+
+.ws-scenario-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.ws-tab-btn {
+  flex: 1 1 auto;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 2px solid var(--line, #e6dfd0);
+  border-radius: 12px;
+  background: #f8f9fa;
+  font-weight: 800;
+  font-size: max(15px, 0.9rem);
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.ws-tab-btn.active {
+  background: var(--c, #2f6fdf);
+  border-color: var(--c, #2f6fdf);
+  color: #ffffff;
+}
+
+/* Scratch Block Visual Hierarchy */
+.ws-code-block {
+  padding: 14px 18px;
+  background: #f1f3f5;
+  border: 2px solid #dee2e6;
+  border-radius: 16px;
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.ws-branch-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+
+.ws-branch-row.active {
+  background: #fff9db;
+  border-color: #fcc419;
+  transform: translateX(6px);
+  box-shadow: 0 0 12px rgba(252, 196, 25, 0.4);
+}
+
+.ws-branch-row.ws-indent {
+  margin-left: 28px;
+  border-left: 4px solid #ced4da;
+  padding-left: 14px;
+  border-radius: 4px 10px 10px 4px;
+}
+
+.ws-branch-row.ws-indent.active {
+  border-left-color: #fcc419;
+  background: #fff9db;
+  transform: translateX(4px);
+  box-shadow: 0 0 12px rgba(252, 196, 25, 0.4);
+}
+
+.ws-flow-arrow {
+  font-size: 1.15rem;
+  color: #adb5bd;
+  margin-right: 2px;
+  user-select: none;
+}
+
+.ws-branch-row.active .ws-flow-arrow {
+  color: #d9480f;
+  font-weight: 900;
+}
+
+/* Tool Buttons for Voice Clone (Positive empowering colors) */
+.ws-btn-tool-a {
+  background: #e7f5ff;
+  border-color: #339af0;
+  color: #1864ab;
+  font-weight: 800;
+}
+.ws-btn-tool-a:hover:not(:disabled) {
+  background: #d0ebff;
+}
+.ws-btn-tool-b {
+  background: #e6fcf5;
+  border-color: #20c997;
+  color: #087f5b;
+  font-weight: 800;
+}
+.ws-btn-tool-b:hover:not(:disabled) {
+  background: #c3fae8;
+}
+
+/* Gemini Tag at HTML Level */
+.ws-panel > .gemini-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: max(15px, 0.76rem);
+  font-weight: 800;
+  color: #1971c2;
+  background: #e7f5ff;
+  border: 1.5px solid #a5d8ff;
+  border-radius: 999px;
+  padding: 2px 10px;
+  margin-bottom: 12px;
+  letter-spacing: 0.02em;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(25, 113, 194, 0.1);
+}
+
+.ws-panel > .gemini-tag .gemini-spark {
+  font-size: max(15px, 0.85rem);
+}
+
+.ws-branch-pill {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: max(15px, 0.85rem);
+}
+
+.ws-pill-if { background: #ffd43b; color: #495057; }
+.ws-pill-then { background: #69db7c; color: #1b5e20; }
+.ws-pill-else { background: #ffa94d; color: #7f2704; }
+
+/* Simulation Arena with Robot */
+.ws-arena {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0;
+  padding: 20px;
+  background: #e7f5ff;
+  border: 2px solid #a5d8ff;
+  border-radius: 18px;
+  min-height: 150px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ws-robot-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.ws-robot-body {
+  font-size: 3rem;
+  line-height: 1;
+  transition: transform 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.ws-robot-accessory {
+  font-size: 2.8rem;
+  line-height: 1;
+  animation: wsPopKey 0.3s ease;
+}
+
+.ws-robot-action-text {
+  margin-top: 10px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: #1971c2;
+}
+
+.ws-if-toggle-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ws-if-toggle-zone .ws-btn {
+  flex: 1 1 180px;
+}
+
+.ws-if-toggle-zone .ws-btn.active {
+  border-color: var(--c, #2f6fdf);
+  background: #e7f5ff;
+  color: var(--c, #2f6fdf);
+  font-weight: 900;
+}
+
+.ws-stars-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 1.4rem;
+}
+
+/* Keep the approved scenes inside the production lesson viewport. */
+.ws-panel { padding: 14px; }
+.ws-panel button { min-height: 46px; min-width: 46px; flex-shrink: 0; }
+.ws-panel small { font-size: 15px; }
+.ws-panel .ws-header { margin-bottom: 10px; padding-bottom: 8px; }
+.ws-panel .ws-status { margin-top: 10px; padding: 10px 12px; }
+.ws-panel > .gemini-tag { margin-bottom: 0; }
+.ws-voice .ws-voice-phone { max-width: 540px; padding: 10px 12px; }
+.ws-voice .ws-phone-status-bar { margin-bottom: 8px; }
+.ws-voice .ws-call-card { padding: 8px 6px; }
+.ws-voice .ws-caller-avatar { font-size: 42px; margin-bottom: 4px; }
+.ws-voice .ws-speech-bubble { padding: 8px 10px; margin: 8px 0; line-height: 1.35; }
+.ws-voice .ws-voice-actions { margin-top: 8px; gap: 8px; }
+.ws-kick #hackerRow { position: relative; }
+.ws-kick .ws-boot-drop { position: absolute; top: 0; left: 10px; pointer-events: none; }
+.ws-ifcond .ws-code-block { padding: 8px 10px; }
+.ws-ifcond .ws-branch-row { padding: 4px 8px; margin-block: 2px; }
+.ws-ifcond .ws-branch-row.ws-indent { margin-left: 28px; padding-left: 14px; }
+.ws-ifcond .ws-arena { min-height: 92px; margin: 8px 0; padding: 10px; }
+.ws-wallet { position: relative; }
+.ws-wallet .ws-parent-dialog { position: absolute; inset: 12px; margin: 0; z-index: 20; align-content: center; overflow: auto; }
+
+/* ==========================================================================
+   Reduced Motion Accessibility
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-panel *, .ws-panel *::before, .ws-panel *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

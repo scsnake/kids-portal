@@ -143,9 +143,11 @@ python3 -m http.server 8765 --bind 127.0.0.1
 - `js/widgets.js`: shared task implementations, such as `sort`, `choice`,
   `order`, `mouselab`, `touchlab`, `files`, `passcode`, `account`, `packets`, `code`.
   Each one gets `api.done()` to award the star.
+- `js/widgets-hardware.js` and `widgets-hardware.css`: seven approved Gemini activities for computer input/output, phone parts, storage, CPU, GPU, and AI.
+- `js/widgets-safety.js` and `widgets-safety.css`: seven approved Gemini activities for verification codes, Wi-Fi, purchases, account recovery, fake voices, DNS, and conditions.
 - `js/main.js`: routing (`#/u/<unit>/<slide>`), stars in `localStorage`, sound,
   and read-aloud with the device's zh-TW voice.
-- `style.css`: all styles. Each unit sets its own accent color `--c`.
+- `style.css`: shared styles. Each unit sets its own accent color `--c`.
 
 When you change a file, bump its `?v=`: `style.css` and `js/main.js` in
 `index.html`, `course.js` in `main.js`, and the module imports in `course.js`.

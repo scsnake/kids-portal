@@ -39,6 +39,8 @@ async function fixture(t) {
   for (const file of ['js/course.js', 'js/topic-model.js', 'js/topic-registry.js', 'js/main.js']) {
     await fs.copyFile(path.join(ROOT, APP, file), path.join(repo, APP, file));
   }
+  // The fixture has only web and iot, not the released catalog's prerequisites.
+  await write(path.join(repo, APP, 'js/topic-registry.js'), 'export const TOPICS = [];\n');
   const source = git(ROOT, 'show', 'HEAD:' + APP + '/js/units.js');
   const original = await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
   const units = original.UNITS.filter(unit => ['web', 'iot'].includes(unit.id));

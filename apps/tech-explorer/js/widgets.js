@@ -1,3 +1,6 @@
+import * as hardwareRedesigns from './widgets-hardware.js?v=29';
+import * as safetyRedesigns from './widgets-safety.js?v=29';
+
 // Interactions, one per slide. Each widget is `(host, params, api) => void`:
 //   host   the element to draw into (emptied before each slide)
 //   api    { good(), bad(), done(), later(fn, ms), alive() }
@@ -1612,6 +1615,8 @@ const SECURITY_WIDGETS = {
 };
 
 export const WIDGETS = {
+  ...hardwareRedesigns,
+  ...safetyRedesigns,
   ...SECURITY_WIDGETS,
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.

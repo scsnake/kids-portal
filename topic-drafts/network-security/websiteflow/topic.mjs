@@ -16,7 +16,7 @@ const base = (p) => `
 .${p}-root button:focus-visible{outline:3px solid var(--a);outline-offset:2px}
 .${p}-root .${p}-go{background:var(--a);border-color:transparent;color:#fff;font-weight:700;box-shadow:0 3px 0 rgba(0,0,0,.28)}
 .${p}-root .${p}-on{border-color:var(--a);background:#fff8e6;font-weight:700}
-.${p}-row{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.${p}-root .${p}-row{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;align-items:stretch;justify-content:flex-start}
 .${p}-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .${p}-k{font-size:15px;color:#4a5568}
 .${p}-status{min-height:52px;padding:10px 14px;border:2px dashed #e6dfd0;border-radius:14px;background:#fff;font-size:16px}
@@ -233,7 +233,7 @@ const css = base(P) + `
 .wf-note{font-size:15px;color:#5c6675}
 .wf-srv{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border:2px solid #cfd8e3;border-radius:18px;background:#f4f7fb}
 .wf-srv-h{font-weight:700}
-.wf-list{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
+.wf-root .wf-list{display:flex;flex:none;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none;border:0;border-radius:0;background:transparent}
 .wf-list li{padding:4px 10px;border:1px solid #e6dfd0;border-radius:10px;background:#fff}
 .wf-list li.wf-acct-new,.wf-list li.wf-srv-ticket{border:2px solid var(--a);background:#e6fcf5}
 .wf-list li.wf-dead{color:#5c6675;background:#f8f9fa}

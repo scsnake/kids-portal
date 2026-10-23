@@ -81,11 +81,13 @@ const css = baseCss('fw', '#c2410c', '#fff1e6') + `
 .fw-rule-allow{background:#ebfbee}
 .fw-rule-deny{background:#fff5f5}
 .fw-rule-port-tag{display:inline-flex;align-items:center;gap:4px;background:#fff3bf;color:#d9480f;border:2px solid #fab005;border-radius:8px;padding:2px 8px;font-weight:800;box-shadow:0 0 10px rgba(250,176,5,0.4)}
-.fw-question-port-banner{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 12px;border-radius:12px;background:#fff;border:2px solid #fd7e14;margin-top:4px;font-size:15px}
+.fw-question-port-banner{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:4px 8px;border-radius:12px;background:#fff;border:2px solid #fd7e14;margin-top:2px;font-size:15px}
 .fw-port-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:8px;font-weight:800;font-size:16px}
 .fw-port-match{background:#ebfbee;color:#2b8a3e;border:2px solid #40c057;box-shadow:0 0 8px rgba(64,192,87,0.3)}
 .fw-port-mismatch{background:#fff5f5;color:#e03131;border:2px solid #ff6b6b;box-shadow:0 0 8px rgba(255,107,107,0.3)}
-.fw-hint-bar{display:flex;align-items:center;gap:6px;font-size:14px;color:#d9480f;background:#fff4e6;padding:6px 10px;border-radius:8px;border:1px solid #ffd8a8;margin-top:4px}
+.fw-hint-bar{display:flex;align-items:center;gap:6px;font-size:15px;line-height:1.25;color:#d9480f;background:#fff4e6;padding:4px 8px;border-radius:8px;border:1px solid #ffd8a8;margin-top:2px}
+.fw-body{gap:8px}
+.fw-rules{gap:4px}
 .fw-conn{display:flex;flex-direction:column;gap:6px;border-color:var(--c,#c2410c)}
 .fw-conn-h{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-weight:700}
 .fw-say{padding:6px 12px;border-radius:12px;background:#f6f1e7;font-size:16px}

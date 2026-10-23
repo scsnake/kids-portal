@@ -102,6 +102,30 @@ Widget completion must award a star. The runner repeats checks after “重新�
 
 ## Deploy after approval
 
+### Approved redesign checklist
+
+Use this checklist when an approved preview changes existing lessons.
+Owner approval covers the visual direction. Integration checks do not repeat that approval.
+
+1. Preserve the approved source on its branch. Use an isolated release worktree.
+2. Map preview activities to actual unit IDs and slide titles. Preview indices may be stale.
+3. Connect activities to the production renderer. Preserve titles, IDs, progress keys, and navigation.
+4. Synchronize published packages and draft sources. Update registry hashes, catalogs, cache versions, and release notes.
+5. Test every changed activity for completion, stars, and replay in Chromium and WebKit.
+6. Check tablet orientations, desktop sizes, reduced motion, text size, and touch targets.
+7. Scan the full course for new overflow. Compare existing overflow with the deployed baseline.
+8. Test shared navigation and saved progress. Check representative screenshots and every reported failure.
+9. Correct integration defects without changing the approved visual direction. Repeat the affected checks.
+10. Commit the release with implementation, review, and fix attribution. Record the exact content revision.
+11. Deploy staging. Verify its release marker before publishing production.
+12. Deploy production. Verify the live revision and interactions, then synchronize the release and main branches.
+
+Every changed activity needs automated checks in the actual course.
+A separate manual design review of every page is not required.
+Preview-only checks do not prove production layout, progress, or replay behavior.
+
+### New topic batches
+
 Inspect the plan:
 
 ```sh
