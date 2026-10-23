@@ -43,56 +43,57 @@ yet; 「直接開始」 closes it.
 18. 密碼管理和通行密鑰: one password everywhere vs a different one each (a breach opens every account), the 密碼 App, signing in with a passkey on a real and a fake shop
 19. 註冊、登入和登出: Website accounts: sign up once, log in to get a session ticket, change pages without retyping the password, and log out without deleting the account.
 20. 網站記得什麼？: What websites and browsers remember: login state, local and account settings, autofill, local and saved drafts, cookies, sessionStorage and localStorage, and what logging out does not erase.
-21. App 和更新: hardware vs software, installing from the App Store, permissions, spotting a fake look-alike app (developer, ratings, permissions), updates
-22. 常用的 App: messenger vs email, video meetings, social media, search engines, office apps
-23. 實用小技巧: screenshots, QR codes (and fake ones), backup, Find My
-24. 地圖和導航: search a place, walk / bus / car routes, follow the turn-by-turn banner; who may see your location; a stranger asking for it; bus time includes the wait
-25. 行動支付: tap a card or a phone at 30, 10 and 2 cm (NFC only works up close), what to do with a payment code, three pay screens to check (a wrong amount, a "scan to get money" scam), why a card with no battery can beep
-26. AI 聊天機器人: what a chatbot is, catching a wrong answer, good and bad uses
-27. 語音助理: clear commands for four jobs (vague ones ask back, no wake word gets no answer), the wake word, good and careful uses
-28. AI 生成內容的標示: find the AI labels in a feed of real photos and real AI images (public domain, see img/ailabel/CREDITS.md), share your own AI picture honestly, AI and homework
-29. 網路上的著作權: own work vs other people's work, pick pictures for a report by their license (創用 CC, public domain) and write the source, share the link instead of re-uploading
-30. 共用文件和雲端硬碟: three people type in one document at once, 檢視者 / 加註者 / 編輯者 for a teammate, a teacher and parents, restoring a deleted part from the version history
-31. 分享照片之前: find four clues in a photo (name tag, house number, bus stop, phone tag) and cover them, turn off 位置 in the share sheet's 選項, which photos to think twice about, asking friends first
-32. 上網安全: scam messages, traps on web pages (fake ads, pop-ups, fake virus alerts, redirects, phishing), verification codes, two-factor authentication, malware, personal information, 165
-33. 公共 Wi-Fi 和網購: pick the Wi-Fi on the library poster (look-alike and open networks), what to leave for home, a fake shop with 4 warning signs, in-app purchases (Ask to Buy), paying outside the shop
-34. 被駭了怎麼辦？: sort the signs of a stolen account from normal events, the steps to get it back (tell an adult first, sign out all devices, two-factor authentication), a ransom screen (do not pay, go offline, restore from a backup), a USB drive found in the hallway goes to 失物招領
-35. 假訊息和 AI 假圖: misinformation (source, date, forwarded hoaxes), spotting flaws in an AI-made picture, deepfake voices (a fake call from a parent), creepy videos dressed as cartoons (Elsagate), habits before forwarding
-36. 網路禮儀和網路霸凌: think before you post, cyberbullying in a chat (don't reply, screenshot, tell an adult, block), bystanders
-37. 緊急求救: 119 vs 110, calling from a locked phone (緊急 on the passcode screen), Medical ID, Emergency SOS
-38. 搜尋技巧: pick the key words out of a question (filler words shake), find the official site under the 「贊助」 ads, sort sources by how far to trust them (an AI summary too)
-39. 數位足跡: delete a post and watch the copies stay (a screenshot, a forward, a saved photo, a search engine), choose who can see a post (公開 / 朋友 / 只有我), which posts are fine ten years later
-40. 訂閱和自動續訂: cancel a 7-day free trial before day 8 charges NT$290, turn off unused subscriptions (monthly and yearly totals), the steps to cancel on iPad, a 「first month for 1 dollar」 offer
-41. 智慧手錶和穿戴裝置: green light measures the heart rate at rest and after running (with a stethoscope heartbeat sound), what the watch does alone vs with the phone, fall detection calling 119
+21. 登入更安全: Safer sign-in: unique passwords in a password manager, real two-factor authentication, refusing unexpected approvals, phishing-resistant methods, where a fingerprint stays, never sharing codes, and a recovery plan.
+22. App 和更新: hardware vs software, installing from the App Store, permissions, spotting a fake look-alike app (developer, ratings, permissions), updates
+23. 常用的 App: messenger vs email, video meetings, social media, search engines, office apps
+24. 實用小技巧: screenshots, QR codes (and fake ones), backup, Find My
+25. 地圖和導航: search a place, walk / bus / car routes, follow the turn-by-turn banner; who may see your location; a stranger asking for it; bus time includes the wait
+26. 行動支付: tap a card or a phone at 30, 10 and 2 cm (NFC only works up close), what to do with a payment code, three pay screens to check (a wrong amount, a "scan to get money" scam), why a card with no battery can beep
+27. AI 聊天機器人: what a chatbot is, catching a wrong answer, good and bad uses
+28. 語音助理: clear commands for four jobs (vague ones ask back, no wake word gets no answer), the wake word, good and careful uses
+29. AI 生成內容的標示: find the AI labels in a feed of real photos and real AI images (public domain, see img/ailabel/CREDITS.md), share your own AI picture honestly, AI and homework
+30. 網路上的著作權: own work vs other people's work, pick pictures for a report by their license (創用 CC, public domain) and write the source, share the link instead of re-uploading
+31. 共用文件和雲端硬碟: three people type in one document at once, 檢視者 / 加註者 / 編輯者 for a teammate, a teacher and parents, restoring a deleted part from the version history
+32. 分享照片之前: find four clues in a photo (name tag, house number, bus stop, phone tag) and cover them, turn off 位置 in the share sheet's 選項, which photos to think twice about, asking friends first
+33. 上網安全: scam messages, traps on web pages (fake ads, pop-ups, fake virus alerts, redirects, phishing), verification codes, two-factor authentication, malware, personal information, 165
+34. 公共 Wi-Fi 和網購: pick the Wi-Fi on the library poster (look-alike and open networks), what to leave for home, a fake shop with 4 warning signs, in-app purchases (Ask to Buy), paying outside the shop
+35. 被駭了怎麼辦？: sort the signs of a stolen account from normal events, the steps to get it back (tell an adult first, sign out all devices, two-factor authentication), a ransom screen (do not pay, go offline, restore from a backup), a USB drive found in the hallway goes to 失物招領
+36. 假訊息和 AI 假圖: misinformation (source, date, forwarded hoaxes), spotting flaws in an AI-made picture, deepfake voices (a fake call from a parent), creepy videos dressed as cartoons (Elsagate), habits before forwarding
+37. 網路禮儀和網路霸凌: think before you post, cyberbullying in a chat (don't reply, screenshot, tell an adult, block), bystanders
+38. 緊急求救: 119 vs 110, calling from a locked phone (緊急 on the passcode screen), Medical ID, Emergency SOS
+39. 搜尋技巧: pick the key words out of a question (filler words shake), find the official site under the 「贊助」 ads, sort sources by how far to trust them (an AI summary too)
+40. 數位足跡: delete a post and watch the copies stay (a screenshot, a forward, a saved photo, a search engine), choose who can see a post (公開 / 朋友 / 只有我), which posts are fine ten years later
+41. 訂閱和自動續訂: cancel a 7-day free trial before day 8 charges NT$290, turn off unused subscriptions (monthly and yearly totals), the steps to cancel on iPad, a 「first month for 1 dollar」 offer
+42. 智慧手錶和穿戴裝置: green light measures the heart rate at rest and after running (with a stethoscope heartbeat sound), what the watch does alone vs with the phone, fall detection calling 119
 
 **Part 2: 原理探索 (how it works)**
 
-42. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
-43. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
-44. 電腦怎麼做加法？: counting up in binary with carries, a half adder from XOR and AND, a 4-bit ripple-carry adder stepped one column at a time
-45. 作業系統: what an OS does, time sharing (multitasking)
-46. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
-47. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
-48. 聲音和影片怎麼變成數字: sampling a sound wave (and hearing it), frames per second with a bouncing ball, why video needs compression
-49. 人臉和指紋辨識: Face ID dots on a face and on a flat photo (front and side views, unlock or shake), a face as numbers compared with a limit (a twin gets in), Touch ID feature points, why the passcode still matters
-50. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
-51. AI 怎麼學？: learning from examples, why data matters (bias)
-52. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
-53. 網路的實體: follow a message from Taiwan to the US (cell tower, machine room, submarine cable, data center) on a map with Taiwan's real outline, submarine cables, data centers and their power
-54. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
-55. 物聯網和智慧家電: which things go online, a smart plant pot's message from sensor to phone, an air-conditioner rule with AND or OR over one day, default passwords on home cameras, how a tap at school reaches a lamp at home
-56. 駭客想要什麼？: attack goals, permission before testing, social engineering, and practice boundaries
-57. 密碼怎麼被猜到？: common passwords, password combinations, credential stuffing, and one-way password hashes
-58. 網路上的攻擊: HTTP vs HTTPS on a fake Wi-Fi network, DDoS traffic, automatic visitors, and persistent traffic protection
-59. 惡意程式和漏洞: malware types, an unlocked-door vulnerability, zero-day exposure, and installing a security update
-60. 演算法: steps, binary search (number guessing), sorting by swaps
-61. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
-62. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
-63. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
-64. QR Code 怎麼運作？: tap the three finder squares to turn a tilted code upright, black = 1 and white = 0 (paint two bytes to spell Hi), error correction (which damage still scans)
-65. 電腦怎麼記住時間？: a quartz crystal drives a 15-bit counter (32768 = 2^15) with slow and normal speed, syncing with an atomic-clock time server, time zones
-66. GPS 怎麼算出位置？: distance from signal time and the speed of light, trilateration with three circles, a fourth satellite fixes the phone clock
-67. 機器人和自動駕駛怎麼看路？: sense, think, act (the answer turns into a flow chart that loops through the 有人 / 沒人 branch), camera vs radar vs lidar in fog, a robot vacuum that maps a room and stops at the stairs
+43. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
+44. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
+45. 電腦怎麼做加法？: counting up in binary with carries, a half adder from XOR and AND, a 4-bit ripple-carry adder stepped one column at a time
+46. 作業系統: what an OS does, time sharing (multitasking)
+47. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
+48. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
+49. 聲音和影片怎麼變成數字: sampling a sound wave (and hearing it), frames per second with a bouncing ball, why video needs compression
+50. 人臉和指紋辨識: Face ID dots on a face and on a flat photo (front and side views, unlock or shake), a face as numbers compared with a limit (a twin gets in), Touch ID feature points, why the passcode still matters
+51. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
+52. AI 怎麼學？: learning from examples, why data matters (bias)
+53. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
+54. 網路的實體: follow a message from Taiwan to the US (cell tower, machine room, submarine cable, data center) on a map with Taiwan's real outline, submarine cables, data centers and their power
+55. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
+56. 物聯網和智慧家電: which things go online, a smart plant pot's message from sensor to phone, an air-conditioner rule with AND or OR over one day, default passwords on home cameras, how a tap at school reaches a lamp at home
+57. 駭客想要什麼？: attack goals, permission before testing, social engineering, and practice boundaries
+58. 密碼怎麼被猜到？: common passwords, password combinations, credential stuffing, and one-way password hashes
+59. 網路上的攻擊: HTTP vs HTTPS on a fake Wi-Fi network, DDoS traffic, automatic visitors, and persistent traffic protection
+60. 惡意程式和漏洞: malware types, an unlocked-door vulnerability, zero-day exposure, and installing a security update
+61. 演算法: steps, binary search (number guessing), sorting by swaps
+62. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
+63. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
+64. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+65. QR Code 怎麼運作？: tap the three finder squares to turn a tilted code upright, black = 1 and white = 0 (paint two bytes to spell Hi), error correction (which damage still scans)
+66. 電腦怎麼記住時間？: a quartz crystal drives a 15-bit counter (32768 = 2^15) with slow and normal speed, syncing with an atomic-clock time server, time zones
+67. GPS 怎麼算出位置？: distance from signal time and the speed of light, trilateration with three circles, a fourth satellite fixes the phone clock
+68. 機器人和自動駕駛怎麼看路？: sense, think, act (the answer turns into a flow chart that loops through the 有人 / 沒人 branch), camera vs radar vs lidar in fog, a robot vacuum that maps a room and stops at the stairs
 
 ## Saved progress
 
