@@ -1,16 +1,7 @@
 {
-  "id": "0aa87561fd6a973057b1dd71c568aa1a4870e50f4818a4fbb4d799332091b216",
-  "baseCommit": "670a3e84f3d7ccc8e064f95b3c4349c9b50a700a",
-  "topics": [
-    "websiteflow",
-    "webmemory",
-    "loginsafety",
-    "ipports",
-    "firewall",
-    "vpn",
-    "trickdoors",
-    "antivirus",
-    "backupplan"
-  ],
-  "assetsVersion": "27"
+  "id": "141ed9be0754e683ddb6f7f5e99d7f53d11e394308d31100e52c90d40a0d6c0c",
+  "baseCommit": "b4759cc5a6755823b8d09f9293e6cdfe8d1d121b",
+  "topics": [],
+  "changes": ["home-return-position"],
+  "assetsVersion": "28"
 }

@@ -1,7 +1,7 @@
-import { UNITS as units, STAGES as stages, PARTS as parts, COMING as coming } from './units.js?v=27';
-import { WIDGETS as widgets } from './widgets.js?v=27';
-import { TOPICS } from './topic-registry.js?v=27';
-import { assembleCourse } from './topic-model.js?v=27';
+import { UNITS as units, STAGES as stages, PARTS as parts, COMING as coming } from './units.js?v=28';
+import { WIDGETS as widgets } from './widgets.js?v=28';
+import { TOPICS } from './topic-registry.js?v=28';
+import { assembleCourse } from './topic-model.js?v=28';
 
 // Draft snapshots use this renderer too; the release validator enforces ready topics.
 const course = assembleCourse({ units, stages, parts, coming, widgets }, TOPICS, { allowDrafts: true });
