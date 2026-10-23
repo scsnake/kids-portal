@@ -1390,8 +1390,166 @@ function traffic(host, _, api) {
   });
 }
 
+function vulnerability(host, _, api) {
+  host.innerHTML = `<div class="cy-panel cy-lab"><div class="cy-building" role="img" aria-label="門禁程式有錯誤，讓門鎖失效">
+      <div class="cy-program"><strong>門禁程式</strong><span>✓ 檢查身分</span><span class="cy-bugline">🐞 錯誤：沒有鎖門</span></div>
+      <span class="cy-rule-arrow" aria-hidden="true">→</span>
+      <div class="cy-doorwrap"><span class="cy-lockstate">⚠️ 門鎖失效</span><div class="cy-doorframe"><span class="cy-intruder" aria-hidden="true">🤖</span><div class="cy-doorpic open">🔓</div></div></div>
+    </div>
+    <div class="cy-labcopy"><b>這扇門因為程式寫錯，沒有鎖好。</b><button class="option cy-test">測試沒修補的版本</button><button class="go cy-fix">安裝安全更新</button><p class="cy-status" aria-live="polite">先測試，再更新。</p></div></div>`;
+  const door = host.querySelector('.cy-doorpic');
+  const intruder = host.querySelector('.cy-intruder');
+  const bug = host.querySelector('.cy-bugline');
+  const lockState = host.querySelector('.cy-lockstate');
+  const status = host.querySelector('.cy-status');
+  let tested = false;
+  host.querySelector('.cy-test').addEventListener('click', event => {
+    tested = true;
+    event.currentTarget.disabled = true;
+    intruder.classList.add('entered');
+    lockState.textContent = '🚨 陌生程式進來了';
+    host.querySelector('.cy-building').setAttribute('aria-label', '門禁程式的錯誤讓陌生程式穿過沒鎖好的門');
+    status.className = 'cy-status bad';
+    status.textContent = '門沒鎖好，陌生的程式可能跑進來。這個錯誤就是漏洞。';
+    shake(lockState);
+    api.bad();
+  });
+  host.querySelector('.cy-fix').addEventListener('click', event => {
+    event.currentTarget.disabled = true;
+    door.className = 'cy-doorpic fixed';
+    door.textContent = '🔒';
+    intruder.className = 'cy-intruder gone';
+    bug.className = 'cy-bugline fixed';
+    bug.textContent = '✅ 錯誤已修正：記得鎖門';
+    lockState.className = 'cy-lockstate fixed';
+    lockState.textContent = '✅ 門鎖恢復正常';
+    host.querySelector('.cy-building').setAttribute('aria-label', '安全更新修正程式錯誤，門鎖恢復正常');
+    status.className = 'cy-status good';
+    status.textContent = `${tested ? '🎉' : '✅'} 更新把門鎖好了。及早更新，能縮短漏洞打開的時間。`;
+    pop(door);
+    api.good();
+    api.done();
+  });
+}
+
+function patchline(host, _, api) {
+  const steps = [
+    ['🔎', '有人發現漏洞', '漏洞資訊傳開了，但修補還不存在。這段時間叫做零時差。'],
+    ['🧑‍💻', '開發者做出修補', '安全更新已經做好，但你的裝置還沒安裝，攻擊嘗試仍會繼續。'],
+    ['🔄', '我安裝更新', '更新裝好後，這個漏洞才真的在你的裝置上關起來。'],
+  ];
+  host.innerHTML = `<div class="cy-panel"><div class="cy-patchscene">
+      <div class="cy-news"><b>📣 漏洞資訊</b><span>還沒傳開</span></div>
+      <span class="cy-patcharrow" aria-hidden="true">→</span>
+      <div class="cy-device"><i>💻</i><b>我的裝置</b><span>目前正常</span></div>
+      <span class="cy-update" aria-hidden="true">🩹 安全更新</span>
+      <span class="cy-attempt-count" aria-live="polite">攻擊嘗試：0 次</span>
+    </div><div class="cy-risk">依序點下面三步</div>
+    <div class="cy-timeline">${steps.map((step, i) => `<button class="cy-step ${i === 0 ? 'ready' : ''}" data-step="${i}"><i>${step[0]}</i>${step[1]}</button>`).join('')}</div>
+    <p class="cy-status" aria-live="polite">依序點三步，看看修補怎麼完成。</p></div>`;
+  const scene = host.querySelector('.cy-patchscene');
+  const news = host.querySelector('.cy-news');
+  const device = host.querySelector('.cy-device');
+  const update = host.querySelector('.cy-update');
+  const risk = host.querySelector('.cy-risk');
+  const count = host.querySelector('.cy-attempt-count');
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let current = 0;
+  let attacking = false;
+  let attempts = 0;
+
+  const motion = (element, frames, duration, easing = 'cubic-bezier(0.23, 1, 0.32, 1)') => {
+    const safeFrames = reduceMotion ? frames.map(({ opacity = 1 }) => ({ opacity })) : frames;
+    return element.animate(safeFrames, {
+      duration: reduceMotion ? Math.min(duration, 160) : duration,
+      easing,
+      fill: 'both',
+    }).finished.catch(() => {});
+  };
+  const attackLoop = async () => {
+    if (!attacking || !api.alive()) return;
+    const attempt = document.createElement('span');
+    attempt.className = 'cy-attempt';
+    attempt.textContent = '⚠️';
+    scene.append(attempt);
+    const from = attempt.getBoundingClientRect();
+    const to = device.getBoundingClientRect();
+    const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+    const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+    await motion(attempt, [
+      { opacity: .25, transform: 'translate(0, 0) scale(.94)' },
+      { opacity: 1, transform: `translate(${dx}px, ${dy}px) scale(1)` },
+    ], 560, 'cubic-bezier(0.77, 0, 0.175, 1)');
+    attempt.remove();
+    if (!attacking || !api.alive()) return;
+    attempts += 1;
+    count.textContent = `攻擊嘗試：${attempts} 次`;
+    await motion(device, [
+      { transform: 'translateX(-2px)' },
+      { transform: 'translateX(3px)' },
+      { transform: 'translateX(0)' },
+    ], 220);
+    if (attacking) api.later(attackLoop, reduceMotion ? 420 : 260);
+  };
+
+  host.addEventListener('click', async event => {
+    const button = event.target.closest('[data-step]');
+    if (!button || Number(button.dataset.step) !== current) {
+      if (button) { shake(button); api.bad(); }
+      return;
+    }
+    button.disabled = true;
+    button.className = 'cy-step done';
+    host.querySelector('.cy-status').textContent = steps[current][2];
+    api.good();
+    if (current === 0) {
+      news.classList.add('known');
+      news.querySelector('span').textContent = '攻擊者也可能知道了';
+      device.classList.add('vulnerable');
+      device.querySelector('span').textContent = '漏洞還開著';
+      risk.className = 'cy-risk danger';
+      risk.textContent = '⚠️ 零時差：修補還不存在，攻擊已經可能開始';
+      attacking = true;
+      attackLoop();
+    }
+    if (current === 1) {
+      update.classList.add('ready');
+      risk.textContent = '⚠️ 修補已做好，但我的裝置還沒安裝，風險仍在';
+      await motion(update, [
+        { opacity: .35, transform: 'scale(.94)' },
+        { opacity: 1, transform: 'scale(1)' },
+      ], 240);
+    }
+    if (current === 2) {
+      attacking = false;
+      const from = update.getBoundingClientRect();
+      const to = device.getBoundingClientRect();
+      const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+      const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+      await motion(update, [
+        { opacity: 1, transform: 'translate(0, 0) scale(1)' },
+        { opacity: 0, transform: `translate(${dx}px, ${dy}px) scale(.94)` },
+      ], 420, 'cubic-bezier(0.77, 0, 0.175, 1)');
+      host.querySelectorAll('.cy-attempt').forEach(item => item.remove());
+      device.className = 'cy-device safe';
+      device.querySelector('span').textContent = '漏洞已關閉';
+      risk.className = 'cy-risk safe';
+      risk.textContent = '✅ 更新已安裝，攻擊嘗試被擋住了';
+      count.textContent = `攻擊嘗試停止在 ${attempts} 次`;
+    }
+    current += 1;
+    const next = host.querySelector(`[data-step="${current}"]`);
+    if (next) next.classList.add('ready');
+    else {
+      host.querySelector('.cy-status').className = 'cy-status good';
+      host.querySelector('.cy-status').textContent = '🎉 開發者做好更新後，要安裝才完成防守。';
+      api.done();
+    }
+  });
+}
+
 const SECURITY_WIDGETS = {
-  motives, commonpass, combinations, breach, hashdemo, route, traffic,
+  motives, commonpass, combinations, breach, hashdemo, route, traffic, vulnerability, patchline,
 };
 
 export const WIDGETS = {

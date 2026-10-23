@@ -3568,6 +3568,61 @@ export const UNITS = [
   },
 
   {
+    id: 'malwareholes',
+    part: 'adv',
+    icon: '🧩',
+    title: '惡意程式和漏洞',
+    en: 'Malware and Vulnerabilities',
+    desc: '惡意程式、漏洞、零時差和安全更新',
+    color: '#9f1239',
+    added: '2026-10-23',
+    slides: [
+      {
+        title: '惡意程式不只一種',
+        text: `${t('惡意程式', 'malware')}是故意傷害裝置、偷資料或搗亂的程式。名稱常用它怎麼散播，或做了什麼來分類。把四種說明放到對的位置！`,
+        widget: 'sort',
+        params: {
+          bins: [
+            { id: 'virus', icon: '🦠', label: '病毒' },
+            { id: 'worm', icon: '🪱', label: '蠕蟲' },
+            { id: 'trojan', icon: '🎁', label: '木馬' },
+            { id: 'ransom', icon: '🔒', label: '勒索軟體' },
+          ],
+          items: [
+            { icon: '📎', label: '附在其他檔案上，打開後才跟著執行', bin: 'virus' },
+            { icon: '🌐', label: '會自己從一台裝置散播到另一台', bin: 'worm' },
+            { icon: '🎮', label: '假裝是好用的 App，裡面卻藏壞東西', bin: 'trojan' },
+            { icon: '💰', label: '鎖住檔案，再向你要錢', bin: 'ransom' },
+          ],
+        },
+      },
+      {
+        title: '漏洞像沒鎖好的門',
+        text: `${t('漏洞', 'vulnerability')}是程式裡可能被利用的錯誤，像門因為做錯而鎖不起來。${t('修補', 'patch')}會改正錯誤。先測試，再裝上安全更新！`,
+        widget: 'vulnerability',
+      },
+      {
+        title: '修補要趕快裝',
+        text: `漏洞已被發現，但修補還沒做好時，常叫${t('零時差漏洞', 'zero-day vulnerability')}。開發者做好更新後，要安裝到裝置上才完成防守。依序點一點！`,
+        widget: 'patchline',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '平板跳出「安全更新可以安裝」。最好的做法是什麼？',
+          options: [
+            { text: '🔄 先備份，再盡快從系統設定安裝更新', correct: true },
+            { text: '🙈 永遠不要更新，舊版比較熟悉' },
+            { text: '🔗 點陌生訊息裡的連結下載更新檔' },
+          ],
+          explain: '先備份，再使用裝置的系統設定或官方商店更新。不要從陌生訊息下載更新檔。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'algo',
     part: 'adv',
     icon: '🧩',
@@ -3996,7 +4051,7 @@ export const STAGES = [
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },
   { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: '網路怎麼運作', en: 'How Networks Work', units: ['internet', 'networld', 'web', 'iot'] },
-  { id: 'security', part: 'adv', icon: '🛡️', title: '駭客怎麼攻擊？', en: 'How Attackers Think', units: ['attackers', 'passwordattacks', 'networkattacks'] },
+  { id: 'security', part: 'adv', icon: '🛡️', title: '駭客怎麼攻擊？', en: 'How Attackers Think', units: ['attackers', 'passwordattacks', 'networkattacks', 'malwareholes'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'freeapps', 'coding'] },
   { id: 'secret', part: 'adv', icon: '🔬', title: '生活科技的祕密', en: 'Secrets of Everyday Tech', units: ['qrcode', 'clock', 'gpsmath', 'robocar'] },
 ];

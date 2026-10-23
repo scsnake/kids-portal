@@ -3354,6 +3354,62 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .cy-filter { display: inline-block; padding: 4px 8px; border-radius: 9px; background: white; color: var(--ink-2); font-weight: 800; }
 .cy-filter.on { background: #d3f9d8; color: var(--good); }
 
+/* vulnerability and patch timeline */
+.cy-lab { display: grid; grid-template-columns: minmax(0, 1fr) minmax(210px, .9fr); gap: 14px; align-items: center; }
+.cy-building { min-height: 210px; display: grid; grid-template-columns: minmax(118px, 1fr) auto minmax(100px, .8fr); align-items: center; gap: 9px; padding: 14px; border-radius: 18px; background: #e7f5ff; border: 2px solid #a5d8ff; }
+.cy-program { display: flex; flex-direction: column; gap: 7px; padding: 12px; border-radius: 14px; background: #1d2738; color: white; line-height: 1.35; }
+.cy-program strong { font-size: 1.05rem; }
+.cy-program span { padding: 5px 7px; border-radius: 7px; background: #344054; font-size: .9375rem; font-weight: 750; }
+.cy-program .cy-bugline { background: #53262e; color: #ffc9c9; }
+.cy-program .cy-bugline.fixed { background: #204d31; color: #b2f2bb; }
+.cy-rule-arrow { color: #1864ab; font-size: 1.7rem; font-weight: 900; }
+.cy-doorwrap { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 100px; }
+.cy-lockstate { min-height: 2.7em; color: var(--bad); font-size: .9375rem; font-weight: 850; line-height: 1.35; text-align: center; }
+.cy-lockstate.fixed { color: var(--good); }
+.cy-doorframe { position: relative; width: 92px; height: 126px; perspective: 360px; }
+.cy-doorpic { position: relative; z-index: 2; width: 84px; height: 120px; display: grid; place-items: center; border: 7px solid #6c4f3d; border-radius: 8px 8px 2px 2px; background: #d0b08a; font-size: 2rem; transition: transform 280ms cubic-bezier(0.23, 1, 0.32, 1), background-color 200ms ease, border-color 200ms ease; transform-origin: left center; }
+.cy-doorpic.open { transform: perspective(360px) rotateY(-42deg); background: #ffe8cc; }
+.cy-doorpic.fixed { border-color: var(--good); background: #b2f2bb; }
+.cy-intruder { position: absolute; z-index: 1; right: -12px; bottom: 18px; font-size: 2rem; opacity: .4; transform: translateX(35%); transition: transform 280ms cubic-bezier(0.23, 1, 0.32, 1), opacity 200ms ease; }
+.cy-intruder.entered { opacity: 1; transform: translateX(-62%); }
+.cy-intruder.gone { opacity: 0; transform: translateX(35%); }
+.cy-labcopy { display: flex; flex-direction: column; gap: 10px; }
+
+.cy-patchscene { position: relative; overflow: hidden; min-height: 132px; display: grid; grid-template-columns: minmax(130px, 1fr) auto minmax(120px, .9fr); align-items: center; gap: 12px; padding: 12px 14px 28px; border-radius: 16px; background: #f1f3f5; }
+.cy-news, .cy-device { position: relative; z-index: 2; min-height: 78px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 9px; border: 2px solid var(--line); border-radius: 14px; background: white; text-align: center; }
+.cy-news span, .cy-device span { color: var(--ink-2); font-size: .9375rem; font-weight: 750; }
+.cy-news.known { border-color: #ffa8a8; background: #fff5f5; }
+.cy-news.known span { color: var(--bad); }
+.cy-device i { font-size: 2rem; font-style: normal; line-height: 1; }
+.cy-device.vulnerable { border-color: var(--bad); background: #fff5f5; }
+.cy-device.vulnerable span { color: var(--bad); }
+.cy-device.safe { border-color: var(--good); background: #ebfbee; }
+.cy-device.safe span { color: var(--good); }
+.cy-patcharrow { color: var(--ink-3); font-size: 1.6rem; font-weight: 900; }
+.cy-update { position: absolute; z-index: 4; left: 42%; bottom: 8px; padding: 5px 9px; border: 2px solid var(--good); border-radius: 10px; background: #ebfbee; color: var(--good); font-size: .9375rem; font-weight: 850; opacity: 0; pointer-events: none; }
+.cy-update.ready { opacity: 1; }
+.cy-attempt { position: absolute; z-index: 3; left: 21%; top: 45%; font-size: 1.4rem; pointer-events: none; will-change: transform, opacity; }
+.cy-attempt-count { position: absolute; left: 12px; bottom: 7px; color: var(--ink-2); font-size: .9375rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+.cy-risk { margin: 10px 0; padding: 7px 10px; border-radius: 10px; background: #f1f3f5; color: var(--ink-2); font-weight: 850; text-align: center; }
+.cy-risk.danger { background: #fff5f5; color: var(--bad); }
+.cy-risk.safe { background: #ebfbee; color: var(--good); }
+.cy-timeline { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.cy-step {
+  min-height: 112px;
+  padding: 12px;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: white;
+  color: var(--ink-3);
+  text-align: center;
+  font-weight: 800;
+}
+.cy-step i { display: block; margin-bottom: 6px; font-size: 2.2rem; font-style: normal; filter: grayscale(1); opacity: .45; }
+.cy-step.ready { color: var(--ink); cursor: pointer; box-shadow: 0 3px 0 var(--line); }
+.cy-step.ready i { filter: none; opacity: 1; }
+.cy-step.done { border-color: var(--good); background: #ebfbee; color: var(--good); }
+.cy-step.done i { filter: none; opacity: 1; }
+
 @media (max-width: 620px) {
   .cy-login, .cy-combo, .cy-lab, .cy-traffic { grid-template-columns: 1fr; }
   .cy-network { grid-template-columns: 1fr; }
