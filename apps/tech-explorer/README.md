@@ -83,18 +83,19 @@ yet; 「直接開始」 closes it.
 55. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
 56. 物聯網和智慧家電: which things go online, a smart plant pot's message from sensor to phone, an air-conditioner rule with AND or OR over one day, default passwords on home cameras, how a tap at school reaches a lamp at home
 57. IP 位址和連接埠: Route pretend requests by IP address, port and protocol, see that a port needs a listening program, and compare private addresses with a shared public address.
-58. 駭客想要什麼？: attack goals, permission before testing, social engineering, and practice boundaries
-59. 密碼怎麼被猜到？: common passwords, password combinations, credential stuffing, and one-way password hashes
-60. 網路上的攻擊: HTTP vs HTTPS on a fake Wi-Fi network, DDoS traffic, automatic visitors, and persistent traffic protection
-61. 惡意程式和漏洞: malware types, an unlocked-door vulnerability, zero-day exposure, and installing a security update
-62. 演算法: steps, binary search (number guessing), sorting by swaps
-63. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
-64. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
-65. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
-66. QR Code 怎麼運作？: tap the three finder squares to turn a tilted code upright, black = 1 and white = 0 (paint two bytes to spell Hi), error correction (which damage still scans)
-67. 電腦怎麼記住時間？: a quartz crystal drives a 15-bit counter (32768 = 2^15) with slow and normal speed, syncing with an atomic-clock time server, time zones
-68. GPS 怎麼算出位置？: distance from signal time and the speed of light, trilateration with three circles, a fourth satellite fixes the phone clock
-69. 機器人和自動駕駛怎麼看路？: sense, think, act (the answer turns into a flow chart that loops through the 有人 / 沒人 branch), camera vs radar vs lidar in fog, a robot vacuum that maps a room and stops at the stairs
+58. 防火牆: Practice firewall rules in a simulator: stateful return traffic, a narrow allow rule instead of allow-all, and how a firewall differs from HTTPS, malware scanning and NAT.
+59. 駭客想要什麼？: attack goals, permission before testing, social engineering, and practice boundaries
+60. 密碼怎麼被猜到？: common passwords, password combinations, credential stuffing, and one-way password hashes
+61. 網路上的攻擊: HTTP vs HTTPS on a fake Wi-Fi network, DDoS traffic, automatic visitors, and persistent traffic protection
+62. 惡意程式和漏洞: malware types, an unlocked-door vulnerability, zero-day exposure, and installing a security update
+63. 演算法: steps, binary search (number guessing), sorting by swaps
+64. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
+65. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
+66. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+67. QR Code 怎麼運作？: tap the three finder squares to turn a tilted code upright, black = 1 and white = 0 (paint two bytes to spell Hi), error correction (which damage still scans)
+68. 電腦怎麼記住時間？: a quartz crystal drives a 15-bit counter (32768 = 2^15) with slow and normal speed, syncing with an atomic-clock time server, time zones
+69. GPS 怎麼算出位置？: distance from signal time and the speed of light, trilateration with three circles, a fourth satellite fixes the phone clock
+70. 機器人和自動駕駛怎麼看路？: sense, think, act (the answer turns into a flow chart that loops through the 有人 / 沒人 branch), camera vs radar vs lidar in fog, a robot vacuum that maps a room and stops at the stairs
 
 ## Saved progress
 
