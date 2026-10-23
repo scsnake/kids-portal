@@ -4,10 +4,12 @@ import topic1 from '../topics/webmemory/topic.mjs?v=bffee8a02149acb961551eae88ff
 import topic2 from '../topics/loginsafety/topic.mjs?v=22265e8a57e8b1abba9e94804dcab0e4b21fd754cd3e1ba3444a89c244f3da85';
 import topic3 from '../topics/ipports/topic.mjs?v=cf8538defe6eee7f8f8ce99c46c4cecab0f451d67625a0445c31a1d70d14dabf';
 import topic4 from '../topics/firewall/topic.mjs?v=bc8473a835971575f7f828e71634a419a94ce48a6ef0de8aaf9cd772289baa0c';
+import topic5 from '../topics/vpn/topic.mjs?v=bc0a71b18b70c90261f67209f1e052cc5d996daadd5ca93c977cb768cadcc911';
 export const TOPICS = [
   { topic: topic0, ...{"module":"topics/websiteflow/topic.mjs","releasedAt":"2026-10-23","sourceHash":"8c79f310436da014e94f202a312466942f2b716cdf819805674a0c96a6aa8bdb"} },
   { topic: topic1, ...{"module":"topics/webmemory/topic.mjs","releasedAt":"2026-10-23","sourceHash":"bffee8a02149acb961551eae88ffe85e32d52784b392de3b8211d320071de198"} },
   { topic: topic2, ...{"module":"topics/loginsafety/topic.mjs","releasedAt":"2026-10-23","sourceHash":"22265e8a57e8b1abba9e94804dcab0e4b21fd754cd3e1ba3444a89c244f3da85"} },
   { topic: topic3, ...{"module":"topics/ipports/topic.mjs","releasedAt":"2026-10-23","sourceHash":"cf8538defe6eee7f8f8ce99c46c4cecab0f451d67625a0445c31a1d70d14dabf"} },
   { topic: topic4, ...{"module":"topics/firewall/topic.mjs","releasedAt":"2026-10-23","sourceHash":"bc8473a835971575f7f828e71634a419a94ce48a6ef0de8aaf9cd772289baa0c"} },
+  { topic: topic5, ...{"module":"topics/vpn/topic.mjs","releasedAt":"2026-10-23","sourceHash":"bc0a71b18b70c90261f67209f1e052cc5d996daadd5ca93c977cb768cadcc911"} },
 ];
