@@ -41,7 +41,7 @@ yet; 「直接開始」 closes it.
 16. 瀏覽器和網頁: address bar, links, back / forward / reload, browsing history
 17. 帳號和雲端: sign up, user name, password, log in, good passwords, cloud sync, https and the lock icon
 18. 密碼管理和通行密鑰: one password everywhere vs a different one each (a breach opens every account), the 密碼 App, signing in with a passkey on a real and a fake shop
-19. App 和更新: hardware vs software, installing from the App Store, permissions, updates
+19. App 和更新: hardware vs software, installing from the App Store, permissions, spotting a fake look-alike app (developer, ratings, permissions), updates
 20. 常用的 App: messenger vs email, video meetings, social media, search engines, office apps
 21. 實用小技巧: screenshots, QR codes (and fake ones), backup, Find My
 22. 地圖和導航: search a place, walk / bus / car routes, follow the turn-by-turn banner; who may see your location; a stranger asking for it; bus time includes the wait

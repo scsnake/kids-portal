@@ -1001,6 +1001,18 @@ const HK_USB_OPTS = [
   { text: '🙋 交給老師或失物招領', ok: true },
 ];
 
+// ---- fakeapp consts ----
+// One made-up drawing app and three look-alikes, each with one clue (`c` marks it).
+const FA_APPS = [
+  { ok: true, name: '彩虹畫板', dev: '彩虹工作室', stars: '4.7', count: '12 萬則評分', perms: '照片' },
+  { name: '彩虹畫板', dev: 'Rainb0w Studi0', c: 'dev', stars: '5.0', count: '15 則評分', perms: '照片',
+    why: '開發者的名字怪怪的：用「0」假裝成「o」，評分也只有 15 則。' },
+  { name: '彩虹畫版 免費版', c: 'name', dev: 'Free Apps 2026', stars: '3.2', count: '48 則評分', perms: '照片',
+    why: 'App 的名字有錯字（畫「版」），開發者也不是彩虹工作室。' },
+  { name: '彩虹畫板 PRO', dev: '彩虹畫畫社', stars: '4.9', count: '230 則評分', perms: '通訊錄、簡訊、位置、麥克風', c: 'perms',
+    why: '畫畫為什麼要看你的通訊錄和簡訊？要的權限太多了，開發者也不是彩虹工作室。' },
+];
+
 const escapeHTML = value => String(value).replace(/[&<>'"]/g, char => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
 })[char]);
@@ -9808,4 +9820,49 @@ export const WIDGETS = {
     });
   },
 
+  // A pretend App Store search for 「彩虹畫板」 with four look-alike results. Tap the real one.
+  // A wrong tap marks its clue and says why. When the real one is found, every clue shows.
+  fakeapp(host, _, api) {
+    const field = (a, key, html) => `<span class="fa-${key}${a.c === key ? ' fa-clue' : ''}">${html}</span>`;
+    host.innerHTML = `
+      <div class="fa-store">
+        <div class="fa-search">🔍 彩虹畫板</div>
+        <div class="fa-list">${shuffle(FA_APPS.map((a, i) => ({ ...a, i }))).map(a => `
+          <button class="fa-app" data-i="${a.i}">
+            <span class="fa-icon" aria-hidden="true">🌈</span>
+            <span class="fa-info">
+              ${field(a, 'name', `<b>${a.name}</b>`)}
+              ${field(a, 'dev', a.dev)}
+              <span class="fa-rate">★ ${a.stars}　${a.c === 'dev' ? `<span class="fa-clue">${a.count}</span>` : a.count}</span>
+              ${field(a, 'perms', `會用到：${a.perms}`)}
+            </span>
+            <span class="fa-get">取得</span>
+          </button>`).join('')}
+        </div>
+        <p class="fa-why" aria-live="polite">哪一個是真的「彩虹畫板」？</p>
+      </div>`;
+    const why = host.querySelector('.fa-why');
+    let solved = false;
+    host.querySelector('.fa-list').addEventListener('click', e => {
+      const b = e.target.closest('.fa-app');
+      if (!b || solved) return;
+      const a = FA_APPS[b.dataset.i];
+      if (!a.ok) {
+        api.bad();
+        shake(b);
+        b.classList.add('fa-wrong');
+        why.className = 'fa-why fa-bad';
+        why.textContent = `❌ ${a.why}`;
+        return;
+      }
+      solved = true;
+      api.good();
+      b.classList.add('fa-right');
+      pop(b);
+      host.querySelectorAll('.fa-app:not(.fa-right)').forEach(x => x.classList.add('fa-wrong'));
+      why.className = 'fa-why fa-done';
+      why.textContent = '🎉 對！開發者沒錯、評分很多、只用照片。不確定時，從官方網站的連結下載，或先問大人。';
+      api.done();
+    });
+  },
 };

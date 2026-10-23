@@ -3264,6 +3264,27 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .hk-box.hk-got { border-style: solid; border-color: var(--good); background: #ebfbee; }
 .hk-box.hk-got .hk-box-ico::after { content: '✓'; color: var(--good); font-size: 1.4rem; font-weight: 900; }
 
+/* ---------- fakeapp: look-alike apps in a pretend store ---------- */
+
+.fa-store { display: flex; flex-direction: column; gap: 10px; width: min(100%, 640px); margin-inline: auto; }
+.fa-search { padding: .5rem .9rem; border-radius: 12px; background: #f1f3f5; color: var(--ink-2); font-weight: 700; }
+.fa-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 10px; }
+.fa-app { display: flex; align-items: flex-start; gap: 10px; min-height: 52px; padding: 10px; border: 2px solid var(--line); border-radius: 16px; background: var(--card); box-shadow: 0 3px 0 var(--line); font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.fa-app:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+.fa-icon { flex: none; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 13px; background: linear-gradient(135deg, #ffe3e3, #e7f5ff); font-size: 2rem; }
+.fa-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; line-height: 1.35; }
+.fa-name b { font-size: 1.05rem; }
+.fa-dev, .fa-rate, .fa-perms { color: var(--ink-2); font-size: .95rem; }
+.fa-rate { color: #e67700; font-weight: 700; }
+.fa-get { flex: none; align-self: center; padding: 2px 12px; border-radius: 99px; background: #e7f5ff; color: #1c7ed6; font-weight: 800; }
+.fa-why { margin: 0; min-height: 3em; font-weight: 800; line-height: 1.5; color: var(--ink-2); }
+.fa-why.fa-bad { color: var(--bad); }
+.fa-why.fa-done { color: var(--good); }
+.fa-wrong { border-color: #ffa8a8; background: #fff5f5; box-shadow: none; }
+.fa-wrong .fa-clue { width: fit-content; padding: 0 4px; border-radius: 6px; outline: 2px solid var(--bad); background: #ffe3e3; color: var(--ink); }
+.fa-right { border-color: var(--good); background: #ebfbee; box-shadow: none; }
+.fa-right .fa-get { background: var(--good); color: white; }
+
 /* ---------- Part 2: security lesson demonstrations ---------- */
 
 .cy-panel {

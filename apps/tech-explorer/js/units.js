@@ -1260,6 +1260,12 @@ export const UNITS = [
         },
       },
       {
+        title: '這個 App 是真的嗎？',
+        text: `壞人會做出${t('山寨 App', 'fake app')}，名字和圖示都很像真的，裡面卻藏著廣告或${t('惡意程式', 'malware')}。下載前看清楚${t('開發者', 'developer')}、評分和權限。點出真的那一個！`,
+        widget: 'fakeapp',
+        added: '2026-10-23',
+      },
+      {
         title: '為什麼要更新？',
         text: `寫 App 的人會一直改進它，再推出${t('更新', 'update')}：修好${t('錯誤', 'bug')}、補好壞人能鑽進來的${t('安全漏洞', 'security hole')}，有時候還加上新功能。跟著步驟試試看！`,
         widget: 'update',
