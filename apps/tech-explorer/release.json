@@ -1,9 +1,16 @@
 {
-  "id": "5a1884d92a79a14931f726c25c443885f219ed5b2e5f9931206dd3f1413c5c35",
-  "baseCommit": "b2489cf1b71ed8f60f8cf83d2de751c1aa6c007c",
-  "topics": ["hacked", "appbasics", "attackers", "passwordattacks", "networkattacks", "malwareholes"],
-  "assetsVersion": "26",
-  "units": 65,
-  "stages": 17,
-  "slides": 290
+  "id": "0aa87561fd6a973057b1dd71c568aa1a4870e50f4818a4fbb4d799332091b216",
+  "baseCommit": "670a3e84f3d7ccc8e064f95b3c4349c9b50a700a",
+  "topics": [
+    "websiteflow",
+    "webmemory",
+    "loginsafety",
+    "ipports",
+    "firewall",
+    "vpn",
+    "trickdoors",
+    "antivirus",
+    "backupplan"
+  ],
+  "assetsVersion": "27"
 }

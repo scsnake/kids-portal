@@ -1,4 +1,4 @@
-import { UNITS, COMING, PARTS, STAGES, WIDGETS, installTopicStyles } from './course.js?v=26';
+import { UNITS, COMING, PARTS, STAGES, WIDGETS, installTopicStyles } from './course.js?v=27';
 
 installTopicStyles();
 
