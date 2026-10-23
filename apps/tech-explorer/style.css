@@ -3221,6 +3221,49 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
   .rb-flow, .rb-edge.lit path { animation: none; }
 }
 
+/* ---------- hacked: ransom screen and a found USB drive ---------- */
+
+.hk-ransom, .hk-found { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); gap: 16px; align-items: center; width: 100%; }
+.hk-ask { display: flex; flex-direction: column; gap: 10px; }
+.hk-q { margin: 0; font-weight: 800; font-size: 1.15rem; line-height: 1.5; }
+.hk-q.done { color: var(--good); }
+.hk-opts { display: flex; flex-direction: column; gap: 10px; }
+.hk-opts .option { font-size: 1.1rem; padding: .6rem 1rem; }
+.hk-opts .option:disabled:not(.right):not(.wrong) { opacity: .45; }
+.hk-why { margin: 0; min-height: 1.5em; color: var(--bad); font-weight: 700; line-height: 1.5; }
+.hk-why.done { color: var(--good); font-weight: 800; }
+
+/* a laptop: a dark ransom screen that turns light after the restore */
+.hk-pc { display: flex; flex-direction: column; align-items: center; width: 100%; }
+.hk-screen { width: 100%; padding: 12px; border: 10px solid #1f232b; border-radius: 14px 14px 4px 4px; background: #2b2f36; color: #f8f9fa; transition: background .4s, color .4s; }
+.hk-base { width: 112%; height: 14px; border-radius: 0 0 12px 12px; background: #adb5bd; }
+.hk-msg { text-align: center; }
+.hk-msg p { margin: 0 0 4px; line-height: 1.45; }
+.hk-big { font-size: 1.15rem; font-weight: 900; color: #ffd43b; }
+.hk-msg b { color: #ffd43b; }
+.hk-timer b { font-family: ui-monospace, Menlo, monospace; }
+.hk-files { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 8px; }
+.hk-file { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 8px; background: rgba(255, 255, 255, .1); font-size: .95rem; font-weight: 700; }
+.hk-fi { font-size: 1.2rem; }
+.hk-fn { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hk-off .hk-msg::after { content: '📴 網路已關掉'; display: inline-block; margin-top: 4px; padding: 1px 10px; border-radius: 99px; background: #495057; font-size: .9rem; font-weight: 800; }
+.hk-safe { background: #f8f9fa; color: var(--ink); }
+.hk-safe .hk-big { color: var(--good); }
+.hk-safe .hk-msg::after { display: none; }
+.hk-safe .hk-file { background: #f1f3f5; }
+.hk-file.hk-back { background: #ebfbee; }
+
+/* the hallway and the lost-and-found box */
+.hk-scene { display: flex; align-items: flex-end; justify-content: space-around; gap: 12px; padding: 14px; border-radius: var(--radius); background: linear-gradient(#f1f3f5 60%, #dee2e6 60%); border: 2px solid var(--line); }
+.hk-floor { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.hk-drive { display: block; width: min(200px, 40vw); }
+.hk-usb-pic { display: block; width: 100%; height: auto; }
+.hk-where { color: var(--ink-2); font-weight: 700; font-size: .95rem; }
+.hk-box { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 104px; padding: 8px 10px; border: 2px dashed #c9a46a; border-radius: 14px; background: #fff4e6; }
+.hk-box-ico { font-size: 2.6rem; line-height: 1; }
+.hk-box.hk-got { border-style: solid; border-color: var(--good); background: #ebfbee; }
+.hk-box.hk-got .hk-box-ico::after { content: '✓'; color: var(--good); font-size: 1.4rem; font-weight: 900; }
+
 /* ---------- Part 2: security lesson demonstrations ---------- */
 
 .cy-panel {

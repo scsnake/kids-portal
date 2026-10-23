@@ -954,6 +954,53 @@ const RB_FLOW = `
     <g class="rb-saw"><rect x="300" y="14" width="128" height="36" rx="18"/><text x="364" y="38"></text></g>
   </svg>`;
 
+// ---- hacked consts ----
+const HK_FILES = [
+  { icon: '📝', name: '作業.docx' },
+  { icon: '🖼️', name: '旅行照片' },
+  { icon: '🎵', name: '鋼琴錄音' },
+  { icon: '📊', name: '班級報告' },
+];
+const HK_STEPS = [
+  {
+    q: '看到這個畫面，先做什麼？',
+    options: [
+      { text: '💳 趕快買點數付錢', why: '付了錢，也不一定拿得回檔案，壞人還可能再來要。' },
+      { text: '📞 打畫面上的「客服電話」', why: '那是壞人的電話，他只會叫你付錢。' },
+      { text: '🙋 不付錢，關掉網路，告訴大人', ok: true },
+    ],
+  },
+  {
+    q: '大人要怎麼把檔案救回來？',
+    options: [
+      { text: '🔄 重新開機就好', why: '重新開機，檔案還是鎖著的。' },
+      { text: '💾 清掉勒索軟體，從備份還原', ok: true },
+      { text: '💳 還是付錢吧', why: '付錢不一定拿得回來。平常做的備份才靠得住。' },
+    ],
+  },
+];
+// A found USB drive with a paper tag, drawn because 🔑 or 💾 would mislead.
+const HK_USB = `<svg class="hk-usb-pic" viewBox="0 0 170 90" aria-hidden="true">
+  <path d="M38 40 C 30 52, 24 60, 18 64" fill="none" stroke="#868e96" stroke-width="2"/>
+  <g transform="rotate(-8 70 34)">
+    <rect x="36" y="20" width="78" height="30" rx="7" fill="#1c7ed6"/>
+    <rect x="114" y="25" width="24" height="20" rx="2" fill="#dee2e6" stroke="#868e96" stroke-width="2"/>
+    <rect x="123" y="29" width="7" height="4" fill="#495057"/>
+    <rect x="123" y="37" width="7" height="4" fill="#495057"/>
+    <circle cx="44" cy="35" r="4" fill="#fff"/>
+  </g>
+  <g transform="rotate(-14 30 70)">
+    <rect x="2" y="58" width="76" height="26" rx="4" fill="#fff9db" stroke="#e0c97a" stroke-width="2"/>
+    <text x="40" y="76" text-anchor="middle" font-size="14" font-weight="800" fill="#5c3c00">全班合照</text>
+  </g>
+</svg>`;
+const HK_USB_OPTS = [
+  { text: '💻 插進自己的電腦，看看是誰的', why: '隨身碟裡可能藏著惡意程式，一插上就可能跑進電腦。' },
+  { text: '🏫 插進學校的電腦看', why: '學校的電腦中毒，全班都會受影響。' },
+  { text: '🗑️ 直接丟掉', why: '可能真的有人在找它喔。交給大人處理比較好。' },
+  { text: '🙋 交給老師或失物招領', ok: true },
+];
+
 const escapeHTML = value => String(value).replace(/[&<>'"]/g, char => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
 })[char]);
@@ -9630,4 +9677,135 @@ export const WIDGETS = {
     stepAt(1);
     show();
   },
+
+  // A pretend ransom screen on a laptop. Two questions in turn: what to do first (do not pay,
+  // go offline, tell an adult), then how to get the files back (restore from a backup).
+  // The answer is shown: the locks come off one by one.
+  hkransom(host, _, api) {
+    host.innerHTML = `
+      <div class="hk-ransom">
+        <div class="hk-pc">
+          <div class="hk-screen">
+            <div class="hk-msg">
+              <p class="hk-big">🔒 你的檔案都被鎖住了！</p>
+              <p>付 <b>5,000 元遊戲點數</b>，才給你鑰匙。</p>
+              <p class="hk-timer">⏰ 剩下 <b class="hk-left">23:59:50</b></p>
+            </div>
+            <div class="hk-files">${HK_FILES.map(f => `<span class="hk-file"><span class="hk-fi">${f.icon}</span><span class="hk-fn">${f.name}</span><span class="hk-flock">🔒</span></span>`).join('')}</div>
+          </div>
+          <div class="hk-base"></div>
+        </div>
+        <div class="hk-ask">
+          <p class="hk-q"></p>
+          <div class="hk-opts"></div>
+          <p class="hk-why" aria-live="polite"></p>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    let step = 0, solved = false;
+    // the countdown only pushes you to hurry
+    let left = 24 * 3600 - 10;
+    const tick = () => {
+      if (!api.alive() || solved) return;
+      left--;
+      const p = n => String(n).padStart(2, '0');
+      $('.hk-left').textContent = `${p(Math.floor(left / 3600))}:${p(Math.floor(left / 60) % 60)}:${p(left % 60)}`;
+      api.later(tick, 1000);
+    };
+    api.later(tick, 1000);
+    const restore = () => {
+      solved = true;
+      $('.hk-screen').classList.add('hk-safe');
+      $('.hk-msg').innerHTML = '<p class="hk-big">💾 從昨天的備份還原中…</p>';
+      const files = [...host.querySelectorAll('.hk-file')];
+      files.forEach((f, i) => api.later(() => {
+        f.querySelector('.hk-flock').textContent = '✅';
+        f.classList.add('hk-back');
+        pop(f);
+        if (i < files.length - 1) return;
+        $('.hk-msg').innerHTML = '<p class="hk-big">✅ 檔案都回來了！</p>';
+        $('.hk-q').textContent = '🎉 沒付錢，也救回來了！平常有備份，檔案被鎖也不怕。';
+        $('.hk-q').classList.add('done');
+        api.done();
+      }, 500 + i * 450));
+    };
+    const show = () => {
+      const s = HK_STEPS[step];
+      $('.hk-q').textContent = `${step + 1}. ${s.q}`;
+      $('.hk-why').textContent = '';
+      $('.hk-opts').innerHTML = s.options.map((o, i) => `<button class="option hk-opt" data-i="${i}">${o.text}</button>`).join('');
+    };
+    $('.hk-opts').addEventListener('click', e => {
+      const b = e.target.closest('.hk-opt');
+      if (!b || b.disabled) return;
+      const o = HK_STEPS[step].options[b.dataset.i];
+      if (!o.ok) {
+        api.bad();
+        shake(b);
+        b.disabled = true;
+        b.classList.add('wrong');
+        $('.hk-why').textContent = o.why;
+        return;
+      }
+      api.good();
+      b.classList.add('right');
+      host.querySelectorAll('.hk-opt').forEach(x => { x.disabled = true; });
+      if (step === 0) {
+        $('.hk-why').textContent = '';
+        $('.hk-screen').classList.add('hk-off');
+        api.later(() => { step = 1; show(); }, 900);
+      } else {
+        $('.hk-opts').innerHTML = '';
+        $('.hk-why').textContent = '';
+        restore();
+      }
+    });
+    show();
+  },
+
+  // A USB drive found in the hallway, tagged 「全班合照」. The safe choice moves it into the
+  // 失物招領 box; the other choices say why they are risky.
+  hkusb(host, _, api) {
+    host.innerHTML = `
+      <div class="hk-found">
+        <div class="hk-scene">
+          <div class="hk-floor"><span class="hk-drive">${HK_USB}</span><span class="hk-where">🚶 走廊上</span></div>
+          <div class="hk-box"><span class="hk-box-ico">📦</span><b>失物招領</b></div>
+        </div>
+        <div class="hk-ask">
+          <div class="hk-opts">${HK_USB_OPTS.map((o, i) => `<button class="option hk-opt" data-i="${i}">${o.text}</button>`).join('')}</div>
+          <p class="hk-why" aria-live="polite"></p>
+        </div>
+      </div>`;
+    const $ = sel => host.querySelector(sel);
+    $('.hk-opts').addEventListener('click', e => {
+      const b = e.target.closest('.hk-opt');
+      if (!b || b.disabled) return;
+      const o = HK_USB_OPTS[b.dataset.i];
+      if (!o.ok) {
+        api.bad();
+        shake(b);
+        b.disabled = true;
+        b.classList.add('wrong');
+        $('.hk-why').textContent = o.why;
+        return;
+      }
+      api.good();
+      b.classList.add('right');
+      host.querySelectorAll('.hk-opt').forEach(x => { x.disabled = true; });
+      // the drive moves into the box
+      const drive = $('.hk-drive'), box = $('.hk-box');
+      const a = drive.getBoundingClientRect(), z = box.getBoundingClientRect();
+      const dx = z.left + z.width / 2 - (a.left + a.width / 2), dy = z.top + z.height / 2 - (a.top + a.height / 2);
+      drive.animate([{ transform: 'none' }, { transform: `translate(${dx}px, ${dy}px) scale(.35)`, opacity: 0 }], { duration: 700, easing: 'ease-in', fill: 'forwards' });
+      api.later(() => {
+        box.classList.add('hk-got');
+        pop(box);
+        $('.hk-why').classList.add('done');
+        $('.hk-why').textContent = '🎉 交給老師最安全！陌生的隨身碟可能藏著惡意程式，有的甚至會假裝成鍵盤，自己打字。';
+        api.done();
+      }, 750);
+    });
+  },
+
 };

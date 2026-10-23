@@ -1978,6 +1978,149 @@ export const UNITS = [
   },
 
   {
+    id: 'wifishop',
+    part: 'basic',
+    icon: '🛒',
+    title: '公共 Wi-Fi 和網購',
+    en: 'Public Wi-Fi and Shopping',
+    desc: '選對的 Wi-Fi、認出假商店、付錢要小心',
+    color: '#2b8a3e',
+    added: '2026-10-19',
+    slides: [
+      {
+        title: '哪個 Wi-Fi 可以連？',
+        text: `圖書館、車站、餐廳的免費 Wi-Fi 叫${t('公共 Wi-Fi', 'public Wi-Fi')}。名字很像的、沒有密碼又寫「免費」的，可能是壞人開的。連店家貼出來的那一個！`,
+        widget: 'wifipick',
+      },
+      {
+        title: '公共 Wi-Fi 上做什麼？',
+        text: '公共 Wi-Fi 很多人一起用。查資料、看影片沒關係；要輸入密碼、付錢的事，回家再做，或改用自己的行動網路。分分看！',
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '👍', label: '可以做' },
+            { id: 'home', icon: '🏠', label: '回家再做' },
+          ],
+          items: [
+            { icon: '🚌', label: '查公車什麼時候來', bin: 'ok' },
+            { icon: '📰', label: '看新聞', bin: 'ok' },
+            { icon: '🗺️', label: '查地圖', bin: 'ok' },
+            { icon: '📺', label: '看卡通', bin: 'ok' },
+            { icon: '🏦', label: '登入網路銀行', bin: 'home' },
+            { icon: '💳', label: '輸入信用卡號碼', bin: 'home' },
+            { icon: '🔑', label: '輸入重要的密碼', bin: 'home' },
+          ],
+        },
+      },
+      {
+        title: '這家網路商店可信嗎？',
+        text: `在網路上買東西叫${t('網購', 'online shopping')}。有些假商店只想騙錢：便宜得不像話、一直催你、只能轉帳。找找看！`,
+        widget: 'shopcheck',
+      },
+      {
+        title: '遊戲裡的錢是真的錢',
+        text: `遊戲裡的寶石、造型要花錢買，這叫${t('App 內購買', 'in-app purchase')}，用的是爸媽的信用卡，是<b>真的錢</b>。`,
+        widget: 'choice',
+        params: {
+          question: '玩遊戲時跳出：「🎁 超值寶石包 NT$90，按一下就買！」你可以怎麼做？',
+          options: [
+            { text: '🙋 先問爸媽，因為這是真的錢', correct: true },
+            { text: '👆 按下去，反正是遊戲幣' },
+            { text: '🤫 用爸媽的密碼偷偷買' },
+          ],
+          explain: '按下去就會從信用卡扣錢。爸媽可以在 iPad 打開「購買前詢問」，你按購買時，要先經過爸媽同意。',
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '在購物網站上買東西，賣家說：「加我 LINE，私下用 ATM 轉帳，可以便宜 500 元。」怎麼辦？',
+          options: [
+            { text: '🙅 不要，留在購物網站裡付款', correct: true },
+            { text: '👍 好啊，便宜就好' },
+            { text: '💰 先轉一半的錢試試看' },
+          ],
+          explain: '離開購物網站私下轉帳，被騙了網站也幫不了你。覺得怪怪的，打 165 反詐騙專線問問看。',
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'hacked',
+    part: 'basic',
+    icon: '🚨',
+    title: '被駭了怎麼辦？',
+    en: 'Hacked: What to Do',
+    desc: '帳號被盜的徵兆、救回帳號、勒索軟體和備份、撿到的隨身碟',
+    color: '#1e6091',
+    added: '2026-10-23',
+    slides: [
+      {
+        title: '帳號被盜的徵兆',
+        text: `${t('帳號被盜', 'account takeover')}就是別人偷到你的密碼，用你的帳號做事。這時會出現一些怪事。分分看，哪些是被盜的${t('徵兆', 'warning sign')}？`,
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'warn', icon: '⚠️', label: '可能被盜了' },
+            { id: 'ok', icon: '😌', label: '平常的事' },
+          ],
+          items: [
+            { icon: '📍', label: '通知說「新的地方登入」，可是不是你', bin: 'warn' },
+            { icon: '🔑', label: '密碼突然不能用了', bin: 'warn' },
+            { icon: '💬', label: '朋友說收到你傳的怪連結', bin: 'warn' },
+            { icon: '🛒', label: '帳號裡多了你沒買的東西', bin: 'warn' },
+            { icon: '📱', label: '你自己登入新 iPad，收到通知', bin: 'ok' },
+            { icon: '🔄', label: 'App 提醒你更新', bin: 'ok' },
+            { icon: '🖼️', label: '朋友在照片裡標記你', bin: 'ok' },
+          ],
+        },
+      },
+      {
+        title: '救回帳號',
+        text: `發現帳號被盜，先別慌。先告訴大人，再一步一步把帳號拿回來，最後${t('登出所有裝置', 'sign out everywhere')}，把壞人趕出去。依順序點一點。`,
+        widget: 'order',
+        params: {
+          items: [
+            { icon: '🙋', label: '告訴大人（被騙錢就打 165）' },
+            { icon: '📱', label: '用另一台自己的裝置' },
+            { icon: '🔑', label: '改一個新的密碼' },
+            { icon: '🚪', label: '登出所有裝置' },
+            { icon: '🛡️', label: '打開雙重驗證' },
+            { icon: '💬', label: '告訴朋友：怪訊息不是我傳的' },
+          ],
+        },
+      },
+      {
+        title: '檔案被鎖住了',
+        text: `${t('勒索軟體', 'ransomware')}會把檔案鎖起來，再跟你要錢，才給解開的「鑰匙」。看到這個畫面，該怎麼辦？選選看！`,
+        widget: 'hkransom',
+      },
+      {
+        title: '撿到的隨身碟',
+        text: `在走廊撿到一個${t('隨身碟', 'USB drive')}，上面寫著「全班合照」，好想看看喔！可是陌生的隨身碟可能藏著${t('惡意程式', 'malware')}。你會怎麼做？`,
+        widget: 'hkusb',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '朋友問你：「你昨天幹嘛傳奇怪的連結給我？」可是你沒有傳。最先該做什麼？',
+          options: [
+            { text: '🙋 告訴大人，用自己的另一台裝置改密碼', correct: true },
+            { text: '🤷 不理它，過幾天就好了' },
+            { text: '🔗 點那個連結，看看是什麼' },
+          ],
+          explain: '這是帳號可能被盜的徵兆。先告訴大人，改密碼、登出所有裝置、打開雙重驗證，再請朋友不要點那個連結。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'fakes',
     part: 'basic',
     icon: '🕵️',
@@ -2081,77 +2224,6 @@ export const UNITS = [
             { text: '📲 先轉傳給家人，提醒大家' },
           ],
           explain: '很多人傳，不代表是真的。查不到可靠的來源，就先不要轉傳。',
-        },
-      },
-    ],
-  },
-
-  {
-    id: 'wifishop',
-    part: 'basic',
-    icon: '🛒',
-    title: '公共 Wi-Fi 和網購',
-    en: 'Public Wi-Fi and Shopping',
-    desc: '選對的 Wi-Fi、認出假商店、付錢要小心',
-    color: '#2b8a3e',
-    added: '2026-10-19',
-    slides: [
-      {
-        title: '哪個 Wi-Fi 可以連？',
-        text: `圖書館、車站、餐廳的免費 Wi-Fi 叫${t('公共 Wi-Fi', 'public Wi-Fi')}。名字很像的、沒有密碼又寫「免費」的，可能是壞人開的。連店家貼出來的那一個！`,
-        widget: 'wifipick',
-      },
-      {
-        title: '公共 Wi-Fi 上做什麼？',
-        text: '公共 Wi-Fi 很多人一起用。查資料、看影片沒關係；要輸入密碼、付錢的事，回家再做，或改用自己的行動網路。分分看！',
-        widget: 'sort',
-        params: {
-          rest: 'ok',
-          bins: [
-            { id: 'ok', icon: '👍', label: '可以做' },
-            { id: 'home', icon: '🏠', label: '回家再做' },
-          ],
-          items: [
-            { icon: '🚌', label: '查公車什麼時候來', bin: 'ok' },
-            { icon: '📰', label: '看新聞', bin: 'ok' },
-            { icon: '🗺️', label: '查地圖', bin: 'ok' },
-            { icon: '📺', label: '看卡通', bin: 'ok' },
-            { icon: '🏦', label: '登入網路銀行', bin: 'home' },
-            { icon: '💳', label: '輸入信用卡號碼', bin: 'home' },
-            { icon: '🔑', label: '輸入重要的密碼', bin: 'home' },
-          ],
-        },
-      },
-      {
-        title: '這家網路商店可信嗎？',
-        text: `在網路上買東西叫${t('網購', 'online shopping')}。有些假商店只想騙錢：便宜得不像話、一直催你、只能轉帳。找找看！`,
-        widget: 'shopcheck',
-      },
-      {
-        title: '遊戲裡的錢是真的錢',
-        text: `遊戲裡的寶石、造型要花錢買，這叫${t('App 內購買', 'in-app purchase')}，用的是爸媽的信用卡，是<b>真的錢</b>。`,
-        widget: 'choice',
-        params: {
-          question: '玩遊戲時跳出：「🎁 超值寶石包 NT$90，按一下就買！」你可以怎麼做？',
-          options: [
-            { text: '🙋 先問爸媽，因為這是真的錢', correct: true },
-            { text: '👆 按下去，反正是遊戲幣' },
-            { text: '🤫 用爸媽的密碼偷偷買' },
-          ],
-          explain: '按下去就會從信用卡扣錢。爸媽可以在 iPad 打開「購買前詢問」，你按購買時，要先經過爸媽同意。',
-        },
-      },
-      {
-        title: '考考你',
-        widget: 'choice',
-        params: {
-          question: '在購物網站上買東西，賣家說：「加我 LINE，私下用 ATM 轉帳，可以便宜 500 元。」怎麼辦？',
-          options: [
-            { text: '🙅 不要，留在購物網站裡付款', correct: true },
-            { text: '👍 好啊，便宜就好' },
-            { text: '💰 先轉一半的錢試試看' },
-          ],
-          explain: '離開購物網站私下轉帳，被騙了網站也幫不了你。覺得怪怪的，打 165 反詐騙專線問問看。',
         },
       },
     ],
@@ -4045,7 +4117,8 @@ export const STAGES = [
   { id: 'apps', part: 'basic', icon: '📲', title: '用 App', en: 'Using Apps', units: ['appbasics', 'apps', 'handy', 'maps', 'pay'] },
   { id: 'helpers', part: 'basic', icon: '🤖', title: 'AI 小幫手', en: 'AI Helpers', units: ['aichat', 'voice'] },
   { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel', 'copyright', 'shareddoc', 'photoshare'] },
-  { id: 'safe', part: 'basic', icon: '🛡️', title: '安全', en: 'Staying Safe', units: ['safety', 'fakes', 'wifishop', 'kind', 'sos'] },
+  { id: 'safe', part: 'basic', icon: '🛡️', title: '安全上網', en: 'Staying Safe Online', units: ['safety', 'wifishop', 'hacked'] },
+  { id: 'protect', part: 'basic', icon: '🤝', title: '保護自己', en: 'Protecting Yourself', units: ['fakes', 'kind', 'sos'] },
   { id: 'smart', part: 'basic', icon: '🧭', title: '聰明的數位生活', en: 'Smart Digital Life', units: ['search', 'footprint', 'subscribe', 'wearable'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'adder', 'os'] },
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },
