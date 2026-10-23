@@ -3220,3 +3220,85 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 @media (prefers-reduced-motion: reduce) {
   .rb-flow, .rb-edge.lit path { animation: none; }
 }
+
+/* ---------- Part 2: security lesson demonstrations ---------- */
+
+.cy-panel {
+  width: min(100%, 680px);
+  margin-inline: auto;
+  padding: 16px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.cy-status {
+  min-height: 1.7em;
+  margin: 12px 0 0;
+  color: var(--ink-2);
+  font-weight: 800;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.cy-status.good { color: var(--good); }
+.cy-status.bad { color: var(--bad); }
+.cy-panel small { font-size: .9375rem; }
+.cy-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.cy-actions .option, .cy-actions .go { min-width: 150px; text-align: center; }
+.cy-actions .option.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, white); }
+
+/* motives */
+.cy-motives { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.cy-motive {
+  min-height: 112px;
+  padding: 12px;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: 0 3px 0 var(--line);
+  font: inherit;
+  text-align: left;
+}
+.cy-motive:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+.cy-motive.done { border-color: var(--good); background: #ebfbee; box-shadow: none; }
+.cy-motive strong { display: block; font-size: 1.12rem; }
+.cy-motive span { display: block; margin-top: 4px; color: var(--ink-2); line-height: 1.45; }
+.cy-motive.done span { color: #1f6b30; }
+
+@media (max-width: 620px) {
+  .cy-login, .cy-combo, .cy-lab, .cy-traffic { grid-template-columns: 1fr; }
+  .cy-network { grid-template-columns: 1fr; }
+  .cy-wire { rotate: 90deg; }
+  .cy-node { min-height: 82px; }
+  .cy-traffic { grid-template-columns: 1fr; }
+  .cy-road { min-height: 120px; }
+}
+
+@media (max-width: 430px) {
+  .cy-motives, .cy-timeline { grid-template-columns: 1fr; }
+  .cy-doors { grid-template-columns: 1fr; }
+  .cy-machine { grid-template-columns: 1fr; }
+  .cy-arrow { rotate: 90deg; text-align: center; }
+  .cy-building { grid-template-columns: minmax(112px, 1fr) auto minmax(92px, .75fr); padding: 10px; gap: 6px; }
+  .cy-program { padding: 9px; }
+  .cy-program span { padding-inline: 5px; font-size: .8rem; }
+  .cy-patchscene { grid-template-columns: minmax(105px, 1fr) auto minmax(100px, .9fr); gap: 7px; padding-inline: 9px; }
+  .cy-news, .cy-device { padding-inline: 6px; }
+  .cy-update { left: 36%; }
+}
+
+@media (orientation: landscape) and (max-height: 740px) {
+  .cy-panel { padding: 12px; }
+  .cy-motive { min-height: 92px; }
+  .cy-building { min-height: 170px; }
+  .cy-step { min-height: 112px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cy-doorpic, .cy-intruder { transition: none; }
+  .cy-server, .cy-meter span { transition-duration: 0s; }
+  .cy-request { will-change: auto; }
+  .cy-attempt { will-change: auto; }
+}

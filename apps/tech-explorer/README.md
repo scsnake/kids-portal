@@ -13,7 +13,7 @@ Two parts. Part 1 teaches how to use a device, with rough ideas only. Part 2
 explains how things work inside. Inside each part, a unit only uses ideas from
 the units before it.
 
-The home screen groups the units into 15 stages of 2 to 5 units (`STAGES` in
+The home screen groups the units into 16 stages of 2 to 5 units (`STAGES` in
 `js/units.js`). The next stage not read through is marked 「下一站」 and opens by
 itself; a stage read through gets 🏅. No unit is locked. The
 first time a Part 2 unit opens, a card suggests an earlier stage not read through
@@ -76,14 +76,15 @@ yet; 「直接開始」 closes it.
 50. 網路的實體: follow a message from Taiwan to the US (cell tower, machine room, submarine cable, data center) on a map with Taiwan's real outline, submarine cables, data centers and their power
 51. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
 52. 物聯網和智慧家電: which things go online, a smart plant pot's message from sensor to phone, an air-conditioner rule with AND or OR over one day, default passwords on home cameras, how a tap at school reaches a lamp at home
-53. 演算法: steps, binary search (number guessing), sorting by swaps
-54. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
-55. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
-56. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
-57. QR Code 怎麼運作？: tap the three finder squares to turn a tilted code upright, black = 1 and white = 0 (paint two bytes to spell Hi), error correction (which damage still scans)
-58. 電腦怎麼記住時間？: a quartz crystal drives a 15-bit counter (32768 = 2^15) with slow and normal speed, syncing with an atomic-clock time server, time zones
-59. GPS 怎麼算出位置？: distance from signal time and the speed of light, trilateration with three circles, a fourth satellite fixes the phone clock
-60. 機器人和自動駕駛怎麼看路？: sense, think, act (the answer turns into a flow chart that loops through the 有人 / 沒人 branch), camera vs radar vs lidar in fog, a robot vacuum that maps a room and stops at the stairs
+53. 駭客想要什麼？: attack goals, permission before testing, social engineering, and practice boundaries
+54. 演算法: steps, binary search (number guessing), sorting by swaps
+55. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
+56. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
+57. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+58. QR Code 怎麼運作？: tap the three finder squares to turn a tilted code upright, black = 1 and white = 0 (paint two bytes to spell Hi), error correction (which damage still scans)
+59. 電腦怎麼記住時間？: a quartz crystal drives a 15-bit counter (32768 = 2^15) with slow and normal speed, syncing with an atomic-clock time server, time zones
+60. GPS 怎麼算出位置？: distance from signal time and the speed of light, trilateration with three circles, a fourth satellite fixes the phone clock
+61. 機器人和自動駕駛怎麼看路？: sense, think, act (the answer turns into a flow chart that loops through the 有人 / 沒人 branch), camera vs radar vs lidar in fog, a robot vacuum that maps a room and stops at the stairs
 
 ## Saved progress
 

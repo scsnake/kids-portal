@@ -3410,6 +3410,82 @@ export const UNITS = [
   },
 
   {
+    id: 'attackers',
+    part: 'adv',
+    icon: '🕵️',
+    title: '駭客想要什麼？',
+    en: 'What Attackers Want',
+    desc: '攻擊目的、社交工程和練習界線',
+    color: '#6f42c1',
+    added: '2026-10-23',
+    slides: [
+      {
+        title: '白帽和黑帽',
+        text: `${t('白帽駭客', 'white-hat hacker')}得到允許後找漏洞，幫忙修好。${t('黑帽駭客', 'black-hat hacker')}沒有允許就闖入。關鍵不是技術，而是有沒有得到允許。分分看！`,
+        widget: 'sort',
+        params: {
+          bins: [
+            { id: 'yes', icon: '🛡️', label: '有允許，幫忙防守' },
+            { id: 'no', icon: '🚫', label: '沒允許，不能這樣做' },
+          ],
+          items: [
+            { icon: '🏫', label: '學校請專家測試自己的網站', bin: 'yes' },
+            { icon: '🧪', label: '在課堂的練習環境找漏洞', bin: 'yes' },
+            { icon: '🔑', label: '偷猜同學的帳號密碼', bin: 'no' },
+            { icon: '📱', label: '趁朋友不在，翻看他的手機', bin: 'no' },
+          ],
+        },
+      },
+      {
+        title: '駭客想要什麼？',
+        text: `攻擊者通常不是只想「看看」。他們可能想拿走錢、帳號、個人資料，或控制裝置。看懂目的，就知道該保護哪裡。把四張卡都打開！`,
+        widget: 'motives',
+      },
+      {
+        title: '先騙人，比破解電腦容易',
+        text: `${t('社交工程', 'social engineering')}是用話術讓人自己交出資料或做出危險動作。它利用的是著急、害怕或貪心，不是電腦漏洞。選出最好的做法！`,
+        widget: 'choice',
+        params: {
+          question: '你收到訊息：「老師急用！現在把驗證碼傳給我。」你該怎麼做？',
+          options: [
+            { text: '📞 不傳驗證碼，用原本的電話或當面確認', correct: true },
+            { text: '⚡ 老師很急，立刻傳過去' },
+            { text: '🔁 轉傳給同學，問大家要不要一起傳' },
+          ],
+          explain: '驗證碼就像一次性的鑰匙，任何人都不該向你索取。用自己原本知道的聯絡方法確認，不用訊息裡的新電話。',
+        },
+      },
+      {
+        title: '練習也要有界線',
+        text: `沒有允許就進入別人的帳號、電腦或網站，可能觸犯刑法的${t('妨害電腦使用罪', 'computer misuse offences')}。只在自己的裝置、課堂練習環境，或明確允許的系統練習。`,
+        widget: 'choice',
+        params: {
+          question: '哪一種情況可以練習找漏洞？',
+          options: [
+            { text: '🧪 老師準備的練習網站，而且規則說可以', correct: true },
+            { text: '🏪 附近商店的網站，因為只是看看' },
+            { text: '🎮 同學的遊戲帳號，因為沒有花錢' },
+          ],
+          explain: '要先得到系統擁有者的明確允許，並遵守範圍。沒有允許，就不要測試。',
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '有人說：「我只是想幫忙，所以沒有先問也可以測試你的網站。」這句話對嗎？',
+          options: [
+            { text: '❌ 不對。要先得到明確允許，並遵守範圍', correct: true },
+            { text: '✅ 對。只要沒有拿走東西就可以' },
+            { text: '✅ 對。會寫程式的人都可以測試' },
+          ],
+          explain: '白帽工作從允許和清楚範圍開始。好的目的，不能取代同意。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'algo',
     part: 'adv',
     icon: '🧩',
@@ -3838,6 +3914,7 @@ export const STAGES = [
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },
   { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: '網路怎麼運作', en: 'How Networks Work', units: ['internet', 'networld', 'web', 'iot'] },
+  { id: 'security', part: 'adv', icon: '🛡️', title: '駭客怎麼攻擊？', en: 'How Attackers Think', units: ['attackers'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'freeapps', 'coding'] },
   { id: 'secret', part: 'adv', icon: '🔬', title: '生活科技的祕密', en: 'Secrets of Everyday Tech', units: ['qrcode', 'clock', 'gpsmath', 'robocar'] },
 ];

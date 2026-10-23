@@ -954,7 +954,44 @@ const RB_FLOW = `
     <g class="rb-saw"><rect x="300" y="14" width="128" height="36" rx="18"/><text x="364" y="38"></text></g>
   </svg>`;
 
+const escapeHTML = value => String(value).replace(/[&<>'"]/g, char => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
+})[char]);
+
+function motives(host, _, api) {
+  const items = [
+    ['💰', '錢', '開啟付款通知，不理會陌生人的催促。'],
+    ['🔑', '帳號', '每個網站用不同密碼，並打開雙重驗證。'],
+    ['🪪', '個人資料', '少分享生日、地址和證件資料。'],
+    ['🎛️', '控制裝置', '更新裝置，並改掉出廠密碼。'],
+  ];
+  host.innerHTML = `<div class="cy-panel"><div class="cy-motives">${items.map((item, i) => `
+    <button class="cy-motive" data-i="${i}"><strong>${item[0]} ${item[1]}</strong><span>點開看看怎麼保護</span></button>`).join('')}</div>
+    <p class="cy-status" aria-live="polite">把四張卡都打開。</p></div>`;
+  const seen = new Set();
+  host.addEventListener('click', event => {
+    const button = event.target.closest('.cy-motive');
+    if (!button || seen.has(button.dataset.i)) return;
+    const item = items[button.dataset.i];
+    seen.add(button.dataset.i);
+    button.classList.add('done');
+    button.querySelector('span').textContent = item[2];
+    api.good();
+    pop(button);
+    if (seen.size === items.length) {
+      host.querySelector('.cy-status').className = 'cy-status good';
+      host.querySelector('.cy-status').textContent = '🎉 看懂目的，就更容易選對防守方法。';
+      api.done();
+    }
+  });
+}
+
+const SECURITY_WIDGETS = {
+  motives,
+};
+
 export const WIDGETS = {
+  ...SECURITY_WIDGETS,
   // Drag (or tap, then tap a box) each chip into the right box. With `rest`, the last
   // leftovers that can only go in that box move there by themselves. `intro` is shown on top.
   sort(host, { bins, items, rest, intro }, api) {
