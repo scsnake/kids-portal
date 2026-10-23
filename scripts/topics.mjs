@@ -153,7 +153,7 @@ async function deploy() {
   git(repo, 'push', 'origin', `${deployment.releaseCommit}:refs/heads/staging`);
   review.deployment.phase = 'staging-pushed';
   await writeJson(stateFile(id), review);
-  const trigger = 'TOK=$(grep "^COOLIFY_TOKEN=" ~/.env | cut -d= -f2-) && test -n "$TOK" && curl -fsS -m 30 -H "Authorization: Bearer $TOK" "http://100.68.55.39:8000/api/v1/deploy?uuid=akwcwcgs84o0ckks40osk4gk"';
+  const trigger = 'TOK=$(grep "^COOLIFY_TOKEN=" ~/.env | cut -d= -f2-) && test -n "$TOK" && curl -fsS -m 30 -X POST -H "Authorization: Bearer $TOK" "http://100.68.55.39:8000/api/v1/deploy?uuid=akwcwcgs84o0ckks40osk4gk"';
   await run('ssh', ['cthgpu', trigger], { timeout: 40000 });
   const stagingMarker = async () => {
     const { stdout } = await run('ssh', ['cthgpu', 'curl -fkSs -m 15 --resolve kids-tech-test.scsnake.xyz:8444:127.0.0.1 https://kids-tech-test.scsnake.xyz:8444/release.json'], { timeout: 20000 });
