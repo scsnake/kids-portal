@@ -135,7 +135,7 @@ test('candidate generation updates catalogs and excludes untracked application f
   assert.equal(result.version, String(Number(baseVersion) + 1));
   assert.equal(result.course.stages.find(stage => stage.id === 'ainet').units.length, 3);
   assert.match(await fs.readFile(path.join(candidate, 'README.md'), 'utf8'), /流程測試: A pipeline test topic/);
-  assert.ok((await json(path.join(candidate, 'changelog.json')))[0].changes.includes(topic().changelog));
+  assert.ok((await json(path.join(candidate, 'changelog.json'))).find(entry => entry.date === date).changes.includes(topic().changelog));
   const second = path.join(repo, 'candidate-again');
   await buildCandidate({ baseline, destination: second, batch, date });
   assert.equal(await treeHash(candidate), await treeHash(second));
