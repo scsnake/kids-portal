@@ -7,6 +7,8 @@ name beside them.
 
 For the look, the layout and how to add a topic, see `DESIGN.md`.
 
+For new topic packages, previews, catalog checks, and deployment, follow [TOPICS.md](TOPICS.md).
+
 ## Units
 
 Two parts. Part 1 teaches how to use a device, with rough ideas only. Part 2
@@ -122,18 +124,19 @@ python3 -m http.server 8765 --bind 127.0.0.1
 
 ## Files
 
-- `js/units.js`: all lesson text. A slide is `{ title, text, art }` or
+- `js/course.js`: assembles existing lessons and approved topic packages. `js/topic-registry.js` registers packages; `js/topic-model.js` validates placement and IDs.
+- `js/units.js`: legacy lesson text. A slide is `{ title, text, art }` or
   `{ title, text, widget, params }`. Wrap a new term in `t('中文', 'English')`.
-- `js/widgets.js`: one function per task type (about 55 types, such as `sort`, `choice`,
-  `order`, `mouselab`, `touchlab`, `files`, `passcode`, `account`, `packets`, `code`).
+- `js/widgets.js`: shared task implementations, such as `sort`, `choice`,
+  `order`, `mouselab`, `touchlab`, `files`, `passcode`, `account`, `packets`, `code`.
   Each one gets `api.done()` to award the star.
 - `js/main.js`: routing (`#/u/<unit>/<slide>`), stars in `localStorage`, sound,
   and read-aloud with the device's zh-TW voice.
 - `style.css`: all styles. Each unit sets its own accent color `--c`.
 
 When you change a file, bump its `?v=`: `style.css` and `js/main.js` in
-`index.html`, `units.js` and `widgets.js` in the imports at the top of `main.js`
-(then bump `main.js` too, so the browser sees the new imports).
+`index.html`, `course.js` in `main.js`, and the module imports in `course.js`.
+The topic release command updates these versions automatically for new topics.
 
 ## Notes
 

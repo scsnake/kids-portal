@@ -1,5 +1,6 @@
-import { UNITS, COMING, PARTS, STAGES } from './units.js?v=24';
-import { WIDGETS } from './widgets.js?v=24';
+import { UNITS, COMING, PARTS, STAGES, WIDGETS, installTopicStyles } from './course.js?v=24';
+
+installTopicStyles();
 
 const app = document.getElementById('app');
 const STORE = 'tech-explorer.v2';
@@ -13,7 +14,7 @@ const STORE = 'tech-explorer.v2';
 //   secs: seconds the app was on screen, in total (shown on the 3010 slide)
 //   since: the day this browser started (YYYY-MM-DD); content added later counts as new
 
-const slideKey = sl => (sl.title === '考考你' ? 'Q:' + sl.params.question : sl.title);
+const slideKey = sl => sl.progressKey || (sl.title === '考考你' ? 'Q:' + sl.params.question : sl.title);
 
 const today = () => {
   const d = new Date();

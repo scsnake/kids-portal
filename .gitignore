@@ -25,3 +25,7 @@ apps/tech-explorer/.tools/
 
 # cf CLI local cache (holds the Cloudflare account id)
 .cloudflare/
+
+# Local topic review artifacts and isolated release worktrees
+.topic-state/
+topic-drafts/

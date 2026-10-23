@@ -155,6 +155,8 @@ Interaction rules:
 
 ## 7. Add a topic: checklist
 
+For new topic packages, use [TOPICS.md](TOPICS.md). Its preview and release command automates the catalog and version updates below.
+
 1. Find the unit by dependency (section 2). Make a new unit only for a new area.
    Add a new unit's id to its stage in `STAGES`.
 2. Write the slide: title, text, and `art` or `widget` + `params` (section 4).

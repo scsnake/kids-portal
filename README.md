@@ -1,7 +1,7 @@
 # kids-portal
 
-Monorepo hosting the kids' education portal + individual apps. Each subdirectory
-is deployed as its **own Coolify static application** at its own subdomain.
+Monorepo hosting the kids' education portal + individual apps. Production uses
+Cloudflare Pages. Coolify hosts separate staging copies at the `-test` subdomains.
 
 ## Layout
 
@@ -56,8 +56,11 @@ kids-portal/
 }
 ```
 
-3. `git commit && git push` — Coolify only rebuilds the app whose files changed
-   (thanks to per-application **Watch Paths**; see deploy notes below).
+3. Commit and push to `main` to publish through Cloudflare Pages. Each project
+   builds only when files under its application root change.
+
+For tech-explorer topics, follow [TOPICS.md](apps/tech-explorer/TOPICS.md).
+The release command updates catalogs and checks the reviewed candidate before publishing.
 
 `subject` becomes a filter chip in the portal automatically.
 Add `"private": true` for an app that still needs a login (it shows a 🔒 家人限定 tag).
@@ -104,25 +107,34 @@ python3 -m http.server 8765 --bind 127.0.0.1
 Portal cards link to the deployed subdomains — local previews of each app work
 via the per-app path above.
 
-## Deploy (Coolify on cthgpu)
+## Production and staging
+
+Production is Git-connected Cloudflare Pages, branch `main`, with no build command.
+The project root is `portal` or the matching `apps/<slug>` directory.
+Pushing `main:staging` updates staging only. Coolify requires a manual deployment trigger.
+
+The tech-explorer release command handles both targets and verifies the same release identifier on each.
+
+### Coolify staging configuration (cthgpu)
 
 **Once**: connect this repo via Coolify → Sources → GitHub App (private repo OK).
 
 **Per application** (one Coolify service each):
 
-| Service | Base Directory | Publish Directory | Build Command | Watch Paths | Domain |
+| Service | Base Directory | Publish Directory | Build Command | Watch Paths | Staging Domain |
 |---|---|---|---|---|---|
-| **portal** | `portal` | `.` | (none — static) | `portal/**` | `kids.scsnake.xyz` |
-| **math-practice** | `apps/math-practice` | `.` | (none) | `apps/math-practice/**` | `kids-math.scsnake.xyz` |
-| **one-stroke** | `apps/one-stroke` | `.` | (none, uses committed `dist/`) or `npm ci && npm run build` if you drop `dist/` from git | `apps/one-stroke/**` | `kids-onestroke.scsnake.xyz` |
-| **piano-sightreader** | `apps/piano-sightreader` | `.` | (none) | `apps/piano-sightreader/**` | `kids-piano.scsnake.xyz` |
-| **little-writer** | `apps/little-writer` | `.` | (none, uses committed `dist/`) | `apps/little-writer/**` | `kids-writer.scsnake.xyz` |
+| **portal** | `portal` | `.` | (none — static) | `portal/**` | `kids-test.scsnake.xyz` |
+| **math-practice** | `apps/math-practice` | `.` | (none) | `apps/math-practice/**` | `kids-math-test.scsnake.xyz` |
+| **one-stroke** | `apps/one-stroke` | `.` | (none, uses committed `dist/`) or `npm ci && npm run build` if you drop `dist/` from git | `apps/one-stroke/**` | `kids-onestroke-test.scsnake.xyz` |
+| **piano-sightreader** | `apps/piano-sightreader` | `.` | (none) | `apps/piano-sightreader/**` | `kids-piano-test.scsnake.xyz` |
+| **little-writer** | `apps/little-writer` | `.` | (none, uses committed `dist/`) | `apps/little-writer/**` | `kids-writer-test.scsnake.xyz` |
+| **tech-explorer** | `apps/tech-explorer` | `.` | (none) | `apps/tech-explorer/**` | `kids-tech-test.scsnake.xyz` |
 
-Then in **Cloudflare DNS**: add a CNAME for each subdomain pointing at the same
-host `kids-chinese-writing.scsnake.xyz` already targets.
+Production DNS points to each Pages project's `pages.dev` hostname.
+The Coolify staging copies use the corresponding `-test` hostnames.
 
-**Watch Paths** is what stops every push from rebuilding every service — set it
-per Coolify application under "Advanced → Watch Paths".
+**Watch Paths** limits automatic rebuilds if staging webhooks are enabled again.
+Set it per Coolify application under "Advanced → Watch Paths".
 
 ## Rebuilding one-stroke / little-writer locally
 
