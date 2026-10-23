@@ -13,7 +13,7 @@ function setup(host, api, name, statusCls) {
   host.innerHTML = '';
   const root = document.createElement('div');
   root.className = `vpn-root vpn-${name}`;
-  root.innerHTML = `<div class="vpn-body"></div><div class="vpn-status ${statusCls}" role="status" aria-live="polite"></div>${SIM}`;
+  root.innerHTML = `<div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div><div class="vpn-body"></div><div class="vpn-status ${statusCls}" role="status" aria-live="polite"></div>${SIM}`;
   host.appendChild(root);
   const body = root.querySelector('.vpn-body');
   const st = root.querySelector('.vpn-status');
@@ -90,6 +90,45 @@ const css = baseCss('vpn', '#6741d9', '#f3f0ff') + `
 .vpn-sent{display:flex;flex-wrap:wrap;gap:6px}
 .vpn-chip{padding:3px 10px;border-radius:999px;border:2px solid var(--line,#e6dfd0);background:var(--card,#fff);font-size:15px}
 .vpn-chip-on{border-color:var(--good,#2b8a3e);background:#ebfbee}
+/* 4 Stations Grid & Corridor */
+.vpn-stations-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-items:stretch;margin-top:4px}
+@media (max-width:680px){.vpn-stations-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.vpn-station{background:var(--card,#fff);border:2px solid var(--line,#e6dfd0);border-radius:16px;padding:10px 8px;display:flex;flex-direction:column;gap:6px;min-height:120px;transition:border-color .2s ease,background-color .2s ease,box-shadow .2s ease}
+.vpn-station-h{font-weight:700;font-size:14px;display:flex;align-items:center;gap:4px}
+.vpn-ip-tag{font-size:12px;color:var(--ink-2,#4a5568)}
+.vpn-ip-tag code{font-size:12px}
+.vpn-station-desc{font-size:12px;color:var(--ink-2,#4a5568);margin-top:auto}
+.vpn-spy-box{display:flex;flex-direction:column;gap:4px;margin-top:auto}
+.vpn-spy-avatar{font-size:12px;font-weight:700;color:#d9480f}
+.vpn-spy-bubble{font-size:12px;font-weight:700;padding:4px 8px;border-radius:8px;line-height:1.3;border:1px solid var(--line,#e6dfd0);background:#f8f9fa}
+.vpn-spy-leak{background:#fff5f5;border-color:#ff8787;color:#c92a2a;animation:vpn-pop .3s ease-out}
+.vpn-spy-safe{background:#f3f0ff;border-color:#b197fc;color:#5f3dc4;animation:vpn-pop .3s ease-out}
+.vpn-st-off{opacity:.7;background:#fdfcfb;border-style:dashed}
+.vpn-hop-vpn{border-color:var(--c,#6741d9)!important;background:#f8f6ff!important;box-shadow:0 0 0 2px rgba(103,65,217,.15);font-weight:700}
+.vpn-relay-box{font-size:12px;padding:4px 8px;border-radius:8px;background:#f1f3f5;border:1px dashed #ced4da;margin-top:auto;line-height:1.3}
+.vpn-relay-box.vpn-relay-active{border-style:solid;border-color:var(--c,#6741d9);background:#f3f0ff;color:#5f3dc4;font-weight:700;animation:vpn-pop .3s ease-out}
+.vpn-target-log-box{font-size:12px;padding:4px 8px;border-radius:8px;background:#f1f3f5;border:1px solid #ced4da;margin-top:auto;display:flex;flex-direction:column;gap:2px;line-height:1.3}
+.vpn-log-title{font-weight:700;font-size:11px;color:var(--ink-2,#4a5568)}
+.vpn-log-val{font-size:12px}
+.vpn-target-log-box.vpn-log-leak{background:#fff5f5;border-color:#ff8787;color:#c92a2a;animation:vpn-pop .3s ease-out}
+.vpn-target-log-box.vpn-log-masked{background:#ebfbee;border-color:#8ce99a;color:#2b8a3e;font-weight:700;animation:vpn-pop .3s ease-out}
+.vpn-corridor{position:relative;margin:8px 0;border-radius:14px;overflow:visible}
+.vpn-tunnel-pipe{display:flex;width:100%;min-height:50px;border-radius:14px;box-shadow:inset 0 2px 6px rgba(0,0,0,.35);overflow:hidden}
+.vpn-pipe-body{flex:0 0 75%;background:linear-gradient(180deg,#2b303a 0%,#16181d 50%,#262931 100%);border:2px solid #495057;border-right:3px solid #7950f2;border-radius:14px 0 0 14px;display:flex;align-items:center;justify-content:center;color:#d0bfff;font-size:13px;font-weight:700;letter-spacing:.3px;text-shadow:0 1px 3px rgba(0,0,0,.9);padding:6px 10px;text-align:center;box-sizing:border-box}
+.vpn-exit-body{flex:1;background:#ebfbee;border:2px dashed #8ce99a;border-left:none;border-radius:0 14px 14px 0;display:flex;align-items:center;justify-content:center;color:#2b8a3e;font-size:13px;font-weight:700;padding:6px 8px;text-align:center;box-sizing:border-box}
+.vpn-plain-road{width:100%;min-height:50px;background:#f8f9fa;border:2px dashed #ced4da;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--ink-2,#4a5568);font-size:13px;font-weight:600;padding:6px 12px;text-align:center;box-sizing:border-box}
+.vpn-packet-lane{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.vpn-flying-packet{position:absolute;top:50%;will-change:transform,left,opacity}
+.vpn-pkt-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+.vpn-pkt-plain{background:#fff;border:2px solid #fd7e14;color:#d9480f}
+.vpn-pkt-dark{background:#212529;border:2px solid #b197fc;color:#f3f0ff}
+.vpn-pkt-green{background:#2b8a3e;border:2px solid #51cf66;color:#fff}
+.vpn-packet-open{animation:vpn-fly-open 1.1s cubic-bezier(.25,.1,.25,1) forwards}
+.vpn-packet-tunnel{animation:vpn-fly-tunnel .75s cubic-bezier(.25,.1,.25,1) forwards}
+.vpn-packet-vpn-relay{animation:vpn-fly-relay .75s cubic-bezier(.25,.1,.25,1) .7s forwards;opacity:0}
+@keyframes vpn-fly-open{0%{left:4%;opacity:0;transform:translateY(-50%) scale(.9)}12%{opacity:1;transform:translateY(-50%) scale(1)}85%{opacity:1}100%{left:82%;opacity:.95;transform:translateY(-50%) scale(1)}}
+@keyframes vpn-fly-tunnel{0%{left:4%;opacity:0;transform:translateY(-50%) scale(.8)}15%{opacity:1;transform:translateY(-50%) scale(1)}85%{opacity:1}100%{left:62%;opacity:0;transform:translateY(-50%) scale(.85)}}
+@keyframes vpn-fly-relay{0%{left:62%;opacity:0;transform:translateY(-50%) scale(.8)}20%{opacity:1;transform:translateY(-50%) scale(1)}85%{opacity:1}100%{left:82%;opacity:1;transform:translateY(-50%) scale(1)}}
 .vpn-obs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .vpn-ob{display:flex;flex-direction:column;gap:6px}
 .vpn-ob-h{font-weight:700}
@@ -124,56 +163,148 @@ const widgets = {
   // Slide 1: ordinary route vs. device → encrypted tunnel → VPN server → website.
   vpnRoute(host, params, api) {
     const w = setup(host, api, 'route', 'vpn-r-status');
-    const s = { vpn: false, sentOff: false, sentOn: false, anim: false };
+    const s = { vpn: false, sentOff: false, sentOn: false, lastSent: null, animating: false };
 
     function render() {
-      const hops = [
-        { icon: '📱', name: '你的平板' },
-        { icon: '📶', name: '咖啡店 Wi-Fi' },
-        { icon: '🏢', name: '網路業者' },
-        ...(s.vpn ? [{ icon: '🛡️', name: 'VPN 伺服器', vpn: true }] : []),
-        { icon: '🌐', name: 'library.example.tw' },
-      ];
-      const n = hops.length;
-      // Row 2 under the hops: the tunnel spans device → VPN server; the last column is after the exit.
-      const bands = s.vpn
-        ? `<div class="vpn-band vpn-band-tun" style="grid-column:1 / ${n};grid-row:2">🔒 加密隧道：平板 → VPN 伺服器</div><div class="vpn-band vpn-band-plain" style="grid-column:${n} / ${n + 1};grid-row:2">隧道出口後</div>`
-        : `<div class="vpn-band vpn-band-plain" style="grid-column:1 / ${n + 1};grid-row:2">一般路線：沒有隧道</div>`;
-      w.body.innerHTML = `<div class="vpn-row">
-          <button type="button" class="vpn-btn vpn-r-toggle" data-act="toggle" aria-pressed="${s.vpn}">🛡️ VPN：${s.vpn ? '開' : '關'}</button>
+      w.body.innerHTML = `
+        <div class="vpn-row">
+          <button type="button" class="vpn-btn vpn-r-toggle" data-act="toggle" aria-pressed="${s.vpn}">
+            🛡️ VPN 連線開關：${s.vpn ? '🟢 已開啟 (地下隧道)' : '⚪ 已關閉 (一般連線)'}
+          </button>
           <button type="button" class="vpn-btn vpn-go vpn-r-send" data-act="send">📨 送出請求</button>
+          <button type="button" class="vpn-btn" data-act="reset">↺ 重來</button>
         </div>
-        <div class="vpn-path" style="grid-template-columns:repeat(${n},minmax(0,1fr))">
-          ${hops.map((h) => `<div class="vpn-hop${h.vpn ? ' vpn-hop-vpn' : ''}" style="grid-row:1"><span class="vpn-emo" aria-hidden="true">${h.icon}</span><span>${h.name}</span></div>`).join('')}
-          ${bands}
+
+        <!-- 4 Stations on screen -->
+        <div class="vpn-stations-grid">
+          <!-- Station 1: 小安 -->
+          <div class="vpn-station vpn-st-client">
+            <div class="vpn-station-h"><span>📱 小安</span></div>
+            <div class="vpn-ip-tag">IP: <code>114.32.1.5</code></div>
+            <div class="vpn-station-desc">
+              ${s.vpn ? '🔒 封包密文封裝' : '📄 封包明文直發'}
+            </div>
+          </div>
+
+          <!-- Station 2: 咖啡店 Wi-Fi (with 🦊 偷看客) -->
+          <div class="vpn-station vpn-st-wifi">
+            <div class="vpn-station-h"><span>📶 咖啡店 Wi-Fi</span></div>
+            <div class="vpn-spy-box">
+              <div class="vpn-spy-avatar">🦊 偷看客</div>
+              <div class="vpn-spy-bubble ${s.lastSent === 'on' ? 'vpn-spy-safe' : s.lastSent === 'off' ? 'vpn-spy-leak' : ''}">
+                ${s.lastSent === 'on'
+                  ? '😵 只有亂碼 🔒'
+                  : s.lastSent === 'off'
+                    ? '👀 看見去動物園！'
+                    : '👀 埋伏等待中'}
+              </div>
+            </div>
+          </div>
+
+          <!-- Station 3: VPN 伺服器 (has class .vpn-hop-vpn when VPN on) -->
+          <div class="vpn-station vpn-st-vpn ${s.vpn ? 'vpn-hop-vpn' : 'vpn-st-off'}">
+            <div class="vpn-station-h"><span>🛡️ VPN 伺服器</span></div>
+            <div class="vpn-ip-tag">IP: <code>203.0.113.88</code></div>
+            <div class="vpn-relay-box ${s.vpn ? 'vpn-relay-active' : ''}">
+              ${s.vpn
+                ? '🚀 VPN 伺服器替小安發送請求 ➔ 去動物園'
+                : '（未啟用）'}
+            </div>
+          </div>
+
+          <!-- Station 4: 動物園網站 (目標) -->
+          <div class="vpn-station vpn-st-target">
+            <div class="vpn-station-h"><span>🦁 動物園網站</span></div>
+            <div class="vpn-target-log-box ${s.lastSent === 'on' ? 'vpn-log-masked' : s.lastSent === 'off' ? 'vpn-log-leak' : ''}">
+              <span class="vpn-log-title">📝 網站訪客紀錄</span>
+              <div class="vpn-log-val">
+                ${s.lastSent === 'on'
+                  ? '訪客 IP: <code>203.0.113.88</code> (綠色隱藏成功 ✨)'
+                  : s.lastSent === 'off'
+                    ? '訪客 IP: <code>114.32.1.5</code> (紅色曝光 ⚠️)'
+                    : '等待請求中...'}
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="vpn-track" aria-hidden="true">${s.anim ? `<div class="vpn-mover">${s.vpn ? '🔒📨' : '📨'}</div>` : ''}</div>
+
+        <!-- Visual Pipe Corridor: Steel Tunnel vs Plain Road -->
+        <div class="vpn-corridor ${s.vpn ? 'vpn-corridor-vpn' : 'vpn-corridor-plain'}">
+          ${s.vpn ? `
+            <div class="vpn-tunnel-pipe">
+              <div class="vpn-pipe-body">
+                <span>🚇 加密地下隧道（小安 ➔ VPN 伺服器）🔒</span>
+              </div>
+              <div class="vpn-exit-body">
+                <span>🌿 VPN 代表發送 ➔ 去動物園</span>
+              </div>
+            </div>
+          ` : `
+            <div class="vpn-plain-road">
+              <span>────── 露天連線（明文直連，無隧道保護）──────➔</span>
+            </div>
+          `}
+
+          <div class="vpn-packet-lane" aria-hidden="true">
+            ${s.animating ? (
+              s.vpn ? `
+                <div class="vpn-flying-packet vpn-packet-tunnel">
+                  <span class="vpn-pkt-badge vpn-pkt-dark">🔒 密文封包</span>
+                </div>
+                <div class="vpn-flying-packet vpn-packet-vpn-relay">
+                  <span class="vpn-pkt-badge vpn-pkt-green">VPN 代表發送 ➔ 去動物園</span>
+                </div>
+              ` : `
+                <div class="vpn-flying-packet vpn-packet-open">
+                  <span class="vpn-pkt-badge vpn-pkt-plain">📨 去動物園</span>
+                </div>
+              `
+            ) : ''}
+          </div>
+        </div>
+
         <div class="vpn-sent">
           <span class="vpn-chip${s.sentOff ? ' vpn-chip-on' : ''}">${s.sentOff ? '✓' : '○'} 關 VPN 送一次</span>
           <span class="vpn-chip${s.sentOn ? ' vpn-chip-on' : ''}">${s.sentOn ? '✓' : '○'} 開 VPN 送一次</span>
         </div>`;
-      s.anim = false;
+      s.animating = false;
     }
 
     w.on((act) => {
+      if (act === 'reset') {
+        s.vpn = false;
+        s.sentOff = false;
+        s.sentOn = false;
+        s.lastSent = null;
+        s.animating = false;
+        render();
+        w.say('已重來。先按送出請求，再切換 VPN 開關比比看！');
+        return;
+      }
       if (act === 'toggle') {
         s.vpn = !s.vpn;
+        s.animating = false;
         render();
-        w.say(s.vpn ? '🛡️ VPN 開了：路上多了 VPN 伺服器。按送出看看！' : 'VPN 關了：回到一般路線。');
+        w.say(s.vpn ? '🛡️ VPN 地下隧道已開啟！按送出看封包怎麼走。' : 'VPN 關閉：回到一般露天連線。');
         return;
       }
       if (act !== 'send') return;
-      if (s.vpn) s.sentOn = true;
-      else s.sentOff = true;
-      s.anim = true;
+      if (s.vpn) {
+        s.sentOn = true;
+        s.lastSent = 'on';
+      } else {
+        s.sentOff = true;
+        s.lastSent = 'off';
+      }
+      s.animating = true;
       render();
       if (s.sentOn && s.sentOff) {
-        w.say('🎉 比出來了：開 VPN 多了一站，加密隧道從你的平板一直通到 VPN 伺服器。', 'ok');
+        w.say('🎉 比出來了：開 VPN 多了一站，加密隧道保護內容，真實 IP 隱藏成功！', 'ok');
         w.finish();
       } else if (s.vpn) {
-        w.say('🔒 封包先包進加密隧道，到 VPN 伺服器才出來，再去網站。關掉 VPN 送一次比比看！', 'ok');
+        w.say('🔒 封包穿過地下隧道，由 VPN 伺服器代打發送！關掉 VPN 送一次比比看。', 'ok');
       } else {
-        w.say('📨 一般路線：封包經過咖啡店 Wi-Fi 和網路業者，直接到網站。開 VPN 再送一次！', 'ok');
+        w.say('📨 露天封包被偷看客看見了！打開 VPN 再試一次。', 'ok');
       }
     });
 

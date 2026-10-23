@@ -27,18 +27,20 @@ const base = (p) => `
 `;
 
 function setup(host, api) {
-  const root = document.createElement('div');
-  root.className = `${P}-root`;
-  host.replaceChildren(root);
+  const container = document.createElement('div');
+  container.className = `${P}-root`;
+  container.innerHTML = `<div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div><div class="${P}-slot"></div>`;
+  host.replaceChildren(container);
+  const root = container.querySelector(`.${P}-slot`);
   let finished = false;
   const finish = () => {
     if (finished || (api.alive && !api.alive())) return;
     finished = true;
     api.done();
   };
-  const on = (fn) => root.addEventListener('click', (e) => {
+  const on = (fn) => container.addEventListener('click', (e) => {
     const b = e.target.closest('[data-a]');
-    if (b && root.contains(b) && !b.disabled) fn(b.dataset.a, b);
+    if (b && container.contains(b) && !b.disabled) fn(b.dataset.a, b);
   });
   return { root, finish, on };
 }

@@ -3509,3 +3509,25 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
   .cy-request { will-change: auto; }
   .cy-attempt { will-change: auto; }
 }
+
+/* Gemini Interactive Design Tag */
+.gemini-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #1971c2;
+  background: #e7f5ff;
+  border: 1.5px solid #a5d8ff;
+  border-radius: 999px;
+  padding: 2px 10px;
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(25, 113, 194, 0.1);
+}
+
+.gemini-tag .gemini-spark {
+  font-size: 0.85rem;
+}

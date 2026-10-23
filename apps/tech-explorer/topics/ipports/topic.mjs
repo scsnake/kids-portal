@@ -13,7 +13,7 @@ function setup(host, api, name, statusCls) {
   host.innerHTML = '';
   const root = document.createElement('div');
   root.className = `ipp-root ipp-demo-${name}`;
-  root.innerHTML = `<div class="ipp-body"></div><div class="ipp-status ${statusCls}" role="status" aria-live="polite"></div>${SIM}`;
+  root.innerHTML = `<div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div><div class="ipp-body"></div><div class="ipp-status ${statusCls}" role="status" aria-live="polite"></div>${SIM}`;
   host.appendChild(root);
   const body = root.querySelector('.ipp-body');
   const st = root.querySelector('.ipp-status');
@@ -111,6 +111,33 @@ const css = baseCss('ipp', '#1864ab', '#e7f0fa') + `
 .ipp-portline{align-self:stretch;margin-top:4px;padding:8px 10px;border-radius:12px;border:2px dashed var(--line,#e6dfd0);font-weight:700}
 .ipp-live{border-style:solid;border-color:var(--good,#2b8a3e);background:#ebfbee}
 .ipp-sticky{padding:6px 10px;border-radius:6px;background:#fff3bf;box-shadow:0 2px 0 #f0d97a;transform:rotate(-1.5deg);font-size:15px}
+/* Server Building and Port Doors */
+.ipp-bldg-wrap{display:flex;flex-direction:column;gap:8px}
+.ipp-pkt-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:8px 14px;border-radius:14px;background:#e7f0fa;border:2px solid #1864ab;font-size:15px;font-weight:700}
+.ipp-pkt-top code{font-size:16px}
+.ipp-bldg{background:#f8fafc;border:3px solid #1864ab;border-radius:18px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 14px rgba(24,100,171,0.08);position:relative}
+.ipp-bldg-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;padding-bottom:6px;border-bottom:2px dashed #b2d7ff;font-size:15px}
+.ipp-bldg-title{display:flex;align-items:center;gap:6px;font-weight:800;font-size:16px;color:#1864ab}
+.ipp-bldg-badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#1864ab;color:#fff;font-size:15px;font-weight:700}
+.ipp-bldg-desc{font-size:15px;color:var(--ink-2,#4a5568)}
+.ipp-rooms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ipp-room-door{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;min-height:130px;padding:10px 8px;border-radius:14px;border:2px solid var(--line,#e6dfd0);background:var(--card,#fff);color:var(--ink,#1d2738);cursor:pointer;touch-action:manipulation;transition:transform .15s ease,box-shadow .15s ease,background-color .2s ease,border-color .2s ease;box-shadow:0 3px 0 var(--line,#e6dfd0);font:inherit}
+.ipp-room-door:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--line,#e6dfd0)}
+.ipp-room-door:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line,#e6dfd0)}
+.ipp-room-door.ipp-target{border-color:#1864ab;background:#e7f0fa;box-shadow:0 0 0 2px #1864ab, 0 4px 0 #1864ab}
+.ipp-room-door.ipp-listening{border-color:#2b8a3e;background:#f4fbf5}
+.ipp-room-door.ipp-target.ipp-listening{background:#e8f7ec;border-color:#2b8a3e;box-shadow:0 0 0 2px #2b8a3e, 0 4px 0 #2b8a3e}
+.ipp-room-door.ipp-door-fail{border-color:#e03131!important;background:#fff5f5!important;animation:ipp-shake .36s ease}
+.ipp-room-door.ipp-door-open{border-color:#2b8a3e!important;background:#ebfbee!important;animation:ipp-pop .3s ease-out}
+.ipp-door-num{font-size:15px;font-weight:800;color:var(--ink,#1d2738)}
+.ipp-door-visual{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:12px;background:#f1f3f5;font-size:26px;line-height:1}
+.ipp-room-door.ipp-listening .ipp-door-visual{background:#d3f9d8;box-shadow:0 0 10px rgba(43,138,62,0.3)}
+.ipp-door-name{font-size:15px;font-weight:700;color:var(--ink,#1d2738)}
+.ipp-door-status{display:inline-flex;align-items:center;justify-content:center;padding:2px 8px;border-radius:999px;font-size:15px;font-weight:700;background:#f1f3f5;color:var(--ink-2,#4a5568);white-space:nowrap}
+.ipp-door-status.ipp-st-listen{background:#ebfbee;color:#2b8a3e}
+.ipp-door-status.ipp-st-lock{background:#fff3bf;color:#d9480f}
+.ipp-target-tag{position:absolute;top:-10px;right:-4px;padding:2px 8px;border-radius:999px;background:#1864ab;color:#fff;font-size:15px;font-weight:800;box-shadow:0 2px 4px rgba(0,0,0,0.15)}
+.ipp-prog-on{background:#ebfbee!important;border-color:#2b8a3e!important;color:#2b8a3e!important;font-weight:700}
 .ipp-homes{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:10px}
 .ipp-home{display:flex;flex-direction:column;gap:6px}
 .ipp-router{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:15px}
@@ -118,7 +145,7 @@ const css = baseCss('ipp', '#1864ab', '#e7f0fa') + `
 .ipp-nd{position:relative;flex-direction:column;gap:2px;width:100%}
 .ipp-log{display:flex;flex-direction:column;gap:6px}
 .ipp-logrow{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:6px 10px;border-radius:10px;background:#f1f5fb;font-size:15px}
-@media (max-width:600px){.ipp-net,.ipp-route,.ipp-homes,.ipp-eps,.ipp-lrow{grid-template-columns:1fr}}
+@media (max-width:600px){.ipp-net,.ipp-route,.ipp-homes,.ipp-eps,.ipp-lrow,.ipp-rooms{grid-template-columns:1fr}}
 `;
 
 const widgets = {
@@ -330,62 +357,163 @@ const widgets = {
   // Slide 4: a port number alone starts nothing; a program must listen.
   ippListen(host, params, api) {
     const w = setup(host, api, 'listen', 'ipp-l-status');
-    const s = { noted: false, run: false, fail: false, ok: false, wire: '', flash: false };
+    const s = { port: 7000, run: false, fail: false, ok: false, lastPort: null };
+
+    const DOORS = [
+      {
+        num: 80,
+        name: '網頁伺服器',
+        icon: '🌐',
+        desc: 'HTTP 服務',
+      },
+      {
+        num: 7000,
+        name: '聊天室 App',
+        icon: '💬',
+        desc: 'ChatApp 服務',
+      },
+      {
+        num: 9999,
+        name: '空房間',
+        icon: '🕸️',
+        desc: '無人租用',
+      },
+    ];
 
     function render() {
-      const wire = s.wire === 'ok' ? '✅ ⇄' : s.wire === 'bad' ? '✋ ✕' : '→';
-      w.body.innerHTML = `<div class="ipp-lrow">
-          <div class="ipp-card ipp-ldev"><span class="ipp-emo" aria-hidden="true">📱</span><span>同學的平板</span><code>192.0.2.30</code></div>
-          <div class="ipp-wire${s.wire ? ` ipp-${s.wire}` : ''}${s.flash ? ' ipp-pop' : ''}">${wire}<br><span class="ipp-tag">TCP</span> <code>7000</code></div>
-          <div class="ipp-card ipp-ldev"><span class="ipp-emo" aria-hidden="true">🖥️</span><span>練習伺服器</span><code>${SERVER}</code>
-            <div class="ipp-portline${s.run ? ' ipp-live' : ''}">TCP 7000：${s.run ? '🟢 🧩 拼圖程式在聽' : '⚪ 沒有程式'}</div>
-            ${s.noted ? '<div class="ipp-sticky">📝 紙條：「TCP 7000 = 拼圖遊戲」</div>' : ''}
+      const doorsHtml = DOORS.map((d) => {
+        const isTarget = d.num === s.port;
+        const listening = (d.num === 7000 && s.run);
+        const fail = (s.lastPort === d.num && !listening);
+        const open = (s.lastPort === d.num && listening);
+
+        let statusText = '💤 休息未監聽';
+        let statusCls = '';
+        let icon = d.icon;
+
+        if (d.num === 9999) {
+          statusText = '🔒 空房無人';
+          statusCls = 'ipp-st-lock';
+          icon = '🕸️ 🔒';
+        } else if (d.num === 7000) {
+          if (s.run) {
+            statusText = '🟢 監聽接聽中';
+            statusCls = 'ipp-st-listen';
+            icon = '💬 🟢';
+          } else {
+            statusText = '⚪ 未啟動監聽';
+            icon = '💤';
+          }
+        }
+
+        return `<button type="button" class="ipp-room-door ipp-door-${d.num} ${isTarget ? 'ipp-target' : ''} ${listening ? 'ipp-listening' : ''} ${fail ? 'ipp-door-fail' : ''} ${open ? 'ipp-door-open' : ''}" data-act="pick" data-arg="${d.num}" aria-pressed="${isTarget}">
+          ${isTarget ? '<span class="ipp-target-tag">🎯 敲門目標</span>' : ''}
+          <span class="ipp-door-num">🚪 Port ${d.num}</span>
+          <span class="ipp-door-visual" aria-hidden="true">${icon}</span>
+          <span class="ipp-door-name">${d.name}</span>
+          <span class="ipp-door-status ${statusCls}">${statusText}</span>
+        </button>`;
+      }).join('');
+
+      w.body.innerHTML = `
+        <div class="ipp-bldg-wrap">
+          <!-- Packet Delivery Header -->
+          <div class="ipp-pkt-top">
+            <span>📨 外送封包：目的地 🏢 <code>${SERVER}</code></span>
+            <span>敲門目標：<strong>Port ${s.port} 門牌</strong></span>
+          </div>
+
+          <!-- Server Building -->
+          <div class="ipp-bldg">
+            <div class="ipp-bldg-header">
+              <div class="ipp-bldg-title">
+                <span class="ipp-emo" aria-hidden="true">🏢</span>
+                <span>伺服器大樓 <code>${SERVER}</code></span>
+                <span class="ipp-bldg-badge">IP 門牌</span>
+              </div>
+              <div class="ipp-bldg-desc">大樓裡的小房間門牌＝連接埠 (Port)</div>
+            </div>
+
+            <!-- 3 Port Doors -->
+            <div class="ipp-rooms" role="group" aria-label="大樓房間門牌清單">
+              ${doorsHtml}
+            </div>
           </div>
         </div>
+
+        <!-- Controls -->
         <div class="ipp-ctl">
-          <button type="button" class="ipp-btn ipp-l-note" data-act="note">📝 只寫下號碼 7000</button>
-          <button type="button" class="ipp-btn ipp-l-prog" data-act="prog" aria-pressed="${s.run}">${s.run ? '⏹️ 停止拼圖程式' : '▶️ 啟動拼圖程式'}</button>
-          <button type="button" class="ipp-btn ipp-go ipp-l-send" data-act="send">📨 從平板連過去</button>
-        </div>`;
-      s.flash = false;
+          <button type="button" class="ipp-btn ipp-go ipp-l-send" data-act="send">
+            📨 敲門送信 (連往 Port ${s.port})
+          </button>
+          <button type="button" class="ipp-btn ipp-l-prog ${s.run ? 'ipp-prog-on' : ''}" data-act="prog" aria-pressed="${s.run}">
+            ${s.run ? '⏹️ 停止聊天程式 (離開 7000 號房)' : '▶️ 啟動聊天程式 (進駐 7000 號房)'}
+          </button>
+          <button type="button" class="ipp-btn" data-act="reset">↺ 重來</button>
+        </div>
+      `;
     }
 
-    w.on((act) => {
-      if (act === 'note') {
-        if (s.noted) { w.say('紙條已經貼好了。連連看，有沒有用？'); return; }
-        s.noted = true;
+    w.on((act, arg) => {
+      if (act === 'reset') {
+        s.port = 7000;
+        s.run = false;
+        s.fail = false;
+        s.ok = false;
+        s.lastPort = null;
         render();
-        w.say('📝 號碼寫好了，可是還沒有程式。連連看！');
+        w.say('已重來。大樓門牌是 203.0.113.25。選一扇房門敲敲看，或啟動聊天程式比比看！');
+        return;
+      }
+      if (act === 'pick') {
+        s.port = Number(arg);
+        s.lastPort = null;
+        render();
+        if (s.port === 80) {
+          w.say('已鎖定 80 號門（網頁伺服器）。按「📨 敲門送信」敲敲看！');
+        } else if (s.port === 7000) {
+          w.say(`已鎖定 7000 號門（聊天室 App）。${s.run ? '程式正在監聽中！' : '目前程式未啟動。'}按「📨 敲門送信」敲敲看！`);
+        } else if (s.port === 9999) {
+          w.say('已鎖定 9999 號門（空房間）。按「📨 敲門送信」敲敲看！');
+        }
         return;
       }
       if (act === 'prog') {
         s.run = !s.run;
+        s.lastPort = null;
         render();
-        w.say(s.run ? '▶️ 拼圖程式開始在 TCP 7000 監聽。' : '⏹️ 程式停了，TCP 7000 又沒有程式在等。');
+        w.say(
+          s.run
+            ? '▶️ 聊天室 App 已進駐 7000 號房！正在門後豎起耳朵監聽連線。快敲門連連看！'
+            : '⏹️ 聊天室 App 已停止離開，7000 號小門又沒有人在聽了。'
+        );
         return;
       }
       if (act !== 'send') return;
-      s.flash = true;
-      if (s.run) {
+
+      s.lastPort = s.port;
+      const connected = (s.port === 7000 && s.run);
+
+      if (connected) {
         s.ok = true;
-        s.wire = 'ok';
+        render();
+        w.say('🎉 連上了！號碼只是門牌：要有程式在聽，連線才有人接。', 'ok');
+        w.finish();
       } else {
         s.fail = true;
-        s.wire = 'bad';
-      }
-      render();
-      if (s.ok && s.fail) {
-        w.say(`🎉 ${s.run ? '連上了' : '又連不上了'}！號碼只是門牌：要有程式在聽，連線才有人接。`, 'ok');
-        w.finish();
-      } else if (s.run) {
-        w.say('✅ 連上了！拼圖程式回覆「歡迎來玩」。停止程式，再連一次看看。', 'ok');
-      } else {
-        w.say(`❌ 連不上：TCP 7000 沒有程式在聽。${s.noted ? '紙條上寫了號碼也沒用。' : '光有號碼，不會變出服務。'}`, 'bad');
+        render();
+        if (s.port === 9999) {
+          w.say('❌ 連不上：叩叩叩... 💥 碰壁！連線被拒絕：這個小門沒有程式在監聽！9999 號是空房間，掛著大鎖無人租用。', 'bad');
+        } else if (s.port === 80) {
+          w.say('❌ 連不上：叩叩叩... 💥 碰壁！連線被拒絕：這個小門沒有程式在監聽！80 號網頁伺服器休息中，門後沒有人應門。', 'bad');
+        } else {
+          w.say('❌ 連不上：叩叩叩... 💥 碰壁！連線被拒絕：這個小門沒有程式在監聽！7000 號聊天室 App 還沒啟動，請按「▶️ 啟動聊天程式」。', 'bad');
+        }
       }
     });
 
     render();
-    w.say('先從平板連過去，再啟動程式，比比看。試試看！');
+    w.say('先送封包敲敲看 7000 號門，再啟動程式或換敲別扇門，比比看！');
   },
 
   // Slide 5: private addresses repeat in each home; a shared public IP is not one person.

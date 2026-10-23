@@ -11,7 +11,7 @@ function setup(host, api, name, statusCls) {
   host.innerHTML = '';
   const root = document.createElement('div');
   root.className = `fw-root fw-${name}`;
-  root.innerHTML = `<div class="fw-body"></div><div class="fw-status ${statusCls}" role="status" aria-live="polite"></div>${SIM}`;
+  root.innerHTML = `<div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div><div class="fw-body"></div><div class="fw-status ${statusCls}" role="status" aria-live="polite"></div>${SIM}`;
   host.appendChild(root);
   const body = root.querySelector('.fw-body');
   const st = root.querySelector('.fw-status');
@@ -80,6 +80,12 @@ const css = baseCss('fw', '#c2410c', '#fff1e6') + `
 .fw-rule{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:6px 10px;border-radius:10px;font-size:16px}
 .fw-rule-allow{background:#ebfbee}
 .fw-rule-deny{background:#fff5f5}
+.fw-rule-port-tag{display:inline-flex;align-items:center;gap:4px;background:#fff3bf;color:#d9480f;border:2px solid #fab005;border-radius:8px;padding:2px 8px;font-weight:800;box-shadow:0 0 10px rgba(250,176,5,0.4)}
+.fw-question-port-banner{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 12px;border-radius:12px;background:#fff;border:2px solid #fd7e14;margin-top:4px;font-size:15px}
+.fw-port-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:8px;font-weight:800;font-size:16px}
+.fw-port-match{background:#ebfbee;color:#2b8a3e;border:2px solid #40c057;box-shadow:0 0 8px rgba(64,192,87,0.3)}
+.fw-port-mismatch{background:#fff5f5;color:#e03131;border:2px solid #ff6b6b;box-shadow:0 0 8px rgba(255,107,107,0.3)}
+.fw-hint-bar{display:flex;align-items:center;gap:6px;font-size:14px;color:#d9480f;background:#fff4e6;padding:6px 10px;border-radius:8px;border:1px solid #ffd8a8;margin-top:4px}
 .fw-conn{display:flex;flex-direction:column;gap:6px;border-color:var(--c,#c2410c)}
 .fw-conn-h{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-weight:700}
 .fw-say{padding:6px 12px;border-radius:12px;background:#f6f1e7;font-size:16px}
@@ -137,36 +143,64 @@ const widgets = {
 
     function render() {
       const c = CARDS[s.i];
+      const isMatch = c && c.port === 443;
       const conn = c
         ? `<div class="fw-card fw-conn${s.flash ? ' fw-pop' : ''}">
-            <div class="fw-conn-h"><span class="fw-emo" aria-hidden="true">${c.icon}</span><span>連線 ${s.i + 1}/3：來自 <code>${c.from}</code> → <span class="fw-tag">${c.proto}</span> <code>${c.port}</code></span></div>
+            <div class="fw-conn-h">
+              <span class="fw-emo" aria-hidden="true">${c.icon}</span>
+              <span>連線 ${s.i + 1}/3：來自 <code>${c.from}</code></span>
+            </div>
             <div class="fw-say">💬「${c.say}」</div>
+            <div class="fw-question-port-banner">
+              <span>🎯 封包要去的小門：</span>
+              <span class="fw-port-pill ${isMatch ? 'fw-port-match' : 'fw-port-mismatch'}">
+                <span class="fw-tag">${c.proto}</span> Port ${c.port}
+              </span>
+              <span style="font-weight:700;color:${isMatch ? '#2b8a3e' : '#e03131'};">
+                ${isMatch ? '🟢 (號碼 443 符合規則！)' : '🔴 (號碼不符規則！)'}
+              </span>
+            </div>
           </div>`
         : '<div class="fw-card fw-conn"><div class="fw-conn-h">✅ 3 條連線都判斷完了</div></div>';
       const hist = s.hist.map((h) => `<span class="fw-chip ${h.pass ? 'fw-chip-pass' : 'fw-chip-block'}">${h.icon} ${h.pass ? '✅ 放行' : '⛔ 擋下'}</span>`).join('');
       w.body.innerHTML = `<div class="fw-h">此例只看連線資料。有些防火牆也會檢查內容，但不能保證擋住所有壞程式。</div><div class="fw-card fw-rules">
-          <div class="fw-h">🧱 防火牆規則表（從外面進來的連線）</div>
-          <div class="fw-rule fw-rule-allow">✅ 允許 <span class="fw-tag">TCP</span> <code>443</code> → 學校網站伺服器</div>
-          <div class="fw-rule fw-rule-deny">⛔ 其他進來的連線 → 擋下</div>
+          <div class="fw-h">🧱 防火牆規則表（守門員比對標準）</div>
+          <div class="fw-rule fw-rule-allow">
+            <span>✅ 允許進來：</span>
+            <span class="fw-tag">TCP</span>
+            <span class="fw-rule-port-tag">Port 443</span>
+            <span>→ 學校網站伺服器</span>
+          </div>
+          <div class="fw-rule fw-rule-deny">⛔ 其他所有連接埠 (Port) → 擋下</div>
+          <div class="fw-hint-bar">👀 守門員秘訣：眼睛盯著封包的「Port 號碼」是不是 443！</div>
         </div>
         ${conn}
         <div class="fw-choices">
           <button type="button" class="fw-btn fw-r-allow" data-act="judge" data-arg="allow">✅ 放行</button>
           <button type="button" class="fw-btn fw-r-block" data-act="judge" data-arg="block">⛔ 擋下</button>
+          <button type="button" class="fw-btn" data-act="reset">↺ 重來</button>
         </div>
         <div class="fw-hist" aria-label="判斷紀錄">${hist}</div>`;
       s.flash = false;
     }
 
     w.on((act, arg) => {
+      if (act === 'reset') {
+        s.i = 0;
+        s.hist = [];
+        s.flash = false;
+        render();
+        w.say('已重來。比對封包的 Port 號碼是不是 443！');
+        return;
+      }
       if (act !== 'judge') return;
       const c = CARDS[s.i];
       if (!c) {
-        w.say('🎉 都判斷完了。按 ↺ 重新玩，可以再試一次。', 'ok');
+        w.say('🎉 都判斷完了。按 ↺ 重來，可以再試一次。', 'ok');
         return;
       }
       if ((arg === 'allow') !== c.pass) {
-        w.say(`再看規則表：<span class="fw-tag">${c.proto}</span> <code>${c.port}</code> 有沒有允許？別管它說了什麼。`, 'bad');
+        w.say(`再看規則表：<span class="fw-tag">${c.proto}</span> <code>${c.port}</code> 有沒有允許？別管它說了什麼，只看 Port！`, 'bad');
         w.shake('.fw-conn');
         return;
       }
@@ -183,7 +217,7 @@ const widgets = {
     });
 
     render();
-    w.say('看規則表，決定這條連線要放行還是擋下。猜猜看！');
+    w.say('看規則表，比對封包的 Port 號碼，決定要放行還是擋下。試試看！');
   },
 
   // Slide 2: stateful model — replies to our own connection pass, unsolicited inbound is blocked.

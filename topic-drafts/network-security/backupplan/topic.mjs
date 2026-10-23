@@ -8,10 +8,11 @@ const card = (id, icon, title, detail, sub = '') =>
     '<span class="bk-icon">' + icon + '</span>' +
     '<strong>' + title + '</strong>' +
     '<span class="bk-detail">' + detail + '</span>' +
+    '<span class="bk-health-badge">🟢 狀態完好</span>' +
   '</div>';
 
 function frame(host, body, controls, note) {
-  host.innerHTML = '<div class="bk-demo">' + body + '<div class="bk-status" role="status" aria-live="polite">' + note + '</div><div class="bk-controls">' + controls + '</div></div>';
+  host.innerHTML = '<div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div><div class="bk-demo">' + body + '<div class="bk-status" role="status" aria-live="polite">' + note + '</div><div class="bk-controls">' + controls + '</div></div>';
   return host.querySelector('.bk-status');
 }
 
@@ -28,18 +29,26 @@ function copies(host, _, api) {
     '</div>',
     '<button data-copy="same" aria-pressed="true">放同一顆硬碟</button>' +
     '<button data-copy="other" aria-pressed="false">改存外接硬碟</button>' +
-    '<button class="go bk-fail">模擬原硬碟故障</button>',
+    '<button class="go bk-fail">模擬原硬碟故障</button>' +
+    '<button class="bk-copies-reset" type="button">↺ 重來</button>',
     '兩份檔案不一定能避開同一次故障。換個位置試試。'
   );
 
   function draw() {
-    host.querySelector('[data-store="original"]').classList.remove('bk-lost');
+    const orig = host.querySelector('[data-store="original"]');
+    orig.classList.remove('bk-lost');
+    const origBadge = orig.querySelector('.bk-health-badge');
+    if (origBadge) origBadge.textContent = '🟢 狀態完好';
+
     const c = host.querySelector('[data-store="copy"]');
     c.classList.remove('bk-lost', 'bk-safe');
-    c.querySelector('.bk-icon').textContent = separate ? '💾' : '📁';
+    c.querySelector('.bk-icon').textContent = separate ? '💽' : '📁';
     c.querySelector('strong').textContent = separate ? '另一個儲存裝置' : '同一顆硬碟';
     c.querySelector('.bk-detail').textContent = '🖼️ 複製一份';
     c.querySelector('.bk-store-badge').textContent = separate ? '獨立外接硬碟' : '同一硬碟資料夾';
+    const cBadge = c.querySelector('.bk-health-badge');
+    if (cBadge) cBadge.textContent = '🟢 狀態完好';
+
     host.querySelector('.bk-hw-status').textContent = separate ? '分開在獨立的外接裝置上' : '都在同一顆硬碟的分割區';
     host.querySelectorAll('[data-copy]').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.copy === 'other') === separate)));
     status.textContent = separate ? '副本在另一個裝置。再模擬原硬碟故障。' : '副本仍在原硬碟上，會一起受到同一次硬碟故障影響。';
@@ -47,15 +56,31 @@ function copies(host, _, api) {
 
   host.querySelectorAll('[data-copy]').forEach(b => b.onclick = () => { separate = b.dataset.copy === 'other'; draw(); });
   host.querySelector('.bk-fail').onclick = () => {
-    host.querySelector('[data-store="original"]').classList.add('bk-lost');
+    const orig = host.querySelector('[data-store="original"]');
+    orig.classList.add('bk-lost');
+    const origBadge = orig.querySelector('.bk-health-badge');
+    if (origBadge) origBadge.textContent = '💥 磁區壞軌損毀！';
+
     const c = host.querySelector('[data-store="copy"]');
     c.classList.toggle('bk-lost', !separate);
     c.classList.toggle('bk-safe', separate);
+    const cBadge = c.querySelector('.bk-health-badge');
+    if (cBadge) cBadge.textContent = separate ? '✅ 副本完好安全！' : '💥 一起損毀無法讀取！';
+
     status.textContent = separate ?
       '✅ 原硬碟故障，但另一個裝置上的副本還在。接著還要考慮火災、失竊和惡意程式。' :
       '⚠️ 同一顆硬碟壞掉，兩份都無法讀取。改存另一個裝置，再試一次。';
     if (separate) api.done(); else api.bad();
   };
+
+  const resetBtn = host.querySelector('.bk-copies-reset');
+  if (resetBtn) {
+    resetBtn.onclick = () => {
+      separate = false;
+      draw();
+      status.textContent = '已重來。試著點選「改存外接硬碟」，再模擬硬碟故障！';
+    };
+  }
 }
 
 function sync(host, _, api) {
@@ -103,7 +128,7 @@ function plan(host, _, api) {
     host,
     '<div class="bk-row">' +
       card('original', '💻', '原本的一份', '電腦的 SSD') +
-      card('disk', '💾', '外接備份', '另一顆 HDD 硬碟') +
+      card('disk', '💽', '外接備份', '另一顆 HDD 硬碟') +
       card('cloud', '☁️', '異地備份', '雲端備份服務') +
     '</div>' +
     '<div class="bk-count">目前：1 份、1 種儲存方式、0 份異地</div>',
@@ -146,7 +171,7 @@ function protectedCopy(host, _, api) {
         '<span class="bk-plug-icon">🔌</span>' +
         '<span class="bk-cable-status">目前接著</span>' +
       '</div>' +
-      card('backup', '💾', '外接備份', '🖼️ 備份一份') +
+      card('backup', '💽', '外接備份', '🖼️ 備份一份') +
     '</div>',
     '<button class="bk-disconnect" aria-pressed="false">中斷備份連接</button><button class="go bk-attack">模擬惡意改寫</button>',
     '這個簡化範例假設程式能改寫接上的硬碟。先試試，再改變連接狀態。'
@@ -161,17 +186,28 @@ function protectedCopy(host, _, api) {
     cable.classList.toggle('bk-off', !connected);
     cable.querySelector('.bk-cable-status').textContent = connected ? '目前接著' : '離線隔離 (Air Gap)';
     cable.querySelector('.bk-plug-icon').textContent = connected ? '🔌' : '⚡';
-    for (const c of host.querySelectorAll('.bk-store')) c.classList.remove('bk-lost', 'bk-safe');
+    for (const c of host.querySelectorAll('.bk-store')) {
+      c.classList.remove('bk-lost', 'bk-safe');
+      const badge = c.querySelector('.bk-health-badge');
+      if (badge) badge.textContent = '🟢 狀態完好';
+    }
     status.textContent = connected ?
       '範例已重設。接上的硬碟可能被這個程式一起改寫。' :
       '範例已重設。備份平時離線，現在再試一次。';
   };
 
   host.querySelector('.bk-attack').onclick = () => {
-    host.querySelector('[data-store="pc"]').classList.add('bk-lost');
+    const pc = host.querySelector('[data-store="pc"]');
+    pc.classList.add('bk-lost');
+    const pcBadge = pc.querySelector('.bk-health-badge');
+    if (pcBadge) pcBadge.textContent = '💥 電腦遭改寫/損毀！';
+
     const backup = host.querySelector('[data-store="backup"]');
     backup.classList.toggle('bk-lost', connected);
     backup.classList.toggle('bk-safe', !connected);
+    const bBadge = backup.querySelector('.bk-health-badge');
+    if (bBadge) bBadge.textContent = connected ? '💥 連線中被一起改寫！' : '✅ 離線拔插頭，安全！';
+
     status.textContent = connected ?
       '⚠️ 這次連備份也被改寫。中斷備份連接後，再比較一次。' :
       '✅ 離線備份沒有被這次程式改寫。備份時才連接；受感染時，不要為了還原就急著接回去。';
@@ -184,7 +220,7 @@ function testRestore(host, _, api) {
   const status = frame(
     host,
     '<div class="bk-row">' +
-      card('source', '💾', '選擇備份', '🔒 不可用的版本', '備份來源') +
+      card('source', '💽', '選擇備份', '🔒 不可用的版本', '備份來源') +
       card('target', '💻', '測試裝置', '尚未確認乾淨', '還原目標') +
     '</div>' +
     '<div class="bk-preview-stage">' +
@@ -245,7 +281,7 @@ export default {
   unit: {
     id: 'backupplan',
     part: 'adv',
-    icon: '💾',
+    icon: '💽',
     color: '#39734b',
     title: '備份：還有另一份',
     en: 'Backups and Recovery',
@@ -260,7 +296,7 @@ export default {
         { icon: '📴', label: '中斷受影響裝置的網路連線' },
         { icon: '🧑', label: '告訴可信任的大人或專業人員' },
         { icon: '🛡️', label: '由專業人員處理感染，準備乾淨裝置' },
-        { icon: '💾', label: '挑選可用備份，再還原並檢查' },
+        { icon: '💽', label: '挑選可用備份，再還原並檢查' },
       ] } },
       { id: 'quiz', title: '考考你', widget: 'choice', params: {
         question: '從備份找回檔案後，就代表被偷走的資料也收回來了嗎？',
@@ -288,14 +324,27 @@ export default {
   css: `
 .bk-demo { width: 100%; max-width: 690px; margin: auto; display: grid; gap: 14px; font-size: 18px; line-height: 1.5; }
 .bk-row { display: flex; justify-content: center; gap: 12px; align-items: stretch; position: relative; }
-.bk-store { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 8px; text-align: center; padding: 16px 10px; background: var(--card); border: 2px solid var(--line); border-radius: 18px; min-height: 150px; transition: all 220ms cubic-bezier(.23,1,.32,1); position: relative; }
-.bk-store-badge { font-size: 15px; font-weight: 700; color: var(--ink-2); background: #f1eee8; padding: 2px 8px; border-radius: 6px; align-self: center; }
+.bk-store { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 8px; text-align: center; padding: 16px 10px; background: #fdfdfd; border: 2.5px solid #8ce99a; border-radius: 18px; min-height: 165px; transition: all 250ms cubic-bezier(.23,1,.32,1); position: relative; box-shadow: 0 4px 12px rgba(43,138,62,0.08); }
+.bk-store-badge { font-size: 14px; font-weight: 700; color: var(--ink-2); background: #f1eee8; padding: 2px 8px; border-radius: 6px; align-self: center; }
 .bk-icon { font-size: 42px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.08)); }
 .bk-detail { font-size: 15px; overflow-wrap: anywhere; }
+.bk-health-badge { display: inline-block; font-size: 13px; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: #ebfbee; color: #2b8a3e; border: 1px solid #b2f2bb; margin-top: 2px; }
 
-.bk-store.bk-lost { background: #fff0de; border-color: #b77926; transform: translateY(4px); box-shadow: inset 0 0 12px rgba(183, 121, 38, 0.15); }
-.bk-store.bk-lost .bk-icon { filter: grayscale(1) opacity(0.7); }
-.bk-store.bk-safe { background: #e6f3e8; border-color: var(--good); box-shadow: 0 4px 12px rgba(43, 138, 62, 0.15); }
+/* Non-broken vs Broken Visual Differentiation */
+.bk-store.bk-lost { background: #fff5f5 !important; border: 2.5px dashed #e03131 !important; transform: translateY(4px) scale(0.98); box-shadow: 0 4px 18px rgba(224, 49, 49, 0.25) !important; animation: bk-shake-damage 0.4s ease; }
+.bk-store.bk-lost .bk-icon { filter: drop-shadow(0 0 10px #ff6b6b) grayscale(0.6); }
+.bk-store.bk-lost .bk-detail { color: #c92a2a; text-decoration: line-through; }
+.bk-store.bk-lost .bk-health-badge { background: #ffe3e3; color: #c92a2a; border-color: #ffa8a8; }
+.bk-store.bk-safe { background: #e6fcf5 !important; border: 2.5px solid #2b8a3e !important; box-shadow: 0 4px 16px rgba(43, 138, 62, 0.25) !important; }
+.bk-store.bk-safe .bk-health-badge { background: #d3f9d8; color: #2b8a3e; border-color: #8ce99a; }
+
+@keyframes bk-shake-damage {
+  0%, 100% { transform: translateY(4px) translateX(0); }
+  20% { transform: translateY(4px) translateX(-6px); }
+  40% { transform: translateY(4px) translateX(6px); }
+  60% { transform: translateY(4px) translateX(-4px); }
+  80% { transform: translateY(4px) translateX(4px); }
+}
 
 .bk-hardware-note { text-align: center; font-size: 15px; color: var(--ink-2); margin-top: 4px; }
 .bk-hw-status { color: var(--c); font-weight: 700; }
