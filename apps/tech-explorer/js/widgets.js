@@ -986,8 +986,152 @@ function motives(host, _, api) {
   });
 }
 
+function commonpass(host, _, api) {
+  const tries = ['123456', 'password', '小花＋生日'];
+  host.innerHTML = `<div class="cy-panel cy-login">
+    <div class="cy-window"><div class="cy-windowbar">game.example.tw　🔒 教學頁面</div><div class="cy-form">
+      <b>小安的遊戲帳號</b><div class="cy-field">密碼：••••••</div><p class="cy-status">常見的密碼會先被猜。</p>
+    </div></div>
+    <div><div class="cy-tries">${tries.map((word, i) => `<div class="cy-try" data-i="${i}">${i + 1}. ${escapeHTML(word)}</div>`).join('')}</div>
+    <div class="cy-actions" style="margin-top:12px"><button class="go cy-start">開始安全示範</button></div></div>
+  </div>`;
+  const start = host.querySelector('.cy-start');
+  start.addEventListener('click', () => {
+    start.disabled = true;
+    const rows = [...host.querySelectorAll('.cy-try')];
+    rows.forEach((row, i) => api.later(() => {
+      rows.forEach(item => item.classList.remove('now'));
+      row.classList.add('now');
+      api.good();
+      if (i === 0) {
+        row.classList.add('hit');
+        host.querySelector('.cy-status').className = 'cy-status bad';
+        host.querySelector('.cy-status').textContent = '「123456」第一個就被猜中。常見不等於安全。';
+        api.done();
+      }
+    }, i * 500));
+  });
+}
+
+function combinations(host, _, api) {
+  const lengths = [4, 8, 12];
+  const kinds = [
+    { id: 'n', label: '只有數字', size: 10 },
+    { id: 'l', label: '加上字母', size: 36 },
+    { id: 's', label: '再加符號', size: 70 },
+  ];
+  let length = 4;
+  let kind = kinds[0];
+  const visited = new Set();
+  host.innerHTML = `<div class="cy-panel cy-combo"><div class="cy-control">
+    <span class="cy-label">密碼長度</span><div class="cy-lengths">${lengths.map(n => `<button data-l="${n}" class="${n === length ? 'on' : ''}">${n} 個字</button>`).join('')}</div>
+    <span class="cy-label">可用的字</span><div class="cy-kinds">${kinds.map((item, i) => `<button data-k="${i}" class="${i === 0 ? 'on' : ''}">${item.label}</button>`).join('')}</div>
+  </div><div class="cy-number"><span class="cy-label">可能的組合</span><output></output><small>這只比較組合數量，不代表真實破解時間。</small></div></div>`;
+  const output = host.querySelector('output');
+  const update = () => {
+    const value = BigInt(kind.size) ** BigInt(length);
+    output.textContent = new Intl.NumberFormat('zh-TW').format(value);
+    visited.add(`${length}-${kind.id}`);
+    if (length === 12 && kind.id === 's') {
+      pop(output);
+      api.good();
+      api.done();
+      host.querySelector('.cy-number small').textContent = '🎉 長度增加時，組合數會非常快地變大。密碼管理器能幫你記住長密碼。';
+    }
+  };
+  host.addEventListener('click', event => {
+    const len = event.target.closest('[data-l]');
+    const type = event.target.closest('[data-k]');
+    if (!len && !type) return;
+    if (len) {
+      length = Number(len.dataset.l);
+      host.querySelectorAll('[data-l]').forEach(button => button.classList.toggle('on', button === len));
+    }
+    if (type) {
+      kind = kinds[type.dataset.k];
+      host.querySelectorAll('[data-k]').forEach(button => button.classList.toggle('on', button === type));
+    }
+    api.good();
+    update();
+  });
+  update();
+}
+
+function breach(host, _, api) {
+  const sites = [['🎮', '遊戲'], ['📚', '電子書'], ['🎨', '畫畫']];
+  host.innerHTML = `<div class="cy-panel cy-breach">
+    <div class="cy-leak">💧 遊戲網站外洩了一組密碼 <span class="cy-key">blue-cat-7</span></div>
+    <div class="cy-doors">${sites.map(site => `<div class="cy-door"><i>${site[0]}</i>${site[1]}網站<br><span>🔒 還鎖著</span></div>`).join('')}</div>
+    <div class="cy-actions"><button class="option cy-reuse">三站都用同一密碼</button><button class="option cy-unique">每站用不同密碼</button></div>
+    <p class="cy-status" aria-live="polite">外洩的密碼，會不會打開其他網站？選選看。</p>
+  </div>`;
+  let done = false;
+  host.querySelector('.cy-reuse').addEventListener('click', event => {
+    if (done) return;
+    done = true;
+    event.currentTarget.classList.add('on');
+    const doors = [...host.querySelectorAll('.cy-door')];
+    doors.forEach((door, i) => api.later(() => {
+      door.classList.add('open');
+      door.querySelector('span').textContent = '🔓 被打開了';
+      pop(door);
+      if (i === doors.length - 1) {
+        host.querySelector('.cy-status').className = 'cy-status bad';
+        host.querySelector('.cy-status').textContent = '同一把鑰匙打開三扇門，這叫撞庫。每站用不同密碼，或改用通行密鑰。';
+        api.done();
+      }
+    }, i * 360));
+  });
+  host.querySelector('.cy-unique').addEventListener('click', event => {
+    if (done) return;
+    done = true;
+    event.currentTarget.classList.add('on');
+    const doors = [...host.querySelectorAll('.cy-door')];
+    doors[0].classList.add('open');
+    doors[0].querySelector('span').textContent = '🔓 需要改密碼';
+    doors.slice(1).forEach(door => {
+      door.classList.add('safe');
+      door.querySelector('span').textContent = '🔒 仍然安全';
+    });
+    host.querySelector('.cy-status').className = 'cy-status good';
+    host.querySelector('.cy-status').textContent = '🎉 不同的密碼讓問題留在一個網站。現在去改掉外洩的密碼。';
+    api.good();
+    api.done();
+  });
+}
+
+function hashdemo(host, _, api) {
+  const samples = [
+    ['蘋果雨衣', '7A91–C04E–22B8'],
+    ['月亮火車', '19D3–88F1–A620'],
+    ['蘋果雨衣', '7A91–C04E–22B8'],
+  ];
+  host.innerHTML = `<div class="cy-panel cy-hash"><div class="cy-hash-picks">${samples.map((sample, i) => `<button class="option" data-h="${i}">${sample[0]}${i === 2 ? '（再一次）' : ''}</button>`).join('')}</div>
+    <div class="cy-machine"><div class="cy-value cy-input">選一個密碼</div><div class="cy-arrow">→</div><div class="cy-value code">教學用指紋</div></div>
+    <div class="cy-oneway">密碼可以變成指紋；指紋不能拿來還原密碼。</div><p class="cy-status" aria-live="polite">點三次，比較相同和不同的結果。</p></div>`;
+  const seen = new Set();
+  host.addEventListener('click', event => {
+    const button = event.target.closest('[data-h]');
+    if (!button) return;
+    const index = Number(button.dataset.h);
+    const [word, code] = samples[index];
+    host.querySelector('.cy-input').textContent = word;
+    const result = host.querySelector('.cy-value.code');
+    result.textContent = code;
+    button.classList.add('right');
+    seen.add(index);
+    pop(result);
+    api.good();
+    if (seen.size === samples.length) {
+      host.querySelector('.cy-status').className = 'cy-status good';
+      host.querySelector('.cy-status').textContent = '🎉 相同密碼會得到相同指紋；不同密碼通常不同。真正網站還會加上隨機資料再儲存。';
+      api.done();
+    }
+  });
+}
+
 const SECURITY_WIDGETS = {
-  motives,
+  motives, commonpass, combinations, breach, hashdemo,
 };
 
 export const WIDGETS = {

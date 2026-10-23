@@ -3486,6 +3486,52 @@ export const UNITS = [
   },
 
   {
+    id: 'passwordattacks',
+    part: 'adv',
+    icon: '🔐',
+    title: '密碼怎麼被猜到？',
+    en: 'How Passwords Get Guessed',
+    desc: '常見密碼、組合數、撞庫和雜湊',
+    color: '#b45309',
+    added: '2026-10-23',
+    slides: [
+      {
+        title: '常見密碼先被猜',
+        text: `攻擊者不必從亂碼開始。像「123456」這種${t('常見密碼', 'common password')}，通常會排在很前面。這是安全示範，只在假的遊戲網站裡進行。試試看！`,
+        widget: 'commonpass',
+      },
+      {
+        title: '長度很重要',
+        text: `每多一個字，可能的組合就會增加很多。長密碼通常比短密碼更難猜。切換長度和可用的字，讓組合數變大！`,
+        widget: 'combinations',
+      },
+      {
+        title: '一個外洩，三個都開？',
+        text: `攻擊者會拿外洩的密碼去試其他網站，這叫${t('撞庫', 'credential stuffing')}。每個網站都用同一個密碼，就像所有門都用同一把鑰匙。選一種做法看看！`,
+        widget: 'breach',
+      },
+      {
+        title: '網站不該存原密碼',
+        text: `好的網站會儲存密碼的${t('雜湊', 'hash')}，像不能倒著還原的指紋。登入時再比對指紋，不必看見原本的密碼。用教學機器試三次！`,
+        widget: 'hashdemo',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '哪一種做法最能防止一個網站外洩後，其他帳號也被打開？',
+          options: [
+            { text: '🔐 每站用不同長密碼，交給密碼管理器保管', correct: true },
+            { text: '🔁 每站都用同一個好記的密碼' },
+            { text: '📝 把密碼改成自己的生日' },
+          ],
+          explain: '每站用不同密碼，外洩就不會一路擴大。能用通行密鑰時，也可以優先使用。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'algo',
     part: 'adv',
     icon: '🧩',
@@ -3914,7 +3960,7 @@ export const STAGES = [
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },
   { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: '網路怎麼運作', en: 'How Networks Work', units: ['internet', 'networld', 'web', 'iot'] },
-  { id: 'security', part: 'adv', icon: '🛡️', title: '駭客怎麼攻擊？', en: 'How Attackers Think', units: ['attackers'] },
+  { id: 'security', part: 'adv', icon: '🛡️', title: '駭客怎麼攻擊？', en: 'How Attackers Think', units: ['attackers', 'passwordattacks'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'freeapps', 'coding'] },
   { id: 'secret', part: 'adv', icon: '🔬', title: '生活科技的祕密', en: 'Secrets of Everyday Tech', units: ['qrcode', 'clock', 'gpsmath', 'robocar'] },
 ];

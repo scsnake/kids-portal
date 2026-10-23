@@ -3267,6 +3267,58 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .cy-motive span { display: block; margin-top: 4px; color: var(--ink-2); line-height: 1.45; }
 .cy-motive.done span { color: #1f6b30; }
 
+/* password queue */
+.cy-login { display: grid; grid-template-columns: minmax(0, 1fr) minmax(210px, .9fr); gap: 14px; align-items: center; }
+.cy-window { overflow: hidden; border: 2px solid var(--line); border-radius: 16px; background: #f8f9fa; }
+.cy-windowbar { padding: 8px 12px; background: #e9ecef; color: var(--ink-2); font-size: .9375rem; font-weight: 800; }
+.cy-form { padding: 16px; }
+.cy-field { margin-top: 8px; padding: 10px 12px; border: 2px solid var(--line); border-radius: 12px; background: white; font: 800 1rem ui-monospace, Menlo, monospace; }
+.cy-tries { display: flex; flex-direction: column; gap: 8px; }
+.cy-try { padding: 8px 12px; border-radius: 12px; background: #f1f3f5; color: var(--ink-2); font: 750 .95rem ui-monospace, Menlo, monospace; opacity: .55; }
+.cy-try.now { opacity: 1; outline: 3px solid color-mix(in srgb, var(--c) 36%, white); }
+.cy-try.hit { opacity: 1; background: #fff5f5; color: var(--bad); }
+
+/* combination explorer */
+.cy-combo { display: grid; grid-template-columns: minmax(210px, .85fr) minmax(0, 1.15fr); gap: 18px; align-items: center; }
+.cy-control { display: flex; flex-direction: column; gap: 10px; }
+.cy-label { color: var(--ink-2); font-weight: 800; }
+.cy-lengths, .cy-kinds { display: flex; flex-wrap: wrap; gap: 8px; }
+.cy-lengths button, .cy-kinds button {
+  min-height: 48px;
+  padding: 6px 14px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: white;
+  font: inherit;
+  font-weight: 800;
+  box-shadow: 0 3px 0 var(--line);
+}
+.cy-lengths button:active, .cy-kinds button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+.cy-lengths button.on, .cy-kinds button.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, white); box-shadow: none; }
+.cy-number { padding: 18px; border-radius: 18px; background: color-mix(in srgb, var(--c) 8%, white); text-align: center; }
+.cy-number output { display: block; overflow-wrap: anywhere; color: var(--c); font: 900 clamp(1.55rem, 4vw, 2.4rem) ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; }
+.cy-number small { display: block; margin-top: 6px; color: var(--ink-2); font-weight: 700; line-height: 1.45; }
+
+/* leaked password opening several pretend sites */
+.cy-breach { display: flex; flex-direction: column; gap: 12px; }
+.cy-leak { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 14px; background: #fff9db; font-weight: 800; }
+.cy-key { padding: 5px 10px; border-radius: 10px; background: white; font: 850 1rem ui-monospace, Menlo, monospace; }
+.cy-doors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.cy-door { padding: 12px 8px; border: 2px solid var(--line); border-radius: 14px; background: white; text-align: center; font-weight: 800; }
+.cy-door i { display: block; margin-bottom: 5px; font-size: 2rem; font-style: normal; }
+.cy-door.open { border-color: var(--bad); background: #fff5f5; color: var(--bad); }
+.cy-door.safe { border-color: var(--good); background: #ebfbee; color: var(--good); }
+
+/* teaching-only hash machine */
+.cy-hash { display: flex; flex-direction: column; gap: 12px; }
+.cy-hash-picks { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.cy-hash-picks .option { min-width: 110px; text-align: center; }
+.cy-machine { display: grid; grid-template-columns: minmax(90px, 1fr) auto minmax(140px, 1.4fr); align-items: center; gap: 10px; }
+.cy-value { min-height: 64px; display: grid; place-items: center; padding: 10px; border: 2px solid var(--line); border-radius: 14px; background: #f8f9fa; font-weight: 850; }
+.cy-value.code { color: var(--c); font-family: ui-monospace, Menlo, monospace; overflow-wrap: anywhere; }
+.cy-arrow { color: var(--ink-3); font-size: 1.7rem; font-weight: 900; }
+.cy-oneway { padding: 8px 12px; border-radius: 12px; background: #f1f3f5; color: var(--ink-2); font-weight: 800; text-align: center; }
+
 @media (max-width: 620px) {
   .cy-login, .cy-combo, .cy-lab, .cy-traffic { grid-template-columns: 1fr; }
   .cy-network { grid-template-columns: 1fr; }
