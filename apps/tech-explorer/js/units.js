@@ -3532,6 +3532,42 @@ export const UNITS = [
   },
 
   {
+    id: 'networkattacks',
+    part: 'adv',
+    icon: '🛜',
+    title: '網路上的攻擊',
+    en: 'Attacks on the Network',
+    desc: '中間人攻擊、HTTPS 和 DDoS 防護',
+    color: '#0f766e',
+    added: '2026-10-23',
+    slides: [
+      {
+        title: '有人站在網路中間',
+        text: `${t('中間人攻擊', 'man-in-the-middle attack')}是有人假裝成中途的網路設備，想偷看或改動資料。比較 HTTP 和 HTTPS 經過假的 Wi-Fi 時，有什麼不同。`,
+        widget: 'route',
+      },
+      {
+        title: '網站被塞爆了',
+        text: `${t('分散式阻斷服務', 'DDoS')}用許多被控制的裝置同時送來流量，讓真正的使用者進不去。這不是「闖進」網站，而是把門口塞住。打開防護救回商店！`,
+        widget: 'traffic',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '你在公共 Wi-Fi 上要登入網站。哪一個做法最安全？',
+          options: [
+            { text: '🔒 確認網址正確，而且開頭是 https://', correct: true },
+            { text: '🛜 只要 Wi-Fi 名字像店名，就一定安全' },
+            { text: '⚠️ 網頁說憑證有問題，還是繼續登入' },
+          ],
+          explain: 'HTTPS 會加密傳輸，但你仍要確認網址正確。看到憑證警告時，不要繼續輸入資料。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'algo',
     part: 'adv',
     icon: '🧩',
@@ -3960,7 +3996,7 @@ export const STAGES = [
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },
   { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: '網路怎麼運作', en: 'How Networks Work', units: ['internet', 'networld', 'web', 'iot'] },
-  { id: 'security', part: 'adv', icon: '🛡️', title: '駭客怎麼攻擊？', en: 'How Attackers Think', units: ['attackers', 'passwordattacks'] },
+  { id: 'security', part: 'adv', icon: '🛡️', title: '駭客怎麼攻擊？', en: 'How Attackers Think', units: ['attackers', 'passwordattacks', 'networkattacks'] },
   { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'freeapps', 'coding'] },
   { id: 'secret', part: 'adv', icon: '🔬', title: '生活科技的祕密', en: 'Secrets of Everyday Tech', units: ['qrcode', 'clock', 'gpsmath', 'robocar'] },
 ];

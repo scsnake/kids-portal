@@ -1130,8 +1130,268 @@ function hashdemo(host, _, api) {
   });
 }
 
+function route(host, _, api) {
+  host.innerHTML = `<div class="cy-panel cy-route"><div class="cy-actions">
+    <button class="option" data-mode="http">HTTP 明信片</button><button class="option" data-mode="https">HTTPS 鎖起來</button>
+  </div><div class="cy-network"><div class="cy-node"><span><i>📱</i>你的 iPad</span></div><div class="cy-wire">→</div>
+    <div class="cy-node cy-snoop"><span><i>🛜</i>假的 Wi-Fi<br><small>有人在中間看</small></span></div><div class="cy-wire">→</div>
+    <div class="cy-node"><span><i>📚</i>book.example.tw</span></div></div>
+    <div class="cy-packet">選一種傳送方法。</div><p class="cy-status" aria-live="polite">比較資料經過中間時，看起來有什麼不同。</p></div>`;
+  const seen = new Set();
+  host.addEventListener('click', event => {
+    const button = event.target.closest('[data-mode]');
+    if (!button) return;
+    const mode = button.dataset.mode;
+    host.querySelectorAll('[data-mode]').forEach(item => item.classList.toggle('on', item === button));
+    const packet = host.querySelector('.cy-packet');
+    seen.add(mode);
+    if (mode === 'http') {
+      packet.className = 'cy-packet';
+      packet.textContent = '買一本書｜收件人：小安｜內容看得懂';
+      host.querySelector('.cy-status').className = 'cy-status bad';
+      host.querySelector('.cy-status').textContent = 'HTTP 像明信片。經過的人可能看懂內容。';
+      api.bad();
+    } else {
+      packet.className = 'cy-packet locked';
+      packet.textContent = '🔒 8F · A2 · 19 · 7C · …';
+      host.querySelector('.cy-status').className = 'cy-status good';
+      host.querySelector('.cy-status').textContent = 'HTTPS 先加密。中間的人只看到看不懂的資料。';
+      api.good();
+    }
+    pop(packet);
+    if (seen.size === 2) {
+      host.querySelector('.cy-status').textContent += ' 🎉 看到鎖頭，也要確認網址正確。';
+      api.done();
+    }
+  });
+}
+
+function traffic(host, _, api) {
+  host.innerHTML = `<div class="cy-panel"><div class="cy-traffic"><div class="cy-road" aria-label="前往右側玩具商店的網路流量"><div class="cy-bot-stream" aria-label="機器人流量"></div><div class="cy-guest-line" aria-label="往右側商店前進的正常客人隊伍"><span class="cy-line-label">真人隊伍 → <b>0 位</b></span><div class="cy-guest-track"></div></div></div><div class="cy-server"><i>🏪</i>玩具商店<br><span class="cy-server-state">等待客人</span><div class="cy-meter" aria-hidden="true"><span></span></div><small class="cy-filter">🛡️ 防護未開啟</small></div></div>
+    <div class="cy-actions" style="margin-top:12px"><button class="option" data-t="flood">大量機器人湧入</button><button class="go" data-t="defend" aria-pressed="false">打開流量防護</button></div>
+    <p class="cy-status" aria-live="polite">正常客人會偶爾來訪。發動 DDoS，看看網站和客人會怎樣。</p></div>`;
+  const road = host.querySelector('.cy-road');
+  const botStream = host.querySelector('.cy-bot-stream');
+  const guestLine = host.querySelector('.cy-guest-line');
+  const guestTrack = host.querySelector('.cy-guest-track');
+  const lineCount = host.querySelector('.cy-line-label b');
+  const server = host.querySelector('.cy-server');
+  const serverState = host.querySelector('.cy-server-state');
+  const meter = host.querySelector('.cy-meter span');
+  const filter = host.querySelector('.cy-filter');
+  const status = host.querySelector('.cy-status');
+  const floodButton = host.querySelector('[data-t="flood"]');
+  const defendButton = host.querySelector('[data-t="defend"]');
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let guarded = false;
+  let attackActive = false;
+  let floodAnimating = false;
+  let guestIndex = 0;
+  let serviceChain = Promise.resolve();
+
+  const animate = (element, frames, duration, easing = 'cubic-bezier(0.23, 1, 0.32, 1)') => {
+    const safeFrames = reduceMotion
+      ? frames.map(({ opacity = 1 }) => ({ opacity }))
+      : frames;
+    return element.animate(safeFrames, {
+      duration: reduceMotion ? Math.min(duration, 160) : duration,
+      easing,
+      fill: 'both',
+    }).finished.catch(() => {});
+  };
+  const setMeter = (amount, danger = false) => {
+    meter.style.transform = `scaleX(${amount})`;
+    meter.classList.toggle('danger', danger);
+  };
+  const updateQueueCount = () => {
+    const count = guestLine.querySelectorAll('.cy-request.person').length;
+    lineCount.textContent = `${count} 位`;
+  };
+  const add = (icon, className = '') => {
+    const item = document.createElement('span');
+    item.className = `cy-request ${className}`;
+    item.textContent = icon;
+    (className.includes('bot') ? botStream : guestTrack).append(item);
+    if (className.includes('person')) updateQueueCount();
+    return item;
+  };
+  const arrive = async (item, delay = 0) => {
+    item.style.opacity = '0';
+    if (delay) await new Promise(resolve => api.later(resolve, delay));
+    item.style.opacity = '';
+    await animate(item, [
+      { opacity: .35, transform: 'translateX(-70%) scale(.94)' },
+      { opacity: 1, transform: 'translateX(0) scale(1)' },
+    ], 280);
+  };
+  const enterServer = async item => {
+    const from = item.getBoundingClientRect();
+    const to = server.getBoundingClientRect();
+    const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+    const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+    await animate(item, [
+      { opacity: 1, transform: 'translate(0, 0) scale(1)' },
+      { opacity: 0, transform: `translate(${dx}px, ${dy}px) scale(.94)` },
+    ], 420, 'cubic-bezier(0.77, 0, 0.175, 1)');
+    item.remove();
+    updateQueueCount();
+    await animate(server, [
+      { transform: 'scale(.97)' },
+      { transform: 'scale(1.025)' },
+      { transform: 'scale(1)' },
+    ], 240, 'cubic-bezier(0.23, 1, 0.32, 1)');
+  };
+  const servePerson = person => {
+    if (person.dataset.serving) return serviceChain;
+    person.dataset.serving = 'true';
+    person.classList.remove('waiting');
+    serviceChain = serviceChain.then(async () => {
+      if (!person.isConnected || !api.alive()) return;
+      serverState.textContent = guarded ? '防護開啟，真人正常進入' : '正常服務客人';
+      await enterServer(person);
+      serverState.textContent = attackActive && guarded
+        ? '正在過濾機器人，真人仍可進入'
+        : guarded ? '防護中，等待下一位客人' : '等待下一位客人';
+    });
+    return serviceChain;
+  };
+  const releaseWaitingGuests = () => {
+    const waiting = [...guestLine.querySelectorAll('.cy-request.person.waiting')];
+    waiting.forEach(person => servePerson(person));
+  };
+  const updateLoad = () => {
+    const bots = host.querySelectorAll('.cy-request.bot[data-arrived="true"]:not([data-filtering])').length;
+    setMeter(Math.min(1, bots / 10), bots >= 8);
+    if (bots >= 8 && !guarded) {
+      server.className = 'cy-server busy';
+      serverState.textContent = '流量太多，忙不過來';
+    }
+  };
+  const finishDefense = () => {
+    if (!guarded || !attackActive || host.querySelector('.cy-request.bot')) return;
+    attackActive = false;
+    floodAnimating = false;
+    floodButton.disabled = false;
+    server.className = 'cy-server safe';
+    serverState.textContent = '機器人被擋住，真人可以進入';
+    setMeter(0);
+    status.className = 'cy-status good';
+    status.textContent = '🎉 防護擋住 DDoS；正常客人仍會繼續來訪。防護會保持開啟。';
+  };
+  const filterBot = bot => {
+    if (bot.filterPromise) return bot.filterPromise;
+    bot.dataset.filtering = 'true';
+    bot.classList.add('blocked');
+    bot.filterPromise = (async () => {
+      await animate(bot, [
+        { opacity: 1, transform: 'translateY(0) scale(1)' },
+        { opacity: .12, transform: 'translateY(-55%) scale(.94)' },
+      ], 260);
+      bot.remove();
+      updateLoad();
+      finishDefense();
+    })();
+    return bot.filterPromise;
+  };
+  const normalVisit = async () => {
+    if (!api.alive()) return;
+    const people = ['🧒', '👵', '👨'];
+    const person = add(people[guestIndex % people.length], 'person');
+    guestIndex += 1;
+    await arrive(person);
+    if (!api.alive()) return;
+    await new Promise(resolve => api.later(resolve, reduceMotion ? 550 : 900));
+    if (attackActive && !guarded) {
+      person.classList.add('waiting');
+      const waiting = guestLine.querySelectorAll('.cy-request.person.waiting').length;
+      serverState.textContent = `網站塞滿了，真人排隊：${waiting} 位`;
+      await animate(person, [
+        { transform: 'translateX(-2px)' },
+        { transform: 'translateX(3px)' },
+        { transform: 'translateX(0)' },
+      ], 220);
+    } else {
+      if (guarded) server.className = 'cy-server safe';
+      servePerson(person);
+    }
+  };
+  const normalLoop = () => {
+    if (!api.alive()) return;
+    normalVisit();
+    const gaps = reduceMotion ? [1100] : [780, 900, 840];
+    api.later(normalLoop, gaps[guestIndex % gaps.length]);
+  };
+  api.later(normalLoop, reduceMotion ? 700 : 450);
+
+  floodButton.addEventListener('click', async () => {
+    if (floodAnimating || attackActive) return;
+    attackActive = true;
+    floodAnimating = true;
+    floodButton.disabled = true;
+    status.className = guarded ? 'cy-status' : 'cy-status bad';
+    status.textContent = guarded
+      ? '機器人和正常客人同時來了，防護正在即時過濾…'
+      : '機器人和正常客人同時湧入，網站負載快速上升…';
+    const arrivals = [];
+    for (let i = 0; i < 18; i++) {
+      const bot = add('🤖', 'bot');
+      arrivals.push((async () => {
+        await arrive(bot, i * 55);
+        bot.dataset.arrived = 'true';
+        if (guarded) {
+          server.className = 'cy-server safe';
+          serverState.textContent = '正在過濾機器人流量';
+          await filterBot(bot);
+          return;
+        }
+        updateLoad();
+      })());
+    }
+    await Promise.all(arrivals);
+    floodAnimating = false;
+    if (guarded) {
+      finishDefense();
+      return;
+    }
+    serverState.textContent = 'DDoS 持續中，真人進不去';
+    status.textContent = 'DDoS 把網站塞滿了。你可以在攻擊進行時，隨時打開流量防護。';
+    api.bad();
+  });
+
+  defendButton.addEventListener('click', async () => {
+    if (guarded) return;
+    guarded = true;
+    defendButton.setAttribute('aria-pressed', 'true');
+    defendButton.textContent = '✓ 流量防護已開啟';
+    filter.className = 'cy-filter on';
+    filter.textContent = '🛡️ 流量防護已開啟';
+    server.className = 'cy-server safe';
+    await animate(filter, [
+      { opacity: .45, transform: 'scale(.94)' },
+      { opacity: 1, transform: 'scale(1)' },
+    ], 240);
+    const bots = [...host.querySelectorAll('.cy-request.bot[data-arrived="true"]')];
+    if (attackActive) {
+      status.className = 'cy-status';
+      status.textContent = '防護已在攻擊途中開啟，正在過濾機器人；正常客人不會停止來訪。';
+      serverState.textContent = '正在過濾機器人，真人仍可進入';
+      releaseWaitingGuests();
+      await Promise.all(bots.map((bot, i) => new Promise(resolve => {
+        api.later(() => { filterBot(bot).then(resolve); }, i * 24);
+      })));
+      finishDefense();
+    } else {
+      serverState.textContent = '防護中，等待下一位客人';
+      status.className = 'cy-status good';
+      status.textContent = '流量防護已開啟。正常客人會繼續來訪，也可以發動 DDoS 測試防護。';
+    }
+    api.good();
+    api.done();
+  });
+}
+
 const SECURITY_WIDGETS = {
-  motives, commonpass, combinations, breach, hashdemo,
+  motives, commonpass, combinations, breach, hashdemo, route, traffic,
 };
 
 export const WIDGETS = {
