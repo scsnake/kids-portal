@@ -969,11 +969,23 @@ vec3 typhoonCloud(vec2 q) {
   float spin = uTc.w;
   vec2 evo = vec2(uTime * 0.0021, -uTime * 0.0017);
 
-  // texture rides a gentle swirl; the band layout uses a tighter log spiral
+  // large structure turns with the storm
   vec2 qs = rot2(q, 1.0 * log(1.0 + r / 80.0) - spin);
   float nL = fbm(qs / 6400.0 + evo, 4);
-  float nM = fbm(qs / 2800.0 + evo * 1.6 + 3.7, 5);
-  float nS = fbm(qs / 1040.0 + evo * 2.3 + 1.3, 4);
+
+  // cloud texture flows: spins faster near the eye and drifts inward.
+  // Two phases cross-fade so the spiral never winds up too tight.
+  float ph0 = fract(uTime / 4.5);
+  float ph1 = fract(uTime / 4.5 + 0.5);
+  float w0 = 1.0 - abs(2.0 * ph0 - 1.0);
+  float w1 = 1.0 - w0;
+  float omega = 0.25 * (1.0 + 1.5 / (1.0 + r / 120.0)) * mix(0.4, 1.0, I);
+  float swirl = 1.0 * log(1.0 + r / 80.0);
+  vec2 qa = rot2(q * exp(0.05 * ph0 * 4.5), swirl - omega * ph0 * 4.5);
+  vec2 qb = rot2(q * exp(0.05 * ph1 * 4.5), swirl - omega * ph1 * 4.5);
+  float norm = inversesqrt(w0 * w0 + w1 * w1);
+  float nM = (fbm(qa / 2800.0 + 3.7, 4) * w0 + fbm(qb / 2800.0 + 9.2, 4) * w1) * norm;
+  float nS = (fbm(qa / 1040.0 + 1.3, 3) * w0 + fbm(qb / 1040.0 + 6.4, 3) * w1) * norm;
 
   // central dense overcast: bright and round, with a ragged edge
   float edge = rCdo * (1.0 + 0.13 * nL + 0.07 * nM);
@@ -1015,10 +1027,13 @@ vec3 typhoonCloud(vec2 q) {
 // Background weather: trade-wind cumulus, tropical clusters, mid-latitude cloud bands
 vec2 backgroundCloud(vec2 ll, float land, float rKm) {
   float lat = ll.y;
-  float drift = mix(-1.0, 2.4, smoothstep(18.0, 32.0, lat));
-  vec2 p = vec2(ll.x * cos(radians(lat)) - drift * uTime * 0.004, lat);
+  // each field moves as one piece (trade winds west, westerlies east), so nothing smears
+  vec2 g = vec2(ll.x * cos(radians(lat)), lat);
+  vec2 p = g - vec2(-0.12, 0.015) * uTime;    // degrees per second
+  vec2 pm = g - vec2(0.30, 0.02) * uTime;
   float clus = fbm(p / 48.0 + vec2(5.2, 1.3), 4);
-  float pop = fbm(p / 7.2 + vec2(uTime * 0.0008, 0.0), 5);
+  // a second field moving the other way makes cumulus grow and fade
+  float pop = 0.75 * fbm(p / 7.2, 5) + 0.45 * fbm(p / 5.0 + vec2(0.05, -0.03) * uTime + 4.4, 3);
   float tex = fbm(p / 14.0 + vec2(2.9, 7.7), 4);
   float trop = 1.0 - smoothstep(17.0, 26.0, lat);
   // popcorn cumulus: small specks, more over warm land
@@ -1027,9 +1042,10 @@ vec2 backgroundCloud(vec2 ll, float land, float rKm) {
   float cbCore = smoothstep(0.9, 1.9, clus + 0.35 * tex);
   float cb = cbCore * (0.55 + 0.45 * smoothstep(-0.8, 1.0, tex + 0.5 * pop)) * trop;
   float mid = smoothstep(26.0, 34.0, lat);
-  float st = fbm(vec2(p.x / 70.0, p.y / 22.0) + vec2(1.7, 9.1 + uTime * 0.0004), 5);
-  float zone = fbm(p / 110.0 + vec2(3.3, 0.6), 3);
-  float fr = smoothstep(0.0, 1.6, st + 0.35 * tex + 0.8 * zone) * mid * 0.8;
+  float st = fbm(vec2(pm.x / 70.0, pm.y / 22.0) + vec2(1.7, 9.1) + vec2(-0.004, 0.003) * uTime, 5);
+  float zone = fbm(pm / 110.0 + vec2(3.3, 0.6), 3);
+  float texm = fbm(pm / 14.0 + vec2(6.1, 2.2), 4);
+  float fr = smoothstep(0.0, 1.6, st + 0.35 * texm + 0.8 * zone) * mid * 0.8;
   float sub = mix(0.25, 1.0, smoothstep(650.0, 1400.0, rKm));   // sinking air around the typhoon
   float d = max(max(cu, cb), fr) * sub;
   float conv = max(cbCore * (0.45 + 0.35 * smoothstep(-0.5, 1.5, tex + pop)), cu * 0.35) * trop;
@@ -1437,7 +1453,7 @@ function renderOverlay() {
   const layer = CONFIG.activeLayer;
   const style = LINE_STYLE[layer];
 
-  if (layer === 'stream') renderWindParticles();
+  if (layer === 'stream' || layer === 'pressure') renderWindParticles(layer === 'stream' ? 0.55 : 0.3);
 
   ctx.lineWidth = 1;
   ctx.strokeStyle = style.grid;
@@ -1461,7 +1477,7 @@ function renderOverlay() {
 /**
  * Vector Wind Streamline Renderer
  */
-function renderWindParticles() {
+function renderWindParticles(alpha) {
   const N = CONFIG.particleCount;
   const stride = N > 90000 ? 3 : (N > 50000 ? 2 : 1);
   ctx.lineWidth = 1.1;
@@ -1478,7 +1494,7 @@ function renderWindParticles() {
     ctx.moveTo(x0, y0);
     ctx.lineTo(x1, y1);
   }
-  ctx.strokeStyle = 'rgba(230, 250, 255, 0.55)';
+  ctx.strokeStyle = `rgba(230, 250, 255, ${alpha})`;
   ctx.stroke();
 }
 
