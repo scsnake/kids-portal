@@ -1,8 +1,15 @@
 {
-  "id": "cda329eeee02298d4047c00a5fca57c17a758e204a6cc34d8931e9f6de06c7e1",
-  "baseCommit": "2e0c5d66d472dce4f20c9455fae37a6a59dcf2fc",
-  "topics": ["websiteflow", "webmemory", "loginsafety", "ipports", "firewall", "vpn", "trickdoors", "antivirus", "backupplan"],
-  "changes": ["approved-gemini-medium-redesign", "12-interactive-replacements", "agent-preview-handoff-guide", "gemini-renewal-status"],
-  "excludedWidgets": ["ewastechute", "hashblender"],
-  "assetsVersion": "30"
+  "id": "d4d4f1bf9c4e3b2f4b6d38a39d445973cf88b13cd867f78b563f1686fc722db2",
+  "baseCommit": "0f23784f5b9cd4b86b155d622cc55dba8786998b",
+  "topics": [
+    "socialmanners",
+    "trolls",
+    "behindscreen",
+    "influencers",
+    "strangerdm",
+    "adcopy",
+    "investscam",
+    "healthmyth"
+  ],
+  "assetsVersion": "31"
 }
