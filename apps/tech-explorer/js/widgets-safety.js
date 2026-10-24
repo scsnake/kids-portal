@@ -25,7 +25,7 @@ const escapeHTML = val => String(val).replace(/[&<>'"]/g, char => ({
 export function otpdefense(host, _params, api) {
   host.innerHTML = `
     <div class="ws-panel ws-otp">
-      <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini"></div>
       <div class="ws-header">
         <span class="ws-title">🛡️ 驗證碼保衛戰</span>
         <span class="ws-badge ws-badge-warn">簡訊一次性密鑰 (OTP)</span>
@@ -165,7 +165,7 @@ export function otpdefense(host, _params, api) {
 export function packetsniff(host, _params, api) {
   host.innerHTML = `
     <div class="ws-panel ws-sniff">
-      <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini"></div>
       <div class="ws-sniff-header">
         <span class="ws-title">☕ 露天咖啡廳 · 公共 Wi-Fi</span>
         <span class="ws-badge ws-badge-warn">⚠️ 開放網路（未加密）</span>
@@ -296,7 +296,7 @@ export function packetsniff(host, _params, api) {
       snooperSpeech.textContent = '「可惡！被 HTTPS 密碼鎖保護住，偷看到也完全解不開！」';
       tabletText.textContent = '🔒 安全加密登入！';
       statusEl.className = 'ws-status good';
-      statusEl.textContent = '🎉 太安全了！HTTPS 會把你的封包放進鈦合金保險箱，公共 Wi-Fi 偷聽客完全沒轍！';
+      statusEl.textContent = '🎉 太安全了！HTTPS 會對你的封包全程加密，在公共 Wi-Fi 偷聽客眼中全都是看不懂的亂碼！';
       api.good();
       api.done();
       setButtonsDisabled(false);
@@ -310,7 +310,7 @@ export function packetsniff(host, _params, api) {
 export function realwallet(host, _params, api) {
   host.innerHTML = `
     <div class="ws-panel ws-wallet">
-      <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini"></div>
       <div class="ws-header">
         <span class="ws-title">🎮 遊戲商城與真實荷包</span>
         <span class="ws-badge ws-badge-warn">遊戲內購安全 (IAP)</span>
@@ -462,7 +462,7 @@ export function realwallet(host, _params, api) {
 export function kickhacker(host, _params, api) {
   host.innerHTML = `
     <div class="ws-panel ws-kick">
-      <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini"></div>
       <div class="ws-header">
         <span class="ws-title">🛡️ 帳號救援控制台</span>
         <span class="ws-badge ws-badge-bad" id="kickBadge">⚠️ 偵測到未授權登入</span>
@@ -597,7 +597,7 @@ export function kickhacker(host, _params, api) {
 export function voiceclone(host, _params, api) {
   host.innerHTML = `
     <div class="ws-panel ws-voice">
-      <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini"></div>
       <div class="ws-voice-phone">
         <div class="ws-phone-status-bar">
           <span>中華電信 5G</span>
@@ -641,7 +641,7 @@ export function voiceclone(host, _params, api) {
             💬 工具 A：問約定好的通關密語 (Secret Word)
           </button>
           <button class="ws-btn ws-btn-tool-b" id="btnCallback">
-            📞 工具 B：掛斷電話，回撥給媽媽公司座機
+            📞 工具 B：掛斷電話，回撥給媽媽公司電話
           </button>
         </div>
       </div>
@@ -730,12 +730,12 @@ export function voiceclone(host, _params, api) {
 
     audioWave.hidden = true;
     aiGauge.hidden = true;
-    callSub.textContent = '通話已結束 ➔ 回撥「媽媽公司座機」中...';
+    callSub.textContent = '通話已結束 ➔ 回撥「媽媽公司電話」中...';
 
     api.later(() => {
       if (!api.alive()) return;
       speechBubble.innerHTML = `
-        <b>真正的媽媽（公司辦公室座機）：</b><br>
+        <b>真正的媽媽（辦公室市內電話）：</b><br>
         「喂？小安！我正在公司開會呢，根本沒有叫人接你！好險你聰明掛斷回撥查證，沒有受騙！」
       `;
       speechBubble.style.borderColor = 'var(--good, #2b8a3e)';
@@ -752,7 +752,7 @@ export function voiceclone(host, _params, api) {
 export function dnslookup(host, _params, api) {
   host.innerHTML = `
     <div class="ws-panel ws-dns">
-      <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini"></div>
       <!-- Browser Address Bar -->
       <div class="ws-browser-bar">
         <span style="font-size:1.2rem">🌐</span>
@@ -923,7 +923,7 @@ export function ifcondition(host, _params, api) {
 
   host.innerHTML = `
     <div class="ws-panel ws-ifcond">
-      <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini"></div>
       <!-- Scenario Switch Tabs -->
       <div class="ws-scenario-tabs" id="scenarioTabs">
         ${scenarios.map((sc, i) => `

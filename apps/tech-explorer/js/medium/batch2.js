@@ -54,9 +54,7 @@ const shake = el => {
 export function deskrelay(host, _params, api) {
   host.innerHTML = `
     <div class="b2-panel b2-deskrelay">
-      <div class="gemini-tag" data-created-by="gemini" data-info="辦公桌與大書架連動（CPU、RAM 與硬碟分工）">
-        <span class="gemini-spark">✨</span> Gemini 互動設計
-      </div>
+      <div class="gemini-tag" data-created-by="gemini" data-info="辦公桌與大書架連動（CPU、RAM 與硬碟分工）"></div>
 
       <div class="b2-info-banner">
         <span class="b2-info-icon">💡</span>
@@ -408,9 +406,7 @@ export function sensorheroes(host, _params, api) {
 
   host.innerHTML = `
     <div class="b2-panel b2-sensorheroes">
-      <div class="gemini-tag" data-created-by="gemini" data-info="感測器解謎任務（環境光、陀螺儀、距離感測器、麥克風）">
-        <span class="gemini-spark">✨</span> Gemini 互動設計
-      </div>
+      <div class="gemini-tag" data-created-by="gemini" data-info="感測器解謎任務（環境光、陀螺儀、距離感測器、麥克風）"></div>
 
       <div class="b2-info-banner">
         <span class="b2-info-icon">💡</span>
@@ -739,9 +735,7 @@ export function urltrain(host, _params, api) {
 
   host.innerHTML = `
     <div class="b2-panel b2-urltrain">
-      <div class="gemini-tag" data-created-by="gemini" data-info="網址火車掛鉤拼圖（協定、網域名稱、路徑）">
-        <span class="gemini-spark">✨</span> Gemini 互動設計
-      </div>
+      <div class="gemini-tag" data-created-by="gemini" data-info="網址火車掛鉤拼圖（協定、網域名稱、路徑）"></div>
 
       <div class="b2-info-banner">
         <span class="b2-info-icon">💡</span>
@@ -966,9 +960,7 @@ export function tlshandshake(host, _params, api) {
 
   host.innerHTML = `
     <div class="b2-panel b2-tlshandshake">
-      <div class="gemini-tag" data-created-by="gemini" data-info="TLS 握手與金鑰拼合（打招呼、數位憑證、會話金鑰、加密通道）">
-        <span class="gemini-spark">✨</span> Gemini 互動設計
-      </div>
+      <div class="gemini-tag" data-created-by="gemini" data-info="TLS 握手與金鑰拼合（打招呼、數位憑證、會話金鑰、加密通道）"></div>
 
       <div class="b2-info-banner">
         <span class="b2-info-icon">💡</span>

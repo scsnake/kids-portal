@@ -32,7 +32,7 @@ const base = (p) => `
 function setup(host, api) {
   const container = document.createElement('div');
   container.className = `${P}-root`;
-  container.innerHTML = `<div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div><div class="${P}-slot"></div>`;
+  container.innerHTML = `<div class="gemini-tag" data-created-by="gemini"></div><div class="${P}-slot"></div>`;
   host.replaceChildren(container);
   const root = container.querySelector(`.${P}-slot`);
   let finished = false;
@@ -273,7 +273,7 @@ export default {
         text: `${t('登出', 'Log out')}會讓這張票失效，但帳號和存好的資料還在網站上。按登出，再登入看看！`,
         widget: 'wfLogout', params: {} },
       { id: 'compare', title: '登出、清除、刪除',
-        text: `${t('清除瀏覽資料', 'Clear browsing data')}要看選了哪些項目；${t('刪除帳號', 'Delete account')}則是向網站要求刪除帳號。比較這個範例的三種動作！`,
+        text: `${t('登出', 'Log out')}只讓目前裝置的票失效；${t('清除瀏覽資料', 'Clear browsing data')}會清掉暫存或記錄；${t('刪除帳號', 'Delete account')}則是向網站要求徹底移除資料。比較這個範例的三種動作！`,
         widget: 'wfCompare', params: {} },
       { id: 'quiz', title: '考考你', widget: 'choice',
         params: {

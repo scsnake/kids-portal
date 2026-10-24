@@ -88,9 +88,7 @@ export function ewastechute(host, _params, api) {
 
   host.innerHTML = `
     <div class="b1-panel b1-chute">
-      <div class="gemini-tag" data-created-by="gemini" data-info="回收管道精準投遞 · 舊 3C 與鋰電池安全回收">
-        <span class="gemini-spark">✨</span> Gemini 互動設計
-      </div>
+      <div class="gemini-tag" data-created-by="gemini" data-info="回收管道精準投遞 · 舊 3C 與鋰電池安全回收"></div>
 
       <div class="b1-header">
         <div class="b1-title-group">

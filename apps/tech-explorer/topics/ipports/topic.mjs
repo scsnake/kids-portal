@@ -13,7 +13,7 @@ function setup(host, api, name, statusCls) {
   host.innerHTML = '';
   const root = document.createElement('div');
   root.className = `ipp-root ipp-demo-${name}`;
-  root.innerHTML = `<div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div><div class="ipp-body"></div><div class="ipp-status ${statusCls}" role="status" aria-live="polite"></div>${SIM}`;
+  root.innerHTML = `<div class="gemini-tag" data-created-by="gemini"></div><div class="ipp-body"></div><div class="ipp-status ${statusCls}" role="status" aria-live="polite"></div>${SIM}`;
   host.appendChild(root);
   const body = root.querySelector('.ipp-body');
   const st = root.querySelector('.ipp-status');
@@ -594,7 +594,7 @@ export default {
       {
         id: 'address',
         title: 'IP 位址找誰？',
-        text: `${t('IP 位址', 'IP address')}是給${t('網路介面', 'network interface')}的地址。一台筆電的 Wi-Fi 和網路線，可以各有一個。送送看！`,
+        text: `${t('IP 位址', 'IP address')}是分配給${t('網路介面', 'network interface')}的網路位址。例如筆電的有線網路和 Wi-Fi，各自可以有一個獨立的 IP 位址。送送看！`,
         widget: 'ippAddress',
         params: {},
       },
@@ -622,7 +622,7 @@ export default {
       {
         id: 'public',
         title: '公開 IP 是一個人嗎？',
-        text: `家裡的裝置用${t('私人 IP', 'private IP address')}，上網時共用路由器的${t('公開 IP', 'public IP address')}。所以一個公開 IP 不等於一個人。送送看！`,
+        text: `家裡的裝置用${t('私有 IP', 'private IP address')}，上網時共用路由器的${t('公用 IP', 'public IP address')}。所以一個公用 IP 不等於單一一個人。送送看！`,
         widget: 'ippPublic',
         params: {},
       },

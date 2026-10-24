@@ -3531,3 +3531,20 @@ button.wd.on { background: #a5d8ff; border-color: #4dabf7; }
 .gemini-tag .gemini-spark {
   font-size: 15px;
 }
+
+
+/* Global hidden rule for Gemini provenance metadata tag (info for future agents, not user-visible) */
+.gemini-tag,
+.b5-gemini-tag,
+.b6-gemini-tag,
+.b7-gemini-tag {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}

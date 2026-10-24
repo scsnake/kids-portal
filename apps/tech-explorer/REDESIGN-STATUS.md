@@ -8,6 +8,7 @@ Use [AGENT-HANDOFF.md](AGENT-HANDOFF.md) for future work.
 - Version 29 already includes fourteen legacy activity replacements and refinements across nine packaged security units.
 - Version 30 adds twelve medium-priority activity replacements to its release scope.
 - Version 32 adds the reviewed recycling and password-hash redesigns: `ewastechute` and `hashblender`.
+- Candidate review: global terminology and kid-friendly zh-TW copy review across all 82 units, and agent-only hidden attribution tags.
 
 The original “37” total counts 28 activity replacements and nine unit-level redesign items.
 It is not a count of 37 individual slides. All 28 activity replacements are included through version 32.

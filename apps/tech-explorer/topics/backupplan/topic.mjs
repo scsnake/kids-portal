@@ -12,7 +12,7 @@ const card = (id, icon, title, detail, sub = '') =>
   '</div>';
 
 function frame(host, body, controls, note) {
-  host.innerHTML = '<div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div><div class="bk-demo">' + body + '<div class="bk-status" role="status" aria-live="polite">' + note + '</div><div class="bk-controls">' + controls + '</div></div>';
+  host.innerHTML = '<div class="gemini-tag" data-created-by="gemini"></div><div class="bk-demo">' + body + '<div class="bk-status" role="status" aria-live="polite">' + note + '</div><div class="bk-controls">' + controls + '</div></div>';
   return host.querySelector('.bk-status');
 }
 

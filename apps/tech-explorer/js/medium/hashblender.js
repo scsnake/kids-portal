@@ -62,7 +62,7 @@ export function hashblender(host, _params, api) {
 
   host.innerHTML = `
     <div class="wb3-panel wb3-blender">
-      <div class="gemini-tag" data-created-by="gemini" data-info="神奇單向果汁機 · 體驗單向雜湊運算與不可逆保護"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini" data-info="神奇單向果汁機 · 體驗單向雜湊運算與不可逆保護"></div>
       <div class="wb3-header">
         <span class="wb3-title">🍹 神奇單向果汁機</span>
         <span class="wb3-badge">單向雜湊演算法</span>

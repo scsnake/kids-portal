@@ -29,7 +29,7 @@ const base = (p) => `
 function setup(host, api) {
   const container = document.createElement('div');
   container.className = `${P}-root`;
-  container.innerHTML = `<div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div><div class="${P}-slot"></div>`;
+  container.innerHTML = `<div class="gemini-tag" data-created-by="gemini"></div><div class="${P}-slot"></div>`;
   host.replaceChildren(container);
   const root = container.querySelector(`.${P}-slot`);
   let finished = false;
@@ -91,7 +91,7 @@ const widgets = {
 
   lsFactors(host, params, api) {
     const { root, finish, on } = setup(host, api);
-    const CAT = { know: '你知道的', have: '你擁有的', are: '你本身' };
+    const CAT = { know: '你知道的', have: '你擁有的', are: '你具備的特徵' };
     const F = [
       { id: 'pw', name: '🔤 密碼', cat: 'know' },
       { id: 'pw2', name: '🔤 第二組密碼', cat: 'know' },
@@ -402,7 +402,7 @@ export default {
         text: `一個網站外洩時，壞人會拿同一組密碼去試別的網站。用${t('密碼管理工具', 'Password manager')}幫每站記不同密碼，比比看！`,
         widget: 'lsUnique', params: {} },
       { id: 'factors', title: '兩個密碼不是雙重驗證',
-        text: `${t('雙重驗證', '2FA')}是${t('多因素驗證', 'MFA')}的一種：用你知道的、你擁有的、你本身，選兩種不同類型。組組看！`,
+        text: `${t('雙重驗證', '2FA')}是${t('多因素驗證', 'MFA')}的一種：結合「你知道的」、「你擁有的」、「你具備的特徵（如指紋）」，選兩種不同類型。組組看！`,
         widget: 'lsFactors', params: {} },
       { id: 'approve', title: '不是你按的，就拒絕',
         text: '有些網站會傳到手機問「是你在登入嗎？」。只有你自己正在登入時才按允許，試試看！',

@@ -10,7 +10,7 @@ function paths(host, _, api) {
   ];
   const seen = new Set();
   host.innerHTML = `
-    <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+    <div class="gemini-tag" data-created-by="gemini"></div>
     <div class="td-demo">
       <div class="td-hub">
         <div class="td-target">
@@ -109,7 +109,7 @@ function trick(host, params, api) {
 
   const s = scenarios[params.kind];
   host.innerHTML = `
-    <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+    <div class="gemini-tag" data-created-by="gemini"></div>
     <div class="td-demo">
       <div class="td-message">
         <div class="td-sender">${s.icon} ${s.sender}</div>

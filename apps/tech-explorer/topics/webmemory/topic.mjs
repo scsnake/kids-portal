@@ -29,7 +29,7 @@ const base = (p) => `
 function setup(host, api) {
   const container = document.createElement('div');
   container.className = `${P}-root`;
-  container.innerHTML = `<div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div><div class="${P}-slot"></div>`;
+  container.innerHTML = `<div class="gemini-tag" data-created-by="gemini"></div><div class="${P}-slot"></div>`;
   host.replaceChildren(container);
   const root = container.querySelector(`.${P}-slot`);
   let finished = false;
@@ -376,7 +376,7 @@ export default {
         text: `有些${t('設定', 'Setting')}只存在這台裝置，有些存在你的帳號裡。帳號設定會跟著你到另一台裝置，試試看！`,
         widget: 'wmDevices', params: {} },
       { id: 'autofill', title: '自動填入是誰記的？',
-        text: `此例由瀏覽器的${t('自動填入', 'Autofill')}，從${t('密碼管理工具', 'Password manager')}取出範例資料。真實網頁也能讀取欄位，先確認網站再填資料。`,
+        text: `瀏覽器的${t('自動填入', 'Autofill')}會從裝置的${t('密碼管理工具', 'Password manager')}取出資料。真實網頁能直接讀取填入的欄位，請務必先確認網址正確再填入！`,
         widget: 'wmAutofill', params: {} },
       { id: 'draft', title: '字還在，就存好了嗎？',
         text: `有些網站先把${t('草稿', 'Draft')}存在這台瀏覽器，按「儲存」才送到伺服器。打一句，再重新整理看看！`,

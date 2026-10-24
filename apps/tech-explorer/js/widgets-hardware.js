@@ -45,7 +45,7 @@ export function juicebox(host, params, api) {
 
   host.innerHTML = `
     <div class="hw-panel hw-juicebox">
-      <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini"></div>
       <div class="hw-jb-steps" aria-label="運作流程">
         <div class="hw-jb-step active" data-step="1">📥 1. 輸入（收到水果）</div>
         <span class="hw-jb-arrow">➔</span>
@@ -251,7 +251,7 @@ export function phonepeek(host, params, api) {
 
   host.innerHTML = `
     <div class="hw-panel hw-phonepeek">
-      <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini"></div>
       <div class="hw-phonepeek-layout">
         <!-- Phone Frame with X-Ray Chips & Beam -->
         <div class="hw-pp-phone-wrap">
@@ -404,7 +404,7 @@ export function hddseek(host, params, api) {
 
   host.innerHTML = `
     <div class="hw-panel hw-hddseek">
-      <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini"></div>
       <div class="hw-hdd-enclosure">
         <svg class="hw-hdd-svg" viewBox="0 0 380 280">
           <defs>
@@ -561,7 +561,7 @@ export function flashtrap(host, params, api) {
 
   host.innerHTML = `
     <div class="hw-panel hw-flashtrap">
-      <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini"></div>
       <div class="hw-ft-grid">
         ${CELLS.map(c => `
           <div class="hw-ft-cell" data-cell="${c.id}">
@@ -674,7 +674,7 @@ export function cpuchefs(host, params, api) {
 
   host.innerHTML = `
     <div class="hw-panel hw-cpuchefs">
-      <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini"></div>
       <div class="hw-cc-grid">
         ${CHEFS.map(c => `
           <div class="hw-cc-chef" data-chef="${c.id}">
@@ -823,7 +823,7 @@ export function gpusimd(host, params, api) {
 
   host.innerHTML = `
     <div class="hw-panel hw-gpusimd">
-      <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini"></div>
       <div class="hw-simd-container">
         <div class="hw-simd-board" aria-label="8x8 像素馬賽克牆">
           ${Array.from({ length: TILES_COUNT }, (_, i) => `
@@ -984,7 +984,7 @@ export function aimath(host, params, api) {
 
   host.innerHTML = `
     <div class="hw-panel hw-aimath">
-      <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini"></div>
       <div class="hw-ai-layout">
         <!-- 10x10 Math Matrix -->
         <div class="hw-ai-matrix" aria-label="100 道微觀特徵神經網路算式">

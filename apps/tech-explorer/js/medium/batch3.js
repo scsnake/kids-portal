@@ -98,7 +98,7 @@ export function assetdefense(host, _params, api) {
 
   host.innerHTML = `
     <div class="wb3-panel wb3-asset">
-      <div class="gemini-tag" data-created-by="gemini" data-info="金庫資產防禦戰 · 認識駭客覬覦的數位資產與防禦護盾"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini" data-info="金庫資產防禦戰 · 認識駭客覬覦的數位資產與防禦護盾"></div>
       <div class="wb3-header">
         <span class="wb3-title">🛡️ 金庫資產防禦戰</span>
         <span class="wb3-badge">已防禦 <span id="assetDefCount">0</span> / 4</span>
@@ -316,7 +316,7 @@ export function mitmforcefield(host, _params, api) {
 
   host.innerHTML = `
     <div class="wb3-panel wb3-mitm">
-      <div class="gemini-tag" data-created-by="gemini" data-info="中途攔截者與防護力場 · 體驗 HTTP 與 HTTPS 的差異"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini" data-info="中途攔截者與防護力場 · 體驗 HTTP 與 HTTPS 的差異"></div>
       <div class="wb3-header">
         <span class="wb3-title">🛡️ 中途攔截者與防護力場</span>
         <span class="wb3-badge">網路中間人攻擊 (MitM)</span>
@@ -546,7 +546,7 @@ export function cookiebackpack(host, _params, api) {
 
   host.innerHTML = `
     <div class="wb3-panel wb3-cookie">
-      <div class="gemini-tag" data-created-by="gemini" data-info="Cookie 標籤小背包 · 揭開跨網站廣告追蹤的秘密"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini" data-info="Cookie 標籤小背包 · 揭開跨網站廣告追蹤的秘密"></div>
       <div class="wb3-header">
         <span class="wb3-title">🎒 Cookie 標籤小背包</span>
         <span class="wb3-badge">跨網站廣告追蹤</span>
@@ -765,7 +765,7 @@ export function autoplaytug(host, _params, api) {
 
   host.innerHTML = `
     <div class="wb3-panel wb3-autoplay">
-      <div class="gemini-tag" data-created-by="gemini" data-info="自動播放拔河戰 · 奪回看螢幕的主導權"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini" data-info="自動播放拔河戰 · 奪回看螢幕的主導權"></div>
       <div class="wb3-header">
         <span class="wb3-title">⏸️ 自動播放拔河戰</span>
         <span class="wb3-badge" id="tugBadge">連續播放中</span>
@@ -1009,7 +1009,7 @@ export function globetime(host, _params, api) {
 
   host.innerHTML = `
     <div class="wb3-panel wb3-globe">
-      <div class="gemini-tag" data-created-by="gemini" data-info="旋轉地球儀與晨昏線 · 看懂晝夜交替與全球時區秘密"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+      <div class="gemini-tag" data-created-by="gemini" data-info="旋轉地球儀與晨昏線 · 看懂晝夜交替與全球時區秘密"></div>
       <div class="wb3-header">
         <span class="wb3-title">🌍 旋轉地球儀與晨昏線</span>
         <span class="wb3-badge">地球自轉與時區</span>

@@ -11,7 +11,7 @@ function setup(host, api, name, statusCls) {
   host.innerHTML = '';
   const root = document.createElement('div');
   root.className = `fw-root fw-${name}`;
-  root.innerHTML = `<div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div><div class="fw-body"></div><div class="fw-status ${statusCls}" role="status" aria-live="polite"></div>${SIM}`;
+  root.innerHTML = `<div class="gemini-tag" data-created-by="gemini"></div><div class="fw-body"></div><div class="fw-status ${statusCls}" role="status" aria-live="polite"></div>${SIM}`;
   host.appendChild(root);
   const body = root.querySelector('.fw-body');
   const st = root.querySelector('.fw-status');
@@ -138,7 +138,7 @@ const widgets = {
         why: '符合「允許 TCP 443」，所以放行。' },
       { icon: '🧑‍💼', from: '198.51.100.66', proto: 'TCP', port: 22, say: '我是管理員，相信我，讓我進去！', pass: false,
         why: 'TCP 22 沒有允許的規則。話說得再好聽，規則沒寫就擋下。' },
-      { icon: '📦', from: '198.51.100.90', proto: 'TCP', port: 443, say: '我的附件裡藏了壞程式。', pass: true,
+      { icon: '📦', from: '198.51.100.90', proto: 'TCP', port: 443, say: '我的附件裡藏了惡意程式。', pass: true,
         why: '它符合 TCP 443，所以這個簡化防火牆放行。還需要防毒、更新等保護。' },
     ];
     const s = { i: 0, hist: [], flash: false };
@@ -165,7 +165,7 @@ const widgets = {
           </div>`
         : '<div class="fw-card fw-conn"><div class="fw-conn-h">✅ 3 條連線都判斷完了</div></div>';
       const hist = s.hist.map((h) => `<span class="fw-chip ${h.pass ? 'fw-chip-pass' : 'fw-chip-block'}">${h.icon} ${h.pass ? '✅ 放行' : '⛔ 擋下'}</span>`).join('');
-      w.body.innerHTML = `<div class="fw-h">此例只看連線資料。有些防火牆也會檢查內容，但不能保證擋住所有壞程式。</div><div class="fw-card fw-rules">
+      w.body.innerHTML = `<div class="fw-h">此例只看連線資料。有些防火牆也會檢查內容，但不能保證擋住所有惡意程式。</div><div class="fw-card fw-rules">
           <div class="fw-h">🧱 防火牆規則表（守門員比對標準）</div>
           <div class="fw-rule fw-rule-allow">
             <span>✅ 允許進來：</span>
@@ -365,13 +365,13 @@ const widgets = {
     const TOOLS = [
       { id: 'fw', icon: '🧱', name: '防火牆', job: '照規則放行或擋下連線' },
       { id: 'https', icon: '🔒', name: 'HTTPS 加密', job: '讓路上的人看不懂內容' },
-      { id: 'av', icon: '🦠', name: '防毒掃描', job: '檢查檔案裡的壞程式' },
+      { id: 'av', icon: '🦠', name: '防毒掃描', job: '檢查檔案中是否藏有惡意程式' },
       { id: 'nat', icon: '🔁', name: 'NAT 位址轉換', job: '把私人 IP 換成公開 IP' },
     ];
     const PROBS = [
       { icon: '🖨️', txt: '陌生電腦想從外面直接連進家裡的印表機。', tool: 'fw', ok: '防火牆擋下沒人邀請的連線。' },
       { icon: '☕', txt: '咖啡店裡有人想偷看你送出的密碼。', tool: 'https', ok: 'HTTPS 把內容加密，路上的人看不懂。' },
-      { icon: '🎮', txt: '下載的「免費遊戲」檔案裡藏了壞程式。', tool: 'av', ok: '防毒掃描協助檢查檔案；此例的防火牆只看連線規則。' },
+      { icon: '🎮', txt: '下載的「免費遊戲」檔案裡藏了惡意程式。', tool: 'av', ok: '防毒掃描協助檢查檔案；此例的防火牆只看連線規則。' },
       { icon: '👨‍👩‍👧', txt: '家裡三台裝置要共用一個公開 IP 上網。', tool: 'nat', ok: 'NAT 把私人 IP 換成公開 IP。' },
     ];
     const s = { i: 0, used: [], flash: false };

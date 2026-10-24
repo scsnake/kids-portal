@@ -127,7 +127,7 @@ export const UNITS = [
     slides: [
       {
         title: '電腦是什麼？',
-        text: "電腦其實就像一台神奇的果汁機！<b class=\"term\">輸入<span class=\"en\" lang=\"en\">Input</span></b>收到材料，在肚子裡<b class=\"term\">處理<span class=\"en\" lang=\"en\">Process</span></b>想一想，最後把好喝的果汁<b class=\"term\">輸出<span class=\"en\" lang=\"en\">Output</span></b>送出來。把水果放進漏斗試試看！",
+        text: "電腦就像一台神奇的果汁機！放入水果是<b class=\"term\">輸入<span class=\"en\" lang=\"en\">input</span></b>，機器運轉攪拌是<b class=\"term\">處理<span class=\"en\" lang=\"en\">process</span></b>，倒出好喝果汁是<b class=\"term\">輸出<span class=\"en\" lang=\"en\">output</span></b>。把水果放進漏斗試試看！",
         widget: 'juicebox',
         params: {},
         added: '2026-10-24',
@@ -154,7 +154,7 @@ export const UNITS = [
       },
       {
         title: '輸入還是輸出？',
-        text: "把信號送進電腦的是「<b class=\"term\">輸入裝置<span class=\"en\" lang=\"en\">input device</span></b>」，電腦把結果展示出來的是「<b class=\"term\">輸出裝置<span class=\"en\" lang=\"en\">output device</span></b>」。將工作台上的外接裝置插上電腦，觀察信號傳送方向！",
+        text: "把訊號送進電腦的是「<b class=\"term\">輸入裝置<span class=\"en\" lang=\"en\">input device</span></b>」，電腦把結果展示出來的是「<b class=\"term\">輸出裝置<span class=\"en\" lang=\"en\">output device</span></b>」。將工作台上的外接裝置插上電腦，觀察訊號傳送方向！",
         widget: "workbench",
         params: {},
         added: '2026-10-24',
@@ -392,7 +392,7 @@ export const UNITS = [
     slides: [
       {
         title: '充電器和快充',
-        text: `牆上插座的電太強，${t('充電器', 'charger')}會把它變成平板能用的小小的電。充電器上寫的${t('瓦數', 'watts, W')}越大，通常充得越快，不過平板也要支援${t('快充', 'fast charging')}才行。試試看兩種充電器！`,
+        text: `牆上插座的電壓很高，${t('充電器', 'charger')}會把它降壓轉換成裝置能安全吸收的電力。充電器標示的${t('瓦數', 'watts, W')}越大通常充得越快，但裝置本身也要支援${t('快充', 'fast charging')}才行。試試看兩種充電器！`,
         widget: 'charge',
       },
       {
@@ -436,7 +436,7 @@ export const UNITS = [
             { text: '🔌 繼續充電看看' },
             { text: '✋ 用力把它壓平' },
           ],
-          explain: '膨脹表示電池壞了，可能會起火。不要壓它、不要丟一般垃圾，要拿去電池回收。',
+          explain: '膨脹代表內部損壞有起火危險！請大人協助用絕緣膠帶貼住金屬接點，裝入防燃容器後交由專門門市或清潔隊處理。',
         },
       },
     ],
@@ -646,7 +646,7 @@ export const UNITS = [
     slides: [
       {
         title: '用相機拍照和錄影',
-        text: `相機 App 有${t('拍照', 'photo')}和${t('錄影', 'video')}兩種模式。按大大的${t('快門', 'shutter')}按鈕就拍一張，拍到的是按下去那一刻的畫面。拍照時按住快門不放，會直接錄影，放開就停。在錄影模式，按紅色按鈕開始，再按一次停止。還可以切換${t('前鏡頭', 'front camera')}和${t('後鏡頭', 'back camera')}。完成五個任務！`,
+        text: `相機 App 包含${t('拍照', 'photo')}與${t('錄影', 'video')}模式：按${t('快門', 'shutter')}能拍照，按住快門不放會快速錄影；切換錄影模式可按紅鈕啟動或停止。還能切換前後鏡頭。動手完成五個任務！`,
         widget: 'camera',
       },
       {
@@ -1218,7 +1218,7 @@ export const UNITS = [
       },
       {
         title: '為什麼要更新？',
-        text: `寫 App 的人會一直改進它，再推出${t('更新', 'update')}：修好${t('錯誤', 'bug')}、補好壞人能鑽進來的${t('安全漏洞', 'security hole')}，有時候還加上新功能。跟著步驟試試看！`,
+        text: `寫 App 的人會一直改進它，再推出${t('更新', 'update')}：修好${t('錯誤', 'bug')}、補好壞人能鑽進來的${t('安全漏洞', 'security vulnerability')}，有時候還加上新功能。跟著步驟試試看！`,
         widget: 'update',
       },
       {
@@ -1944,7 +1944,7 @@ export const UNITS = [
       },
       {
         title: '公共 Wi-Fi 上做什麼？',
-        text: "咖啡廳的公共開放 Wi-Fi 就像在廣場講話，任何人都能竊聽。<b class=\"term\">HTTPS 加密<span class=\"en\" lang=\"en\">HTTPS Encryption</span></b>會把資料鎖在保險箱裡！",
+        text: "咖啡廳的公共開放 Wi-Fi 就像在廣場講話，任何人都能竊聽。<b class=\"term\">HTTPS 加密<span class=\"en\" lang=\"en\">HTTPS Encryption</span></b>會將傳輸的資料加密上鎖，即使被攔截也無法偷看！",
         widget: 'packetsniff',
         params: {},
         added: '2026-10-24',
@@ -2073,7 +2073,7 @@ export const UNITS = [
       },
       {
         title: '聲音和影片也能假造',
-        text: "現在 AI 能學會親人的聲音打電話假冒。遇到緊急要錢或接送，記得問<b class=\"term\">通關密語<span class=\"en\" lang=\"en\">Secret Passcode</span></b>並掛斷回撥！",
+        text: "現在 AI 能學會親人的聲音打電話假冒。遇到緊急要錢或接送，掛斷後，主動撥打通訊錄中儲存的家人電話查證，並核對約定的<b class=\"term\">通關密語<span class=\"en\" lang=\"en\">Secret Passcode</span></b>！",
         widget: 'voiceclone',
         params: {},
         added: '2026-10-24',
@@ -2559,7 +2559,7 @@ export const UNITS = [
     slides: [
       {
         title: '電腦裡面的好朋友',
-        text: "大書架（<b class=\"term\">硬碟<span class=\"en\" lang=\"en\">hard drive</span></b>）負責永久保存，辦公桌（<b class=\"term\">記憶體<span class=\"en\" lang=\"en\">RAM</span></b>）隨手拿來放正在做的事，忙碌小工人（<b class=\"term\">CPU<span class=\"en\" lang=\"en\">CPU</span></b>）飛快動手處理。體驗開啟相簿與突發斷電！",
+        text: "大書架（<b class=\"term\">硬碟<span class=\"en\" lang=\"en\">hard drive</span></b>）負責永久保存，辦公桌（<b class=\"term\">記憶體<span class=\"en\" lang=\"en\">RAM</span></b>）隨手拿來放正在做的事，忙碌小工人（<b class=\"term\">中央處理器<span class=\"en\" lang=\"en\">CPU</span></b>）飛快動手處理。體驗開啟相簿與突發斷電！",
         widget: "deskrelay",
         params: {},
         added: '2026-10-24',
@@ -2582,7 +2582,7 @@ export const UNITS = [
       },
       {
         title: '每個按鍵都有號碼',
-        text: `電腦看不懂字母，只看得懂數字。所以${t('鍵盤', 'keyboard')}的每個按鍵都有自己的${t('號碼', 'code')}，像 A 是 65。按按看，看看號碼怎麼跑。`,
+        text: `電腦看不懂字母，只看得懂數字。所以${t('鍵盤', 'keyboard')}的每個按鍵都有對應的${t('字元編碼', 'character code')}，例如在標準 ASCII 編碼中大寫 A 是 65。按按看，看看號碼怎麼跑。`,
         widget: 'keys',
         params: { keys: ['A', 'B', 'C', 'X', 'Y', 'Z'], goal: 4, showCode: true },
       },
@@ -2737,7 +2737,7 @@ export const UNITS = [
       },
       {
         title: '同時做好幾件事？',
-        text: `一邊聽音樂、一邊下載、一邊畫畫，其實 CPU 是很快地${t('輪流', 'time sharing')}做這些事，快到看起來像同時進行。作業系統負責安排現在輪到誰。`,
+        text: `一邊聽音樂、一邊下載、一邊畫畫，其實是 CPU 正在以極快速度${t('分時多工', 'time-sharing')}輪流切換，快到人眼感覺像是同時在跑。作業系統就負責居中排程、調配資源！`,
         widget: 'multitask',
       },
       {
@@ -2773,7 +2773,7 @@ export const UNITS = [
       },
       {
         title: '手機的超能力',
-        text: "手機上有許多神奇的<b class=\"term\">感測器<span class=\"en\" lang=\"en\">sensor</span></b>小英雄，像眼睛和耳朵一樣幫忙察覺周圍環境。遇到天黑、開車轉彎或貼近耳朵時，派出正確的感測英雄！",
+        text: "手機上有許多敏銳的<b class=\"term\">感測器<span class=\"en\" lang=\"en\">sensor</span></b>，就像五官一樣隨時察覺周遭環境。遇到天黑、開車轉彎或貼近耳朵講電話時，派出正確的感測器來化解難題！",
         widget: "sensorheroes",
         params: {},
         added: '2026-10-24',
@@ -3058,7 +3058,7 @@ export const UNITS = [
       },
       {
         title: 'AI 也愛用 GPU',
-        text: "現代 <b class=\"term\">人工智慧<span class=\"en\" lang=\"en\">AI</span></b> 辨識一張圖片或回答問題，需要計算成千上萬道簡單的數學乘法。如果用 CPU 一題一題算要等很久，但換成 GPU 同步運算，眨眼間就能辨識出小貓！",
+        text: "現代 <b class=\"term\">人工智慧<span class=\"en\" lang=\"en\">AI</span></b> 在辨識圖片或生成內容時，背後是成千上萬道矩陣乘法運算。CPU 一題一題循序計算會非常耗時，但換成擁有數千核心的 GPU 進行<b class=\"term\">平行運算<span class=\"en\" lang=\"en\">parallel computing</span></b>，眨眼間就能算好整張圖片！",
         widget: 'aimath',
         params: {},
         added: '2026-10-24',
@@ -3153,7 +3153,7 @@ export const UNITS = [
       },
       {
         title: '路由器：網路的交通警察',
-        text: `${t('路由器', 'router')}會看封包上的 IP 位址，查自己的路線表，決定下一站往哪裡送，這叫做${t('路由', 'routing')}。網路上有好多路由器連來連去，封包一站一站傳過去。家裡的 Wi-Fi 分享器裡面，也有一台小路由器。換你當路由器：看地址的第三段，點下一站！`,
+        text: `${t('路由器', 'router')}會看封包上的目標 IP 位址，查詢內部的${t('路由表', 'routing table')}決定下一站往哪送，這過程稱為${t('路由', 'routing')}。網路上無數的路由器彼此串聯，像接力賽一樣把封包送達目的地。家裡的 Wi-Fi 分享器也內建了一台小路由器喔！換你當路由器：看 IP 位址第三段，選出下一站！`,
         widget: 'routing',
       },
       {
@@ -3270,7 +3270,7 @@ export const UNITS = [
       },
       {
         title: 'DNS：網路的通訊錄',
-        text: "電腦只認得像「140.112.1.25」這樣的數字門牌。<b class=\"term\">DNS<span class=\"en\" lang=\"en\">Domain Name System</span></b> 就像網路世界的超大電話簿與地址通訊錄，負責把網址翻譯成 IP 位址！",
+        text: "電腦只認得像「140.112.1.25」這樣的數字門牌。<b class=\"term\">DNS 網域名稱系統<span class=\"en\" lang=\"en\">Domain Name System</span></b> 就像網路世界的超大電話簿，負責把網域名稱轉換成 IP 位址！",
         widget: 'dnslookup',
         params: {},
         added: '2026-10-24',
@@ -3465,7 +3465,7 @@ export const UNITS = [
     icon: '🔐',
     title: '密碼怎麼被猜到？',
     en: 'How Passwords Get Guessed',
-    desc: '常見密碼、組合數、撞庫和雜湊',
+    desc: '常見密碼、組合數、憑證填充攻擊和雜湊',
     color: '#b45309',
     added: '2026-10-23',
     slides: [
@@ -3481,7 +3481,7 @@ export const UNITS = [
       },
       {
         title: '一個外洩，三個都開？',
-        text: `攻擊者會拿外洩的密碼去試其他網站，這叫${t('撞庫', 'credential stuffing')}。每個網站都用同一個密碼，就像所有門都用同一把鑰匙。選一種做法看看！`,
+        text: `攻擊者會拿外洩的密碼去試其他網站，這叫${t('憑證填充攻擊', 'credential stuffing')}（俗稱撞庫）。每個網站都用同一個密碼，就像所有門都用同一把鑰匙。選一種做法看看！`,
         widget: 'breach',
       },
       {
@@ -3932,7 +3932,7 @@ export const UNITS = [
             { text: '🏞️ 空曠的公園' },
             { text: '🏖️ 海邊，手機沒有網路' },
           ],
-          explain: 'GPS 訊號從天上來，穿不過厚厚的水泥和土，所以在地下室、隧道裡收不到。GPS 不用網路，在海邊、山上也能用。',
+          explain: 'GPS 衛星只做單向電波廣播，絕不追蹤你的裝置，且訊號穿不過厚厚的水泥和土，所以在地下室收不到。GPS 不依賴手機網路，在海邊、山上也能用。',
         },
       },
     ],
@@ -3950,7 +3950,7 @@ export const UNITS = [
     slides: [
       {
         title: '感測、判斷、行動',
-        text: `自動駕駛車和機器人都照三個步驟做事：${t('感測', 'sense')}、${t('判斷', 'think')}、${t('行動', 'act')}。而且一秒鐘就重複很多次。排排看！`,
+        text: `自動駕駛車和機器人都照三個步驟做事：${t('感測', 'sense')}、${t('決策規劃', 'plan')}、${t('行動', 'act')}。而且一秒鐘就重複很多次。排排看！`,
         widget: 'senseloop',
         params: {
           items: [

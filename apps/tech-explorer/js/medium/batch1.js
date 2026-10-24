@@ -53,9 +53,7 @@ export function backpackfit(host, _params, api) {
 
   host.innerHTML = `
     <div class="b1-panel b1-backpack">
-      <div class="gemini-tag" data-created-by="gemini" data-info="書包收納大挑戰 · 桌機 vs 筆電平板">
-        <span class="gemini-spark">✨</span> Gemini 互動設計
-      </div>
+      <div class="gemini-tag" data-created-by="gemini" data-info="書包收納大挑戰 · 桌機 vs 筆電平板"></div>
 
       <div class="b1-header">
         <div class="b1-title-group">
@@ -283,9 +281,7 @@ export function workbench(host, _params, api) {
 
   host.innerHTML = `
     <div class="b1-panel b1-workbench">
-      <div class="gemini-tag" data-created-by="gemini" data-info="實體外接工作台 · 輸入與輸出裝置">
-        <span class="gemini-spark">✨</span> Gemini 互動設計
-      </div>
+      <div class="gemini-tag" data-created-by="gemini" data-info="實體外接工作台 · 輸入與輸出裝置"></div>
 
       <div class="b1-header">
         <div class="b1-title-group">
@@ -454,9 +450,7 @@ export function workbench(host, _params, api) {
 export function charginghazards(host, _params, api) {
   host.innerHTML = `
     <div class="b1-panel b1-hazards">
-      <div class="gemini-tag" data-created-by="gemini" data-info="臥室危險抓抓樂 · 電池與充電安全">
-        <span class="gemini-spark">✨</span> Gemini 互動設計
-      </div>
+      <div class="gemini-tag" data-created-by="gemini" data-info="臥室危險抓抓樂 · 電池與充電安全"></div>
 
       <div class="b1-header">
         <div class="b1-title-group">

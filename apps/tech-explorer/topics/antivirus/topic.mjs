@@ -34,7 +34,7 @@ function scanner(host, params, api) {
       name: '已知有害木馬程式',
       filename: 'trojan.exe',
       sub: '已列入病毒資料庫黑名單的有害程式',
-      activity: '雷射比對結果：特徵碼與已知病毒黑名單完全吻合！',
+      activity: '特徵碼比對結果：特徵碼與已知病毒特徵庫完全吻合！',
       flag: true,
       detail: '找到符合的病毒指紋，立即隔離。隔離不等於修好了所有受影響的資料。',
       pattern: '指紋樣式：[▲-◆-■] (命中病毒庫黑名單)',
@@ -46,7 +46,7 @@ function scanner(host, params, api) {
       name: '範例照片/作業',
       filename: 'photo.jpg',
       sub: '乾淨的正常生活照片檔案',
-      activity: '雷射比對結果：掃描完畢，未命中任何已知惡意樣式。',
+      activity: '特徵碼比對結果：掃描完畢，未命中任何已知惡意特徵。',
       flag: false,
       detail: '沒有發現威脅，不是保證完全安全。新變種、漏判和誤判都可能發生。',
       pattern: '指紋樣式：[●-★-◆] (非已知病毒特徵)',
@@ -59,7 +59,7 @@ function scanner(host, params, api) {
   const seen = new Set();
 
   host.innerHTML = `
-    <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+    <div class="gemini-tag" data-created-by="gemini"></div>
     <div class="av-demo">
       <div class="av-lab-header">
         <div class="av-step-indicator">
@@ -92,7 +92,7 @@ function scanner(host, params, api) {
             <div class="av-shield" aria-hidden="true">${behavior ? '🧪' : '🛡️'}</div>
           </div>
           <div class="av-meta">
-            <strong class="av-mode">${behavior ? '🧪 動態行為沙盒檢驗艙 (監控檔案改寫動作)' : '🔍 雷射特徵比對台 (比對已知病毒黑名單)'}</strong>
+            <strong class="av-mode">${behavior ? '🧪 動態行為沙盒檢驗艙 (監控檔案改寫動作)' : '🔍 特徵碼比對台 (比對已知病毒特徵庫)'}</strong>
             <p class="av-activity">${cases[0].activity}</p>
             <div class="av-tech-badge">${cases[0].pattern}</div>
           </div>
@@ -149,7 +149,7 @@ function scanner(host, params, api) {
               <span class="av-dome-icon">🫧🔒</span>
               <div class="av-dome-text-group">
                 <strong class="av-dome-label">⚠️ 已成功攔截並隔離至安全沙盒！</strong>
-                <small class="av-dome-sub">惡意威脅已封印於安全隔離艙，無法危害系統</small>
+                <small class="av-dome-sub">惡意威脅已移至安全隔離區 (Quarantine)，無法危害系統</small>
               </div>
             </div>
           </div>
@@ -238,7 +238,7 @@ function scanner(host, params, api) {
     machine.classList.add('av-running');
     status.textContent = behavior
       ? '🧪 動態沙盒執行中……看門狗正在全天候監控程式行為軌跡'
-      : '🔍 雷射特徵比對中……正在掃描代碼並比對已知病毒黑名單';
+      : '🔍 特徵碼比對中……正在掃描程式碼並比對已知病毒特徵庫';
 
     boxes.forEach(box => {
       box.className = 'av-box-item';
@@ -299,7 +299,7 @@ function limits(host, _, api) {
   ];
   const seen = new Set();
   host.innerHTML = `
-    <div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div>
+    <div class="gemini-tag" data-created-by="gemini"></div>
     <div class="av-demo">
       <div class="av-limit-list">
         ${scenarios.map((s, i) => `
@@ -339,7 +339,7 @@ export default {
     en: 'What Antivirus Can Do',
     desc: '偵測、隔離和多層保護，也看懂防毒的界線',
     slides: [
-      { id: 'patterns', title: '認出已知的有害樣式', text: t('防毒軟體', 'antivirus') + '會用多種方法找威脅，' + t('樣式比對', 'signature matching') + '是其中之一。試著檢查兩個假檔案。這裡不會掃描你的裝置。', widget: 'av-scanner', params: { mode: 'patterns' } },
+      { id: 'patterns', title: '認出已知的有害樣式', text: t('防毒軟體', 'antivirus') + '會用多種方法找威脅，' + t('特徵碼比對', 'signature matching') + '是其中之一。試著檢查兩個假檔案。這裡不會掃描你的裝置。', widget: 'av-scanner', params: { mode: 'patterns' } },
       { id: 'behavior', title: '名字換了，動作仍然可疑', text: '有些防護也看' + t('程式行為', 'behavior monitoring') + '，不只認名字或舊樣式。短時間改寫很多檔案，可能引起警告；但仍可能漏判。比較兩個範例。', widget: 'av-scanner', params: { mode: 'behavior' } },
       { id: 'limits', title: '防毒不是「一定安全」保證書', text: '保護工具有幫助，但會有' + t('誤判', 'false positive') + '和' + t('漏判', 'false negative') + '。它也不能替你判斷每一句話。點點看四種情況。', widget: 'av-limits', params: {} },
       { id: 'layers', title: '多幾層，不靠一面盾牌', text: t('多層防護', 'defense in depth') + '讓一道保護失效時，還有其他機會擋住或復原。每件事該靠什麼？分分看！', widget: 'sort', params: {

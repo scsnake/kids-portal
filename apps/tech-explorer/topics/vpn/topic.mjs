@@ -13,7 +13,7 @@ function setup(host, api, name, statusCls) {
   host.innerHTML = '';
   const root = document.createElement('div');
   root.className = `vpn-root vpn-${name}`;
-  root.innerHTML = `<div class="gemini-tag" data-created-by="gemini"><span class="gemini-spark">✨</span> Gemini 互動設計</div><div class="vpn-body"></div><div class="vpn-status ${statusCls}" role="status" aria-live="polite"></div>${SIM}`;
+  root.innerHTML = `<div class="gemini-tag" data-created-by="gemini"></div><div class="vpn-body"></div><div class="vpn-status ${statusCls}" role="status" aria-live="polite"></div>${SIM}`;
   host.appendChild(root);
   const body = root.querySelector('.vpn-body');
   const st = root.querySelector('.vpn-status');
@@ -504,9 +504,9 @@ const widgets = {
       { icon: '☕', txt: '在咖啡店 Wi-Fi，不想讓同一個網路的人看到你去哪個網站', yes: true, why: 'VPN 隧道讓咖啡店 Wi-Fi 只看到你連到 VPN。' },
       { icon: '🎣', txt: '假購物網站 shop.examp1e.tw 要你輸入密碼', yes: false, why: '要靠看清楚網址、用通行密鑰。假網站開了 VPN 還是假的。' },
       { icon: '🧩', txt: 'App 很久沒更新，裡面有漏洞', yes: false, why: '要靠更新。' },
-      { icon: '🔐', txt: '密碼外洩了，有人想登入你的帳號', yes: false, why: '要靠兩步驟驗證和換密碼。' },
+      { icon: '🔐', txt: '密碼外洩了，有人想登入你的帳號', yes: false, why: '要靠雙重驗證（2FA）和換密碼。' },
       { icon: '🏫', txt: '在家打開學校允許的內部作業平台', yes: true, why: '這正是學校 VPN 的用途。' },
-      { icon: '💾', txt: '照片被勒索程式鎖住了', yes: false, why: '先隔離受影響裝置並求助，再用乾淨裝置和可用備份還原。' },
+      { icon: '💾', txt: '照片被勒索軟體加密鎖住了', yes: false, why: '先隔離受影響裝置並求助，再用乾淨裝置和可用備份還原。' },
     ];
     const s = { i: 0, done: [], flash: false };
 
@@ -544,7 +544,7 @@ const widgets = {
       s.flash = true;
       render();
       if (s.i >= ITEMS.length) {
-        w.say('🎉 VPN 只是一層保護，不能取代 HTTPS、兩步驟驗證、更新和備份。', 'ok');
+        w.say('🎉 VPN 只是一層保護，不能取代 HTTPS、雙重驗證（2FA）、更新和備份。', 'ok');
         w.finish();
       } else {
         w.say(`✅ ${it.why}`, 'ok');
@@ -598,7 +598,7 @@ export default {
       {
         id: 'limits',
         title: 'VPN 不是萬能',
-        text: 'VPN 只改變連線走的路。假網站、漏洞、密碼外洩和勒索程式，要靠看網址、更新、兩步驟驗證和備份。分分看！',
+        text: 'VPN 只改變連線走的路。假網站、漏洞、密碼外洩和勒索軟體，要靠核對網址、系統更新、雙重驗證（2FA）和備份。分分看！',
         widget: 'vpnLimits',
         params: {},
       },
@@ -612,9 +612,9 @@ export default {
             { text: '網站還是知道是小安的帳號在購物', correct: true },
             { text: '網站完全不知道是誰' },
             { text: '開了 VPN，假網站也會變安全' },
-            { text: '有 VPN 就不需要兩步驟驗證' },
+            { text: '有 VPN 就不需要雙重驗證' },
           ],
-          explain: 'VPN 只換掉網站看到的 IP。登入的帳號網站一定知道；假網站、密碼外洩，還是要靠看網址和兩步驟驗證。',
+          explain: 'VPN 只換掉網站看到的 IP。登入的帳號網站一定知道；假網站、密碼外洩，還是要靠核對網址和雙重驗證（2FA）。',
         },
       },
     ],
