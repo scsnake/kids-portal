@@ -436,7 +436,7 @@ export const UNITS = [
             { text: '🔌 繼續充電看看' },
             { text: '✋ 用力把它壓平' },
           ],
-          explain: '膨脹代表內部損壞有起火危險！請大人協助用絕緣膠帶貼住金屬接點，裝入防燃容器後交由專門門市或清潔隊處理。',
+          explain: '膨脹表示電池壞了，可能會起火。不要壓它、不要再充電，也不要丟一般垃圾。請大人放在遠離易燃物的地方，再拿去電池回收點或清潔隊。',
         },
       },
     ],
@@ -2582,7 +2582,7 @@ export const UNITS = [
       },
       {
         title: '每個按鍵都有號碼',
-        text: `電腦看不懂字母，只看得懂數字。所以${t('鍵盤', 'keyboard')}的每個按鍵都有對應的${t('字元編碼', 'character code')}，例如在標準 ASCII 編碼中大寫 A 是 65。按按看，看看號碼怎麼跑。`,
+        text: `電腦看不懂字母，只看得懂數字。所以${t('鍵盤', 'keyboard')}的每個按鍵都有自己的${t('字元編碼', 'character code')}，就像一個號碼，例如大寫 A 是 65。按按看，看看號碼怎麼跑。`,
         widget: 'keys',
         params: { keys: ['A', 'B', 'C', 'X', 'Y', 'Z'], goal: 4, showCode: true },
       },
@@ -2737,7 +2737,7 @@ export const UNITS = [
       },
       {
         title: '同時做好幾件事？',
-        text: `一邊聽音樂、一邊下載、一邊畫畫，其實是 CPU 正在以極快速度${t('分時多工', 'time-sharing')}輪流切換，快到人眼感覺像是同時在跑。作業系統就負責居中排程、調配資源！`,
+        text: `一邊聽音樂、一邊下載、一邊畫畫，其實 CPU 用的是${t('分時多工', 'time-sharing')}：很快地輪流做這些事，快到看起來像同時進行。作業系統負責安排現在輪到誰。`,
         widget: 'multitask',
       },
       {
@@ -3058,7 +3058,7 @@ export const UNITS = [
       },
       {
         title: 'AI 也愛用 GPU',
-        text: "現代 <b class=\"term\">人工智慧<span class=\"en\" lang=\"en\">AI</span></b> 在辨識圖片或生成內容時，背後是成千上萬道矩陣乘法運算。CPU 一題一題循序計算會非常耗時，但換成擁有數千核心的 GPU 進行<b class=\"term\">平行運算<span class=\"en\" lang=\"en\">parallel computing</span></b>，眨眼間就能算好整張圖片！",
+        text: "現代 <b class=\"term\">人工智慧<span class=\"en\" lang=\"en\">AI</span></b> 辨識一張圖片，要做大量的<b class=\"term\">矩陣乘法<span class=\"en\" lang=\"en\">matrix multiplication</span></b>，也就是成千上萬道簡單的乘法。CPU 一題一題算要等很久；GPU 讓幾千個小幫手一起算，這叫<b class=\"term\">平行運算<span class=\"en\" lang=\"en\">parallel computing</span></b>，眨眼間就認出小貓！",
         widget: 'aimath',
         params: {},
         added: '2026-10-24',
@@ -3153,7 +3153,7 @@ export const UNITS = [
       },
       {
         title: '路由器：網路的交通警察',
-        text: `${t('路由器', 'router')}會看封包上的目標 IP 位址，查詢內部的${t('路由表', 'routing table')}決定下一站往哪送，這過程稱為${t('路由', 'routing')}。網路上無數的路由器彼此串聯，像接力賽一樣把封包送達目的地。家裡的 Wi-Fi 分享器也內建了一台小路由器喔！換你當路由器：看 IP 位址第三段，選出下一站！`,
+        text: `${t('路由器', 'router')}會看封包上的 IP 位址，查自己的${t('路由表', 'routing table')}（一張下一站的路線表），決定下一站往哪送，這叫做${t('路由', 'routing')}。封包就這樣一站一站傳過去。家裡的 Wi-Fi 分享器裡也有一台小路由器。換你當路由器：看地址的第三段，點下一站！`,
         widget: 'routing',
       },
       {
@@ -3465,7 +3465,7 @@ export const UNITS = [
     icon: '🔐',
     title: '密碼怎麼被猜到？',
     en: 'How Passwords Get Guessed',
-    desc: '常見密碼、組合數、憑證填充攻擊和雜湊',
+    desc: '常見密碼、組合數、撞庫和雜湊',
     color: '#b45309',
     added: '2026-10-23',
     slides: [
@@ -3481,7 +3481,7 @@ export const UNITS = [
       },
       {
         title: '一個外洩，三個都開？',
-        text: `攻擊者會拿外洩的密碼去試其他網站，這叫${t('憑證填充攻擊', 'credential stuffing')}（俗稱撞庫）。每個網站都用同一個密碼，就像所有門都用同一把鑰匙。選一種做法看看！`,
+        text: `攻擊者會拿外洩的密碼去試其他網站，這叫${t('憑證填充攻擊', 'credential stuffing')}，俗稱「撞庫」。每個網站都用同一個密碼，就像所有門都用同一把鑰匙。選一種做法看看！`,
         widget: 'breach',
       },
       {
@@ -3932,7 +3932,7 @@ export const UNITS = [
             { text: '🏞️ 空曠的公園' },
             { text: '🏖️ 海邊，手機沒有網路' },
           ],
-          explain: 'GPS 衛星只做單向電波廣播，絕不追蹤你的裝置，且訊號穿不過厚厚的水泥和土，所以在地下室收不到。GPS 不依賴手機網路，在海邊、山上也能用。',
+          explain: 'GPS 訊號從天上的衛星來，穿不過厚厚的水泥和土，所以在地下室、隧道裡收不到。GPS 不用網路，在海邊、山上也能用。',
         },
       },
     ],
@@ -3950,7 +3950,7 @@ export const UNITS = [
     slides: [
       {
         title: '感測、判斷、行動',
-        text: `自動駕駛車和機器人都照三個步驟做事：${t('感測', 'sense')}、${t('決策規劃', 'plan')}、${t('行動', 'act')}。而且一秒鐘就重複很多次。排排看！`,
+        text: `自動駕駛車和機器人都照三個步驟做事：${t('感測', 'sense')}、${t('判斷', 'think')}、${t('行動', 'act')}。而且一秒鐘就重複很多次。排排看！`,
         widget: 'senseloop',
         params: {
           items: [
