@@ -7,10 +7,10 @@ Use [AGENT-HANDOFF.md](AGENT-HANDOFF.md) for future work.
 
 - Version 29 already includes fourteen legacy activity replacements and refinements across nine packaged security units.
 - Version 30 adds twelve medium-priority activity replacements to its release scope.
-- Version 31 adds the reviewed recycling and password-hash redesigns: `ewastechute` and `hashblender`.
+- Version 32 adds the reviewed recycling and password-hash redesigns: `ewastechute` and `hashblender`.
 
 The original “37” total counts 28 activity replacements and nine unit-level redesign items.
-It is not a count of 37 individual slides. All 28 activity replacements are included through version 31.
+It is not a count of 37 individual slides. All 28 activity replacements are included through version 32.
 Check the [live release marker](https://kids-tech.scsnake.xyz/release.json) for the deployed version and exact revision.
 This file records implementation scope; it is not deployment proof.
 
@@ -80,7 +80,7 @@ The checked-in scope record is `tests/redesign/medium/manifest.json` at the repo
 Production modules are `js/widgets-medium.js` and `js/medium/batch1.js` through `batch3.js`.
 Styles are in `widgets-medium.css`. The original slide titles remain unchanged to preserve progress.
 
-## Previously deferred activities: version 31 release scope
+## Previously deferred activities: version 32 release scope
 
 | Unit ID | Existing slide identity | Widget | Reviewed renewal |
 |---|---|---|---|
