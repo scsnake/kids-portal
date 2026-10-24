@@ -1,6 +1,6 @@
 {
-  "id": "b12ee0c81786e0dabacea7afc271ea267d82a684652d86c10e143490400fff99",
-  "baseCommit": "bc83148d94982b322a10266b34c91fce8a933f7d",
+  "id": "7ec21ba3678ffe0f958bb612580bc36f2b9a5f897f1af7284c2d59527a9b2bca",
+  "baseCommit": "baed53239a5ca07c4587db7811bc29b5523b1dc9",
   "topics": [
     "socialmanners",
     "trolls",
@@ -11,8 +11,14 @@
     "investscam",
     "healthmyth"
   ],
-  "changes": ["reviewed-gemini-ewastechute", "reviewed-gemini-hashblender", "animation-cleanup-and-contrast", "renewal-catalog-updated", "social-media-release-preserved"],
+  "changes": [
+    "global-wording-review",
+    "kid-friendly-terminology-zh-tw",
+    "concealed-agent-attribution-tags",
+    "source-hashes-synchronized",
+    "version-v33-assets-bump"
+  ],
   "changedWidgets": ["ewastechute", "hashblender"],
   "excludedWidgets": [],
-  "assetsVersion": "32"
+  "assetsVersion": "33"
 }
