@@ -128,6 +128,7 @@ let demMain = null;      // Float32Array metres (+ land, - sea)
 let demTw = null;
 let demImages = null;
 let twBox = null;        // [lonW, latS, lonE, latN] of the Taiwan detail grid
+let trackClim = null;    // IBTrACS motion field per month (tracks.json)
 
 function loadImage(src) {
   return new Promise((resolve, reject) => {
@@ -139,12 +140,14 @@ function loadImage(src) {
 }
 
 async function loadMapData() {
-  const [coast, meta, dem, tw] = await Promise.all([
+  const [coast, meta, dem, tw, tracks] = await Promise.all([
     fetch('coast.json?v=1').then(r => r.json()),
     fetch('dem.json?v=1').then(r => r.json()),
     loadImage('dem.png?v=1'),
-    loadImage('dem-tw.png?v=1')
+    loadImage('dem-tw.png?v=1'),
+    fetch('tracks.json?v=1').then(r => r.json())
   ]);
+  trackClim = tracks;
 
   regions = coast.regions.map((reg, k) => {
     const rings = reg.rings.map(flat => {
@@ -390,7 +393,14 @@ const typhoon = {
   trend: 0,
   vx: 0,
   vy: 0,
-  isDragging: false
+  isDragging: false,
+  fric: 1,             // surface wind factor: land and mountains slow the surface wind before the low fills
+  au: 0, av: 0,        // this storm's own motion anomaly (AR(1), in standard deviations)
+  leeDone: false,      // a lee-side low took over during this crossing
+  note: null,          // { text, until } short message on the card
+  hist: [],            // hourly positions near Taiwan, for the CWA path class
+  pathClass: 0,
+  histT: 0
 };
 
 // Web Audio Synthesizer State
@@ -792,9 +802,9 @@ function updateParticles(dt) {
 // TYPHOON LIFE CYCLE (warm sea feeds it, land and mountains break it)
 // =========================================================================
 
-// Time-lapse like a TV weather loop: one second on screen is one hour of weather.
+// Time-lapse like a TV weather loop: one second on screen is three hours of weather.
 // The storm track, its life cycle, the cold wake and the clock all use this scale.
-const LAPSE = 3600;
+const LAPSE = 10800;
 const KMS_PER_MS = LAPSE / 1000;   // a real speed in m/s moves this many km per screen second
 
 const P_ENV = 1010;      // hPa, pressure far from the storm
@@ -817,29 +827,139 @@ function gradWindMs(rKm, lat) {
   return Math.sqrt(B * dp / AIR_RHO * x * Math.exp(-x) + rf * rf) - rf;
 }
 
-function tcMaxWindKt() { return gradWindMs(tcRmwKm(), tcLonLat()[1]) * SFC_WIND * MS_TO_KT; }
+// typhoon.fric: rough land slows the surface wind long before the low fills
+function tcMaxWindKt() { return gradWindMs(tcRmwKm(), tcLonLat()[1]) * SFC_WIND * typhoon.fric * MS_TO_KT; }
 
 // surface wind (kt) at a distance from the eye
 function windAtKm(rKm, overLand) {
-  const kt = gradWindMs(rKm, tcLonLat()[1]) * SFC_WIND * MS_TO_KT;
+  const kt = gradWindMs(rKm, tcLonLat()[1]) * SFC_WIND * typhoon.fric * MS_TO_KT;
   return Math.max(kt, 8) * (overLand ? 0.75 : 1);
 }
 
-// Deep-layer steering wind (m/s): trade winds south of the subtropical high, westerlies north of it.
-// The GPU copy is steerKm() in GLSL_COMMON.
-function steerMs(lat) {
-  const t = Math.max(0, Math.min(1, (lat - 21) / 8));
-  const s = t * t * (3 - 2 * t);
-  return [-5 + 13 * s, 1 + 2 * s];
+function smooth(a, b, x) { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); }
+
+function gauss() { return Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random()); }
+
+// simulated clock (ms) and its month: 0.0 = 1 January ... 11.99 = end of December
+function simClockMs() { return satClockStart + (performance.now() - t0) * LAPSE; }
+function simMonth() {
+  const d = new Date(simClockMs() + 8 * 3600000);
+  const days = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
+  return d.getUTCMonth() + (d.getUTCDate() - 1 + d.getUTCHours() / 24) / days;
 }
 
-// Storm motion (m/s) = steering + beta drift. The Earth's spin grows stronger toward the pole,
-// so a northern storm drifts north-west at about 2 m/s even in still air.
+// Steering wind (m/s) from real typhoon tracks (IBTrACS 1980-2024, tracks.json): the mean motion at
+// this place and time of year, minus a typical beta drift. Returns [u, v, spread u, spread v].
+// Each month's value sits at mid-month; days in between blend two months.
+function steerMs(lon, lat) {
+  const T = trackClim, g = T.grid;
+  const fx = Math.max(0, Math.min(g.nx - 1.001, (lon - g.lon0) / g.dlon));
+  const fy = Math.max(0, Math.min(g.ny - 1.001, (lat - g.lat0) / g.dlat));
+  const i = Math.floor(fx), j = Math.floor(fy), tx = fx - i, ty = fy - j;
+  const mf = simMonth() - 0.5;
+  const m0 = ((Math.floor(mf) % 12) + 12) % 12, m1 = (m0 + 1) % 12, tm = mf - Math.floor(mf);
+  const at = (arr, m) => {
+    const b = m * g.ny * g.nx + j * g.nx + i;
+    return ((arr[b] * (1 - tx) + arr[b + 1] * tx) * (1 - ty) + (arr[b + g.nx] * (1 - tx) + arr[b + g.nx + 1] * tx) * ty) / 10;
+  };
+  return [T.u, T.v, T.su, T.sv].map(a => at(a, m0) * (1 - tm) + at(a, m1) * tm);
+}
+
+// How much tall ground lies 40-120 km ahead of the storm (0..1)
+function mountainAhead(lon, lat, mx, my) {
+  const sp = Math.hypot(mx, my);
+  if (sp < 0.1) return 0;
+  let h = 0;
+  for (const d of [40, 80, 120]) {
+    h = Math.max(h, groundAt(lon + mx / sp * d / (111.32 * Math.cos(lat * DEG)), lat + my / sp * d / 110.57).height);
+  }
+  return smooth(800, 2800, h);
+}
+
+// Storm motion (m/s) = steering + this storm's own random wander (AR(1), from the track data) + beta drift.
+// Beta drift: the Earth's spin grows stronger toward the pole, so a northern storm drifts north-west
+// at about 2 m/s even in still air.
+// Tall mountains ahead slow the storm and turn it to the left, as seen before Taiwan landfalls
+// (e.g. Haitang 2005, Jangmi 2008); over the range it slows down more.
 function tcMotionMs() {
-  const [, lat] = tcLonLat();
-  const [sx, sy] = steerMs(lat);
+  const [lon, lat] = tcLonLat();
+  const [su, sv, du, dv] = steerMs(lon, lat);
   const beta = 2.0 * (0.6 + 0.4 * typhoon.intensity) * CONFIG.coriolisFactor * Math.cos(lat * DEG);
-  return [sx - beta * 0.7071, sy + beta * 0.7071];
+  const mx = su + typhoon.au * du - beta * 0.7071;
+  const my = sv + typhoon.av * dv + beta * 0.7071;
+  const m = mountainAhead(lon, lat, mx, my);
+  const over = tcEnv.land ? smooth(500, 2500, tcEnv.height) : 0;
+  const a = 0.6 * m, k = (1 - 0.3 * m) * (1 - 0.2 * over);
+  return [(mx * Math.cos(a) - my * Math.sin(a)) * k, (mx * Math.sin(a) + my * Math.cos(a)) * k];
+}
+
+// Lee-side low: over a high range the old centre can die while a new low forms on the far side,
+// so the track jumps (a "secondary low" often seen west of Taiwan's Central Mountain Range).
+function jumpToLeeLow(lon, lat) {
+  const [mx, my] = tcMotionMs();
+  const sp = Math.hypot(mx, my) || 1;
+  for (let d = 20; d <= 200; d += 10) {
+    const l2 = lon + mx / sp * d / (111.32 * Math.cos(lat * DEG)), a2 = lat + my / sp * d / 110.57;
+    if (groundAt(l2, a2).height < 150) {
+      typhoon.x = typhoon.targetX = Math.max(0.03, Math.min(0.97, lonToNormX(l2)));
+      typhoon.y = typhoon.targetY = Math.max(0.03, Math.min(0.97, latToNormY(a2)));
+      typhoon.leeDone = true;
+      typhoon.note = { text: 'Lee-side low takes over 背風面副低壓接手', until: performance.now() + 6000 };
+      return;
+    }
+  }
+}
+
+// --- CWA path classes for typhoons that hit Taiwan (1911-) ---
+const CWA_PATHS = ['', '通過臺灣北部海面向西或西北進行', '通過臺灣北部向西或西北進行', '通過臺灣中部向西或西北進行',
+  '通過臺灣南部向西或西北進行', '通過臺灣南部海面向西或西北進行', '沿臺灣東岸或東部海面北上', '沿臺灣西岸或臺灣海峽北上',
+  '通過臺灣南部海面向東或東北進行', '通過臺灣南部向東或東北進行', '特殊路徑'];
+
+// km from Taiwan's coast, with the island as a line from its south tip to its north tip
+function kmToTaiwan(lon, lat) {
+  const c = Math.cos(23.6 * DEG);
+  const ax = 120.85 * c, ay = 21.95, bx = 121.9 * c, by = 25.25, px = lon * c, py = lat;
+  const t = Math.max(0, Math.min(1, ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / ((bx - ax) ** 2 + (by - ay) ** 2)));
+  return Math.max(0, Math.hypot(px - ax - t * (bx - ax), py - ay - t * (by - ay)) * 111 - 50);
+}
+
+// h: hourly [lon, lat, over Taiwan] within 400 km of Taiwan. Returns 1-10, or 0 when it is not a Taiwan typhoon.
+function classifyPath(h) {
+  if (h.length < 3) return 0;
+  let dmin = Infinity, P = h[0];
+  for (const p of h) { const d = kmToTaiwan(p[0], p[1]); if (d < dmin) { dmin = d; P = p; } }
+  if (dmin > 300) return 0;
+  const a = h[0], b = h[h.length - 1];
+  const dir = Math.atan2(b[1] - a[1], (b[0] - a[0]) * Math.cos(23.6 * DEG)) / DEG;   // 0 = east, 90 = north
+  const west = dir >= 112.5 || dir <= -135, north = dir > 67.5 && dir < 112.5, east = dir > -45 && dir <= 67.5;
+  const land = h.filter(p => p[2]);
+  if (land.length) {
+    const la = land.reduce((s, p) => s + p[1], 0) / land.length;
+    const lo = land.reduce((s, p) => s + p[0], 0) / land.length;
+    if (west) return la >= 24.3 ? 2 : la >= 23.3 ? 3 : 4;
+    if (north) return lo >= 121.0 ? 6 : 7;
+    return east && la < 23.3 ? 9 : 10;
+  }
+  if (west) return P[1] > 24.5 ? 1 : P[1] < 22.8 ? 5 : 10;
+  if (north) return P[0] > 121.3 ? 6 : 7;
+  return east && P[1] < 22.8 ? 8 : 10;
+}
+
+function resetPath() { typhoon.hist = []; typhoon.pathClass = 0; typhoon.histT = 0; }
+
+function updatePath(lon, lat, hrs) {
+  typhoon.histT += hrs;
+  if (typhoon.histT < 1) return;
+  typhoon.histT = 0;
+  if (kmToTaiwan(lon, lat) > 400) {
+    // it has left: now "other" is a final answer too
+    if (typhoon.hist.length) typhoon.pathClass = classifyPath(typhoon.hist);
+    return;
+  }
+  typhoon.hist.push([lon, lat, landAt(lon, lat).taiwan]);
+  // while it is still near Taiwan, show a class only once the track fits one
+  const c = classifyPath(typhoon.hist);
+  typhoon.pathClass = c === 10 ? 0 : c;
 }
 
 function kmBetween(lon1, lat1, lon2, lat2) {
@@ -858,6 +978,12 @@ function sstAtEye() {
 let tcEnv = { land: false, height: 0, sst: 29 };
 
 function updateTyphoon(dt) {
+  const hrs = dt * LAPSE / 3600;
+  // the storm's own wander keeps its memory for days (AR(1) fitted to the track data)
+  for (const [key, rho] of [['au', trackClim.ar6h[0]], ['av', trackClim.ar6h[1]]]) {
+    const k = Math.pow(rho, hrs / 6);
+    typhoon[key] = typhoon[key] * k + Math.sqrt(1 - k * k) * gauss();
+  }
   // when nobody holds it, the storm moves with the steering wind and the beta drift
   if (!typhoon.isDragging) {
     const [mx, my] = tcMotionMs();
@@ -883,14 +1009,24 @@ function updateTyphoon(dt) {
   pot *= Math.min(1, CONFIG.coriolisFactor) * Math.min(1, Math.max(0, (lat - 4) / 4));
   let rate;
   if (typhoon.intensity > pot) {
-    rate = g.land ? 0.12 + 0.45 * Math.min(1, g.height / 3000) : 0.05;
+    // over land the low fills slowly (Taiwan crossings keep much of their pressure drop); mountains add a little
+    rate = g.land ? 0.025 + 0.025 * Math.min(1, g.height / 3000) : 0.05;
   } else {
     rate = 0.035;
   }
   const before = typhoon.intensity;
-  typhoon.intensity = Math.max(0.02, Math.min(1, typhoon.intensity + (pot - typhoon.intensity) * rate * dt));
-  typhoon.trend = typhoon.trend * 0.95 + ((typhoon.intensity - before) / Math.max(dt, 1e-3)) * 0.05;
+  typhoon.intensity = Math.max(0.02, Math.min(1, typhoon.intensity + (pot - typhoon.intensity) * rate * hrs));
+  typhoon.trend = typhoon.trend * 0.95 + ((typhoon.intensity - before) / Math.max(hrs, 1e-3)) * 0.05;   // per hour
   typhoon.rot += dt * (0.12 + 0.28 * typhoon.intensity);
+  // rough land slows the surface wind within a few hours; the sea lets it recover
+  const fricT = g.land ? 0.8 - 0.12 * Math.min(1, g.height / 3000) : 1;
+  typhoon.fric += (fricT - typhoon.fric) * Math.min(1, hrs * (g.land ? 0.5 : 0.3));
+
+  if (!g.land) typhoon.leeDone = false;
+  else if (!typhoon.leeDone && !typhoon.isDragging && g.height > 1200 && typhoon.intensity > 0.3 && Math.random() < 0.25 * hrs) {
+    jumpToLeeLow(lon, lat);
+  }
+  if (!typhoon.isDragging) updatePath(...tcLonLat(), hrs);
 
   // Cold wake: strong winds stir up cool deep water, most on the right of the track.
   // It fades slowly, so a moving typhoon leaves a cool trail behind it.
@@ -902,12 +1038,12 @@ function updateTyphoon(dt) {
     const cj = typhoon.y * GH + (sp > 1e-6 ? typhoon.vx / sp : 0) * side;
     const i0 = Math.max(0, Math.floor(ci - 3 * r)), i1 = Math.min(GW - 1, Math.ceil(ci + 3 * r));
     const j0 = Math.max(0, Math.floor(cj - 3 * r)), j1 = Math.min(GH - 1, Math.ceil(cj + 3 * r));
-    for (let n = 0; n < size; n++) sstAnom[n] *= (1 - 0.002 * dt);
+    for (let n = 0; n < size; n++) sstAnom[n] *= (1 - 0.002 * hrs);
     for (let j = j0; j <= j1; j++) {
       for (let i = i0; i <= i1; i++) {
         const idx = i + j * GW;
         const d2 = ((i - ci) ** 2 + (j - cj) ** 2) / (r * r);
-        sstAnom[idx] = Math.max(-4, sstAnom[idx] - 1.2 * typhoon.intensity * dt * Math.exp(-d2));
+        sstAnom[idx] = Math.max(-4, sstAnom[idx] - 1.2 * typhoon.intensity * hrs * Math.exp(-d2));
       }
     }
     for (let n = 0; n < size; n++) sstMap[n] = sstClim[n] + sstAnom[n];
@@ -929,12 +1065,19 @@ function updateTyphoonCard() {
   document.getElementById('tc-wind').innerText = kt.toFixed(0);
   document.getElementById('tc-pres').innerText = tcPressure().toFixed(0);
   let trend;
-  if (tcEnv.land && tcEnv.height > 1500) trend = 'High mountains break the eye 高山破壞颱風眼';
+  if (typhoon.note && performance.now() < typhoon.note.until) trend = typhoon.note.text;
+  else if (tcEnv.land && tcEnv.height > 1500) trend = 'High mountains break the eye 高山破壞颱風眼';
   else if (tcEnv.land) trend = 'Over land · weakening 登陸減弱';
   else if (typhoon.trend < -0.002) trend = 'Cool sea · weakening 海溫低減弱';
   else if (typhoon.trend > 0.002) trend = 'Warm sea · strengthening 暖海增強';
   else trend = 'Steady 強度持平';
   document.getElementById('tc-trend').innerText = trend;
+  const pathEl = document.getElementById('tc-path');
+  pathEl.classList.toggle('hidden', !typhoon.pathClass);
+  if (typhoon.pathClass) {
+    pathEl.innerText = typhoon.pathClass === 10 ? `CWA path 氣象署路徑：其他（${CWA_PATHS[10]}）`
+      : `CWA path 氣象署路徑：第 ${typhoon.pathClass} 類（${CWA_PATHS[typhoon.pathClass]}）`;
+  }
   document.getElementById('hud-sst').innerText = tcEnv.land ? 'over land' : `${tcEnv.sst.toFixed(1)} °C`;
 }
 
@@ -962,6 +1105,7 @@ uniform vec4 uGeo;           // minLon, maxLat, spanLon, spanLat
 uniform vec4 uTc;            // eye lon, lat, intensity, rotation
 uniform vec2 uTcVel;         // typhoon motion, km per second
 uniform vec4 uHol;           // Holland profile: radius of max wind (km), B, pressure drop (hPa), max gradient wind (m/s)
+uniform float uFric;         // surface wind factor: 1 over sea, lower after landfall
 uniform float uTime;
 
 vec2 geoUv(vec2 ll) { return vec2((ll.x - uGeo.x) / uGeo.z, (uGeo.y - ll.y) / uGeo.w); }
@@ -985,7 +1129,7 @@ float fbm(vec2 p, int oct) {
 vec2 rot2(vec2 q, float a) { float c = cos(a), s = sin(a); return vec2(c * q.x - s * q.y, s * q.x + c * q.y); }
 
 // steering winds (km per screen second at the time-lapse): trade winds blow west, westerlies east.
-// Same numbers as steerMs() in JS.
+// Only the background clouds use this simple version; the storm itself follows steerMs() in JS.
 vec2 steerKm(float lat) { return ${KMS_PER_MS.toFixed(2)} * mix(vec2(-5.0, 1.0), vec2(8.0, 3.0), smoothstep(21.0, 29.0, lat)); }
 
 vec2 tcKm(vec2 ll) {
@@ -1001,10 +1145,10 @@ float hollandWind(float r, float lat) {
   return sqrt(uHol.y * uHol.z * 100.0 / 1.15 * x * exp(-x) + rf * rf) - rf;
 }
 // How fast the clouds turn (km per screen second). It has the Holland shape, but it turns
-// much slower than the 1 s = 1 h time-lapse: at full speed the clouds would only be a blur.
+// much slower than the 1 s = 3 h time-lapse: at full speed the clouds would only be a blur.
 float spinKm(float r) {
   float x = hollandX(r);
-  return 0.42 * uHol.w * sqrt(x * exp(1.0 - x));
+  return 0.42 * uHol.w * uFric * sqrt(x * exp(1.0 - x));
 }
 
 // Storm winds alone, without the steering flow.
@@ -1117,7 +1261,7 @@ void main() {
   float rOut = mix(550.0, 1000.0, I);
   float spin = 0.15 * uTc.w;   // the band pattern turns slowly; the wind does the rest
   float strength = smoothstep(0.0, 0.25, I);
-  float clear = smoothstep(0.35, 0.8, I);
+  float clear = smoothstep(0.35, 0.8, I) * smoothstep(0.7, 0.92, uFric);   // mountains fill the eye
   vec2 qs = rot2(q, -spin);
   float nL = fbm(qs / 6400.0 + vec2(uTime * 0.0021, -uTime * 0.0017), 3);
   // two fields moving apart make convective cells grow, merge and die
@@ -1178,12 +1322,13 @@ void main() {
   // warm, windy sea evaporates the most water; land gives a little
   vec4 F = texture(uField, uv);
   float sst = 20.0 + 15.0 * F.r;
-  float windy = min(1.0, length(vortexKm(q, 0.0)) / max(0.42 * uHol.w, 1.0));
+  float windy = min(1.0, length(vortexKm(q, 0.0)) / max(0.42 * uHol.w * uFric, 1.0));
   float evap = mix((0.15 + 1.2 * windy) * smoothstep(18.0, 28.5, sst), 0.06, land);
   wet += uDt * (evap * (1.0 - wet) - 0.6 * up * wet - 0.3 * conv * wet);
 
   // the eye: sinking air clears it out
   float eyeSink = (1.0 - smoothstep(rEye * 0.8, rEye * 1.4, r)) * clear;
+  down *= 1.0 - 0.9 * cdo * strength;   // the thick storm core keeps its cloud over the mountains
   float kSub = 0.6 * (1.0 - sub) * smoothstep(rOut * 0.6, rOut * 1.1, r) + 1.2 * down;
   // relax toward the local weather; the wind carries what is already there
   low += uDt * (0.9 * (tLow - low) - (kSub + 5.0 * eyeSink) * low);
@@ -1297,7 +1442,7 @@ vec3 cloudsAt(vec2 ll, float rKm, out float lit) {
   // the eye is smaller than a simulation cell, so cut it out here
   float I = uTc.z;
   float rEye = mix(45.0, 16.0, I);
-  float clear = smoothstep(0.35, 0.8, I);
+  float clear = smoothstep(0.35, 0.8, I) * smoothstep(0.7, 0.92, uFric);
   float eye = mix(1.0, smoothstep(rEye * 0.7, rEye * 1.3, rKm + 3.0 * det), clear);
   // bumpy tops: tall storm clouds catch more sun
   lit = 0.9 + 0.07 * smoothstep(-1.2, 1.2, det) + 0.06 * C.b;
@@ -1426,7 +1571,7 @@ void main() {
     }
   } else {
     if (uLayer == 3) {
-      float kt = max(hollandWind(rKm, ll.y) * ${SFC_WIND} * ${MS_TO_KT}, 8.0) * mix(1.0, 0.75, land);
+      float kt = max(hollandWind(rKm, ll.y) * ${SFC_WIND} * ${MS_TO_KT} * uFric, 8.0) * mix(1.0, 0.75, land);
       col = mix(satBase * 0.55, windColor(kt), 0.6);
     } else {
       // isobars: typhoon low inside a Pacific high and the autumn continental high
@@ -1543,7 +1688,7 @@ function initCloudSim(gl) {
 
   const prog = linkProgram(gl, SIM_SRC);
   const loc = {};
-  for (const name of ['uPrev', 'uSize', 'uDt', 'uDither', 'uLand', 'uNoise', 'uField', 'uGeo', 'uTc', 'uTcVel', 'uHol', 'uTime']) loc[name] = gl.getUniformLocation(prog, name);
+  for (const name of ['uPrev', 'uSize', 'uDt', 'uDither', 'uLand', 'uNoise', 'uField', 'uGeo', 'uTc', 'uTcVel', 'uHol', 'uFric', 'uTime']) loc[name] = gl.getUniformLocation(prog, name);
   gl.useProgram(prog);
   gl.uniform1i(loc.uPrev, 5);
   gl.uniform1i(loc.uLand, 2);
@@ -1560,14 +1705,15 @@ function tcVelKm() {
   const [, lat] = tcLonLat();
   let vx = typhoon.vx * SPAN_LON * 111.32 * Math.cos(lat * DEG);
   let vy = -typhoon.vy * SPAN_LAT * 110.57;
-  const sp = Math.hypot(vx, vy), cap = 40;
+  const sp = Math.hypot(vx, vy), cap = 120;
   if (sp > cap) { vx *= cap / sp; vy *= cap / sp; }
   return [vx, vy];
 }
 
 // Holland profile for the shaders: radius of max wind, B, pressure drop, max gradient wind
 function hollandUniform(gl, loc) {
-  gl.uniform4f(loc, tcRmwKm(), tcHollandB(), P_ENV - tcPressure(), gradWindMs(tcRmwKm(), tcLonLat()[1]));
+  gl.uniform4f(loc.uHol, tcRmwKm(), tcHollandB(), P_ENV - tcPressure(), gradWindMs(tcRmwKm(), tcLonLat()[1]));
+  gl.uniform1f(loc.uFric, typhoon.fric);
 }
 
 function stepClouds(n, dt) {
@@ -1578,7 +1724,7 @@ function stepClouds(n, dt) {
   gl.viewport(0, 0, CLOUD_W, CLOUD_H);
   gl.uniform4f(c.loc.uTc, lon, lat, typhoon.intensity, typhoon.rot);
   gl.uniform2f(c.loc.uTcVel, vx, vy);
-  hollandUniform(gl, c.loc.uHol);
+  hollandUniform(gl, c.loc);
   gl.uniform1f(c.loc.uDt, dt);
   gl.activeTexture(gl.TEXTURE5);
   for (let i = 0; i < n; i++) {
@@ -1623,7 +1769,7 @@ function initGL() {
   gl.enableVertexAttribArray(0);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
-  for (const name of ['uRes', 'uView', 'uDem', 'uDemTw', 'uLand', 'uNoise', 'uField', 'uDemGeo', 'uDemSize', 'uTwGeo', 'uTwSize', 'uTwBox', 'uGeo', 'uTwScale', 'uTc', 'uTcVel', 'uHol', 'uTime', 'uLayer', 'uCloud']) {
+  for (const name of ['uRes', 'uView', 'uDem', 'uDemTw', 'uLand', 'uNoise', 'uField', 'uDemGeo', 'uDemSize', 'uTwGeo', 'uTwSize', 'uTwBox', 'uGeo', 'uTwScale', 'uTc', 'uTcVel', 'uHol', 'uFric', 'uTime', 'uLayer', 'uCloud']) {
     gpu.loc[name] = gl.getUniformLocation(prog, name);
   }
 
@@ -1707,7 +1853,7 @@ function renderGL(timeSec) {
   const [lon, lat] = tcLonLat();
   const [vx, vy] = tcVelKm();
   gl.uniform2f(gpu.loc.uTcVel, vx, vy);
-  hollandUniform(gl, gpu.loc.uHol);
+  hollandUniform(gl, gpu.loc);
   gl.viewport(0, 0, gpu.w, gpu.h);
   gl.uniform2f(gpu.loc.uRes, gpu.w, gpu.h);
   gl.uniform3f(gpu.loc.uView, view.cx, view.cy, view.k * s);
@@ -2169,7 +2315,7 @@ function loop(timestamp) {
     lastCardUpdate = now;
     updateTyphoonCard();
     // 10-minute satellite frames at the time-lapse speed
-    const simMs = satClockStart + Math.floor(timeSec * LAPSE / 600) * 600000;
+    const simMs = Math.floor(simClockMs() / 600000) * 600000;
     const d = new Date(simMs + 8 * 3600000);
     document.getElementById('sat-time').innerText =
       `${d.toISOString().slice(0, 10)} ${d.toISOString().slice(11, 16)} (UTC+8)`;
@@ -2289,6 +2435,7 @@ function onPointerDown(e) {
     return;
   }
   typhoon.isDragging = true;
+  resetPath();
   steerTo(ll, true);
 
   if (CONFIG.isSoundEnabled && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
@@ -2451,6 +2598,13 @@ function setupInteractions() {
     document.getElementById('label-coriolis-slider').innerText = `${CONFIG.coriolisFactor.toFixed(1)}x`;
   });
 
+  const info = document.getElementById('modal-info');
+  const closeInfo = () => info.classList.add('hidden');
+  document.getElementById('btn-info').addEventListener('click', () => info.classList.remove('hidden'));
+  document.getElementById('btn-close-info').addEventListener('click', closeInfo);
+  info.addEventListener('click', e => { if (e.target === info) closeInfo(); });
+  window.addEventListener('keydown', e => { if (e.key === 'Escape') closeInfo(); });
+
   document.getElementById('btn-benchmark-start').addEventListener('click', startBenchmark);
   document.getElementById('btn-rerun-bench').addEventListener('click', startBenchmark);
   document.getElementById('btn-close-modal').addEventListener('click', () => {
@@ -2486,6 +2640,7 @@ function setupInteractions() {
     typhoon.x = typhoon.targetX = lonToNormX(TC_START.lon);
     typhoon.y = typhoon.targetY = latToNormY(TC_START.lat);
     typhoon.intensity = 0.85;
+    newStormState();
     probe = null;
     sstAnom = null;
     u = v = density = null;
@@ -2506,6 +2661,16 @@ function setupInteractions() {
   });
 }
 
+// A new storm: no landfall history, its own random wander
+function newStormState() {
+  typhoon.fric = 1;
+  typhoon.au = gauss();
+  typhoon.av = gauss();
+  typhoon.leeDone = false;
+  typhoon.note = null;
+  resetPath();
+}
+
 // =========================================================================
 // STARTUP
 // =========================================================================
@@ -2513,6 +2678,7 @@ function setupInteractions() {
 async function start() {
   try {
     await loadMapData();
+    newStormState();
     handleResize();
     initGL();
     resizeGL();
