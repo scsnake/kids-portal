@@ -345,7 +345,7 @@ const CONFIG = {
   particleCount: 65000,
   renderScale: 0.75,
   cmrHeight: 3952,
-  sstBase: 30.0,
+  sstBase: 32.5,
   coriolisFactor: 1.0,
   activeLayer: 'satellite', // 'satellite', 'radar', 'topo', 'stream', 'pressure', 'sst'
   showPeaks: true,
@@ -1501,7 +1501,8 @@ vec3 sstColor(float t) {
   float s[7] = float[7](20.0, 23.0, 25.5, 27.0, 28.5, 30.0, 31.5);
   vec3 c[7] = vec3[7](vec3(0.17, 0.20, 0.70), vec3(0.15, 0.55, 0.85), vec3(0.20, 0.78, 0.75),
                       vec3(0.65, 0.85, 0.30), vec3(0.98, 0.75, 0.20), vec3(0.95, 0.35, 0.15), vec3(0.75, 0.08, 0.30));
-  return ramp7(t, s, c);
+  // one more step for very warm seas (the default tropical sea is 32.5 C)
+  return mix(ramp7(t, s, c), vec3(0.45, 0.05, 0.45), clamp((t - 31.5) / 1.5, 0.0, 1.0));
 }
 
 void main() {
@@ -2503,7 +2504,7 @@ const LEGENDS = {
   topo: { title: 'Elevation 海拔 (m) · sea depth 水深', stops: [[0, '#4d854d'], [200, '#80ab5c'], [600, '#cccc7a'], [1200, '#cc9e5e'], [2000, '#9e6e4a'], [3000, '#8f7870'], [3700, '#f2f2f2']], ticks: [0, 1000, 2000, 3000, '3952'] },
   stream: { title: 'Wind speed 風速 (kt)', stops: [[0, '#1a2961'], [20, '#2673bf'], [34, '#33b3b3'], [64, '#59cc4d'], [90, '#fad133'], [115, '#f25926'], [140, '#cc26bf']], ticks: [0, 34, 64, 100, 140] },
   pressure: { title: 'Sea level pressure 氣壓 · lines every 4 hPa', stops: [[905, '#d94d59'], [1018, '#4073d9']], ticks: [905, 960, 1018] },
-  sst: { title: 'Sea temperature 海溫 (°C) · cool trail = cold wake 冷尾流', stops: [[20, '#2b33b3'], [23, '#268cd9'], [25.5, '#33c7bf'], [27, '#a6d94d'], [28.5, '#fabf33'], [30, '#f25926'], [31.5, '#bf144d']], ticks: [20, 23, 26, 29, 32] }
+  sst: { title: 'Sea temperature 海溫 (°C) · cool trail = cold wake 冷尾流', stops: [[20, '#2b33b3'], [23, '#268cd9'], [25.5, '#33c7bf'], [27, '#a6d94d'], [28.5, '#fabf33'], [30, '#f25926'], [31.5, '#bf144d'], [33, '#730d73']], ticks: [20, 23, 26.5, 30, 33] }
 };
 
 function updateLegend() {

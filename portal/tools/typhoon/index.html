@@ -341,9 +341,9 @@
       <div>
         <div class="flex justify-between text-gray-300 mb-1">
           <span>Tropical Sea Surface Temp:</span>
-          <span id="label-sst-slider" class="mono text-red-400 font-bold">30.0 °C</span>
+          <span id="label-sst-slider" class="mono text-red-400 font-bold">32.5 °C</span>
         </div>
-        <input id="slider-sst" type="range" min="24" max="34" step="0.5" value="30.0" class="w-full">
+        <input id="slider-sst" type="range" min="24" max="34" step="0.5" value="32.5" class="w-full">
         <p class="text-[10px] text-gray-500 mt-0.5">Typhoons need sea water above about 26.5 °C.</p>
       </div>
 
@@ -376,27 +376,29 @@
       </div>
 
       <p class="mb-3 px-3 py-2 rounded-lg bg-amber-950/50 border border-amber-700/50 text-amber-100">
-        This is a learning toy, not a weather forecast. The maker of this page is not a weather professional.
-        For real typhoon news, use the <a class="underline text-amber-300" href="https://www.cwa.gov.tw/" target="_blank" rel="noopener">Central Weather Administration 中央氣象署</a>.<br>
-        這是學習用的模擬，不是天氣預報。本頁作者不是氣象專業人員。真實颱風消息請看中央氣象署。
+        For learning only. This is not a weather forecast. The author is not a meteorologist, and the
+        storms on this page are simplified, so they can behave very differently from real typhoons.
+        For real typhoon information, follow the <a class="underline text-amber-300" href="https://www.cwa.gov.tw/" target="_blank" rel="noopener">Central Weather Administration 中央氣象署</a>.<br>
+        本模擬僅供學習，不是天氣預報。作者並非氣象專業人士，畫面中的颱風經過大幅簡化，可能與真實颱風差異很大。實際颱風資訊請以中央氣象署發布為準。
       </p>
 
       <h3 class="font-semibold text-cyan-300 mt-3 mb-1">Data 資料</h3>
       <ul class="list-disc pl-5 space-y-1 text-gray-300">
-        <li>Coastlines: Natural Earth 1:10m countries.</li>
-        <li>Land height and sea depth: NOAA ETOPO1 (1 arc-minute).</li>
-        <li>Typhoon tracks: IBTrACS v04r01 (NOAA NCEI), West Pacific, 1980–2024. From them we take the mean storm motion for each place and month, how much it varies, and how long a storm keeps its own direction.</li>
-        <li>Path classes 路徑分類: the Central Weather Administration's classes for typhoons that hit Taiwan (第 1–9 類 and 其他).</li>
+        <li>Coastlines 海岸線: Natural Earth, 1:10m.</li>
+        <li>Land height and sea depth 地形與水深: NOAA ETOPO1 (1 arc-minute grid).</li>
+        <li>Typhoon tracks 颱風路徑: IBTrACS v04r01 (NOAA NCEI), western North Pacific, 1980–2024. For each place and month, the page uses the average storm motion, how much it varies, and how long a storm keeps its own direction.</li>
+        <li>Path classes 路徑分類: the Central Weather Administration's classes for typhoons that affect Taiwan (第 1–9 類 and 特殊路徑). This page picks the class with simple rules, so it can differ from the official class.</li>
+        <li>Sea temperature 海溫: not real-time data. A simple pattern: cooler toward the north, warmer along the Kuroshio 黑潮, and cooler over the shallow shelf in the north. The slider sets the tropical value (default 32.5 °C).</li>
       </ul>
 
       <h3 class="font-semibold text-cyan-300 mt-3 mb-1">Model 模型</h3>
       <ul class="list-disc pl-5 space-y-1 text-gray-300">
-        <li>Time-lapse: 1 second on screen = 3 hours of weather.</li>
-        <li>Wind and pressure: the Holland (1980) typhoon profile. Land slows the surface wind first; the low fills more slowly.</li>
-        <li>Movement: the steering wind from the track data, plus beta drift (about 2 m/s to the north-west), plus a random wander for each storm. High mountains ahead slow the storm and bend its path. Over Taiwan's mountains, a new low sometimes forms on the far side.</li>
-        <li>Strength: warm sea (above about 26 °C) makes the storm stronger. Land, high mountains and the cool water it stirs up (cold wake) make it weaker. These are simple rules, not a full weather model.</li>
-        <li>Clouds: a GPU cloud field that the model wind moves. Warm sea adds water vapour. Rising air (air flowing together, wind up a mountain) makes cloud and rain; sinking air clears it. The cloud texture is drawn to look like a satellite picture.</li>
-        <li>View: the Earth as seen by a geostationary satellite above 140.7°E (like Himawari-9).</li>
+        <li>Time-lapse 縮時: 1 second on screen = 3 hours of weather.</li>
+        <li>Wind and pressure 風與氣壓: the Holland (1980) typhoon wind profile. Over land, friction quickly slows the surface wind, while the central pressure rises more slowly.</li>
+        <li>Movement 移動: the steering flow from the track data, plus beta drift (about 2 m/s toward the north-west), plus a random wander that is different for each storm. High mountains ahead slow the storm and bend its path. Over Taiwan's Central Mountain Range, a new low sometimes forms on the far side and takes over (背風面副低壓).</li>
+        <li>Strength 強度: a warm sea (above about 26 °C) makes the storm stronger. Land, high mountains and the cool water that the storm stirs up (cold wake 冷尾流) make it weaker. These are simple rules, not a full weather model.</li>
+        <li>Clouds 雲: a cloud field on the GPU, moved by the model wind. A warm sea adds water vapour. Rising air (where winds flow together or blow up a mountain) makes cloud and rain; sinking air clears it. The clouds are drawn to look like a satellite image.</li>
+        <li>View 視角: the Earth as seen from a geostationary satellite above 140.7°E, like Himawari-9 向日葵9號.</li>
       </ul>
     </div>
   </div>
@@ -452,6 +454,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=10"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>
