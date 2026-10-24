@@ -845,7 +845,9 @@ function smooth(a, b, x) { const t = Math.max(0, Math.min(1, (x - a) / (b - a)))
 function gauss() { return Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random()); }
 
 // simulated clock (ms) and its month: 0.0 = 1 January ... 11.99 = end of December
-function simClockMs() { return satClockStart + (performance.now() - t0) * LAPSE; }
+// It counts only the time the storm was really stepped, so a hidden tab or a slow start does not skip days.
+let simSec = 0;
+function simClockMs() { return satClockStart + simSec * 1000 * LAPSE; }
 function simMonth() {
   const d = new Date(simClockMs() + 8 * 3600000);
   const days = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
@@ -998,8 +1000,9 @@ function updateTyphoon(dt) {
     typhoon.targetY = Math.max(0.03, Math.min(0.97, typhoon.targetY));
   }
   const px0 = typhoon.x, py0 = typhoon.y;
-  typhoon.x += (typhoon.targetX - typhoon.x) * 0.08;
-  typhoon.y += (typhoon.targetY - typhoon.y) * 0.08;
+  const follow = 1 - Math.pow(0.92, dt * 60);   // 8% per frame at 60 FPS
+  typhoon.x += (typhoon.targetX - typhoon.x) * follow;
+  typhoon.y += (typhoon.targetY - typhoon.y) * follow;
   const k = Math.min(1, dt * 4);
   typhoon.vx += ((typhoon.x - px0) / Math.max(dt, 1e-3) - typhoon.vx) * k;
   typhoon.vy += ((typhoon.y - py0) / Math.max(dt, 1e-3) - typhoon.vy) * k;
@@ -2245,6 +2248,21 @@ function runAdaptiveGovernor(now, currentFps) {
   }
 }
 
+// Dialogs: move focus inside on open, and give it back on close
+let modalReturnFocus = null;
+function openModal(el, focusEl) {
+  if (el.classList.contains('hidden')) modalReturnFocus = document.activeElement;
+  el.classList.remove('hidden');
+  focusEl.focus();
+}
+function closeModal(el) {
+  if (el.classList.contains('hidden')) return;
+  if (el.contains(document.activeElement)) document.activeElement.blur();
+  el.classList.add('hidden');
+  if (modalReturnFocus && document.contains(modalReturnFocus)) modalReturnFocus.focus();
+  modalReturnFocus = null;
+}
+
 function startBenchmark() {
   bench.active = true;
   bench.duration = 15.0;
@@ -2255,11 +2273,12 @@ function startBenchmark() {
   bench.totalOps = 0;
   bench.startTime = performance.now();
   bench.lastFrameTime = performance.now();
+  if (!bench.prevTier) bench.prevTier = CONFIG.currentTier;   // a re-run keeps the first saved tier
 
   applyGranularityTier(4, false); // Level 4 Ultra
 
   document.getElementById('benchmark-toast').classList.remove('hidden');
-  document.getElementById('modal-benchmark-result').classList.add('hidden');
+  closeModal(document.getElementById('modal-benchmark-result'));
 }
 
 function finishBenchmark() {
@@ -2300,8 +2319,12 @@ function finishBenchmark() {
   document.getElementById('result-res-summary').innerText = `${GW} × ${GH}`;
   document.getElementById('result-advect-summary').innerText = CONFIG.particleCount.toLocaleString();
 
-  if (CONFIG.isAdaptive) applyGranularityTier(CONFIG.currentTier, false);
-  document.getElementById('modal-benchmark-result').classList.remove('hidden');
+  // back to the level from before the test, and forget the test's frame rates
+  applyGranularityTier(bench.prevTier || CONFIG.currentTier, false);
+  bench.prevTier = 0;
+  governor.fpsHistory = [];
+  governor.cooldown = 2;
+  openModal(document.getElementById('modal-benchmark-result'), document.getElementById('btn-close-modal'));
 }
 
 // =========================================================================
@@ -2312,30 +2335,36 @@ const t0 = performance.now();
 let lastFrame = performance.now();
 let lastDraw = -Infinity;
 let simAcc = 0;
+let windowOps = 0;
 const SIM_HZ = 60;
 let lastCardUpdate = 0;
 // simulated satellite clock: one image every 10 minutes at the time-lapse speed
 const satClockStart = Math.floor(Date.now() / 600000) * 600000;
 
 function loop(timestamp) {
-  // Draw at most targetFPS frames a second, so a 120 Hz screen does not switch between 60 and 120
-  if (timestamp - lastDraw < 1000 / CONFIG.targetFPS - 4) {
+  // Draw at most targetFPS frames a second, so a 120 Hz screen does not switch between 60 and 120.
+  // lastDraw follows an ideal schedule, so caps like 90 or 75 FPS also work on a 120 Hz screen.
+  const interval = 1000 / CONFIG.targetFPS;
+  if (timestamp - lastDraw < interval - 1.5) {
     requestAnimationFrame(loop);
     return;
   }
-  lastDraw = timestamp;
+  // never ahead of the real frame (a 60.05 Hz screen must not drop frames); restart after a stall
+  lastDraw = timestamp - lastDraw > 2 * interval ? timestamp : Math.min(timestamp, lastDraw + interval);
   bench.lastFrameTime = timestamp;
   const now = performance.now();
   const dt = Math.min(0.05, (now - lastFrame) / 1000);
   lastFrame = now;
 
+  simSec += dt;
   updateTyphoon(dt);
 
   // CPU wind grid and particles: fixed 60 Hz steps keep the wind the same speed at any frame rate
   let frameOps = 0;
   simAcc = Math.min(simAcc + dt, 3 / SIM_HZ);
   for (let n = 0; n < 2 && simAcc > 0.5 / SIM_HZ; n++) {
-    for (let s = 0; s < CONFIG.substeps; s++) frameOps += fluidStep(0.08);
+    // more substeps add accuracy, not speed
+    for (let s = 0; s < CONFIG.substeps; s++) frameOps += fluidStep(0.08 / CONFIG.substeps);
     frameOps += updateParticles(0.12);
     simAcc -= 1 / SIM_HZ;
   }
@@ -2356,10 +2385,12 @@ function loop(timestamp) {
   }
 
   frameCount++;
+  windowOps += frameOps;
   if (now - lastFpsUpdate >= 500) {
     fps = Math.round((frameCount * 1000) / (now - lastFpsUpdate));
     rollingFps = rollingFps * 0.7 + fps * 0.3;
-    currentOpsPerSec = Math.round(frameOps * fps);
+    currentOpsPerSec = Math.round(windowOps * 1000 / (now - lastFpsUpdate));
+    windowOps = 0;
     document.getElementById('fps-counter').innerText = fps;
     document.getElementById('megaops-counter').innerText = (currentOpsPerSec / 1000000).toFixed(1);
     runAdaptiveGovernor(now, fps);
@@ -2453,10 +2484,11 @@ function movePinch() {
 }
 
 function onPointerDown(e) {
-  canvas.setPointerCapture(e.pointerId);
+  try { canvas.setPointerCapture(e.pointerId); } catch (_) { /* the pointer is already gone */ }
   const pos = localPos(e);
   pointers.set(e.pointerId, pos);
   if (pointers.size === 2) {
+    pendingTouch = null;
     typhoon.isDragging = false;
     startPinch();
     return;
@@ -2470,11 +2502,23 @@ function onPointerDown(e) {
     probe = { lon: ll[0], lat: ll[1], info };
     return;
   }
+  if (CONFIG.isSoundEnabled && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  // A pinch starts with one finger: wait a moment for a second finger before steering
+  if (e.pointerType === 'touch') {
+    pendingTouch = { ll, t: performance.now() };
+    return;
+  }
+  startSteering(ll);
+}
+
+let pendingTouch = null;
+const TOUCH_HOLD_MS = 100;
+
+function startSteering(ll) {
+  pendingTouch = null;
   typhoon.isDragging = true;
   resetPath();
   steerTo(ll, true);
-
-  if (CONFIG.isSoundEnabled && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 }
 
 function onPointerMove(e) {
@@ -2490,11 +2534,17 @@ function onPointerMove(e) {
     const info = updateInspector(ll);
     if (CONFIG.probeMode && pointers.size === 1) probe = { lon: ll[0], lat: ll[1], info };
   }
+  if (pendingTouch && pointers.size === 1 && performance.now() - pendingTouch.t > TOUCH_HOLD_MS) startSteering(pendingTouch.ll);
   if (typhoon.isDragging && pointers.size === 1) steerTo(ll, false);
 }
 
 function onPointerUp(e) {
   pointers.delete(e.pointerId);
+  // a one-finger tap steers too
+  if (pendingTouch && pointers.size === 0) {
+    startSteering(pendingTouch.ll);
+    typhoon.isDragging = false;
+  }
   if (pointers.size < 2) pinch = null;
   if (pointers.size === 0) typhoon.isDragging = false;
 }
@@ -2637,17 +2687,20 @@ function setupInteractions() {
   });
 
   const info = document.getElementById('modal-info');
-  const closeInfo = () => info.classList.add('hidden');
-  document.getElementById('btn-info').addEventListener('click', () => info.classList.remove('hidden'));
-  document.getElementById('btn-close-info').addEventListener('click', closeInfo);
-  info.addEventListener('click', e => { if (e.target === info) closeInfo(); });
-  window.addEventListener('keydown', e => { if (e.key === 'Escape') closeInfo(); });
+  const benchModal = document.getElementById('modal-benchmark-result');
+  document.getElementById('btn-info').addEventListener('click', () => openModal(info, document.getElementById('btn-close-info')));
+  document.getElementById('btn-close-info').addEventListener('click', () => closeModal(info));
+  info.addEventListener('click', e => { if (e.target === info) closeModal(info); });
+  benchModal.addEventListener('click', e => { if (e.target === benchModal) closeModal(benchModal); });
+  window.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    closeModal(info);
+    closeModal(benchModal);
+  });
 
   document.getElementById('btn-benchmark-start').addEventListener('click', startBenchmark);
   document.getElementById('btn-rerun-bench').addEventListener('click', startBenchmark);
-  document.getElementById('btn-close-modal').addEventListener('click', () => {
-    document.getElementById('modal-benchmark-result').classList.add('hidden');
-  });
+  document.getElementById('btn-close-modal').addEventListener('click', () => closeModal(benchModal));
 
   document.getElementById('card-rough-score').addEventListener('click', () => {
     showScalingToast(`Detected Hardware: ${hardwareRating.tierName} (${hardwareRating.classType})`);
@@ -2728,6 +2781,10 @@ async function start() {
     updateLegend();
     updateInspector([121.0, 23.5]);
     document.getElementById('loading').classList.add('hidden');
+    // start the FPS and governor clocks now, not before the slow start-up work
+    lastFrame = lastFpsUpdate = governor.lastEvalTime = performance.now();
+    frameCount = 0;
+    governor.fpsHistory = [];
     governor.lockAt = performance.now() + GOVERNOR_SETTLE_MS;
     requestAnimationFrame(loop);
   } catch (err) {
