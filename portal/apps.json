@@ -72,6 +72,13 @@
       "desc": "找出收集／使用 MP 的組合，讓 MP 剛好落在目標範圍",
       "url": "tools/pokemon-mp-calc/",
       "icon": "⚡"
+    },
+    {
+      "id": "typhoon",
+      "title": "颱風衛星雲圖",
+      "desc": "真實海岸線與地形的西太平洋衛星雲圖：拖曳颱風，看高山和海溫怎樣改變它，還能測裝置運算分數",
+      "url": "tools/typhoon/",
+      "icon": "🌀"
     }
   ]
 }
