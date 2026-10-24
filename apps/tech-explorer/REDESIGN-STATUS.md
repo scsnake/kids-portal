@@ -7,10 +7,10 @@ Use [AGENT-HANDOFF.md](AGENT-HANDOFF.md) for future work.
 
 - Version 29 already includes fourteen legacy activity replacements and refinements across nine packaged security units.
 - Version 30 adds twelve medium-priority activity replacements to its release scope.
-- Two additional Gemini previews are deferred: `ewastechute` and `hashblender`. Their version 29 lessons remain unchanged.
+- Version 31 adds the reviewed recycling and password-hash redesigns: `ewastechute` and `hashblender`.
 
 The original “37” total counts 28 activity replacements and nine unit-level redesign items.
-It is not a count of 37 individual slides. Two of those activities are excluded from this release.
+It is not a count of 37 individual slides. All 28 activity replacements are included through version 31.
 Check the [live release marker](https://kids-tech.scsnake.xyz/release.json) for the deployed version and exact revision.
 This file records implementation scope; it is not deployment proof.
 
@@ -80,16 +80,16 @@ The checked-in scope record is `tests/redesign/medium/manifest.json` at the repo
 Production modules are `js/widgets-medium.js` and `js/medium/batch1.js` through `batch3.js`.
 Styles are in `widgets-medium.css`. The original slide titles remain unchanged to preserve progress.
 
-## Deferred to Gemini
+## Previously deferred activities: version 31 release scope
 
-| Unit ID | Existing slide identity | Deferred widget | Required follow-up |
+| Unit ID | Existing slide identity | Widget | Reviewed renewal |
 |---|---|---|---|
-| ewaste | 舊 3C 要丟哪裡？ | ewastechute | Correct waste sorting and damaged-battery handling. |
-| passwordattacks | 網站不該存原密碼 | hashblender | Explain password guessing accurately and label simulated hashes. |
+| ewaste | 舊 3C 要丟哪裡？ | ewastechute | Sort used tissues and dry batteries; explain safe handling of damaged batteries. |
+| passwordattacks | 網站不該存原密碼 | hashblender | Show the one-way concept and explain guessing; label the demonstration as illustrative. |
 
-Owner decision: bypass these two redesigns and let Gemini modify them.
-Do not include them in a later release without a new preview, content review, and owner approval.
-Their original Gemini source files remain outside the production bundle.
+The owner deferred these two in version 30, then requested deployment after Gemini reviewed and redesigned them.
+Their production modules are `js/medium/ewastechute.js` and `js/medium/hashblender.js`.
+Original slide titles and saved progress identities remain unchanged. No activities in this batch remain deferred.
 
 ## Remaining catalog
 

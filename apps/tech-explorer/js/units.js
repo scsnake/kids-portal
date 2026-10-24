@@ -517,24 +517,10 @@ export const UNITS = [
     slides: [
       {
         title: '舊 3C 要丟哪裡？',
-        text: `壞掉、不用的 3C 叫${t('電子廢棄物', 'e-waste')}，不能丟一般垃圾，要${t('回收', 'recycling')}。電池放超商的回收筒，舊手機拿去電信門市或回收點。分分看！`,
-        widget: 'sort',
-        params: {
-          bins: [
-            { id: 'tech', icon: '♻️', label: '3C 回收' },
-            { id: 'cell', icon: '🔋', label: '電池回收筒' },
-            { id: 'trash', icon: '🗑️', label: '一般垃圾' },
-          ],
-          items: [
-            { icon: '📱', label: '舊手機', bin: 'tech' },
-            { icon: '🎧', label: '壞掉的耳機', bin: 'tech' },
-            { icon: '🔌', label: '舊充電線', bin: 'tech' },
-            { icon: '🔋', label: '用完的乾電池', bin: 'cell' },
-            { icon: '🪫', label: '舊行動電源', bin: 'cell' },
-            { icon: '🧻', label: '用過的衛生紙', bin: 'trash' },
-            { icon: '😷', label: '用過的口罩', bin: 'trash' },
-          ],
-        },
+        text: "壞掉的手機、線材和用完的乾電池不能丟進垃圾車！用過的髒衛生紙是一般垃圾。將物品精準投入正確的回收管道！",
+        widget: 'ewastechute',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '手機裡面有什麼？',
@@ -3500,8 +3486,10 @@ export const UNITS = [
       },
       {
         title: '網站不該存原密碼',
-        text: `好的網站會儲存密碼的${t('雜湊', 'hash')}，像不能倒著還原的指紋。登入時再比對指紋，不必看見原本的密碼。用教學機器試三次！`,
-        widget: 'hashdemo',
+        text: "安全的網站不會存你的原始密碼，而是用單向果汁機把密碼打成果汁指紋（<b class=\"term\">雜湊<span class=\"en\" lang=\"en\">hash</span></b>）。把水果打成果汁，再試試看能不能把它變回水果！",
+        widget: 'hashblender',
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '考考你',

@@ -1,10 +1,10 @@
 {
   "batch": "medium-priority",
-  "baseCommit": "2e0c5d66d472dce4f20c9455fae37a6a59dcf2fc",
+  "baseCommit": "0f23784f5b9cd4b86b155d622cc55dba8786998b",
   "authoringBaseCommit": "ac87ec9051c2086cdbdba7c79411022218345233",
   "createdAt": "2026-10-24",
   "author": "Gemini (AGY)",
-  "description": "Twelve approved activities; recycling and hash redesigns deferred by owner.",
+  "description": "Fourteen approved activities; the two previously deferred redesigns are now approved.",
   "integration": "Documentary scope record; the production registry and lesson source perform registration.",
   "widgetsModule": "../../../apps/tech-explorer/js/widgets-medium.js",
   "stylesFile": "../../../apps/tech-explorer/widgets-medium.css",
@@ -117,10 +117,25 @@
       "title": "時區",
       "text": "地球圓圓的在自轉，太陽只能照到一半。轉動地球儀，看看當台北是陽光明媚的中午時，世界的另一邊正在做什麼！",
       "pedagogy": "【旋轉地球儀與晨昏線】原為文字時差算術題。以 3D 地球儀與固定太陽光束，旋轉時即時呈現台北吃午餐 vs 倫敦熟睡中，把抽象時區轉化為真實宇宙物理直覺。"
+    },
+    {
+      "unitId": "ewaste",
+      "slideIdentity": "舊 3C 要丟哪裡？",
+      "action": "replace-widget",
+      "widget": "ewastechute",
+      "title": "舊 3C 要丟哪裡？",
+      "text": "壞掉的手機、線材和用完的乾電池不能丟進垃圾車！用過的髒衛生紙是一般垃圾。將物品精準投入正確的回收管道！",
+      "pedagogy": "【回收管道精準投遞】原為卡片丟垃圾桶。模擬超商門市、廢乾電池專用筒與一般垃圾桶，學習廢乾電池與 3C 安全回收，釐清不可回收一般垃圾與資源分類。"
+    },
+    {
+      "unitId": "passwordattacks",
+      "slideIdentity": "網站不該存原密碼",
+      "action": "replace-widget",
+      "widget": "hashblender",
+      "title": "網站不該存原密碼",
+      "text": "安全的網站不會存你的原始密碼，而是用單向果汁機把密碼打成果汁指紋（雜湊）。把水果打成果汁，再試試看能不能把它變回水果！",
+      "pedagogy": "【神奇單向果汁機】原為三組範例的雜湊比較互動。將密碼（草莓香蕉）打成粉紅奶昔（雜湊指紋），按下倒轉還原按鈕觸發物理不可能警告，說明單向雜湊無法直接逆算，但簡單密碼仍可能被逐一猜中，因此密碼要夠長，每個網站都不同。"
     }
   ],
-  "excluded": [
-    "ewastechute",
-    "hashblender"
-  ]
+  "excluded": []
 }

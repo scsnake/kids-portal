@@ -1,6 +1,6 @@
 import * as hardwareRedesigns from './widgets-hardware.js?v=29';
 import * as safetyRedesigns from './widgets-safety.js?v=29';
-import * as mediumRedesigns from './widgets-medium.js?v=30';
+import * as mediumRedesigns from './widgets-medium.js?v=31';
 
 // Interactions, one per slide. Each widget is `(host, params, api) => void`:
 //   host   the element to draw into (emptied before each slide)

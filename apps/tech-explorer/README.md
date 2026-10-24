@@ -155,9 +155,10 @@ python3 -m http.server 8765 --bind 127.0.0.1
   Each one gets `api.done()` to award the star.
 - `js/widgets-hardware.js` and `widgets-hardware.css`: seven approved Gemini activities for computer input/output, phone parts, storage, CPU, GPU, and AI.
 - `js/widgets-safety.js` and `widgets-safety.css`: seven approved Gemini activities for verification codes, Wi-Fi, purchases, account recovery, fake voices, DNS, and conditions.
-- `js/widgets-medium.js`, `js/medium/batch1.js` through `batch3.js`, and `widgets-medium.css`: twelve approved Gemini activities in existing lessons.
+- `js/widgets-medium.js`, `js/medium/batch1.js` through `batch3.js`, and `widgets-medium.css`: fourteen approved Gemini activities in existing lessons.
   They cover portable devices, peripherals, charging safety, RAM and storage, sensors, URL parts, TLS, digital assets, HTTPS, tracking cookies, autoplay, and time zones.
-  The recycling and password-hash redesigns remain deferred. Their previous lessons remain unchanged.
+  `js/medium/ewastechute.js` adds safe waste sorting and a damaged-battery warning.
+  `js/medium/hashblender.js` demonstrates one-way hashes and explains that passwords can still be guessed.
 - `js/main.js`: routing (`#/u/<unit>/<slide>`), stars in `localStorage`, sound,
   and read-aloud with the device's zh-TW voice.
 - `style.css`: shared styles. Each unit sets its own accent color `--c`.
@@ -167,7 +168,7 @@ When you change a file, bump its `?v=`: `style.css` and `js/main.js` in
 The topic release command updates these versions automatically for new topics.
 
 For legacy redesigns, `tests/redesign/medium/manifest.json` records the approved replacements and exclusions.
-`tests/redesign/medium/checks.json` records completion checks for the twelve activities.
+`tests/redesign/medium/checks.json` records completion checks for the fourteen activities.
 Run `tests/redesign/browser.py --group all` with Playwright to test all approved legacy redesigns, including completion and replay.
 These checks supplement the topic package and home-return tests. A smoke check does not authorize deployment.
 

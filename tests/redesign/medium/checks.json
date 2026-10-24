@@ -400,5 +400,119 @@
       "selector": "#globeStatus",
       "text": "時區"
     }
+  ],
+  "ewastechute": [
+    {
+      "action": "click",
+      "selector": "[data-chute=\"green\"]"
+    },
+    {
+      "action": "expectText",
+      "selector": "#ewStatus",
+      "text": "請先"
+    },
+    {
+      "action": "click",
+      "selector": "[data-item=\"battery\"]"
+    },
+    {
+      "action": "click",
+      "selector": "[data-chute=\"red\"]"
+    },
+    {
+      "action": "expectText",
+      "selector": "#ewStatus.bad",
+      "text": "廢乾電池"
+    },
+    {
+      "action": "waitFor",
+      "selector": ".b1-flying-token",
+      "state": "hidden"
+    },
+    {
+      "action": "click",
+      "selector": "[data-chute=\"yellow\"]"
+    },
+    {
+      "action": "expectText",
+      "selector": "#ewCounter",
+      "text": "1 / 4"
+    },
+    {
+      "action": "click",
+      "selector": "[data-item=\"phone\"]"
+    },
+    {
+      "action": "click",
+      "selector": "[data-chute=\"green\"]"
+    },
+    {
+      "action": "expectText",
+      "selector": "#ewCounter",
+      "text": "2 / 4"
+    },
+    {
+      "action": "click",
+      "selector": "[data-item=\"cable\"]"
+    },
+    {
+      "action": "click",
+      "selector": "[data-chute=\"green\"]"
+    },
+    {
+      "action": "expectText",
+      "selector": "#ewCounter",
+      "text": "3 / 4"
+    },
+    {
+      "action": "click",
+      "selector": "[data-item=\"tissue\"]"
+    },
+    {
+      "action": "click",
+      "selector": "[data-chute=\"red\"]"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#ewCompletion"
+    },
+    {
+      "action": "expectText",
+      "selector": "#ewCompletion",
+      "text": "先告訴大人"
+    }
+  ],
+  "hashblender": [
+    {
+      "action": "click",
+      "selector": "#btnReverse"
+    },
+    {
+      "action": "expectText",
+      "selector": "#blenderStatus.bad",
+      "text": "請先"
+    },
+    {
+      "action": "click",
+      "selector": "#btnBlend"
+    },
+    {
+      "action": "expectText",
+      "selector": "#dbHashValue",
+      "text": "e8a9f4c2"
+    },
+    {
+      "action": "click",
+      "selector": "#btnReverse"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#blenderStatus.good"
+    },
+    {
+      "action": "expectText",
+      "selector": "#blenderStatus",
+      "text": "一組一組猜"
+    }
   ]
 }
