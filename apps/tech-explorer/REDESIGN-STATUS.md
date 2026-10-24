@@ -6,11 +6,13 @@ Use [AGENT-HANDOFF.md](AGENT-HANDOFF.md) for future work.
 ## Release status
 
 - Version 29 already includes fourteen legacy activity replacements and refinements across nine packaged security units.
-- Version 30 preparation adds twelve medium-priority activity replacements. Deployment verification is pending.
+- Version 30 adds twelve medium-priority activity replacements to its release scope.
 - Two additional Gemini previews are deferred: `ewastechute` and `hashblender`. Their version 29 lessons remain unchanged.
 
 The original “37” total counts 28 activity replacements and nine unit-level redesign items.
 It is not a count of 37 individual slides. Two of those activities are excluded from this release.
+Check the [live release marker](https://kids-tech.scsnake.xyz/release.json) for the deployed version and exact revision.
+This file records implementation scope; it is not deployment proof.
 
 ## Hardware and compute: live in version 29
 
@@ -57,7 +59,7 @@ All nine units received Gemini redesign attribution. Five also received focused 
 
 These units already existed before the Gemini redesign release. Do not credit the badge-only changes as new unit creation.
 
-## Medium-priority activities: version 30 candidate
+## Medium-priority activities: version 30 release scope
 
 | Unit ID | Existing slide identity | Widget | Renewal |
 |---|---|---|---|

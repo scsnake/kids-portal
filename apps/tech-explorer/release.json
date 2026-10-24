@@ -1,7 +1,8 @@
 {
-  "id": "ffc3f0d740e2902074a5d0bab7bbc146862a7ca33b2d2f387deff216b44ca24e",
-  "baseCommit": "42350e9ab132bcff7c739c50a19fd03ed055ce17",
+  "id": "cda329eeee02298d4047c00a5fca57c17a758e204a6cc34d8931e9f6de06c7e1",
+  "baseCommit": "2e0c5d66d472dce4f20c9455fae37a6a59dcf2fc",
   "topics": ["websiteflow", "webmemory", "loginsafety", "ipports", "firewall", "vpn", "trickdoors", "antivirus", "backupplan"],
-  "changes": ["approved-gemini-redesign", "14-interactive-replacements", "production-layout-and-accessibility"],
-  "assetsVersion": "29"
+  "changes": ["approved-gemini-medium-redesign", "12-interactive-replacements", "agent-preview-handoff-guide", "gemini-renewal-status"],
+  "excludedWidgets": ["ewastechute", "hashblender"],
+  "assetsVersion": "30"
 }
