@@ -13,6 +13,7 @@ import topic10 from '../topics/trolls/topic.mjs?v=784f56a460948fee06e8135efa2022
 import topic11 from '../topics/behindscreen/topic.mjs?v=6302aba7fdbde6c7c75c93f7266a7f24180c77bef36baf4327676f7b72d5a6ca';
 import topic12 from '../topics/influencers/topic.mjs?v=52c45754f3e68848665c9f0a995d0c2f40a0f9b2f25de7f0637f89ee6e798170';
 import topic13 from '../topics/strangerdm/topic.mjs?v=84c7c6125d11a7551155d6132bee34cba6810dc0fbcc8e2f3d5ee51dc7bef015';
+import topic14 from '../topics/adcopy/topic.mjs?v=c18f3cb48b94ef589be98657fc60f24ae7a0374956d4eb9ecf0e469149f8e9ae';
 export const TOPICS = [
   { topic: topic0, ...{"module":"topics/websiteflow/topic.mjs","releasedAt":"2026-10-23","sourceHash":"a9d1b86c9d1e72e9966335e50f3a52054ace700e73c5484cb0206bca1ad4d1cf"} },
   { topic: topic1, ...{"module":"topics/webmemory/topic.mjs","releasedAt":"2026-10-23","sourceHash":"f4954caa5640d4847d6322c6d8fb6be05411cc5eaaf89018ef4b6e8cf20b6abf"} },
@@ -28,4 +29,5 @@ export const TOPICS = [
   { topic: topic11, ...{"module":"topics/behindscreen/topic.mjs","releasedAt":"2026-10-24","sourceHash":"6302aba7fdbde6c7c75c93f7266a7f24180c77bef36baf4327676f7b72d5a6ca"} },
   { topic: topic12, ...{"module":"topics/influencers/topic.mjs","releasedAt":"2026-10-24","sourceHash":"52c45754f3e68848665c9f0a995d0c2f40a0f9b2f25de7f0637f89ee6e798170"} },
   { topic: topic13, ...{"module":"topics/strangerdm/topic.mjs","releasedAt":"2026-10-24","sourceHash":"84c7c6125d11a7551155d6132bee34cba6810dc0fbcc8e2f3d5ee51dc7bef015"} },
+  { topic: topic14, ...{"module":"topics/adcopy/topic.mjs","releasedAt":"2026-10-24","sourceHash":"c18f3cb48b94ef589be98657fc60f24ae7a0374956d4eb9ecf0e469149f8e9ae"} },
 ];
