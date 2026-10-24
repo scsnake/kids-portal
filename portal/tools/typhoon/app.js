@@ -1135,6 +1135,42 @@ float heightRaw(vec2 ll) {
 
 // Simulated clouds plus fine texture that rides the same wind (two cross-faded phases).
 // Returns low cloud (x), cirrus (y), deep convection (z).
+// Curved streaks in the cloud core. They lie along log spirals, turn with the wind
+// (faster near the eye) and drift slowly outward with the outflow.
+// Two phases cross-fade so the inner streaks never wind up too tight.
+float coreStreaks(vec2 q, float r) {
+  float I = uTc.z;
+  float rm = mix(120.0, 50.0, I);
+  float vg = 32.0 * mix(0.3, 1.0, I);
+  float vt = r < rm ? vg * r / rm : vg * sqrt(rm / r);
+  float om = vt / max(r, 1.0);                 // turning rate, rad per second
+  float th = atan(q.y, q.x);
+  float lr = log(max(r, 1.0) / 100.0);
+  // gradients from the smooth Cartesian frame: atan jumps at +-pi
+  vec2 qx = dFdx(q), qy = dFdy(q);
+  float r2 = max(r * r, 1.0);
+  vec2 dth = vec2(q.x * qx.y - q.y * qx.x, q.x * qy.y - q.y * qy.x) / r2;
+  vec2 dlr = vec2(dot(q, qx), dot(q, qy)) / r2;
+  const float B = 1.6;                         // spiral tightness, same sense as the rain bands
+  const float K = 1.0;                         // noise tiles around the circle (an integer, so no seam)
+  const float L = 0.08;                        // slow change along a streak makes it long
+  const float T = 3.0;
+  float s = 0.0, ww = 0.0;
+  for (int k = 0; k < 2; k++) {
+    float f = fract(uTime / T + 0.5 * float(k));
+    float w = 1.0 - abs(2.0 * f - 1.0);
+    float a = th - om * f * T;
+    float l = lr - 0.12 * om * f * T;
+    vec2 p = vec2(K * (a + B * l) / 6.2831853, L * l) + vec2(0.0, 0.37 * float(k));
+    vec2 gx = vec2(K * (dth.x + B * dlr.x) / 6.2831853, L * dlr.x);
+    vec2 gy = vec2(K * (dth.y + B * dlr.y) / 6.2831853, L * dlr.y);
+    float n = 0.8 * textureGrad(uNoise, p, gx, gy).b + 0.2 * textureGrad(uNoise, 2.0 * p + 0.29, 2.0 * gx, 2.0 * gy).a;
+    s += w * (n - 0.5);
+    ww += w * w;
+  }
+  return 0.5 + s * inversesqrt(ww);
+}
+
 vec3 cloudsAt(vec2 ll, float rKm, out float lit) {
   vec4 C = texture(uCloud, geoUv(ll));
   float cl = cos(radians(ll.y));
@@ -1161,6 +1197,16 @@ vec3 cloudsAt(vec2 ll, float rKm, out float lit) {
   float eye = mix(1.0, smoothstep(rEye * 0.7, rEye * 1.3, rKm + 3.0 * det), clear);
   // bumpy tops: tall storm clouds catch more sun
   lit = 0.9 + 0.07 * smoothstep(-1.2, 1.2, det) + 0.06 * C.b;
+
+  // spiral streaks with darker grooves between them inside the dense core
+  float rCdo = mix(110.0, 280.0, I);
+  float wCore = smoothstep(0.5, 0.8, C.r) * (1.0 - smoothstep(rCdo * 0.9, rCdo * 1.4, rKm)) * smoothstep(0.3, 0.6, I);
+  // no branch here: the streaks need screen derivatives, which must stay in uniform flow
+  vec2 qk = tcKm(ll);
+  float st = smoothstep(0.3, 0.7, coreStreaks(qk, rKm));
+  wCore *= 0.35 + 0.65 * smoothstep(-0.8, 0.9, fbm(rot2(qk, uTc.w * 0.15) / 2600.0 + 2.3, 2));   // strong in some patches only
+  low *= 1.0 - wCore * 0.18 * (1.0 - st);
+  lit *= mix(1.0, 0.91 + 0.13 * st, wCore);
   return vec3(low * eye, cir * eye, conv * eye);
 }
 
