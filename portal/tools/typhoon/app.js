@@ -420,8 +420,12 @@ const governor = {
   evalInterval: 1200,
   fpsHistory: [],
   cooldown: 0,
-  stableStreak: 0
+  stableStreak: 0,
+  lockAt: Infinity     // after this time the level stays fixed; set when the run starts
 };
+// The governor picks a level in the first seconds only. Level changes later made the
+// frame rate and the wind look jump (120 Hz screens: 120 FPS, step up, drop to 60 FPS).
+const GOVERNOR_SETTLE_MS = 12000;
 
 const bench = {
   active: false,
@@ -2197,6 +2201,18 @@ function runAdaptiveGovernor(now, currentFps) {
     return;
   }
 
+  if (now > governor.lockAt) {
+    // locked: step down only when the device really cannot keep up
+    if (avgRecentFps < target * 0.75 && CONFIG.currentTier > 1) {
+      stateLabel.innerText = "Throttling Down (Lag Protection)";
+      applyGranularityTier(CONFIG.currentTier - 1, true);
+      governor.cooldown = 3;
+    } else {
+      stateLabel.innerText = `Locked @ ${avgRecentFps.toFixed(0)} FPS`;
+    }
+    return;
+  }
+
   if (avgRecentFps < target - 7) {
     if (CONFIG.currentTier > 1) {
       stateLabel.innerText = "Throttling Down (Lag Protection)";
@@ -2214,6 +2230,8 @@ function runAdaptiveGovernor(now, currentFps) {
         applyGranularityTier(CONFIG.currentTier + 1, true);
         governor.cooldown = 3;
         governor.stableStreak = 0;
+        // check the new level before locking it
+        governor.lockAt = Math.max(governor.lockAt, now + 6000);
       } else {
         stateLabel.innerText = "Max Granularity (Hypercane)";
       }
@@ -2291,11 +2309,20 @@ function finishBenchmark() {
 
 const t0 = performance.now();
 let lastFrame = performance.now();
+let lastDraw = -Infinity;
+let simAcc = 0;
+const SIM_HZ = 60;
 let lastCardUpdate = 0;
-// simulated satellite clock: one image every 10 minutes, 1 s = 3 min
+// simulated satellite clock: one image every 10 minutes at the time-lapse speed
 const satClockStart = Math.floor(Date.now() / 600000) * 600000;
 
 function loop(timestamp) {
+  // Draw at most targetFPS frames a second, so a 120 Hz screen does not switch between 60 and 120
+  if (timestamp - lastDraw < 1000 / CONFIG.targetFPS - 4) {
+    requestAnimationFrame(loop);
+    return;
+  }
+  lastDraw = timestamp;
   bench.lastFrameTime = timestamp;
   const now = performance.now();
   const dt = Math.min(0.05, (now - lastFrame) / 1000);
@@ -2303,9 +2330,15 @@ function loop(timestamp) {
 
   updateTyphoon(dt);
 
+  // CPU wind grid and particles: fixed 60 Hz steps keep the wind the same speed at any frame rate
   let frameOps = 0;
-  for (let s = 0; s < CONFIG.substeps; s++) frameOps += fluidStep(0.08);
-  frameOps += updateParticles(0.12);
+  simAcc = Math.min(simAcc + dt, 3 / SIM_HZ);
+  for (let n = 0; n < 2 && simAcc > 0.5 / SIM_HZ; n++) {
+    for (let s = 0; s < CONFIG.substeps; s++) frameOps += fluidStep(0.08);
+    frameOps += updateParticles(0.12);
+    simAcc -= 1 / SIM_HZ;
+  }
+  simAcc = Math.min(simAcc, 0.5 / SIM_HZ);   // a slow device runs the wind slower instead of catching up
 
   const timeSec = (now - t0) / 1000;
   renderGL(timeSec);
@@ -2556,6 +2589,7 @@ function setupInteractions() {
     const indicator = document.getElementById('hud-adaptive-indicator');
     if (val === 'adaptive') {
       CONFIG.isAdaptive = true;
+      governor.lockAt = performance.now() + GOVERNOR_SETTLE_MS;
       indicator.innerText = `ADAPTIVE ${CONFIG.targetFPS}FPS`;
       indicator.className = 'text-[10px] px-1.5 rounded bg-cyan-900/60 text-cyan-200 mono';
       applyGranularityTier(CONFIG.currentTier, true);
@@ -2570,6 +2604,7 @@ function setupInteractions() {
 
   document.getElementById('slider-target-fps').addEventListener('input', e => {
     CONFIG.targetFPS = parseInt(e.target.value, 10);
+    governor.lockAt = performance.now() + GOVERNOR_SETTLE_MS;
     document.getElementById('label-target-fps').innerText = `${CONFIG.targetFPS} FPS`;
     if (CONFIG.isAdaptive) document.getElementById('hud-adaptive-indicator').innerText = `ADAPTIVE ${CONFIG.targetFPS}FPS`;
   });
@@ -2690,6 +2725,7 @@ async function start() {
     updateLegend();
     updateInspector([121.0, 23.5]);
     document.getElementById('loading').classList.add('hidden');
+    governor.lockAt = performance.now() + GOVERNOR_SETTLE_MS;
     requestAnimationFrame(loop);
   } catch (err) {
     console.error(err);

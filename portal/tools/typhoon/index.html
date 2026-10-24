@@ -298,7 +298,7 @@
         <div class="flex items-center space-x-1.5 min-w-0">
           <label for="select-granularity-mode" class="text-[11px] text-gray-400 font-medium whitespace-nowrap">Granularity:</label>
           <select id="select-granularity-mode" class="min-w-0 bg-gray-900 border border-cyan-700/60 rounded-md text-xs px-2 py-1 text-cyan-300 font-semibold focus:outline-none focus:ring-1 focus:ring-cyan-400">
-            <option value="adaptive" selected>⚡ Auto: Adaptive Governor</option>
+            <option value="adaptive" selected>⚡ Auto: pick at start, then fixed</option>
             <option value="eco">Manual: Level 1 (Eco 128×96)</option>
             <option value="balanced">Manual: Level 2 (Balanced 160×120)</option>
             <option value="high">Manual: Level 3 (High 192×144)</option>
@@ -357,11 +357,11 @@
 
       <div>
         <div class="flex justify-between text-gray-300 mb-1">
-          <span>Target Governor Framerate:</span>
+          <span>Frame Rate Cap:</span>
           <span id="label-target-fps" class="mono text-emerald-400 font-bold">60 FPS</span>
         </div>
         <input id="slider-target-fps" type="range" min="30" max="120" step="5" value="60" class="w-full">
-        <p class="text-[10px] text-gray-500 mt-0.5">The governor changes grid and image detail to hit this FPS.</p>
+        <p class="text-[10px] text-gray-500 mt-0.5">At start, the governor picks the grid and image detail that hold this FPS, then keeps them.</p>
       </div>
     </div>
   </footer>
@@ -451,6 +451,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>
