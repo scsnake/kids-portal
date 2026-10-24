@@ -68,41 +68,42 @@ yet; 「直接開始」 closes it.
 41. 訂閱和自動續訂: cancel a 7-day free trial before day 8 charges NT$290, turn off unused subscriptions (monthly and yearly totals), the steps to cancel on iPad, a 「first month for 1 dollar」 offer
 42. 智慧手錶和穿戴裝置: green light measures the heart rate at rest and after running (with a stethoscope heartbeat sound), what the watch does alone vs with the phone, fall detection calling 119
 43. 社群上的禮貌: Etiquette on social media: text without tone of voice, group-chat manners, asking before posting or tagging someone, and when to use a public comment or a private message.
+44. 酸民和引戰文: Tell disagreement from trolling, see in a simulator how replies feed ragebait while muting lets it sink, find the angry blaming words that spread faster, and match mute, block and report to cases.
 
 **Part 2: 原理探索 (how it works)**
 
-44. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
-45. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
-46. 電腦怎麼做加法？: counting up in binary with carries, a half adder from XOR and AND, a 4-bit ripple-carry adder stepped one column at a time
-47. 作業系統: what an OS does, time sharing (multitasking)
-48. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
-49. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
-50. 聲音和影片怎麼變成數字: sampling a sound wave (and hearing it), frames per second with a bouncing ball, why video needs compression
-51. 人臉和指紋辨識: Face ID dots on a face and on a flat photo (front and side views, unlock or shake), a face as numbers compared with a limit (a twin gets in), Touch ID feature points, why the passcode still matters
-52. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
-53. AI 怎麼學？: learning from examples, why data matters (bias)
-54. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
-55. 網路的實體: follow a message from Taiwan to the US (cell tower, machine room, submarine cable, data center) on a map with Taiwan's real outline, submarine cables, data centers and their power
-56. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
-57. 物聯網和智慧家電: which things go online, a smart plant pot's message from sensor to phone, an air-conditioner rule with AND or OR over one day, default passwords on home cameras, how a tap at school reaches a lamp at home
-58. IP 位址和連接埠: Route pretend requests by IP address, port and protocol, see that a port needs a listening program, and compare private addresses with a shared public address.
-59. 防火牆: Practice firewall rules in a simulator: stateful return traffic, a narrow allow rule instead of allow-all, and how a firewall differs from HTTPS, malware scanning and NAT.
-60. VPN 虛擬私人網路: Compare an ordinary route with a VPN tunnel, toggle VPN and HTTPS separately to see who can observe what in a simplified model, and learn what a VPN does not do.
-61. 駭客想要什麼？: attack goals, permission before testing, social engineering, and practice boundaries
-62. 密碼怎麼被猜到？: common passwords, password combinations, credential stuffing, and one-way password hashes
-63. 網路上的攻擊: HTTP vs HTTPS on a fake Wi-Fi network, DDoS traffic, automatic visitors, and persistent traffic protection
-64. 惡意程式和漏洞: malware types, an unlocked-door vulnerability, zero-day exposure, and installing a security update
-65. 壞人怎麼讓你幫忙開門？: Four attack paths, fake-fix command tricks, verification-code theft, untrusted programs, and pause-and-verify decisions.
-66. 防毒軟體能做什麼？: Known-pattern and behavior detection, quarantine, missed threats and false alarms, platform limits, and layered protection.
-67. 備份：還有另一份: Separate backup copies, sync propagation, version history, 3-2-1 planning, offline protection, restore tests, and ransomware recovery.
-68. 演算法: steps, binary search (number guessing), sorting by swaps
-69. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
-70. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
-71. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
-72. QR Code 怎麼運作？: tap the three finder squares to turn a tilted code upright, black = 1 and white = 0 (paint two bytes to spell Hi), error correction (which damage still scans)
-73. 電腦怎麼記住時間？: a quartz crystal drives a 15-bit counter (32768 = 2^15) with slow and normal speed, syncing with an atomic-clock time server, time zones
-74. GPS 怎麼算出位置？: distance from signal time and the speed of light, trilateration with three circles, a fourth satellite fixes the phone clock
-75. 機器人和自動駕駛怎麼看路？: sense, think, act (the answer turns into a flow chart that loops through the 有人 / 沒人 branch), camera vs radar vs lidar in fog, a robot vacuum that maps a room and stops at the stairs
+45. 電腦裡面: CPU, RAM vs storage, binary, bits vs bytes, key codes
+46. 邏輯閘: AND (switches in a row), OR (side by side), NOT (the fridge light), gates in everyday rules
+47. 電腦怎麼做加法？: counting up in binary with carries, a half adder from XOR and AND, a 4-bit ripple-carry adder stepped one column at a time
+48. 作業系統: what an OS does, time sharing (multitasking)
+49. 螢幕和感測器: touchscreen grid, sensors, mouse movement, pixels, RGB, LCD vs OLED, print dots
+50. 資料怎麼存起來？: hard disk, flash/SSD, compression (run-length, lossy vs lossless), local vs cloud storage
+51. 聲音和影片怎麼變成數字: sampling a sound wave (and hearing it), frames per second with a bouncing ball, why video needs compression
+52. 人臉和指紋辨識: Face ID dots on a face and on a flat photo (front and side views, unlock or shake), a face as numbers compared with a limit (a twin gets in), Touch ID feature points, why the passcode still matters
+53. CPU 和 GPU: cores, parallel computing, why AI uses GPUs
+54. AI 怎麼學？: learning from examples, why data matters (bias)
+55. 網路怎麼傳東西？: electromagnetic waves, IP address, packets, routers, servers
+56. 網路的實體: follow a message from Taiwan to the US (cell tower, machine room, submarine cable, data center) on a map with Taiwan's real outline, submarine cables, data centers and their power
+57. 網址和加密: URL parts, DNS, why we encrypt, a shift cipher, the TLS handshake
+58. 物聯網和智慧家電: which things go online, a smart plant pot's message from sensor to phone, an air-conditioner rule with AND or OR over one day, default passwords on home cameras, how a tap at school reaches a lamp at home
+59. IP 位址和連接埠: Route pretend requests by IP address, port and protocol, see that a port needs a listening program, and compare private addresses with a shared public address.
+60. 防火牆: Practice firewall rules in a simulator: stateful return traffic, a narrow allow rule instead of allow-all, and how a firewall differs from HTTPS, malware scanning and NAT.
+61. VPN 虛擬私人網路: Compare an ordinary route with a VPN tunnel, toggle VPN and HTTPS separately to see who can observe what in a simplified model, and learn what a VPN does not do.
+62. 駭客想要什麼？: attack goals, permission before testing, social engineering, and practice boundaries
+63. 密碼怎麼被猜到？: common passwords, password combinations, credential stuffing, and one-way password hashes
+64. 網路上的攻擊: HTTP vs HTTPS on a fake Wi-Fi network, DDoS traffic, automatic visitors, and persistent traffic protection
+65. 惡意程式和漏洞: malware types, an unlocked-door vulnerability, zero-day exposure, and installing a security update
+66. 壞人怎麼讓你幫忙開門？: Four attack paths, fake-fix command tricks, verification-code theft, untrusted programs, and pause-and-verify decisions.
+67. 防毒軟體能做什麼？: Known-pattern and behavior detection, quarantine, missed threats and false alarms, platform limits, and layered protection.
+68. 備份：還有另一份: Separate backup copies, sync propagation, version history, 3-2-1 planning, offline protection, restore tests, and ransomware recovery.
+69. 演算法: steps, binary search (number guessing), sorting by swaps
+70. 推薦演算法: a video feed that narrows into a filter bubble (同溫層) and opens up again, breaking the bubble, autoplay
+71. 免費 App 怎麼賺錢: a free balloon game with ads and a back room that logs your data, Cookies and tracking, three ways to earn, a flashlight App that wants contacts
+72. 程式怎麼做出 App？: programming languages, a robot program, bugs and debugging, if-then, from code to the App Store
+73. QR Code 怎麼運作？: tap the three finder squares to turn a tilted code upright, black = 1 and white = 0 (paint two bytes to spell Hi), error correction (which damage still scans)
+74. 電腦怎麼記住時間？: a quartz crystal drives a 15-bit counter (32768 = 2^15) with slow and normal speed, syncing with an atomic-clock time server, time zones
+75. GPS 怎麼算出位置？: distance from signal time and the speed of light, trilateration with three circles, a fourth satellite fixes the phone clock
+76. 機器人和自動駕駛怎麼看路？: sense, think, act (the answer turns into a flow chart that loops through the 有人 / 沒人 branch), camera vs radar vs lidar in fog, a robot vacuum that maps a room and stops at the stairs
 
 ## Saved progress
 

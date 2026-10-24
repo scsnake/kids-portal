@@ -9,6 +9,7 @@ import topic6 from '../topics/trickdoors/topic.mjs?v=dcb9497fa480a8136c7fe994e9a
 import topic7 from '../topics/antivirus/topic.mjs?v=8fc6cddd8b5284a4a1993fe0ecdf83c893fbdae55e662a239e132d7c129fba1f';
 import topic8 from '../topics/backupplan/topic.mjs?v=0d69612110e3756613383ae2440325261c5d837c35f4f4b03428cb8031a83855';
 import topic9 from '../topics/socialmanners/topic.mjs?v=efd7fa2bb61edcc452507710b73fef1575a7f8eac421cb912a07bebf63d800c2';
+import topic10 from '../topics/trolls/topic.mjs?v=784f56a460948fee06e8135efa202274f0314dfccc270144076de64380b426d4';
 export const TOPICS = [
   { topic: topic0, ...{"module":"topics/websiteflow/topic.mjs","releasedAt":"2026-10-23","sourceHash":"a9d1b86c9d1e72e9966335e50f3a52054ace700e73c5484cb0206bca1ad4d1cf"} },
   { topic: topic1, ...{"module":"topics/webmemory/topic.mjs","releasedAt":"2026-10-23","sourceHash":"f4954caa5640d4847d6322c6d8fb6be05411cc5eaaf89018ef4b6e8cf20b6abf"} },
@@ -20,4 +21,5 @@ export const TOPICS = [
   { topic: topic7, ...{"module":"topics/antivirus/topic.mjs","releasedAt":"2026-10-23","sourceHash":"8fc6cddd8b5284a4a1993fe0ecdf83c893fbdae55e662a239e132d7c129fba1f"} },
   { topic: topic8, ...{"module":"topics/backupplan/topic.mjs","releasedAt":"2026-10-23","sourceHash":"0d69612110e3756613383ae2440325261c5d837c35f4f4b03428cb8031a83855"} },
   { topic: topic9, ...{"module":"topics/socialmanners/topic.mjs","releasedAt":"2026-10-24","sourceHash":"efd7fa2bb61edcc452507710b73fef1575a7f8eac421cb912a07bebf63d800c2"} },
+  { topic: topic10, ...{"module":"topics/trolls/topic.mjs","releasedAt":"2026-10-24","sourceHash":"784f56a460948fee06e8135efa202274f0314dfccc270144076de64380b426d4"} },
 ];
