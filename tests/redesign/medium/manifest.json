@@ -1,0 +1,126 @@
+{
+  "batch": "medium-priority",
+  "baseCommit": "2e0c5d66d472dce4f20c9455fae37a6a59dcf2fc",
+  "authoringBaseCommit": "ac87ec9051c2086cdbdba7c79411022218345233",
+  "createdAt": "2026-10-24",
+  "author": "Gemini (AGY)",
+  "description": "Twelve approved activities; recycling and hash redesigns deferred by owner.",
+  "integration": "Documentary scope record; the production registry and lesson source perform registration.",
+  "widgetsModule": "../../../apps/tech-explorer/js/widgets-medium.js",
+  "stylesFile": "../../../apps/tech-explorer/widgets-medium.css",
+  "checksFile": "./checks.json",
+  "targets": [
+    {
+      "unitId": "devices",
+      "slideIdentity": "桌機和筆電",
+      "action": "replace-widget",
+      "widget": "backpackfit",
+      "title": "桌機和筆電",
+      "text": "桌上型電腦主機和螢幕分開又厚重，必須插電；筆記型電腦與平板有內建電池，能裝進書包隨身帶著走。試著把不同電腦裝進書包！",
+      "pedagogy": "【書包收納大挑戰】原為卡片分類題。以書包裝填實體隱喻，讓孩子親手嘗試放入厚重主機（卡住警告）與輕薄筆電（順暢滑入拉上拉鍊），直觀掌握行動裝置與固定桌機的本質差異。"
+    },
+    {
+      "unitId": "devices",
+      "slideIdentity": "輸入還是輸出？",
+      "action": "replace-widget",
+      "widget": "workbench",
+      "title": "輸入還是輸出？",
+      "text": "把信號送進電腦的是「輸入裝置」，電腦把結果展示出來的是「輸出裝置」。將工作台上的外接裝置插上電腦，觀察信號傳送方向！",
+      "pedagogy": "【實體外接工作台】原為 2 欄文字卡片分類。透過真實外接插頭與流向粒子動畫（麥克風聲音流入 vs 耳機音樂流出、印表機吐紙），讓孩子直觀看見資料進出的物理方向。"
+    },
+    {
+      "unitId": "battery",
+      "slideIdentity": "充電安全",
+      "action": "replace-widget",
+      "widget": "charginghazards",
+      "title": "充電安全",
+      "text": "睡覺時給 3C 充電，如果悶在被子裡或電線破損，很容易過熱起火！在臥室裡找出 3 個充電危險並動手排除！",
+      "pedagogy": "【臥室危險抓抓樂】原為文字選擇題。還原真實臥室場景，點擊搶救被子下發燙的手機移到通風桌上、更換破損充電線、拔除多餘插頭，深植用電安全直覺。"
+    },
+    {
+      "unitId": "inside",
+      "slideIdentity": "電腦裡面的好朋友",
+      "action": "replace-widget",
+      "widget": "deskrelay",
+      "title": "電腦裡面的好朋友",
+      "text": "大書架（硬碟）負責永久保存，辦公桌（記憶體）隨手拿來放正在做的事，忙碌小工人（CPU）飛快動手處理。體驗開啟相簿與突發斷電！",
+      "pedagogy": "【辦公桌與大書架連動】原為靜態圖。透過工人從書架（硬碟）搬書到桌上（RAM）再由 CPU 修改，並點擊「突發停電」展示 RAM 草稿瞬間消失而硬碟仍存，生動理解揮發性記憶體與非揮發性儲存。"
+    },
+    {
+      "unitId": "screens",
+      "slideIdentity": "手機的超能力",
+      "action": "replace-widget",
+      "widget": "sensorheroes",
+      "title": "手機的超能力",
+      "text": "手機上有許多神奇的感測器小英雄，像眼睛和耳朵一樣幫忙察覺周圍環境。遇到天黑、開車轉彎或貼近耳朵時，派出正確的感測英雄！",
+      "pedagogy": "【感測器解謎任務】原為靜態分類。透過黑夜街道、導航轉彎、貼臉通話 3 大生活關卡，孩子親自指派光感、陀螺儀、距離感測器，了解硬體如何感知物理世界。"
+    },
+    {
+      "unitId": "web",
+      "slideIdentity": "網址的三個部分",
+      "action": "replace-widget",
+      "widget": "urltrain",
+      "title": "網址的三個部分",
+      "text": "每一條網址就像一列三節小火車：安全火車頭 (https://)、地址大門車廂 (zoo.gov.tw) 與寶物房間車尾 (/panda)。將車廂依序掛鉤拼起來！",
+      "pedagogy": "【網址火車掛鉤拼圖】原為卡片文字排序。以磁力車廂掛鉤隱喻協定、網域名稱與路徑，三節拼好後火車鳴笛出發並載入對應網頁，把生硬 URL 解構為具象機械。"
+    },
+    {
+      "unitId": "web",
+      "slideIdentity": "TLS：先握手，再說悄悄話",
+      "action": "replace-widget",
+      "widget": "tlshandshake",
+      "title": "TLS：先握手，再說悄悄話",
+      "text": "開始傳悄悄話前，瀏覽器和伺服器會先握手：驗證防偽印章身分證，再把兩半金鑰扣在一起上鎖。一步一步完成安全握手！",
+      "pedagogy": "【數位印章與金鑰拼合】原為文字步驟圖。孩子親手拿放大鏡蓋章檢驗憑證真偽、旋轉扣合金鑰拼圖，最後啟動綠色防護罩，使抽象 TLS Handshake 流程立體可感。"
+    },
+    {
+      "unitId": "attackers",
+      "slideIdentity": "駭客想要什麼？",
+      "action": "replace-widget",
+      "widget": "assetdefense",
+      "title": "駭客想要什麼？",
+      "text": "壞人想偷走你的遊戲寶物、零用錢、個人隱私和電腦設備。拖曳對應的防護盾牌，保護你的數位城堡不受侵害！",
+      "pedagogy": "【金庫資產防禦戰】原為卡片分類。將 4 項重要數位資產與 2FA、家長審核、隱私設定、系統更新盾牌配對，彈飛偷竊狐狸，建立全面資安防禦思維。"
+    },
+    {
+      "unitId": "networkattacks",
+      "slideIdentity": "有人站在網路中間",
+      "action": "replace-widget",
+      "widget": "mitmforcefield",
+      "title": "有人站在網路中間",
+      "text": "沒加密的連線就像在空中傳紙條，壞人能半路攔截竄改；啟動 HTTPS 加密安全通道，保護傳輸資料不被偷看竄改！切換兩種連線看看差別！",
+      "pedagogy": "【中途攔截者與防護力場】原為抽象文字。直觀呈現信件在空氣中飛過時被狐狸用鉛筆竄改，對比 HTTPS 綠色力場將小偷電擊彈飛，明晰傳輸加密的重要性。"
+    },
+    {
+      "unitId": "freeapps",
+      "slideIdentity": "廣告怎麼跟著你？",
+      "action": "replace-widget",
+      "widget": "cookiebackpack",
+      "title": "廣告怎麼跟著你？",
+      "text": "看過的球鞋廣告為什麼一直出現在別的網站上？因為瀏覽器的小背包裡被貼上了 Cookie 追蹤標籤。逛逛看球鞋店並試著清除標籤！",
+      "pedagogy": "【Cookie 標籤小背包】原為選擇題。孩子帶著背包逛球鞋店拿到標籤，到新聞台看板立刻精準推播球鞋；點擊清除 Cookie 乾淨溜溜，體會第三方追蹤機制。"
+    },
+    {
+      "unitId": "recommend",
+      "slideIdentity": "停不下來？",
+      "action": "replace-widget",
+      "widget": "autoplaytug",
+      "title": "停不下來？",
+      "text": "影片播完後倒數 5 秒自動播下一部，大腦很容易被吸引停不下來。在倒數結束前按下「暫停休息」，保衛你的精力電池！",
+      "pedagogy": "【自動播放拔河戰】原為卡片排序。還原影音平台 5 秒自動播放倒數機制，引導孩子主動按下暫停按鈕補充精力電池，培養自律掌控螢幕時間的數位素養。"
+    },
+    {
+      "unitId": "clock",
+      "slideIdentity": "時區",
+      "action": "replace-widget",
+      "widget": "globetime",
+      "title": "時區",
+      "text": "地球圓圓的在自轉，太陽只能照到一半。轉動地球儀，看看當台北是陽光明媚的中午時，世界的另一邊正在做什麼！",
+      "pedagogy": "【旋轉地球儀與晨昏線】原為文字時差算術題。以 3D 地球儀與固定太陽光束，旋轉時即時呈現台北吃午餐 vs 倫敦熟睡中，把抽象時區轉化為真實宇宙物理直覺。"
+    }
+  ],
+  "excluded": [
+    "ewastechute",
+    "hashblender"
+  ]
+}

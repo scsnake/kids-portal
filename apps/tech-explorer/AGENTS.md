@@ -1,6 +1,8 @@
 # Tech-explorer agent workflow
 
 Read `DESIGN.md`, `README.md`, and `TOPICS.md` before adding topics.
+Read `AGENT-HANDOFF.md` before creating previews or handing work to a deployment agent.
+Check `REDESIGN-STATUS.md` before selecting activities for another redesign batch.
 `TOPICS.md` is the shared source for preview, validation, and deployment steps.
 
 ## Owner checkpoints

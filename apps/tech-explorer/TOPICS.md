@@ -1,6 +1,8 @@
 # Topic preview and release workflow
 
 Use this workflow for new tech-explorer topics. It replaces preview copying and regex-based merging.
+For agent deliverables and legacy activity redesigns, also read [AGENT-HANDOFF.md](AGENT-HANDOFF.md).
+For completed Gemini work and exclusions, see [REDESIGN-STATUS.md](REDESIGN-STATUS.md).
 The owner requests topics, reviews previews, requests changes, and then says “deploy this preview.”
 That instruction authorizes the release steps. Do not request a separate “apply” approval.
 

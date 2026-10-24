@@ -134,22 +134,10 @@ export const UNITS = [
       },
       {
         title: '桌機和筆電',
-        text: `${t('桌上型電腦', 'desktop')}的${t('主機', 'tower')}、螢幕和鍵盤是分開的，放在固定的桌上，要插電才能用。${t('筆記型電腦', 'laptop')}把它們合在一起，有電池和${t('觸控板', 'trackpad')}，可以帶著走。分分看！`,
-        widget: 'sort',
-        params: {
-          bins: [
-            { id: 'desk', icon: '🖥️', label: '桌上型電腦', en: 'desktop' },
-            { id: 'lap', icon: '💻', label: '筆記型電腦', en: 'laptop' },
-          ],
-          items: [
-            { icon: '🔌', label: '一定要插電才能用', bin: 'desk' },
-            { icon: '🔧', label: '容易換零件、升級', bin: 'desk' },
-            { icon: '🏠', label: '適合放在家裡固定的書桌', bin: 'desk' },
-            { icon: '🔋', label: '有電池，可以帶去上課', bin: 'lap' },
-            { icon: '👆', label: '鍵盤下面有觸控板', bin: 'lap' },
-            { icon: '😴', label: '闔上蓋子就進入睡眠', bin: 'lap' },
-          ],
-        },
+        text: "<b class=\"term\">桌上型電腦<span class=\"en\" lang=\"en\">desktop</span></b>主機和螢幕分開又厚重，必須插電；<b class=\"term\">筆記型電腦<span class=\"en\" lang=\"en\">laptop</span></b>與平板有內建電池，能裝進書包隨身帶著走。試著把不同電腦裝進書包！",
+        widget: "backpackfit",
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '口袋裡的電腦',
@@ -166,24 +154,10 @@ export const UNITS = [
       },
       {
         title: '輸入還是輸出？',
-        text: `把東西送進電腦的叫${t('輸入裝置', 'input device')}，把結果送出來給我們的叫${t('輸出裝置', 'output device')}。分分看！`,
-        widget: 'sort',
-        params: {
-          bins: [
-            { id: 'in', icon: '📥', label: '輸入（送進去）', en: 'input' },
-            { id: 'out', icon: '📤', label: '輸出（送出來）', en: 'output' },
-          ],
-          items: [
-            { icon: '⌨️', label: '鍵盤', en: 'keyboard', bin: 'in' },
-            { icon: '🖱️', label: '滑鼠', en: 'mouse', bin: 'in' },
-            { icon: '🎙️', label: '麥克風', en: 'microphone', bin: 'in' },
-            { icon: '📷', label: '相機', en: 'camera', bin: 'in' },
-            { icon: '🖥️', label: '螢幕', en: 'screen', bin: 'out' },
-            { icon: '🔊', label: '喇叭', en: 'speaker', bin: 'out' },
-            { icon: '🖨️', label: '印表機', en: 'printer', bin: 'out' },
-            { icon: '🎧', label: '耳機', en: 'headphones', bin: 'out' },
-          ],
-        },
+        text: "把信號送進電腦的是「<b class=\"term\">輸入裝置<span class=\"en\" lang=\"en\">input device</span></b>」，電腦把結果展示出來的是「<b class=\"term\">輸出裝置<span class=\"en\" lang=\"en\">output device</span></b>」。將工作台上的外接裝置插上電腦，觀察信號傳送方向！",
+        widget: "workbench",
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '考考你',
@@ -447,23 +421,10 @@ export const UNITS = [
       },
       {
         title: '充電安全',
-        text: '電池裡裝了很多能量，用錯方法可能會過熱，甚至起火。分分看哪些是安全的做法！',
-        widget: 'sort',
-        params: {
-          rest: 'safe',
-          bins: [
-            { id: 'safe', icon: '✅', label: '安全' },
-            { id: 'danger', icon: '⚠️', label: '危險' },
-          ],
-          items: [
-            { icon: '🏷️', label: '用有「商品安全標章」的充電器', bin: 'safe' },
-            { icon: '🪵', label: '放在硬硬的桌面上充電', bin: 'safe' },
-            { icon: '🧳', label: '搭飛機時，行動電源放隨身包包', bin: 'safe' },
-            { icon: '🛏️', label: '充電時蓋在棉被或枕頭下', bin: 'danger' },
-            { icon: '🩹', label: '線破皮了還繼續用', bin: 'danger' },
-            { icon: '💧', label: '手濕濕的去拔插頭', bin: 'danger' },
-          ],
-        },
+        text: "睡覺時給 3C 充電，如果悶在被子裡或電線破損，很容易過熱起火！在臥室裡找出 3 個充電危險並動手排除！",
+        widget: "charginghazards",
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '考考你',
@@ -2612,20 +2573,10 @@ export const UNITS = [
     slides: [
       {
         title: '電腦裡面的好朋友',
-        text: '電腦裡面也有分工。把每個零件拖到它的工作。',
-        widget: 'sort',
-        params: {
-          bins: [
-            { id: 'cpu', icon: '🧠', label: '負責思考的大腦' },
-            { id: 'ram', icon: '🗒️', label: '正在用的書桌' },
-            { id: 'disk', icon: '📚', label: '收東西的書櫃' },
-          ],
-          items: [
-            { icon: '🔲', label: '處理器', en: 'CPU', bin: 'cpu' },
-            { icon: '📏', label: '記憶體', en: 'RAM', bin: 'ram' },
-            { icon: '💽', label: '硬碟', en: 'hard drive', bin: 'disk' },
-          ],
-        },
+        text: "大書架（<b class=\"term\">硬碟<span class=\"en\" lang=\"en\">hard drive</span></b>）負責永久保存，辦公桌（<b class=\"term\">記憶體<span class=\"en\" lang=\"en\">RAM</span></b>）隨手拿來放正在做的事，忙碌小工人（<b class=\"term\">CPU<span class=\"en\" lang=\"en\">CPU</span></b>）飛快動手處理。體驗開啟相簿與突發斷電！",
+        widget: "deskrelay",
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '關機以後會怎樣？',
@@ -2836,22 +2787,10 @@ export const UNITS = [
       },
       {
         title: '手機的超能力',
-        text: `手機身上有很多${t('感測器', 'sensor')}，像是它的眼睛、耳朵。把每個感測器拖到它的工作。`,
-        widget: 'sort',
-        params: {
-          bins: [
-            { id: 'see', icon: '👀', label: '看東西' },
-            { id: 'hear', icon: '👂', label: '聽聲音' },
-            { id: 'where', icon: '🗺️', label: '知道自己在哪裡' },
-            { id: 'turn', icon: '🔄', label: '知道被轉向了' },
-          ],
-          items: [
-            { icon: '📷', label: '相機', en: 'camera', bin: 'see' },
-            { icon: '🎙️', label: '麥克風', en: 'microphone', bin: 'hear' },
-            { icon: '🛰️', label: '定位', en: 'GPS', bin: 'where' },
-            { icon: '🧭', label: '陀螺儀', en: 'gyroscope', bin: 'turn' },
-          ],
-        },
+        text: "手機上有許多神奇的<b class=\"term\">感測器<span class=\"en\" lang=\"en\">sensor</span></b>小英雄，像眼睛和耳朵一樣幫忙察覺周圍環境。遇到天黑、開車轉彎或貼近耳朵時，派出正確的感測英雄！",
+        widget: "sensorheroes",
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '滑鼠告訴電腦「動了多少」',
@@ -3338,8 +3277,10 @@ export const UNITS = [
     slides: [
       {
         title: '網址的三個部分',
-        text: `網址的英文叫 ${t('URL', 'Uniform Resource Locator')}，就像網路上的地址。它可以分成三段，點每一段看看它的意思！`,
-        widget: 'url',
+        text: "每一條<b class=\"term\">網址<span class=\"en\" lang=\"en\">URL</span></b>就像一列三節小火車：安全火車頭 (https://)、地址大門車廂 (zoo.gov.tw) 與寶物房間車尾 (/panda)。將車廂依序掛鉤拼起來！",
+        widget: "urltrain",
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: 'DNS：網路的通訊錄',
@@ -3361,8 +3302,10 @@ export const UNITS = [
       },
       {
         title: 'TLS：先握手，再說悄悄話',
-        text: `https 用一套叫 ${t('TLS', 'Transport Layer Security')} 的規則來上鎖。開始傳資料前，瀏覽器和網站會先${t('握手', 'handshake')}：檢查網站的${t('憑證', 'certificate')}（像身分證），再約好一把只有雙方知道的鑰匙。按「下一步」，一步一步看！`,
-        widget: 'tls',
+        text: "開始傳悄悄話前，<b class=\"term\">瀏覽器<span class=\"en\" lang=\"en\">browser</span></b>和<b class=\"term\">伺服器<span class=\"en\" lang=\"en\">server</span></b>會先握手：驗證防偽印章身分證，再把兩半<b class=\"term\">金鑰<span class=\"en\" lang=\"en\">key</span></b>扣在一起上鎖。一步一步完成安全握手！",
+        widget: "tlshandshake",
+        params: {},
+        added: '2026-10-24',
       },
     ],
   },
@@ -3481,8 +3424,10 @@ export const UNITS = [
       },
       {
         title: '駭客想要什麼？',
-        text: `攻擊者通常不是只想「看看」。他們可能想拿走錢、帳號、個人資料，或控制裝置。看懂目的，就知道該保護哪裡。把四張卡都打開！`,
-        widget: 'motives',
+        text: "壞人想偷走你的遊戲寶物、零用錢、個人隱私和電腦設備。拖曳對應的防護盾牌，保護你的數位城堡不受侵害！",
+        widget: "assetdefense",
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '先騙人，比破解電腦容易',
@@ -3586,8 +3531,10 @@ export const UNITS = [
     slides: [
       {
         title: '有人站在網路中間',
-        text: `${t('中間人攻擊', 'man-in-the-middle attack')}是有人假裝成中途的網路設備，想偷看或改動資料。比較 HTTP 和 HTTPS 經過假的 Wi-Fi 時，有什麼不同。`,
-        widget: 'route',
+        text: "沒加密的連線就像在空中傳紙條，壞人能半路攔截竄改；啟動 <b class=\"term\">HTTPS<span class=\"en\" lang=\"en\">HTTPS</span></b> 加密安全通道，保護傳輸資料不被偷看竄改！切換兩種連線看看差別！",
+        widget: "mitmforcefield",
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '網站被塞爆了',
@@ -3741,17 +3688,10 @@ export const UNITS = [
       },
       {
         title: '停不下來？',
-        text: '很多 App 會自動播下一支，或讓你一直往下滑、滑不完。你看得越久，App 就能放越多廣告。要不要再看，要由你自己決定。',
-        widget: 'choice',
-        params: {
-          question: '影片播完了，畫面寫著「5 秒後播放下一支」。你可以怎麼做？',
-          options: [
-            { text: '⏹️ 按「取消」，想想時間到了沒', correct: true },
-            { text: '⏩ 讓它一直播下去' },
-            { text: '🔇 把聲音關掉，繼續看' },
-          ],
-          explain: '自動播放是 App 幫你做的決定。按下取消，就換你自己決定。',
-        },
+        text: "影片播完後倒數 5 秒自動播下一部，大腦很容易被吸引停不下來。在倒數結束前按下「暫停休息」，保衛你的精力電池！",
+        widget: "autoplaytug",
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '考考你',
@@ -3786,16 +3726,10 @@ export const UNITS = [
       },
       {
         title: '廣告怎麼跟著你？',
-        text: `網站會在瀏覽器裡放一個小紀錄，叫${t('Cookie', 'cookie')}，記住你看過什麼。廣告公司用它${t('追蹤', 'tracking')}你，所以看過的鞋子，會一直出現在別的網站上。排排看！`,
-        widget: 'order',
-        params: {
-          items: [
-            { icon: '👟', label: '在購物網站看了一雙球鞋' },
-            { icon: '🍪', label: '網站在瀏覽器放了一個 Cookie' },
-            { icon: '📰', label: '過幾天，打開新聞網站' },
-            { icon: '📢', label: '新聞網站的廣告：同一雙球鞋！' },
-          ],
-        },
+        text: "看過的球鞋廣告為什麼一直出現在別的網站上？因為瀏覽器的小背包裡被貼上了 <b class=\"term\">Cookie<span class=\"en\" lang=\"en\">cookie</span></b> 追蹤標籤。逛逛看球鞋店並試著清除標籤！",
+        widget: "cookiebackpack",
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: 'App 的三種賺錢方法',
@@ -3954,8 +3888,10 @@ export const UNITS = [
       },
       {
         title: '時區',
-        text: `地球會轉，各地的白天、黑夜不一樣，所以分成很多${t('時區', 'time zone')}。台灣是 UTC+8，冬天比倫敦快 8 小時。點城市看看，再回答問題！`,
-        widget: 'timezone',
+        text: "地球圓圓的在自轉，太陽只能照到一半。轉動地球儀，看看當台北是陽光明媚的中午時，世界的另一邊正在做什麼！",
+        widget: "globetime",
+        params: {},
+        added: '2026-10-24',
       },
       {
         title: '考考你',

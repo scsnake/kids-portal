@@ -10,6 +10,9 @@ from playwright.async_api import async_playwright
 suite = runpy.run_path(str(Path(__file__).parents[1] / 'topics/browser.py'))
 TARGETS = {'juicebox', 'phonepeek', 'hddseek', 'flashtrap', 'cpuchefs', 'gpusimd', 'aimath',
            'otpdefense', 'packetsniff', 'realwallet', 'kickhacker', 'voiceclone', 'dnslookup', 'ifcondition'}
+MEDIUM_MANIFEST = json.loads((Path(__file__).parent / 'medium/manifest.json').read_text())
+MEDIUM_CHECKS = json.loads((Path(__file__).parent / 'medium/checks.json').read_text())
+MEDIUM_TARGETS = {target['widget'] for target in MEDIUM_MANIFEST['targets']}
 
 
 async def click(page, selector):
@@ -17,7 +20,15 @@ async def click(page, selector):
 
 
 async def play(page, widget):
-    if widget == 'juicebox':
+    if widget in MEDIUM_TARGETS:
+        await suite['actions'](page, MEDIUM_CHECKS[widget])
+        if widget == 'sensorheroes':
+            assert await page.locator('.b2-sh-siri-response').evaluate('''node => {
+              const screen = node.closest('.b2-sh-phone-screen').getBoundingClientRect();
+              const response = node.getBoundingClientRect();
+              return response.top >= screen.top && response.bottom <= screen.bottom;
+            }'''), 'Sensor reply is clipped inside the phone.'
+    elif widget == 'juicebox':
         for fruit in ['apple', 'orange', 'carrot']:
             await click(page, f'[data-fruit="{fruit}"]')
             await page.locator(f'[data-fruit="{fruit}"].done').wait_for()
@@ -87,7 +98,7 @@ async def play(page, widget):
 async def run(engine, args):
     browser = await engine.launch(args=['--mute-audio'] if engine.name == 'chromium' else [])
     played, issues, errors = 0, [], []
-    for width, height, touch, motion in suite['SIZES']:
+    for width, height, touch, motion in (suite['SIZES'][:1] if args.smoke else suite['SIZES']):
         context = await browser.new_context(viewport={'width':width, 'height':height}, has_touch=touch, reduced_motion=motion)
         await context.add_init_script(suite['MUTE'])
         page = await context.new_page()
@@ -95,8 +106,12 @@ async def run(engine, args):
         page.set_default_navigation_timeout(30000)
         page.on('pageerror', lambda error: errors.append(str(error)))
         await page.goto(args.base, wait_until='networkidle')
-        units = await page.evaluate("async () => (await import('./js/course.js?v=29')).UNITS")
-        selected = set(args.widgets or TARGETS)
+        units = await page.evaluate("""async () => {
+          const version = document.querySelector('script[type=module][src]').src.match(/v=(\\d+)/)[1];
+          return (await import('./js/course.js?v=' + version)).UNITS;
+        }""")
+        groups = {'high': TARGETS, 'medium': MEDIUM_TARGETS, 'all': TARGETS | MEDIUM_TARGETS}
+        selected = set(args.widgets or groups[args.group])
         targets = [(u, i, s) for u in units for i, s in enumerate(u['slides']) if s.get('widget') in selected]
         assert len(targets) == len(selected)
         for unit, index, slide in targets:
@@ -110,11 +125,16 @@ async def run(engine, args):
                         await click(page, '.redo')
                         await page.locator('.star-note').evaluate("node => node.classList.remove('got')")
                         await play(page, slide['widget'])
+                        await page.wait_for_timeout(400)
                         played += 1
                     except Exception as error:
                         issues.append({'slide':label, 'actionError':str(error)})
                         break
                 measured = await page.evaluate(suite['MEASURE'])
+                if slide['widget'] in MEDIUM_TARGETS:
+                    panel_overflow = await page.locator('.b1-panel, .b2-panel, .wb3-panel').evaluate(
+                        'node => Math.max(0, node.scrollHeight - node.clientHeight)')
+                    measured['overflow'] = max(measured['overflow'], panel_overflow)
                 if measured['overflow'] > 1 or (touch and (measured['tiny'] or measured['small'])):
                     issues.append({'slide':label, 'phase':phase, **measured})
         await context.close()
@@ -127,12 +147,15 @@ async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--base', default='http://127.0.0.1:8770/')
     parser.add_argument('--report', type=Path, required=True)
-    parser.add_argument('--widgets', nargs='+', choices=sorted(TARGETS))
+    parser.add_argument('--widgets', nargs='+', choices=sorted(TARGETS | MEDIUM_TARGETS))
+    parser.add_argument('--group', choices=['high', 'medium', 'all'], default='high')
+    parser.add_argument('--smoke', action='store_true')
     args = parser.parse_args()
     async with async_playwright() as p:
         results = await asyncio.gather(run(p.chromium,args), run(p.webkit,args))
-    expected = len(args.widgets or TARGETS) * len(suite['SIZES'])
-    report = {'passed':all(not r['issues'] and not r['errors'] and r['played']==expected for r in results), 'results':results}
+    groups = {'high': TARGETS, 'medium': MEDIUM_TARGETS, 'all': TARGETS | MEDIUM_TARGETS}
+    expected = len(args.widgets or groups[args.group]) * (1 if args.smoke else len(suite['SIZES']))
+    report = {'passed':all(not r['issues'] and not r['errors'] and r['played']==expected for r in results), 'smoke':args.smoke, 'results':results}
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
     print(json.dumps({**report, 'results':[{**r, 'issues':len(r['issues'])} for r in results]}))

@@ -1,0 +1,404 @@
+{
+  "backpackfit": [
+    {
+      "action": "click",
+      "selector": ".b1-item-card[data-item='tower']"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#bpStatus.bad"
+    },
+    {
+      "action": "expectText",
+      "selector": "#bpStatus",
+      "text": "太重太大了"
+    },
+    {
+      "action": "click",
+      "selector": ".b1-item-card[data-item='laptop']"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#bpStatus.good"
+    },
+    {
+      "action": "expectText",
+      "selector": "#bpStatus",
+      "text": "成功放進書包"
+    },
+    {
+      "action": "click",
+      "selector": ".b1-item-card[data-item='tablet']"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#bpCompletion"
+    },
+    {
+      "action": "expectText",
+      "selector": "#bpCompletion",
+      "text": "恭喜完成收納"
+    }
+  ],
+  "workbench": [
+    {
+      "action": "click",
+      "selector": ".b1-wb-dev-btn[data-dev='mic']"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#wbStatus.good"
+    },
+    {
+      "action": "expectText",
+      "selector": "#wbStatus",
+      "text": "輸入裝置"
+    },
+    {
+      "action": "click",
+      "selector": ".b1-wb-dev-btn[data-dev='headphones']"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#wbStatus.good"
+    },
+    {
+      "action": "expectText",
+      "selector": "#wbStatus",
+      "text": "輸出裝置"
+    },
+    {
+      "action": "click",
+      "selector": ".b1-wb-dev-btn[data-dev='kbd']"
+    },
+    {
+      "action": "click",
+      "selector": ".b1-wb-dev-btn[data-dev='printer']"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#wbCompletion"
+    },
+    {
+      "action": "expectText",
+      "selector": "#wbCompletion",
+      "text": "全部搞懂囉"
+    }
+  ],
+  "charginghazards": [
+    {
+      "action": "click",
+      "selector": "#hzPhoneBtn"
+    },
+    {
+      "action": "click",
+      "selector": "#hzWireBtn"
+    },
+    {
+      "action": "click",
+      "selector": "#hzStripBtn"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#hzCompletion"
+    },
+    {
+      "action": "expectText",
+      "selector": "#hzCompletion",
+      "text": "臥室充電安全滿分"
+    }
+  ],
+  "deskrelay": [
+    {
+      "action": "click",
+      "selector": "#b2DrBtnLoad"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#b2DrDeskAlbum"
+    },
+    {
+      "action": "expectText",
+      "selector": "#b2DrStatus",
+      "text": "載入記憶體"
+    },
+    {
+      "action": "click",
+      "selector": "#b2DrBtnFilter"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#b2DrStatus"
+    },
+    {
+      "action": "expectText",
+      "selector": "#b2DrStatus",
+      "text": "快速運算"
+    },
+    {
+      "action": "click",
+      "selector": "#b2DrBtnSave"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#b2DrStatus"
+    },
+    {
+      "action": "expectText",
+      "selector": "#b2DrStatus",
+      "text": "硬碟永久保存"
+    }
+  ],
+  "sensorheroes": [
+    {
+      "action": "click",
+      "selector": ".b2-sh-hero-card[data-hero=\"light\"]"
+    },
+    {
+      "action": "waitFor",
+      "selector": ".b2-sh-mission-tab[data-mid=\"1\"].active"
+    },
+    {
+      "action": "click",
+      "selector": ".b2-sh-hero-card[data-hero=\"gyro\"]"
+    },
+    {
+      "action": "waitFor",
+      "selector": ".b2-sh-mission-tab[data-mid=\"2\"].active"
+    },
+    {
+      "action": "click",
+      "selector": ".b2-sh-hero-card[data-hero=\"prox\"]"
+    },
+    {
+      "action": "waitFor",
+      "selector": ".b2-sh-mission-tab[data-mid=\"3\"].active"
+    },
+    {
+      "action": "click",
+      "selector": ".b2-sh-hero-card[data-hero=\"mic\"]"
+    },
+    {
+      "action": "expectText",
+      "selector": "#b2ShStatus",
+      "text": "4 大感測器英雄全部成功解決任務"
+    }
+  ],
+  "urltrain": [
+    {
+      "action": "click",
+      "selector": ".b2-ut-carriage.proto"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#b2UtSlot1.filled"
+    },
+    {
+      "action": "click",
+      "selector": ".b2-ut-carriage.domain"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#b2UtSlot2.filled"
+    },
+    {
+      "action": "click",
+      "selector": ".b2-ut-carriage.path"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#b2UtSlot3.filled"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#b2UtPandaPage"
+    },
+    {
+      "action": "expectText",
+      "selector": "#b2UtStatus",
+      "text": "完整網址"
+    }
+  ],
+  "tlshandshake": [
+    {
+      "action": "click",
+      "selector": "#b2TlsBtn1"
+    },
+    {
+      "action": "click",
+      "selector": "#b2TlsBtn2"
+    },
+    {
+      "action": "click",
+      "selector": "#b2TlsBtn3"
+    },
+    {
+      "action": "click",
+      "selector": "#b2TlsBtn4"
+    },
+    {
+      "action": "expectText",
+      "selector": "#b2TlsStatus",
+      "text": "安全抵達"
+    }
+  ],
+  "assetdefense": [
+    {
+      "action": "click",
+      "selector": "#shield-2fa"
+    },
+    {
+      "action": "click",
+      "selector": "#chest-game"
+    },
+    {
+      "action": "click",
+      "selector": "#shield-parent"
+    },
+    {
+      "action": "click",
+      "selector": "#chest-money"
+    },
+    {
+      "action": "click",
+      "selector": "#shield-privacy"
+    },
+    {
+      "action": "click",
+      "selector": "#chest-photo"
+    },
+    {
+      "action": "click",
+      "selector": "#shield-update"
+    },
+    {
+      "action": "click",
+      "selector": "#chest-pc"
+    },
+    {
+      "action": "expectText",
+      "selector": "#assetStatus",
+      "text": "4 項數位資產"
+    }
+  ],
+  "mitmforcefield": [
+    {
+      "action": "click",
+      "selector": "#tabHttp"
+    },
+    {
+      "action": "click",
+      "selector": "#btnSendPacket"
+    },
+    {
+      "action": "expectText",
+      "selector": "#mitmStatus",
+      "text": "惡意修改"
+    },
+    {
+      "action": "click",
+      "selector": "#tabHttps"
+    },
+    {
+      "action": "click",
+      "selector": "#btnSendPacket"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#mitmStatus.good"
+    },
+    {
+      "action": "expectText",
+      "selector": "#mitmStatus",
+      "text": "原封不動"
+    }
+  ],
+  "cookiebackpack": [
+    {
+      "action": "click",
+      "selector": "#btnInspectShoes"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#shoeTag"
+    },
+    {
+      "action": "click",
+      "selector": "#tabStep2"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#adBillboard"
+    },
+    {
+      "action": "expectText",
+      "selector": "#adBillboard",
+      "text": "慢跑鞋"
+    },
+    {
+      "action": "click",
+      "selector": "#tabStep3"
+    },
+    {
+      "action": "click",
+      "selector": "#btnClearAction"
+    },
+    {
+      "action": "expectText",
+      "selector": "#cookieStatus",
+      "text": "掃乾淨"
+    },
+    {
+      "action": "click",
+      "selector": "#tabStep2"
+    },
+    {
+      "action": "expectText",
+      "selector": "#adBillboard",
+      "text": "戶外運動"
+    }
+  ],
+  "autoplaytug": [
+    {
+      "action": "click",
+      "selector": "#btnPause"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#tugStatus.good"
+    },
+    {
+      "action": "expectText",
+      "selector": "#batteryText",
+      "text": "100%"
+    },
+    {
+      "action": "expectText",
+      "selector": "#tugBadge",
+      "text": "已暫停觀看"
+    }
+  ],
+  "globetime": [
+    {
+      "action": "click",
+      "selector": "#presetTaipeiNoon"
+    },
+    {
+      "action": "click",
+      "selector": "#presetLondonDawn"
+    },
+    {
+      "action": "click",
+      "selector": "#presetNyNight"
+    },
+    {
+      "action": "waitFor",
+      "selector": "#globeStatus.good"
+    },
+    {
+      "action": "expectText",
+      "selector": "#globeStatus",
+      "text": "時區"
+    }
+  ]
+}
