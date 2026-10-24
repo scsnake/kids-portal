@@ -2414,7 +2414,9 @@ function localPos(e) {
 function updateInspector(ll) {
   const info = describePoint(ll[0], ll[1]);
   const wind = windAtKm(kmBetween(ll[0], ll[1], ...tcLonLat()), info.ground.land);
-  document.getElementById('gis-loc-name').innerText = info.name;
+  const nameEl = document.getElementById('gis-loc-name');
+  nameEl.innerText = info.name;
+  nameEl.title = info.name;   // full name when the header cuts it
   document.getElementById('gis-coords').innerText = `${ll[1].toFixed(2)}°N, ${ll[0].toFixed(2)}°E`;
   document.getElementById('gis-elevation').innerText = info.elev;
   document.getElementById('gis-wind').innerText = `Wind ${Math.round(wind)} kt`;
