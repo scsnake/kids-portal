@@ -792,16 +792,54 @@ function updateParticles(dt) {
 // TYPHOON LIFE CYCLE (warm sea feeds it, land and mountains break it)
 // =========================================================================
 
+// Time-lapse like a TV weather loop: one second on screen is one hour of weather.
+// The storm track, its life cycle, the cold wake and the clock all use this scale.
+const LAPSE = 3600;
+const KMS_PER_MS = LAPSE / 1000;   // a real speed in m/s moves this many km per screen second
+
+const P_ENV = 1010;      // hPa, pressure far from the storm
+const AIR_RHO = 1.15;    // kg/m3
+const SFC_WIND = 0.9;    // gradient-level wind to surface wind
+const MS_TO_KT = 1.9438;
+
 function tcLonLat() { return [normXToLon(typhoon.x), normYToLat(typhoon.y)]; }
-function tcMaxWindKt() { return 35 + 120 * typhoon.intensity; }
 function tcPressure() { return 1005 - 100 * typhoon.intensity; }
 function tcRmwKm() { return 60 - 32 * typhoon.intensity; }
+// Holland B (profile peak sharpness): a stronger storm has a sharper peak.
+// Kept inside the 1..2 range that Willoughby & Rahn (2004) measured; above about 2 the outer winds die too fast.
+function tcHollandB() { return 1.0 + 0.7 * typhoon.intensity; }
 
-// Holland-type wind profile (kt) at a distance from the eye
+// Holland (1980) gradient wind (m/s) at a distance from the eye, with the Coriolis term
+function gradWindMs(rKm, lat) {
+  const B = tcHollandB(), dp = (P_ENV - tcPressure()) * 100;
+  const x = Math.pow(tcRmwKm() / Math.max(rKm, 1), B);
+  const rf = 0.5 * rKm * 1000 * 1.4584e-4 * Math.sin(lat * DEG);
+  return Math.sqrt(B * dp / AIR_RHO * x * Math.exp(-x) + rf * rf) - rf;
+}
+
+function tcMaxWindKt() { return gradWindMs(tcRmwKm(), tcLonLat()[1]) * SFC_WIND * MS_TO_KT; }
+
+// surface wind (kt) at a distance from the eye
 function windAtKm(rKm, overLand) {
-  const x = Math.pow(tcRmwKm() / Math.max(rKm, 1), 1.4);
-  const vt = tcMaxWindKt() * Math.sqrt(x * Math.exp(1 - x));
-  return Math.max(vt, 8) * (overLand ? 0.75 : 1);
+  const kt = gradWindMs(rKm, tcLonLat()[1]) * SFC_WIND * MS_TO_KT;
+  return Math.max(kt, 8) * (overLand ? 0.75 : 1);
+}
+
+// Deep-layer steering wind (m/s): trade winds south of the subtropical high, westerlies north of it.
+// The GPU copy is steerKm() in GLSL_COMMON.
+function steerMs(lat) {
+  const t = Math.max(0, Math.min(1, (lat - 21) / 8));
+  const s = t * t * (3 - 2 * t);
+  return [-5 + 13 * s, 1 + 2 * s];
+}
+
+// Storm motion (m/s) = steering + beta drift. The Earth's spin grows stronger toward the pole,
+// so a northern storm drifts north-west at about 2 m/s even in still air.
+function tcMotionMs() {
+  const [, lat] = tcLonLat();
+  const [sx, sy] = steerMs(lat);
+  const beta = 2.0 * (0.6 + 0.4 * typhoon.intensity) * CONFIG.coriolisFactor * Math.cos(lat * DEG);
+  return [sx - beta * 0.7071, sy + beta * 0.7071];
 }
 
 function kmBetween(lon1, lat1, lon2, lat2) {
@@ -820,6 +858,15 @@ function sstAtEye() {
 let tcEnv = { land: false, height: 0, sst: 29 };
 
 function updateTyphoon(dt) {
+  // when nobody holds it, the storm moves with the steering wind and the beta drift
+  if (!typhoon.isDragging) {
+    const [mx, my] = tcMotionMs();
+    const lat = normYToLat(typhoon.targetY);
+    typhoon.targetX += mx * KMS_PER_MS * dt / (SPAN_LON * 111.32 * Math.cos(lat * DEG));
+    typhoon.targetY -= my * KMS_PER_MS * dt / (SPAN_LAT * 110.57);
+    typhoon.targetX = Math.max(0.03, Math.min(0.97, typhoon.targetX));
+    typhoon.targetY = Math.max(0.03, Math.min(0.97, typhoon.targetY));
+  }
   const px0 = typhoon.x, py0 = typhoon.y;
   typhoon.x += (typhoon.targetX - typhoon.x) * 0.08;
   typhoon.y += (typhoon.targetY - typhoon.y) * 0.08;
@@ -914,6 +961,7 @@ uniform sampler2D uNoise;
 uniform vec4 uGeo;           // minLon, maxLat, spanLon, spanLat
 uniform vec4 uTc;            // eye lon, lat, intensity, rotation
 uniform vec2 uTcVel;         // typhoon motion, km per second
+uniform vec4 uHol;           // Holland profile: radius of max wind (km), B, pressure drop (hPa), max gradient wind (m/s)
 uniform float uTime;
 
 vec2 geoUv(vec2 ll) { return vec2((ll.x - uGeo.x) / uGeo.z, (uGeo.y - ll.y) / uGeo.w); }
@@ -936,32 +984,50 @@ float fbm(vec2 p, int oct) {
 
 vec2 rot2(vec2 q, float a) { float c = cos(a), s = sin(a); return vec2(c * q.x - s * q.y, s * q.x + c * q.y); }
 
-// steering winds (km/s): trade winds blow west, westerlies east
-vec2 steerKm(float lat) { return mix(vec2(-5.0, 0.6), vec2(12.0, 1.0), smoothstep(20.0, 30.0, lat)); }
+// steering winds (km per screen second at the time-lapse): trade winds blow west, westerlies east.
+// Same numbers as steerMs() in JS.
+vec2 steerKm(float lat) { return ${KMS_PER_MS.toFixed(2)} * mix(vec2(-5.0, 1.0), vec2(8.0, 3.0), smoothstep(21.0, 29.0, lat)); }
 
 vec2 tcKm(vec2 ll) {
   return vec2((ll.x - uTc.x) * 111.32 * cos(radians(0.5 * (ll.y + uTc.y))), (ll.y - uTc.y) * 110.57);
 }
 
-// Wind that moves the clouds, in km per second of screen time (much faster than real time).
+// Holland (1980) profile. x = (Rmax / r)^B
+float hollandX(float r) { return pow(uHol.x / max(r, 1.0), uHol.y); }
+// gradient wind (m/s) with the Coriolis term; same as gradWindMs() in JS
+float hollandWind(float r, float lat) {
+  float x = hollandX(r);
+  float rf = 0.5 * r * 1000.0 * 1.4584e-4 * sin(radians(lat));
+  return sqrt(uHol.y * uHol.z * 100.0 / 1.15 * x * exp(-x) + rf * rf) - rf;
+}
+// How fast the clouds turn (km per screen second). It has the Holland shape, but it turns
+// much slower than the 1 s = 1 h time-lapse: at full speed the clouds would only be a blur.
+float spinKm(float r) {
+  float x = hollandX(r);
+  return 0.42 * uHol.w * sqrt(x * exp(1.0 - x));
+}
+
+// Storm winds alone, without the steering flow.
 // Low clouds spiral inward; cirrus (high = 1) spirals outward and turns clockwise far out.
-vec2 windKm(vec2 ll, float high) {
-  vec2 q = tcKm(ll);
+vec2 vortexKm(vec2 q, float high) {
   float r = length(q) + 0.001;
-  float I = uTc.z;
-  float rm = mix(120.0, 50.0, I);
-  float vg = 32.0 * mix(0.3, 1.0, I);
-  float vt = r < rm ? vg * r / rm : vg * sqrt(rm / r);
+  float rm = uHol.x;
+  float vt = spinKm(r);
   vec2 tang = vec2(-q.y, q.x) / r;
   vec2 rad = q / r;
-  float rCdo = mix(110.0, 280.0, I);
+  float rCdo = mix(110.0, 280.0, uTc.z);
   vec2 lowV = tang * vt - rad * 0.3 * vt * smoothstep(rm * 0.8, rm * 1.6, r);
   float turn = 1.0 - 1.7 * smoothstep(rCdo, 3.0 * rCdo, r);
   vec2 highV = tang * vt * 0.6 * turn + rad * 0.9 * vt * smoothstep(rm, 2.0 * rm, r);
-  vec2 v = mix(lowV, highV, high);
-  float w = exp(-(r / 1400.0) * (r / 1400.0));
+  return mix(lowV, highV, high) * exp(-(r / 1400.0) * (r / 1400.0));
+}
+
+// Wind that moves the clouds, in km per screen second
+vec2 windKm(vec2 ll, float high) {
+  vec2 q = tcKm(ll);
+  float w = exp(-dot(q, q) / (1400.0 * 1400.0));
   // trade winds blow west, westerlies east; near the storm everything moves with it
-  return v * w + mix(steerKm(ll.y), uTcVel, w);
+  return vortexKm(q, high) + mix(steerKm(ll.y), uTcVel, w);
 }
 `;
 
@@ -974,9 +1040,29 @@ uniform sampler2D uPrev;
 uniform vec2 uSize;
 uniform float uDt;
 uniform float uDither;       // 1 when the target has only 8 bits per channel
+uniform sampler2D uField;    // r = sea temperature, g = land, b = ground height (coarse grid)
 ${GLSL_COMMON}
 
 vec2 kmToDeg(vec2 km, float lat) { return km / vec2(111.32 * cos(radians(lat)), 110.57); }
+
+// Rising air (per screen second) from the low-level wind:
+// air that flows together (convergence) or up a mountain slope must rise.
+// x = lift, y = sinking (divergence or down the lee slope)
+vec2 liftAt(vec2 ll) {
+  const float H = 12.0;   // km, about two cloud cells
+  vec2 d = kmToDeg(vec2(H), ll.y);
+  // the steering flow is the same everywhere, so only the storm winds can converge
+  float du = vortexKm(tcKm(ll + vec2(d.x, 0.0)), 0.0).x - vortexKm(tcKm(ll - vec2(d.x, 0.0)), 0.0).x;
+  float dv = vortexKm(tcKm(ll + vec2(0.0, d.y)), 0.0).y - vortexKm(tcKm(ll - vec2(0.0, d.y)), 0.0).y;
+  float dvg = (du + dv) / (2.0 * H);
+  // upslope wind: wind (km/s) times slope (km per km), per 1 km of rise
+  vec2 e = vec2(0.25, 0.25);
+  float hE = texture(uField, geoUv(ll + vec2(e.x, 0.0))).b, hW = texture(uField, geoUv(ll - vec2(e.x, 0.0))).b;
+  float hN = texture(uField, geoUv(ll + vec2(0.0, e.y))).b, hS = texture(uField, geoUv(ll - vec2(0.0, e.y))).b;
+  vec2 slope = 4.0 * vec2(hE - hW, hN - hS) / (2.0 * e * vec2(111.32 * cos(radians(ll.y)), 110.57));
+  float oro = dot(windKm(ll, 0.0), slope);
+  return vec2(max(0.0, -dvg) + max(0.0, oro), max(0.0, dvg) + max(0.0, -oro));
+}
 
 vec2 traceBack(vec2 ll, float high) {
   vec2 mid = ll - 0.5 * uDt * kmToDeg(windKm(ll, high), ll.y);
@@ -1018,6 +1104,7 @@ void main() {
   vec4 A = sharpSample(geoUv(traceBack(ll, 0.0)));
   float cir = sharpSample(geoUv(traceBack(ll, 1.0))).g;
   float low = A.r, conv = A.b;
+  float wet = A.a;             // water vapour carried by the low wind (0 = dry, 1 = saturated)
   float land = texture(uLand, uv).g;
 
   // --- typhoon: sources sit in the storm frame; the wind shears them into spiral arcs ---
@@ -1070,21 +1157,42 @@ void main() {
   float texm = 0.5 * fbm(pm / 30.0 + vec2(6.1, 2.2), 2);
   float fr = smoothstep(-0.2, 1.8, st + 0.35 * texm + 0.8 * zone) * mid * 0.85;
   float sub = mix(0.08, 1.0, smoothstep(650.0, 1400.0, r));   // sinking air around the typhoon
-  tLow = max(tLow, max(max(cu, cb), fr) * sub);
-  tConv = max(tConv, max(cbCore * (0.45 + 0.35 * smoothstep(-0.5, 1.5, tex)), cu * 0.4) * trop * sub);
-  tCir = max(tCir, 0.55 * cbCore * smoothstep(0.0, 1.2, tex) * trop * sub + 0.25 * fr);
+
+  // --- moisture: clouds need water vapour; dry air (over land, behind mountains) holds fewer clouds ---
+  float avail = smoothstep(0.25, 0.7, wet);
+  tLow *= mix(0.6, 1.0, avail);
+  tConv *= mix(0.4, 1.0, avail);
+  float bg = mix(0.5, 1.0, avail) * sub;
+  tLow = max(tLow, max(max(cu, cb), fr) * bg);
+  tConv = max(tConv, max(cbCore * (0.45 + 0.35 * smoothstep(-0.5, 1.5, tex)), cu * 0.4) * trop * bg);
+  tCir = max(tCir, 0.55 * cbCore * smoothstep(0.0, 1.2, tex) * trop * bg + 0.25 * fr);
+
+  // rising air turns vapour into cloud (eyewall ring, windward mountain slopes);
+  // sinking air dries the cloud out (lee side of mountains)
+  vec2 lift = liftAt(ll);
+  float up = min(lift.x, 2.0), down = min(lift.y, 2.0);
+  float made = smoothstep(0.05, 0.5, up) * smoothstep(0.3, 0.8, wet);
+  tLow = max(tLow, made);
+  tConv = max(tConv, 0.85 * made);
+
+  // warm, windy sea evaporates the most water; land gives a little
+  vec4 F = texture(uField, uv);
+  float sst = 20.0 + 15.0 * F.r;
+  float windy = min(1.0, length(vortexKm(q, 0.0)) / max(0.42 * uHol.w, 1.0));
+  float evap = mix((0.15 + 1.2 * windy) * smoothstep(18.0, 28.5, sst), 0.06, land);
+  wet += uDt * (evap * (1.0 - wet) - 0.6 * up * wet - 0.3 * conv * wet);
 
   // the eye: sinking air clears it out
   float eyeSink = (1.0 - smoothstep(rEye * 0.8, rEye * 1.4, r)) * clear;
-  float kSub = 0.6 * (1.0 - sub) * smoothstep(rOut * 0.6, rOut * 1.1, r);
+  float kSub = 0.6 * (1.0 - sub) * smoothstep(rOut * 0.6, rOut * 1.1, r) + 1.2 * down;
   // relax toward the local weather; the wind carries what is already there
   low += uDt * (0.9 * (tLow - low) - (kSub + 5.0 * eyeSink) * low);
-  conv += uDt * (2.0 * (tConv - conv) - 5.0 * eyeSink * conv);
+  conv += uDt * (2.0 * (tConv - conv) - (1.2 * down + 5.0 * eyeSink) * conv);
   cir += uDt * (0.4 * (tCir - cir) + 0.25 * conv * max(0.8 - cir, 0.0) - (0.5 * kSub + 5.0 * eyeSink) * cir);
 
-  vec3 o = vec3(low, cir, conv);
+  vec4 o = vec4(low, cir, conv, wet);
   o += uDither * (hash12(gl_FragCoord.xy + fract(uTime * 7.31) * 97.0) - 0.5) / 255.0;
-  outColor = vec4(clamp(o, 0.0, 1.0), 1.0);
+  outColor = clamp(o, 0.0, 1.0);
 }
 `;
 
@@ -1139,11 +1247,7 @@ float heightRaw(vec2 ll) {
 // (faster near the eye) and drift slowly outward with the outflow.
 // Two phases cross-fade so the inner streaks never wind up too tight.
 float coreStreaks(vec2 q, float r) {
-  float I = uTc.z;
-  float rm = mix(120.0, 50.0, I);
-  float vg = 32.0 * mix(0.3, 1.0, I);
-  float vt = r < rm ? vg * r / rm : vg * sqrt(rm / r);
-  float om = vt / max(r, 1.0);                 // turning rate, rad per second
+  float om = spinKm(r) / max(r, 1.0);          // turning rate, rad per second
   float th = atan(q.y, q.x);
   float lr = log(max(r, 1.0) / 100.0);
   // gradients from the smooth Cartesian frame: atan jumps at +-pi
@@ -1154,7 +1258,7 @@ float coreStreaks(vec2 q, float r) {
   const float B = 1.6;                         // spiral tightness, same sense as the rain bands
   const float K = 1.0;                         // noise tiles around the circle (an integer, so no seam)
   const float L = 0.08;                        // slow change along a streak makes it long
-  const float T = 3.0;
+  const float T = 2.0;                         // the Holland core turns fast: short phases keep the streaks spiral
   float s = 0.0, ww = 0.0;
   for (int k = 0; k < 2; k++) {
     float f = fract(uTime / T + 0.5 * float(k));
@@ -1322,20 +1426,17 @@ void main() {
     }
   } else {
     if (uLayer == 3) {
-      float x = pow(mix(60.0, 28.0, uTc.z) / max(rKm, 1.0), 1.4);
-      float kt = max((35.0 + 120.0 * uTc.z) * sqrt(x * exp(1.0 - x)), 8.0) * mix(1.0, 0.75, land);
+      float kt = max(hollandWind(rKm, ll.y) * ${SFC_WIND} * ${MS_TO_KT}, 8.0) * mix(1.0, 0.75, land);
       col = mix(satBase * 0.55, windColor(kt), 0.6);
     } else {
       // isobars: typhoon low inside a Pacific high and the autumn continental high
-      float I = uTc.z;
-      float pc = 1005.0 - 100.0 * I;
-      float rm = mix(60.0, 28.0, I);
       vec2 dh = (ll - vec2(148.0, 29.0)) / vec2(14.0, 7.0);
       float hi = 9.0 * exp(-dot(dh, dh));
       vec2 dc = (ll - vec2(113.0, 40.0)) / vec2(10.0, 8.0);
       float cont = 12.0 * exp(-dot(dc, dc));
       float bgP = 1006.0 + hi + cont + 0.08 * (ll.y - 20.0);
-      float P = bgP + (pc - 1010.0) * (1.0 - exp(-pow(rm / max(rKm, 1.0), 1.4)));
+      // Holland (1980): p = pc + dp * exp(-(Rmax / r)^B)
+      float P = bgP - uHol.z * (1.0 - exp(-hollandX(rKm)));
       float c = P / 4.0;
       float fw = fwidth(c);
       float line = (1.0 - smoothstep(0.0, fw * 0.9, abs(fract(c + 0.5) - 0.5))) * (1.0 - smoothstep(0.35, 0.8, fw));
@@ -1442,11 +1543,12 @@ function initCloudSim(gl) {
 
   const prog = linkProgram(gl, SIM_SRC);
   const loc = {};
-  for (const name of ['uPrev', 'uSize', 'uDt', 'uDither', 'uLand', 'uNoise', 'uGeo', 'uTc', 'uTcVel', 'uTime']) loc[name] = gl.getUniformLocation(prog, name);
+  for (const name of ['uPrev', 'uSize', 'uDt', 'uDither', 'uLand', 'uNoise', 'uField', 'uGeo', 'uTc', 'uTcVel', 'uHol', 'uTime']) loc[name] = gl.getUniformLocation(prog, name);
   gl.useProgram(prog);
   gl.uniform1i(loc.uPrev, 5);
   gl.uniform1i(loc.uLand, 2);
   gl.uniform1i(loc.uNoise, 3);
+  gl.uniform1i(loc.uField, 4);
   gl.uniform2f(loc.uSize, CLOUD_W, CLOUD_H);
   gl.uniform1f(loc.uDither, dither);
   gl.uniform4f(loc.uGeo, GEO.minLon, GEO.maxLat, SPAN_LON, SPAN_LAT);
@@ -1463,6 +1565,11 @@ function tcVelKm() {
   return [vx, vy];
 }
 
+// Holland profile for the shaders: radius of max wind, B, pressure drop, max gradient wind
+function hollandUniform(gl, loc) {
+  gl.uniform4f(loc, tcRmwKm(), tcHollandB(), P_ENV - tcPressure(), gradWindMs(tcRmwKm(), tcLonLat()[1]));
+}
+
 function stepClouds(n, dt) {
   const gl = gpu.gl, c = gpu.cloud;
   const [lon, lat] = tcLonLat();
@@ -1471,6 +1578,7 @@ function stepClouds(n, dt) {
   gl.viewport(0, 0, CLOUD_W, CLOUD_H);
   gl.uniform4f(c.loc.uTc, lon, lat, typhoon.intensity, typhoon.rot);
   gl.uniform2f(c.loc.uTcVel, vx, vy);
+  hollandUniform(gl, c.loc.uHol);
   gl.uniform1f(c.loc.uDt, dt);
   gl.activeTexture(gl.TEXTURE5);
   for (let i = 0; i < n; i++) {
@@ -1488,9 +1596,11 @@ function stepClouds(n, dt) {
 // Start from clear sky and let the weather build up for a while before showing it
 function warmUpClouds(timeSec) {
   const gl = gpu.gl, c = gpu.cloud;
+  // the sea, its temperature and the mountains must be on the GPU first
+  if (gpu.fieldDirty || !gpu.fieldW) uploadField();
   for (const fb of c.fb) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-    gl.clearColor(0, 0, 0, 1);
+    gl.clearColor(0, 0, 0, 0.6);   // alpha = water vapour
     gl.clear(gl.COLOR_BUFFER_BIT);
   }
   const steps = 110, dt = 0.15;
@@ -1513,7 +1623,7 @@ function initGL() {
   gl.enableVertexAttribArray(0);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
-  for (const name of ['uRes', 'uView', 'uDem', 'uDemTw', 'uLand', 'uNoise', 'uField', 'uDemGeo', 'uDemSize', 'uTwGeo', 'uTwSize', 'uTwBox', 'uGeo', 'uTwScale', 'uTc', 'uTcVel', 'uTime', 'uLayer', 'uCloud']) {
+  for (const name of ['uRes', 'uView', 'uDem', 'uDemTw', 'uLand', 'uNoise', 'uField', 'uDemGeo', 'uDemSize', 'uTwGeo', 'uTwSize', 'uTwBox', 'uGeo', 'uTwScale', 'uTc', 'uTcVel', 'uHol', 'uTime', 'uLayer', 'uCloud']) {
     gpu.loc[name] = gl.getUniformLocation(prog, name);
   }
 
@@ -1548,7 +1658,6 @@ function initGL() {
   gl.uniform4f(gpu.loc.uGeo, GEO.minLon, GEO.maxLat, SPAN_LON, SPAN_LAT);
 
   initCloudSim(gl);
-  warmUpClouds((performance.now() - t0) / 1000);
 }
 
 function resizeGL() {
@@ -1574,6 +1683,7 @@ function uploadField() {
   for (let k = 0; k < size; k++) {
     b[4 * k] = Math.max(0, Math.min(255, Math.round((sstShown[k] + sstAnom[k] - 20) / 15 * 255)));
     b[4 * k + 1] = isLandMap[k] * 255;
+    b[4 * k + 2] = Math.min(255, Math.round(elevMeters[k] / 4000 * 255));   // ground height, 0..4 km
     b[4 * k + 3] = 255;
   }
   gl.activeTexture(gl.TEXTURE4);
@@ -1584,7 +1694,8 @@ function uploadField() {
 
 function renderGL(timeSec) {
   const gl = gpu.gl;
-  if (CONFIG.activeLayer === 'sst' && gpu.fieldDirty && frameCount % 6 === 0) uploadField();
+  // the cloud sim reads the cold wake too, so keep the field fresh on every layer
+  if (gpu.fieldDirty && frameCount % (CONFIG.activeLayer === 'sst' ? 6 : 30) === 0) uploadField();
   if (!gpu.fieldW) uploadField();
   // fixed cloud steps keep the weather the same speed at any frame rate
   const c = gpu.cloud;
@@ -1596,6 +1707,7 @@ function renderGL(timeSec) {
   const [lon, lat] = tcLonLat();
   const [vx, vy] = tcVelKm();
   gl.uniform2f(gpu.loc.uTcVel, vx, vy);
+  hollandUniform(gl, gpu.loc.uHol);
   gl.viewport(0, 0, gpu.w, gpu.h);
   gl.uniform2f(gpu.loc.uRes, gpu.w, gpu.h);
   gl.uniform3f(gpu.loc.uView, view.cx, view.cy, view.k * s);
@@ -2056,7 +2168,8 @@ function loop(timestamp) {
   if (now - lastCardUpdate > 400) {
     lastCardUpdate = now;
     updateTyphoonCard();
-    const simMs = satClockStart + Math.floor(timeSec * 180 / 600) * 600000;
+    // 10-minute satellite frames at the time-lapse speed
+    const simMs = satClockStart + Math.floor(timeSec * LAPSE / 600) * 600000;
     const d = new Date(simMs + 8 * 3600000);
     document.getElementById('sat-time').innerText =
       `${d.toISOString().slice(0, 10)} ${d.toISOString().slice(11, 16)} (UTC+8)`;
@@ -2377,6 +2490,7 @@ function setupInteractions() {
     sstAnom = null;
     u = v = density = null;
     applyGranularityTier(CONFIG.currentTier, false);
+    uploadField();
     warmUpClouds((performance.now() - t0) / 1000);
     setView(view.baseCx, view.baseCy, 1);
   });
@@ -2406,6 +2520,7 @@ async function start() {
     setupInteractions();
     performStartupHardwareProbe();
     if (!u) applyGranularityTier(CONFIG.currentTier, false);
+    warmUpClouds((performance.now() - t0) / 1000);
     updateLegend();
     updateInspector([121.0, 23.5]);
     document.getElementById('loading').classList.add('hidden');
