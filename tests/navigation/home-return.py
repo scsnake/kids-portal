@@ -61,7 +61,7 @@ async def run(engine, args):
         await page.goto(args.base, wait_until='networkidle')
         assert await page.evaluate('scrollY') == 0
         course = await page.evaluate(r'''async () => {
-            const v = document.querySelector('script[type=module][src]').src.match(/v=(\d+)/)[1];
+            const v = document.querySelector('script[type=module][src*="js/main.js?v="]').src.match(/v=(\d+)/)[1];
             const {UNITS, STAGES} = await import('./js/course.js?v=' + v);
             return {units:UNITS, stages:STAGES};
         }''')

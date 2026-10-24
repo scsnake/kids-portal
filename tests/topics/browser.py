@@ -111,7 +111,7 @@ async def run_engine(pw, name, args, plan):
         page.on('console', lambda message: errors.append(message.text) if message.type == 'error' else None)
         await page.goto(args.base, wait_until='networkidle')
         units = await page.evaluate('''async () => {
-          const version = document.querySelector('script[type=module][src]').src.match(/v=(\d+)/)[1];
+          const version = document.querySelector('script[type=module][src*="js/main.js?v="]').src.match(/v=(\d+)/)[1];
           return (await import('./js/course.js?v=' + version)).UNITS;
         }''')
         ids = {unit['id'] for unit in units}

@@ -30,7 +30,7 @@ async def run(engine, base):
         page.on('pageerror',lambda error:errors.append(str(error)))
         await page.goto(base,wait_until='networkidle')
         units = await page.evaluate(r'''async()=>{
-          const version=document.querySelector('script[type=module][src]').src.match(/v=(\d+)/)[1];
+          const version=document.querySelector('script[type=module][src*="js/main.js?v="]').src.match(/v=(\d+)/)[1];
           return (await import('./js/course.js?v='+version)).UNITS;
         }''')
         waste=next(u for u in units if u['id']=='ewaste')

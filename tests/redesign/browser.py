@@ -107,7 +107,7 @@ async def run(engine, args):
         page.on('pageerror', lambda error: errors.append(str(error)))
         await page.goto(args.base, wait_until='networkidle')
         units = await page.evaluate("""async () => {
-          const version = document.querySelector('script[type=module][src]').src.match(/v=(\\d+)/)[1];
+          const version = document.querySelector('script[type=module][src*="js/main.js?v="]').src.match(/v=(\\d+)/)[1];
           return (await import('./js/course.js?v=' + version)).UNITS;
         }""")
         groups = {'high': TARGETS, 'medium': MEDIUM_TARGETS, 'all': TARGETS | MEDIUM_TARGETS}
