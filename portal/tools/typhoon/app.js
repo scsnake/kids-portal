@@ -388,6 +388,8 @@ const typhoon = {
   radius: 0.06,
   rot: 0,
   trend: 0,
+  vx: 0,
+  vy: 0,
   isDragging: false
 };
 
@@ -811,14 +813,19 @@ function kmBetween(lon1, lat1, lon2, lat2) {
 function sstAtEye() {
   const i = Math.max(0, Math.min(GW - 1, Math.floor(typhoon.x * GW)));
   const j = Math.max(0, Math.min(GH - 1, Math.floor(typhoon.y * GH)));
-  return sstMap ? sstMap[i + j * GW] : CONFIG.sstBase;
+  // the storm feels part of its own wake: a long stall weakens it but does not kill it
+  return sstMap ? sstClim[i + j * GW] + 0.3 * sstAnom[i + j * GW] : CONFIG.sstBase;
 }
 
 let tcEnv = { land: false, height: 0, sst: 29 };
 
 function updateTyphoon(dt) {
+  const px0 = typhoon.x, py0 = typhoon.y;
   typhoon.x += (typhoon.targetX - typhoon.x) * 0.08;
   typhoon.y += (typhoon.targetY - typhoon.y) * 0.08;
+  const k = Math.min(1, dt * 4);
+  typhoon.vx += ((typhoon.x - px0) / Math.max(dt, 1e-3) - typhoon.vx) * k;
+  typhoon.vy += ((typhoon.y - py0) / Math.max(dt, 1e-3) - typhoon.vy) * k;
 
   const [lon, lat] = tcLonLat();
   const g = groundAt(lon, lat);
@@ -838,21 +845,25 @@ function updateTyphoon(dt) {
   typhoon.trend = typhoon.trend * 0.95 + ((typhoon.intensity - before) / Math.max(dt, 1e-3)) * 0.05;
   typhoon.rot += dt * (0.12 + 0.28 * typhoon.intensity);
 
-  // Cold wake: a strong typhoon mixes up cool water under itself
+  // Cold wake: strong winds stir up cool deep water, most on the right of the track.
+  // It fades slowly, so a moving typhoon leaves a cool trail behind it.
   if (sstAnom) {
-    const ci = typhoon.x * GW, cj = typhoon.y * GH;
-    const r = Math.max(2, GW * 0.02);
+    const r = Math.max(2, GW * 0.022);
+    const sp = Math.hypot(typhoon.vx, typhoon.vy);
+    const side = Math.min(1, sp / 0.02) * 0.7 * r;   // grid y points south, so (-vy, vx) is the right-hand side
+    const ci = typhoon.x * GW + (sp > 1e-6 ? -typhoon.vy / sp : 0) * side;
+    const cj = typhoon.y * GH + (sp > 1e-6 ? typhoon.vx / sp : 0) * side;
     const i0 = Math.max(0, Math.floor(ci - 3 * r)), i1 = Math.min(GW - 1, Math.ceil(ci + 3 * r));
     const j0 = Math.max(0, Math.floor(cj - 3 * r)), j1 = Math.min(GH - 1, Math.ceil(cj + 3 * r));
-    for (let k = 0; k < size; k++) sstAnom[k] *= (1 - 0.01 * dt);
+    for (let n = 0; n < size; n++) sstAnom[n] *= (1 - 0.002 * dt);
     for (let j = j0; j <= j1; j++) {
       for (let i = i0; i <= i1; i++) {
         const idx = i + j * GW;
         const d2 = ((i - ci) ** 2 + (j - cj) ** 2) / (r * r);
-        sstAnom[idx] = Math.max(-2.5, sstAnom[idx] - 0.05 * typhoon.intensity * dt * Math.exp(-d2));
+        sstAnom[idx] = Math.max(-4, sstAnom[idx] - 1.2 * typhoon.intensity * dt * Math.exp(-d2));
       }
     }
-    for (let k = 0; k < size; k++) sstMap[k] = sstClim[k] + sstAnom[k];
+    for (let n = 0; n < size; n++) sstMap[n] = sstClim[n] + sstAnom[n];
     gpu.fieldDirty = true;
   }
 }
@@ -1140,6 +1151,10 @@ void main() {
     float line = (1.0 - smoothstep(0.0, fw * 1.2, abs(fract(c + 0.5) - 0.5))) * step(60.0, h) * (1.0 - smoothstep(0.25, 0.6, fw));
     lc *= 1.0 - 0.35 * line * (mod(floor(c + 0.5), 2.0) < 0.5 ? 1.0 : 0.6);
     col = mix(depthColor(depth), lc, land);
+    // faint moving clouds keep the map alive; the mountains still read through
+    vec3 tcT = typhoonCloud(q);
+    float dT = clamp(1.0 - (1.0 - tcT.x) * (1.0 - backgroundCloud(ll, land, rKm).x), 0.0, 1.0);
+    col = mix(col, vec3(0.97), (1.0 - exp(-4.6 * dT)) * 0.42);
   } else if (uLayer == 5) {
     float sst = 20.0 + 15.0 * texture(uField, geoUv(ll)).r;
     col = mix(sstColor(sst), vec3(0.22, 0.24, 0.20) * mix(1.0, shade, 0.6), land);
@@ -1334,7 +1349,7 @@ function uploadField() {
 
 function renderGL(timeSec) {
   const gl = gpu.gl;
-  if (CONFIG.activeLayer === 'sst' && gpu.fieldDirty && frameCount % 10 === 0) uploadField();
+  if (CONFIG.activeLayer === 'sst' && gpu.fieldDirty && frameCount % 6 === 0) uploadField();
   if (!gpu.fieldW) uploadField();
   const s = gpu.w / view.W;
   const [lon, lat] = tcLonLat();
@@ -1453,7 +1468,7 @@ function renderOverlay() {
   const layer = CONFIG.activeLayer;
   const style = LINE_STYLE[layer];
 
-  if (layer === 'stream' || layer === 'pressure') renderWindParticles(layer === 'stream' ? 0.55 : 0.3);
+  if (layer === 'stream' || layer === 'pressure' || layer === 'sst') renderWindParticles(layer === 'stream' ? 0.55 : 0.3);
 
   ctx.lineWidth = 1;
   ctx.strokeStyle = style.grid;
@@ -1950,7 +1965,7 @@ const LEGENDS = {
   topo: { title: 'Elevation 海拔 (m) · sea depth 水深', stops: [[0, '#4d854d'], [200, '#80ab5c'], [600, '#cccc7a'], [1200, '#cc9e5e'], [2000, '#9e6e4a'], [3000, '#8f7870'], [3700, '#f2f2f2']], ticks: [0, 1000, 2000, 3000, '3952'] },
   stream: { title: 'Wind speed 風速 (kt)', stops: [[0, '#1a2961'], [20, '#2673bf'], [34, '#33b3b3'], [64, '#59cc4d'], [90, '#fad133'], [115, '#f25926'], [140, '#cc26bf']], ticks: [0, 34, 64, 100, 140] },
   pressure: { title: 'Sea level pressure 氣壓 · lines every 4 hPa', stops: [[905, '#d94d59'], [1018, '#4073d9']], ticks: [905, 960, 1018] },
-  sst: { title: 'Sea surface temperature 海溫 (°C)', stops: [[20, '#2b33b3'], [23, '#268cd9'], [25.5, '#33c7bf'], [27, '#a6d94d'], [28.5, '#fabf33'], [30, '#f25926'], [31.5, '#bf144d']], ticks: [20, 23, 26, 29, 32] }
+  sst: { title: 'Sea temperature 海溫 (°C) · cool trail = cold wake 冷尾流', stops: [[20, '#2b33b3'], [23, '#268cd9'], [25.5, '#33c7bf'], [27, '#a6d94d'], [28.5, '#fabf33'], [30, '#f25926'], [31.5, '#bf144d']], ticks: [20, 23, 26, 29, 32] }
 };
 
 function updateLegend() {
