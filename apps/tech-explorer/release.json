@@ -1,24 +1,12 @@
 {
-  "id": "7ec21ba3678ffe0f958bb612580bc36f2b9a5f897f1af7284c2d59527a9b2bca",
-  "baseCommit": "baed53239a5ca07c4587db7811bc29b5523b1dc9",
-  "topics": [
-    "socialmanners",
-    "trolls",
-    "behindscreen",
-    "influencers",
-    "strangerdm",
-    "adcopy",
-    "investscam",
-    "healthmyth"
-  ],
+  "id": "8ed3c7c6508237abbabbb49808128457ac906867c2d6db0d145cbecfdfd0571b",
+  "baseCommit": "c7763f8f8b7d60e76ce0801611ad16374f6c27c8",
+  "topics": [],
   "changes": [
-    "global-wording-review",
-    "kid-friendly-terminology-zh-tw",
-    "concealed-agent-attribution-tags",
-    "source-hashes-synchronized",
-    "version-v33-assets-bump"
+    "wording-fixes-after-global-review",
+    "release-marker-topics-corrected"
   ],
-  "changedWidgets": ["ewastechute", "hashblender"],
+  "changedWidgets": [],
   "excludedWidgets": [],
-  "assetsVersion": "33"
+  "assetsVersion": "34"
 }
