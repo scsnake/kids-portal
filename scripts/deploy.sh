@@ -28,5 +28,5 @@ uuids=""
 for app in "$@"; do uuids="$uuids${uuids:+,}$(uuid "$app")"; done
 
 ssh -x cthgpu "TOK=\$(grep '^COOLIFY_TOKEN=' ~/.env | cut -d= -f2-) &&
-  curl -sS -m 30 -H \"Authorization: Bearer \$TOK\" 'http://100.68.55.39:8000/api/v1/deploy?uuid=$uuids'"
+  curl -sS -m 30 -X POST -H \"Authorization: Bearer \$TOK\" 'http://100.68.55.39:8000/api/v1/deploy?uuid=$uuids'"
 echo
