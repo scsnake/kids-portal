@@ -10,7 +10,7 @@
     "test": "node --test"
   },
   "devDependencies": {
-    "esbuild": "^0.24.0"
+    "esbuild": "^0.28.1"
   },
   "dependencies": {
     "react": "^18.3.1",
