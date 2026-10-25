@@ -18,6 +18,7 @@ Do not publish merely because the owner approved implementing the workflow itsel
 
 ## Source and catalogs
 
+- Check current topic summaries (`TOPIC-INDEX-PRIVATE.md`) before creating a new package to determine duplication, integration targets, and consistent course order.
 - Create new packages with `node scripts/topics.mjs new ...` from the repository root.
 - Keep draft packages outside the published application, under `topic-drafts/`.
 - Preview and production must use the same topic source and renderer.

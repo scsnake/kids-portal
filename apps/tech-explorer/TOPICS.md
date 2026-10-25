@@ -18,24 +18,25 @@ Run commands from the repository root. The checked-in browser runner mutes audio
 
 1. Use a separate branch or worktree for each topic batch.
 2. Commit shared engine changes first. Previews use committed `HEAD` as their baseline.
-3. Create a draft:
+3. Check current topic summaries (`TOPIC-INDEX-PRIVATE.md` Section 1 matrix) to determine duplication, identify integration targets, and verify stage placement and order.
+4. Create a draft:
 
    ```sh
    node scripts/topics.mjs new example-topic --after malwareholes --stage security --batch example-batch
    ```
 
-4. Edit `topic-drafts/example-batch/example-topic/topic.mjs`.
-5. Keep unit and slide IDs stable when changing titles or wording.
-6. Set `ready: true` when content and checks are complete.
-7. Create the preview:
+5. Edit `topic-drafts/example-batch/example-topic/topic.mjs`.
+6. Keep unit and slide IDs stable when changing titles or wording.
+7. Set `ready: true` when content and checks are complete.
+8. Create the preview:
 
    ```sh
    node scripts/topics.mjs preview example-batch --host 0.0.0.0 --port 8766
    ```
 
-8. Give the owner the printed link, replacing `0.0.0.0` with this computer’s LAN address.
-9. Include the revision identifier and a short change description.
-10. After feedback, edit the draft, stop the server, and repeat the preview command.
+9. Give the owner the printed link, replacing `0.0.0.0` with this computer’s LAN address.
+10. Include the revision identifier and a short change description.
+11. After feedback, edit the draft, stop the server, and repeat the preview command.
 
 Each preview is a fixed snapshot. Editing drafts does not change an existing preview.
 Preview and production use the same renderer, lesson source, widgets, and styles.

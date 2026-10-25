@@ -19,7 +19,7 @@ scratch/
 OPS.md
 PLAN-PAID.md
 MIGRATE-PAGES.md
-apps/tech-explorer/DESIGN-PRIVATE.md
+apps/tech-explorer/*-PRIVATE.md
 apps/tech-explorer/HANDOFF.md
 apps/tech-explorer/.tools/
 

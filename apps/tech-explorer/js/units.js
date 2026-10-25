@@ -2443,6 +2443,64 @@ export const UNITS = [
   },
 
   {
+    id: 'freeapps',
+    part: 'basic',
+    icon: '💰',
+    title: '免費 App 怎麼賺錢',
+    en: 'How Free Apps Make Money',
+    desc: '廣告、Cookie 追蹤和你的資料',
+    color: '#c2410c',
+    added: '2026-10-19',
+    slides: [
+      {
+        title: '免費的遊戲，誰付錢？',
+        text: `很多 App 不用錢就能下載，可是做 App 要花很多錢。它們常靠${t('廣告', 'ad')}賺錢，還會收集你的${t('資料', 'data')}。玩玩看，也看看 App 在背後記下了什麼！`,
+        widget: 'freegame',
+      },
+      {
+        title: '廣告怎麼跟著你？',
+        text: "看過的球鞋廣告為什麼一直出現在別的網站上？因為瀏覽器的小背包裡被貼上了 <b class=\"term\">Cookie<span class=\"en\" lang=\"en\">cookie</span></b> 追蹤標籤。逛逛看球鞋店並試著清除標籤！",
+        widget: "cookiebackpack",
+        params: {},
+        added: '2026-10-24',
+      },
+      {
+        title: 'App 的三種賺錢方法',
+        text: '不用錢的 App 和網站，常用三種方法賺錢：請你花錢買東西、讓你看廣告、用你的資料。分分看！',
+        widget: 'sort',
+        params: {
+          bins: [
+            { id: 'buy', icon: '💳', label: '你花錢' },
+            { id: 'ad', icon: '📺', label: '看廣告' },
+            { id: 'data', icon: '📊', label: '用你的資料' },
+          ],
+          items: [
+            { icon: '💎', label: '買遊戲裡的寶石', bin: 'buy' },
+            { icon: '🚫', label: '每個月付錢，就沒有廣告', bin: 'buy' },
+            { icon: '🎬', label: '影片前面的廣告', bin: 'ad' },
+            { icon: '🎮', label: '過關前要看 30 秒廣告', bin: 'ad' },
+            { icon: '🎯', label: '記下你看什麼，挑廣告給你', bin: 'data' },
+            { icon: '📍', label: '把你去過哪裡賣給別的公司', bin: 'data' },
+          ],
+        },
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '一個免費的手電筒 App，要看你的聯絡人和位置。最可能是為什麼？',
+          options: [
+            { text: '📊 想收集你的資料來賺錢', correct: true },
+            { text: '🔦 手電筒要有位置才會亮' },
+            { text: '📇 要打電話告訴朋友手電筒開了' },
+          ],
+          explain: '手電筒不需要聯絡人和位置。App 要了用不到的權限，就按「不允許」。',
+        },
+      },
+    ],
+  },
+
+  {
     id: 'subscribe',
     part: 'basic',
     icon: '🔁',
@@ -3639,123 +3697,6 @@ export const UNITS = [
   },
 
   {
-    id: 'recommend',
-    part: 'adv',
-    icon: '🎯',
-    title: '推薦演算法',
-    en: 'Recommendations',
-    desc: '為什麼 App 一直推薦差不多的影片',
-    color: '#ae3ec9',
-    added: '2026-10-19',
-    slides: [
-      {
-        title: '為什麼一直推薦一樣的？',
-        text: `影片 App 會記下你看了什麼、看多久，再猜你還想看什麼，這叫${t('推薦演算法', 'recommendation algorithm')}。一直點同一種影片，看看推薦會怎麼變！`,
-        widget: 'feed',
-      },
-      {
-        title: '同溫層',
-        text: `推薦的都是同一種東西，你可能會以為全世界都只有這些，這叫${t('同溫層', 'filter bubble')}。分分看，哪些做法能打破同溫層？`,
-        widget: 'sort',
-        params: {
-          rest: 'ok',
-          bins: [
-            { id: 'ok', icon: '🌈', label: '打破同溫層' },
-            { id: 'no', icon: '🫧', label: '同溫層更厚' },
-          ],
-          items: [
-            { icon: '🔍', label: '搜尋不一樣的主題', bin: 'ok' },
-            { icon: '📰', label: '看看不同意見的文章', bin: 'ok' },
-            { icon: '🗣️', label: '問問家人朋友的想法', bin: 'ok' },
-            { icon: '🧹', label: '有時候清除觀看紀錄', bin: 'ok' },
-            { icon: '👍', label: '只按讚自己喜歡的', bin: 'no' },
-            { icon: '📺', label: '只看同一種頻道', bin: 'no' },
-            { icon: '🚫', label: '看到不同意見就封鎖', bin: 'no' },
-          ],
-        },
-      },
-      {
-        title: '停不下來？',
-        text: "影片播完後倒數 5 秒自動播下一部，大腦很容易被吸引停不下來。在倒數結束前按下「暫停休息」，保衛你的精力電池！",
-        widget: "autoplaytug",
-        params: {},
-        added: '2026-10-24',
-      },
-      {
-        title: '考考你',
-        widget: 'choice',
-        params: {
-          question: '小華最近只看恐龍影片，App 推薦的全部都是恐龍。為什麼？',
-          options: [
-            { text: '🧠 App 記得他愛看恐龍，就一直推薦差不多的', correct: true },
-            { text: '🦖 App 裡面只有恐龍影片' },
-            { text: '🏆 恐龍影片是全世界最好看的' },
-          ],
-          explain: '推薦演算法會照你看過的東西來猜。想看別的，就自己去搜尋。',
-        },
-      },
-    ],
-  },
-
-  {
-    id: 'freeapps',
-    part: 'adv',
-    icon: '💰',
-    title: '免費 App 怎麼賺錢',
-    en: 'How Free Apps Make Money',
-    desc: '廣告、Cookie 追蹤和你的資料',
-    color: '#c2410c',
-    added: '2026-10-19',
-    slides: [
-      {
-        title: '免費的遊戲，誰付錢？',
-        text: `很多 App 不用錢就能下載，可是做 App 要花很多錢。它們常靠${t('廣告', 'ad')}賺錢，還會收集你的${t('資料', 'data')}。玩玩看，也看看 App 在背後記下了什麼！`,
-        widget: 'freegame',
-      },
-      {
-        title: '廣告怎麼跟著你？',
-        text: "看過的球鞋廣告為什麼一直出現在別的網站上？因為瀏覽器的小背包裡被貼上了 <b class=\"term\">Cookie<span class=\"en\" lang=\"en\">cookie</span></b> 追蹤標籤。逛逛看球鞋店並試著清除標籤！",
-        widget: "cookiebackpack",
-        params: {},
-        added: '2026-10-24',
-      },
-      {
-        title: 'App 的三種賺錢方法',
-        text: '不用錢的 App 和網站，常用三種方法賺錢：請你花錢買東西、讓你看廣告、用你的資料。分分看！',
-        widget: 'sort',
-        params: {
-          bins: [
-            { id: 'buy', icon: '💳', label: '你花錢' },
-            { id: 'ad', icon: '📺', label: '看廣告' },
-            { id: 'data', icon: '📊', label: '用你的資料' },
-          ],
-          items: [
-            { icon: '💎', label: '買遊戲裡的寶石', bin: 'buy' },
-            { icon: '🚫', label: '每個月付錢，就沒有廣告', bin: 'buy' },
-            { icon: '🎬', label: '影片前面的廣告', bin: 'ad' },
-            { icon: '🎮', label: '過關前要看 30 秒廣告', bin: 'ad' },
-            { icon: '🎯', label: '記下你看什麼，挑廣告給你', bin: 'data' },
-            { icon: '📍', label: '把你去過哪裡賣給別的公司', bin: 'data' },
-          ],
-        },
-      },
-      {
-        title: '考考你',
-        widget: 'choice',
-        params: {
-          question: '一個免費的手電筒 App，要看你的聯絡人和位置。最可能是為什麼？',
-          options: [
-            { text: '📊 想收集你的資料來賺錢', correct: true },
-            { text: '🔦 手電筒要有位置才會亮' },
-            { text: '📇 要打電話告訴朋友手電筒開了' },
-          ],
-          explain: '手電筒不需要聯絡人和位置。App 要了用不到的權限，就按「不允許」。',
-        },
-      },
-    ],
-  },
-
-  {
     id: 'coding',
     part: 'adv',
     icon: '👩‍💻',
@@ -3808,6 +3749,65 @@ export const UNITS = [
             { icon: '🅰️', label: '放上 App Store' },
             { icon: '🔄', label: '聽大家的意見，推出更新' },
           ],
+        },
+      },
+    ],
+  },
+
+  {
+    id: 'recommend',
+    part: 'adv',
+    icon: '🎯',
+    title: '推薦演算法',
+    en: 'Recommendations',
+    desc: '為什麼 App 一直推薦差不多的影片',
+    color: '#ae3ec9',
+    added: '2026-10-19',
+    slides: [
+      {
+        title: '為什麼一直推薦一樣的？',
+        text: `影片 App 會記下你看了什麼、看多久，再猜你還想看什麼，這叫${t('推薦演算法', 'recommendation algorithm')}。一直點同一種影片，看看推薦會怎麼變！`,
+        widget: 'feed',
+      },
+      {
+        title: '同溫層',
+        text: `推薦的都是同一種東西，你可能會以為全世界都只有這些，這叫${t('同溫層', 'filter bubble')}。分分看，哪些做法能打破同溫層？`,
+        widget: 'sort',
+        params: {
+          rest: 'ok',
+          bins: [
+            { id: 'ok', icon: '🌈', label: '打破同溫層' },
+            { id: 'no', icon: '🫧', label: '同溫層更厚' },
+          ],
+          items: [
+            { icon: '🔍', label: '搜尋不一樣的主題', bin: 'ok' },
+            { icon: '📰', label: '看看不同意見的文章', bin: 'ok' },
+            { icon: '🗣️', label: '問問家人朋友的想法', bin: 'ok' },
+            { icon: '🧹', label: '有時候清除觀看紀錄', bin: 'ok' },
+            { icon: '👍', label: '只按讚自己喜歡的', bin: 'no' },
+            { icon: '📺', label: '只看同一種頻道', bin: 'no' },
+            { icon: '🚫', label: '看到不同意見就封鎖', bin: 'no' },
+          ],
+        },
+      },
+      {
+        title: '停不下來？',
+        text: "影片播完後倒数 5 秒自動播下一部，大腦很容易被吸引停不下來。在倒數結束前按下「暫停休息」，保衛你的精力電池！",
+        widget: "autoplaytug",
+        params: {},
+        added: '2026-10-24',
+      },
+      {
+        title: '考考你',
+        widget: 'choice',
+        params: {
+          question: '小華最近只看恐龍影片，App 推薦的全部都是恐龍。為什麼？',
+          options: [
+            { text: '🧠 App 記得他愛看恐龍，就一直推薦差不多的', correct: true },
+            { text: '🦖 App 裡面只有恐龍影片' },
+            { text: '🏆 恐龍影片是全世界最好看的' },
+          ],
+          explain: '推薦演算法會照你看過的東西來猜。想看別的，就自己去搜尋。',
         },
       },
     ],
@@ -4007,13 +4007,13 @@ export const STAGES = [
   { id: 'create', part: 'basic', icon: '🎨', title: '創作和分享', en: 'Creating and Sharing', units: ['ailabel', 'copyright', 'shareddoc', 'photoshare'] },
   { id: 'safe', part: 'basic', icon: '🛡️', title: '安全上網', en: 'Staying Safe Online', units: ['safety', 'wifishop', 'hacked'] },
   { id: 'protect', part: 'basic', icon: '🤝', title: '保護自己', en: 'Protecting Yourself', units: ['fakes', 'kind', 'sos'] },
-  { id: 'smart', part: 'basic', icon: '🧭', title: '聰明的數位生活', en: 'Smart Digital Life', units: ['search', 'footprint', 'subscribe', 'wearable'] },
+  { id: 'smart', part: 'basic', icon: '🧭', title: '聰明的數位生活', en: 'Smart Digital Life', units: ['search', 'footprint', 'freeapps', 'subscribe', 'wearable'] },
   { id: 'inside', part: 'adv', icon: '🧠', title: '電腦裡面', en: 'Inside the Computer', units: ['inside', 'logic', 'adder', 'os'] },
   { id: 'data', part: 'adv', icon: '🖼️', title: '螢幕和資料', en: 'Screens and Data', units: ['screens', 'storage', 'soundvideo', 'biometric'] },
   { id: 'ai', part: 'adv', icon: '⚡', title: 'GPU 和 AI', en: 'GPUs and AI', units: ['gpu', 'ailearn'] },
   { id: 'ainet', part: 'adv', icon: '🔗', title: '網路怎麼運作', en: 'How Networks Work', units: ['internet', 'networld', 'web', 'iot'] },
   { id: 'security', part: 'adv', icon: '🛡️', title: '駭客怎麼攻擊？', en: 'How Attackers Think', units: ['attackers', 'passwordattacks', 'networkattacks', 'malwareholes'] },
-  { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'recommend', 'freeapps', 'coding'] },
+  { id: 'code', part: 'adv', icon: '🧩', title: '演算法和程式', en: 'Algorithms and Code', units: ['algo', 'coding', 'recommend'] },
   { id: 'secret', part: 'adv', icon: '🔬', title: '生活科技的祕密', en: 'Secrets of Everyday Tech', units: ['qrcode', 'clock', 'gpsmath', 'robocar'] },
 ];
 
