@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe Coder 指南 ⚡ AI 代理時代的軟體工程實戰手冊</title>
+  <meta name="description" content="專為想用 AI Agent 打造產品的成人、職場工作者與獨立開發者設計的實戰技術指南：從終端機、DevTools、Git 工作樹、API/MCP 到雲端部署、Playwright 與合法收費。">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20100%20100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/widgets.css">
+</head>
+<body>
+
+  <!-- 頂部應用導覽列 -->
+  <header class="app-header">
+    <div class="brand-section">
+      <button id="mobileNavToggle" class="btn-icon mobile-nav-toggle" aria-label="切換目錄選單">☰</button>
+      <span class="brand-icon">⚡</span>
+      <h1 class="brand-title">
+        Vibe Coder 指南
+        <span class="brand-badge">獨立系列</span>
+      </h1>
+    </div>
+
+    <div class="header-actions">
+      <!-- 搜尋篩選 -->
+      <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="搜尋觀念、指令、單元…" aria-label="搜尋單元">
+        <span class="search-shortcut">/</span>
+      </div>
+
+      <!-- 進度指示 -->
+      <div class="progress-pill" title="課程學習進度">
+        <span id="progressText">0 / 22 完成</span>
+        <div class="progress-bar-mini">
+          <div id="progressFill" class="progress-fill-mini" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- 主題切換 -->
+      <button id="themeToggleBtn" class="btn-icon" title="切換深色 / 淺色模式" aria-label="切換主題">🌙</button>
+
+      <!-- 回到 Portal 首頁 -->
+      <a href="../../portal/" class="portal-link" title="回 Kids Portal 首頁">
+        <span>← 回首頁</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- 手機側邊欄遮罩 -->
+  <div id="sidebarBackdrop" class="sidebar-backdrop" style="display: none;"></div>
+
+  <!-- 主佈局容器 -->
+  <div class="app-container">
+    <!-- 左側邊欄：7 大軌道與 22 單元選單 -->
+    <aside id="appSidebar" class="app-sidebar" aria-label="課程目錄導覽">
+      <div class="sidebar-header">
+        <span class="sidebar-title">課程大綱目錄</span>
+        <span id="unitCountBadge" style="font-size: 0.75rem; color: var(--text-muted);">22 個實戰單元</span>
+      </div>
+      <nav id="tracksNav" class="tracks-nav">
+        <!-- 由 JavaScript 動態生成軌道清單 -->
+      </nav>
+    </aside>
+
+    <!-- 右側主要單元學習區 -->
+    <main class="main-content">
+      <!-- 單元頂部標題與核心資訊 -->
+      <header class="unit-hero">
+        <div class="unit-breadcrumb">
+          <span id="breadcrumbTrack">軌道 1: 現代開發者工作台</span>
+          <span>›</span>
+          <span id="breadcrumbUnit">單元 1</span>
+        </div>
+        <div class="unit-title-row">
+          <h2 id="unitTitle" class="unit-main-title">載入中…</h2>
+        </div>
+        <p id="unitSubtitle" class="unit-subtitle">準備好掌握現代 AI 代理時代的開發核心思維</p>
+        
+        <div class="unit-meta-bar">
+          <div class="meta-item">
+            <span>⏱️ 閱讀時間：</span>
+            <span id="metaReadingTime">5 分鐘</span>
+          </div>
+          <div class="meta-item">
+            <span>🎯 必備先修：</span>
+            <span id="metaPrereq">無特殊限制</span>
+          </div>
+          <div class="meta-item">
+            <span id="unitStatusTag" class="code-badge" style="color: var(--accent-blue-hover);">學習中</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- 頁籤分頁按鈕 -->
+      <div class="unit-tabs" role="tablist">
+        <button class="tab-btn active" data-tab="concepts" role="tab" aria-selected="true">
+          📖 核心觀念
+        </button>
+        <button class="tab-btn" data-tab="pitfalls" role="tab" aria-selected="false">
+          ⚠️ 新手常見地雷
+        </button>
+        <button class="tab-btn" data-tab="sandbox" role="tab" aria-selected="false">
+          💻 動手實戰沙盒
+        </button>
+        <button class="tab-btn" data-tab="cheatsheet" role="tab" aria-selected="false">
+          📋 速查表與指令
+        </button>
+        <button class="tab-btn" data-tab="quiz" role="tab" aria-selected="false">
+          🎯 觀念隨堂測驗
+        </button>
+      </div>
+
+      <!-- 分頁內容區 -->
+      <section id="tab-concepts" class="tab-pane active" role="tabpanel">
+        <div id="conceptsContainer">
+          <!-- 動態載入核心觀念卡片 -->
+        </div>
+      </section>
+
+      <section id="tab-pitfalls" class="tab-pane" role="tabpanel">
+        <div id="pitfallsContainer">
+          <!-- 動態載入新手常見地雷卡片 -->
+        </div>
+      </section>
+
+      <section id="tab-sandbox" class="tab-pane" role="tabpanel">
+        <div class="widget-sandbox-container">
+          <div class="widget-sandbox-header">
+            <span class="widget-sandbox-title">
+              <span>⚡ 實戰互動沙盒</span>
+              <span id="sandboxWidgetName" style="color: var(--text-muted); font-size: 0.8rem; font-family: var(--font-mono);"></span>
+            </span>
+            <button id="resetSandboxBtn" class="code-badge" style="cursor: pointer; background: var(--bg-surface);">重置沙盒</button>
+          </div>
+          <div id="sandboxWidgetBody" class="widget-sandbox-body">
+            <!-- 互動沙盒組件渲染在此處 -->
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-cheatsheet" class="tab-pane" role="tabpanel">
+        <div id="cheatsheetContainer">
+          <!-- 動態載入速查指令與表格 -->
+        </div>
+      </section>
+
+      <section id="tab-quiz" class="tab-pane" role="tabpanel">
+        <div class="quiz-container">
+          <div id="quizContainer">
+            <!-- 動態載入測驗題目 -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 底部前後單元切換導覽 -->
+      <footer class="unit-nav-footer">
+        <a href="#" id="prevUnitBtn" class="btn-nav prev" style="visibility: hidden;">
+          <span class="btn-nav-label">← 上一個單元</span>
+          <span id="prevUnitTitle" class="btn-nav-title"></span>
+        </a>
+        <a href="#" id="nextUnitBtn" class="btn-nav next">
+          <span class="btn-nav-label">下一個單元 →</span>
+          <span id="nextUnitTitle" class="btn-nav-title"></span>
+        </a>
+      </footer>
+    </main>
+  </div>
+
+  <!-- 腳本載入 -->
+  <script src="js/tracks-part1.js"></script>
+  <script src="js/tracks-part2.js"></script>
+  <script src="js/tracks-part3.js"></script>
+  <script src="js/tracks-meta.js"></script>
+  <!-- 各類互動沙盒組件 -->
+  <script src="js/widgets/terminal-widget.js"></script>
+  <script src="js/widgets/devtools-widget.js"></script>
+  <script src="js/widgets/ports-widget.js"></script>
+  <script src="js/widgets/git-widget.js"></script>
+  <script src="js/widgets/api-widget.js"></script>
+  <script src="js/widgets/mcp-widget.js"></script>
+  <script src="js/widgets/deploy-widget.js"></script>
+  <script src="js/widgets/playwright-widget.js"></script>
+  <script src="js/widgets/stripe-widget.js"></script>
+  <script src="js/widgets/index.js"></script>
+  <!-- 主應用控制器 -->
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,974 @@
+/* apps/vibe-coder/css/widgets.css */
+/* Vibe Coder 互動實戰沙盒模組專用樣式表 */
+
+/* 通用沙盒包裝層 */
+.vibe-widget {
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.vibe-widget * {
+  box-sizing: border-box;
+}
+
+/* 頂部控制面板與按鈕 */
+.vibe-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.vibe-btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-focus);
+}
+
+.vibe-btn.primary {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #ffffff;
+}
+
+.vibe-btn.primary:hover {
+  background: var(--accent-blue-hover);
+}
+
+.vibe-btn.danger {
+  background: var(--accent-red);
+  border-color: var(--accent-red);
+  color: #ffffff;
+}
+
+.vibe-btn.danger:hover {
+  opacity: 0.9;
+}
+
+.vibe-btn.success {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #ffffff;
+}
+
+.vibe-btn.success:hover {
+  opacity: 0.9;
+}
+
+.vibe-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.vibe-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  border-radius: var(--radius-full);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+}
+
+.vibe-badge.success {
+  background: var(--accent-green-bg);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+.vibe-badge.danger {
+  background: var(--accent-red-bg);
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+
+.vibe-badge.warning {
+  background: var(--accent-amber-bg);
+  border-color: var(--accent-amber);
+  color: var(--accent-amber);
+}
+
+.vibe-badge.info {
+  background: rgba(56, 139, 253, 0.15);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue-hover);
+}
+
+/* ============================================================
+   1. Terminal Widget
+   ============================================================ */
+.vibe-terminal {
+  background: #090d13;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  font-family: var(--font-mono);
+}
+
+.vibe-terminal-header {
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  padding: 0.5rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.vibe-terminal-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.vibe-terminal-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.vibe-terminal-dot.red { background: #ff5f56; }
+.vibe-terminal-dot.yellow { background: #ffbd2e; }
+.vibe-terminal-dot.green { background: #27c93f; }
+
+.vibe-terminal-title {
+  font-size: 0.78rem;
+  color: #8b949e;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+}
+
+.vibe-terminal-quick-chips {
+  padding: 0.5rem 0.85rem;
+  background: #0d1117;
+  border-bottom: 1px solid #21262d;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.vibe-chip-label {
+  font-size: 0.75rem;
+  color: #8b949e;
+  margin-right: 0.2rem;
+}
+
+.vibe-terminal-chip {
+  padding: 0.2rem 0.55rem;
+  font-size: 0.75rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  color: #58a6ff;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vibe-terminal-chip:hover {
+  background: #21262d;
+  border-color: #58a6ff;
+  color: #79c0ff;
+}
+
+.vibe-terminal-chip.danger {
+  color: #f85149;
+}
+.vibe-terminal-chip.danger:hover {
+  border-color: #f85149;
+}
+
+.vibe-terminal-body {
+  padding: 1rem;
+  min-height: 280px;
+  max-height: 380px;
+  overflow-y: auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #f0f6fc;
+}
+
+.vibe-terminal-line {
+  margin-bottom: 0.35rem;
+  word-break: break-all;
+}
+
+.vibe-terminal-line.command {
+  color: #79c0ff;
+}
+
+.vibe-terminal-line.output {
+  color: #c9d1d9;
+}
+
+.vibe-terminal-line.error {
+  color: #f85149;
+}
+
+.vibe-terminal-line.warning {
+  color: #d29922;
+  background: rgba(210, 153, 34, 0.1);
+  padding: 0.4rem 0.6rem;
+  border-left: 3px solid #d29922;
+  border-radius: 2px;
+}
+
+.vibe-terminal-line.success {
+  color: #7ee787;
+}
+
+.vibe-terminal-line.system {
+  color: #8b949e;
+}
+
+.vibe-terminal-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.vibe-terminal-prompt {
+  color: #39c5cf;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.vibe-terminal-prompt .user {
+  color: #58a6ff;
+}
+
+.vibe-terminal-prompt .path {
+  color: #7ee787;
+}
+
+.vibe-terminal-prompt .symbol {
+  color: #8b949e;
+}
+
+.vibe-terminal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f0f6fc;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0;
+  caret-color: #58a6ff;
+}
+
+/* ============================================================
+   2. DevTools Widget
+   ============================================================ */
+.vibe-devtools-split {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 1rem;
+  min-height: 380px;
+}
+
+@media (max-width: 860px) {
+  .vibe-devtools-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vibe-mock-browser {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.vibe-mock-urlbar {
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  padding: 0.45rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: #8b949e;
+}
+
+.vibe-mock-url {
+  flex: 1;
+  background: #090d13;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  color: #c9d1d9;
+  border: 1px solid #21262d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vibe-mock-webcontent {
+  padding: 1.25rem;
+  background: #161b22;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.vibe-checkout-card {
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+}
+
+.vibe-checkout-price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0.8rem 0;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px dashed #30363d;
+}
+
+.vibe-checkout-price {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #58a6ff;
+  font-family: var(--font-mono);
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.vibe-checkout-price.highlight {
+  color: #7ee787;
+  transform: scale(1.08);
+}
+
+.vibe-devtools-panel {
+  background: #090d13;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--font-mono);
+}
+
+.vibe-devtools-tabs {
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  overflow-x: auto;
+  gap: 0.2rem;
+}
+
+.vibe-devtools-tab {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.78rem;
+  color: #8b949e;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.vibe-devtools-tab.active {
+  color: #f0f6fc;
+  border-bottom-color: #58a6ff;
+  font-weight: 600;
+}
+
+.vibe-devtools-console-body {
+  flex: 1;
+  padding: 0.75rem;
+  overflow-y: auto;
+  max-height: 260px;
+  min-height: 180px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.vibe-console-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #161b22;
+  word-break: break-all;
+}
+
+.vibe-console-entry .prompt-icon {
+  color: #58a6ff;
+  user-select: none;
+}
+
+.vibe-console-entry .return-icon {
+  color: #8b949e;
+  user-select: none;
+}
+
+.vibe-console-entry.input {
+  color: #f0f6fc;
+}
+
+.vibe-console-entry.output {
+  color: #a5d6ff;
+}
+
+.vibe-console-entry.info {
+  color: #7ee787;
+}
+
+.vibe-console-input-row {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid #21262d;
+  background: #161b22;
+  gap: 0.4rem;
+}
+
+.vibe-console-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f0f6fc;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+
+.vibe-console-snippets {
+  padding: 0.5rem 0.75rem;
+  background: #0d1117;
+  border-top: 1px solid #21262d;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* ============================================================
+   3. Ports Widget
+   ============================================================ */
+.vibe-ports-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.vibe-port-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.vibe-port-status-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  background: #21262d;
+  border-left: 4px solid var(--accent-red);
+  transition: all 0.3s ease;
+}
+
+.vibe-port-status-banner.running {
+  border-left-color: var(--accent-green);
+  background: rgba(46, 160, 67, 0.1);
+}
+
+.vibe-port-status-banner.free {
+  border-left-color: var(--accent-blue);
+  background: rgba(56, 139, 253, 0.1);
+}
+
+.vibe-pulse-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  background: var(--accent-red);
+  animation: vibe-pulse 1.5s infinite;
+}
+
+.vibe-pulse-dot.green {
+  background: var(--accent-green);
+}
+
+.vibe-pulse-dot.blue {
+  background: var(--accent-blue);
+}
+
+@keyframes vibe-pulse {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.7; }
+}
+
+.vibe-step-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.vibe-port-terminal {
+  background: #090d13;
+  border: 1px solid #21262d;
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  min-height: 140px;
+  max-height: 220px;
+  overflow-y: auto;
+  color: #c9d1d9;
+}
+
+/* ============================================================
+   4. Git Widget
+   ============================================================ */
+.vibe-git-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.vibe-git-toggle-bar {
+  display: flex;
+  background: #161b22;
+  padding: 0.3rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid #30363d;
+  gap: 0.3rem;
+}
+
+.vibe-git-toggle-btn {
+  flex: 1;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.82rem;
+  border: none;
+  background: transparent;
+  color: #8b949e;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.vibe-git-toggle-btn.active {
+  background: #21262d;
+  color: #58a6ff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.vibe-git-visual-canvas {
+  background: #090d13;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  min-height: 300px;
+}
+
+.vibe-worktree-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .vibe-worktree-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vibe-worktree-folder {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.vibe-worktree-folder.active {
+  border-color: #58a6ff;
+}
+
+/* ============================================================
+   5. API Widget
+   ============================================================ */
+.vibe-api-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.vibe-api-bar {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.vibe-api-method {
+  background: #161b22;
+  border: 1px solid #30363d;
+  color: #58a6ff;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.vibe-api-url {
+  flex: 1;
+  background: #090d13;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-sm);
+  color: #f0f6fc;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  outline: none;
+}
+
+.vibe-api-url:focus {
+  border-color: var(--accent-blue);
+}
+
+.vibe-api-config-box {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.vibe-api-response-panel {
+  background: #090d13;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  font-family: var(--font-mono);
+}
+
+.vibe-api-response-header {
+  background: #161b22;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #30363d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vibe-api-json-body {
+  padding: 1rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  max-height: 260px;
+  overflow-y: auto;
+  color: #c9d1d9;
+}
+
+/* ============================================================
+   6. MCP Widget
+   ============================================================ */
+.vibe-mcp-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.vibe-mcp-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+}
+
+.vibe-mcp-step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid #30363d;
+  background: #161b22;
+  opacity: 0.45;
+  transition: all 0.25s ease;
+}
+
+.vibe-mcp-step.active {
+  opacity: 1;
+  border-color: #58a6ff;
+  background: #21262d;
+  box-shadow: 0 0 12px rgba(88, 166, 255, 0.2);
+  transform: translateX(4px);
+}
+
+.vibe-mcp-step.completed {
+  opacity: 0.85;
+  border-color: #2ea043;
+}
+
+.vibe-mcp-step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.vibe-mcp-step.active .vibe-mcp-step-num {
+  background: #58a6ff;
+  color: #0d1117;
+  border-color: #58a6ff;
+}
+
+.vibe-mcp-step.completed .vibe-mcp-step-num {
+  background: #2ea043;
+  color: #ffffff;
+  border-color: #2ea043;
+}
+
+/* ============================================================
+   7. Deploy Widget
+   ============================================================ */
+.vibe-deploy-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.vibe-deploy-questions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.vibe-deploy-q-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.vibe-deploy-q-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f0f6fc;
+}
+
+.vibe-deploy-option {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid #30363d;
+  background: #0d1117;
+  font-size: 0.8rem;
+  color: #c9d1d9;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vibe-deploy-option:hover {
+  background: #21262d;
+  border-color: #58a6ff;
+}
+
+.vibe-deploy-option.selected {
+  background: rgba(56, 139, 253, 0.15);
+  border-color: #58a6ff;
+  color: #58a6ff;
+  font-weight: 600;
+}
+
+.vibe-deploy-result-card {
+  background: #161b22;
+  border: 2px solid #58a6ff;
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: 0 4px 16px rgba(56, 139, 253, 0.15);
+}
+
+/* ============================================================
+   8. Playwright Widget
+   ============================================================ */
+.vibe-pw-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  min-height: 380px;
+}
+
+@media (max-width: 860px) {
+  .vibe-pw-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vibe-pw-code-panel {
+  background: #090d13;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-md);
+  padding: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  overflow-y: auto;
+  line-height: 1.7;
+}
+
+.vibe-pw-line {
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #8b949e;
+  transition: all 0.2s ease;
+}
+
+.vibe-pw-line .line-no {
+  color: #484f58;
+  width: 20px;
+  text-align: right;
+  user-select: none;
+}
+
+.vibe-pw-line.active {
+  background: rgba(56, 139, 253, 0.2);
+  color: #f0f6fc;
+  border-left: 3px solid #58a6ff;
+}
+
+.vibe-pw-line.passed {
+  color: #7ee787;
+}
+
+.vibe-pw-browser-viewport {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.vibe-virtual-cursor {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 99;
+  transition: top 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.vibe-virtual-cursor svg {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+/* ============================================================
+   9. Stripe Widget
+   ============================================================ */
+.vibe-stripe-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.vibe-stripe-tabs {
+  display: flex;
+  border-bottom: 1px solid #30363d;
+  gap: 0.5rem;
+}
+
+.vibe-stripe-tab-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #8b949e;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.vibe-stripe-tab-btn.active {
+  color: #58a6ff;
+  border-bottom-color: #58a6ff;
+}
+
+.vibe-calc-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .vibe-calc-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vibe-calc-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.vibe-calc-card.highlight {
+  border-color: #2ea043;
+  background: rgba(46, 160, 67, 0.05);
+}

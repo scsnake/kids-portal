@@ -41,6 +41,7 @@ APPS = {
     "kids-onestroke": {"root": "apps/one-stroke", "domain": "kids-onestroke.scsnake.xyz"},
     "kids-writer": {"root": "apps/little-writer", "domain": "kids-writer.scsnake.xyz"},
     "kids-tech": {"root": "apps/tech-explorer", "domain": "kids-tech.scsnake.xyz"},
+    "vibe-coder": {"root": "apps/vibe-coder", "domain": "vibe-coder.scsnake.xyz"},
 }
 # ───────────────────────────────────────────────────────────────────────────
 
