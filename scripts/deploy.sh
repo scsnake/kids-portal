@@ -16,7 +16,7 @@ uuid() {
     piano) echo nsk0k8cwg08cg0sog4c44g0s ;;
     writer) echo agco0okk4w0s488ows4gswok ;;
     tech) echo akwcwcgs84o0ckks40osk4gk ;;
-    chinese-writing) echo d8w084w8sogwsk0kkog404gs ;;
+    chinese-writing) echo tcwowwwcg4c4oo4kksk8og0g ;;
     *) echo "unknown app: $1 (portal math onestroke piano writer tech chinese-writing, or staging)" >&2; exit 2 ;;
   esac
 }
