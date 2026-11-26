@@ -47,17 +47,27 @@
   };
 
   // 初始化主題
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    const meta = document.querySelector('meta[name="color-scheme"]');
+    if (meta) meta.content = theme;
+    dom.themeToggleBtn.textContent = theme === "dark" ? "🌙" : "☀️";
+  }
+
   function initTheme() {
-    const savedTheme = localStorage.getItem("vibe_coder_theme") || "dark";
-    document.documentElement.setAttribute("data-theme", savedTheme);
-    dom.themeToggleBtn.textContent = savedTheme === "dark" ? "🌙" : "☀️";
+    const savedTheme = localStorage.getItem("vibe_coder_theme") === "light" ? "light" : "dark";
+    applyTheme(savedTheme);
 
     dom.themeToggleBtn.addEventListener("click", () => {
       const current = document.documentElement.getAttribute("data-theme");
       const next = current === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", next);
+      applyTheme(next);
       localStorage.setItem("vibe_coder_theme", next);
-      dom.themeToggleBtn.textContent = next === "dark" ? "🌙" : "☀️";
+    });
+
+    // 另一個分頁切換主題時同步
+    window.addEventListener("storage", (e) => {
+      if (e.key === "vibe_coder_theme") applyTheme(e.newValue === "light" ? "light" : "dark");
     });
   }
 

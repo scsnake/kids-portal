@@ -3,6 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <script>
+    // 在 CSS 載入前套用已存的主題，避免閃一下錯的顏色
+    try {
+      var t = localStorage.getItem("vibe_coder_theme") === "light" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", t);
+      document.querySelector('meta[name="color-scheme"]').content = t;
+    } catch (e) {}
+  </script>
   <title>Vibe Coder 指南 ⚡ AI 代理時代的軟體工程實戰手冊</title>
   <meta name="description" content="專為想用 AI Agent 打造產品的成人、職場工作者與獨立開發者設計的實戰技術指南：從終端機、DevTools、Git 工作樹、API/MCP 到雲端部署、Playwright 與合法收費。">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20100%20100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">

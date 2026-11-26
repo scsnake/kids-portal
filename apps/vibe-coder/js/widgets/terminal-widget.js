@@ -66,6 +66,8 @@
 
       // 監聽鍵盤事件
       this.onKeyDown = (e) => {
+        // 注音等輸入法選字中：Enter 與方向鍵都交給輸入法
+        if (e.isComposing || e.keyCode === 229) return;
         if (e.key === "Enter") {
           const cmd = this.inputEl.value.trim();
           if (cmd) {

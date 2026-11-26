@@ -141,7 +141,11 @@
 
       this.consoleRunBtn.addEventListener("click", handleRun);
       this.consoleInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") handleRun();
+        if (e.key !== "Enter") return;
+        e.preventDefault();
+        // 注音等輸入法選字時按 Enter 不送出
+        if (e.isComposing || e.keyCode === 229) return;
+        handleRun();
       });
 
       // 點擊快速 Snippets
